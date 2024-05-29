@@ -34,9 +34,8 @@ bool BAASScrcpyCore::Client::deployServer() {
             "false"                                 // Power off screen after server closed
     };
     try{
-        BAASAdbConnection* serverStream = device->shellStream(cmd, 3000.0);
+        serverStream = device->shellStream(cmd, 3000.0);
         serverStream->readFully(10);
-        delete serverStream;
     }
     catch (AdbError &e) {
         string msg(e.what());
@@ -47,40 +46,40 @@ bool BAASScrcpyCore::Client::deployServer() {
 }
 
 bool BAASScrcpyCore::Client::initServerSocketConnection() {
-    bool f = false;
+    BAASAdbConnection* videoStream, *controlStream;
     for (int i = 1; i <= 30; ++i) {
-        BAASLoggerInstance->BAASInfo("Try to connect to scrcpy server");
+        cout<<"Try to connect to scrcpy server: "<<i<<endl;
         try{
-            videoSocket = device->createConnection(Network::LOCAL_ABSTRACT, "scrcpy");
-            f = true;
+            videoStream = device->createConnection(Network::LOCAL_ABSTRACT, "scrcpy");
             break;
         }catch (AdbError &e) {
-            BAASLoggerInstance->BAASError(e.what());
+            cout<<e.what()<<endl;
             this_thread::sleep_for(chrono::milliseconds(100));
         }
     }
-    if(!f) {
-        BAASLoggerInstance->BAASError("Failed to connect scrcpy-server after 3 seconds");
+    string buffer = videoStream->readFully(1);
+    if(buffer.size() != 1 || buffer[0] != 0) {
+        BAASLoggerInstance->BAASError("Invalid scrcpy server response");
         return false;
     }
-    string st = videoSocket->readFully(1);
-    if(st.size() == 0 || int(st[0]) != 0) {
-        BAASLoggerInstance->BAASError("Did not receive Dummy Byte!");
-        return false;
-    }
-    controlSocket = device->createConnection(Network::LOCAL_ABSTRACT, "scrcpy");
-    st = videoSocket->readFully(64);
-    if(st.size() == 0) {
-        BAASLoggerInstance->BAASError("Did not receive Device Name!");
-        return false;
-    }
-    BAASLoggerInstance->BAASInfo("Device Name : " + st);
-    st = videoSocket->readFully(4);
-    Client::resolution.first = BAASUtil::unsignedBinary2int(st.substr(0, 2), 2);
-    Client::resolution.second = BAASUtil::unsignedBinary2int(st.substr(2, 2), 2);
-    BAASLoggerInstance->BAASInfo("Resolution : " + to_string(resolution.first) + "x" + to_string(resolution.second));
+    controlStream = device->createConnection(Network::LOCAL_ABSTRACT, "scrcpy");
+    delete device;
+    buffer = videoStream->readFully(64);
+    cout<<"Device Name : "<<buffer<<endl;
+    buffer = videoStream->readFully(4);
+    pair<int, int> resolution;
+    resolution.first = BAASUtil::unsignedBinary2int(buffer.substr(0, 2), 2);
+    resolution.second = BAASUtil::unsignedBinary2int(buffer.substr(2, 2), 2);
+    cout<<"Resolution : "<<resolution.first<<"x"<<resolution.second<<endl;
     u_long mode = 1;
-    ioctlsocket(videoSocket->getConnection(), FIONBIO, &mode);
+    cout << "Set blocking" << ioctlsocket(videoStream->getConnection(), FIONBIO, &mode);
+    AVFormatContext* formatContext = avformat_alloc_context();
+    videoStream->setCloseSocketWhenDestruct(false);
+    controlStream->setCloseSocketWhenDestruct(false);
+    videoSocket = videoStream->getConnection();
+    controlSocket = controlStream->getConnection();
+    delete videoStream;
+    delete controlStream;
     return true;
 }
 
@@ -127,12 +126,11 @@ bool BAASScrcpyCore::Client::screenshotLoop() {
         AVCodecParserContext *parser = av_parser_init(codec->id);
         AVCodecContext *codecContext = avcodec_alloc_context3(codec);
         int ret = avcodec_open2(codecContext, codec, nullptr);
-        SOCKET videoSocket = this->videoSocket->getConnection();
         while(alive) {
             char* rawH264 = new char[1<<16];
             int dataSize = recv(videoSocket, rawH264, 1<<16, 0);
             if (dataSize <= 0) {
-                this_thread::sleep_for(chrono::milliseconds(100));
+                this_thread::sleep_for(chrono::milliseconds(1));
                 continue;
             }
             while (dataSize > 0) {
@@ -159,17 +157,17 @@ bool BAASScrcpyCore::Client::screenshotLoop() {
                     cvLinesize[0] = lastFrame.step1();
                     SwsContext* conversion = sws_getContext(width, height, (AVPixelFormat)frame->format, width, height, AV_PIX_FMT_BGR24, SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
                     sws_scale(conversion, frame->data, frame->linesize, 0, height, &lastFrame.data, cvLinesize);
-                    frameMutex.unlock();
                     sws_freeContext(conversion);
+                    frameMutex.unlock();
                     lastFrameTime = BAASUtil::getCurrentTimeMS();
                 }
             }
         }
     } catch (AdbError &e) {
-        cout<<e.what()<<endl;
+        BAASLoggerInstance->BAASError(e.what());
         return false;
     } catch (...) {
-        cout<<"Unknown error"<<endl;
+        BAASLoggerInstance->BAASError("Unknown Error");
         return false;
     }
     return true;
@@ -181,18 +179,21 @@ bool BAASScrcpyCore::Client::screenshot(cv::Mat &output) {
     while (lastFrameTime < currentTime) {
         if(!alive)throw RuntimeError("Scrcpy Client is not alive");
         BAASUtil::sleepMS(1);
+        currentTime = BAASUtil::getCurrentTimeMS();
     }
-    frameMutex.lock();
+//    frameMutex.lock();
     output = lastFrame.clone();
-    frameMutex.unlock();
+//    frameMutex.unlock();
+    cout<<"lock freed";
     return true;
 }
 
 bool BAASScrcpyCore::Client::stop() {
     alive = false;
     screenshotThread.join();
-    delete videoSocket;
-    delete controlSocket;
+    delete serverStream;
+    closesocket(videoSocket);
+    closesocket(controlSocket);
     return true;
 }
 

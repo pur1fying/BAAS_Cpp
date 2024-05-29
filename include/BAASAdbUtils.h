@@ -51,6 +51,7 @@ public:
 
     ~BAASAdbConnection();
 
+    bool setCloseSocketWhenDestruct(bool state);
 protected:
     std::string host;
 
@@ -63,6 +64,8 @@ protected:
     sockaddr_in serverAddr;
 
     double socketTimeout;
+
+    bool closeSocketWhenDestruct = true;
 };
 
 class ConnectionRefusedError : public std::exception {

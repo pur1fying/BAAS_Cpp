@@ -268,7 +268,7 @@ int BAASUtil::MuMuSerialToDisplayId(const std::string serial) {
     serialPort(serial, port);
     port -= 16384;
     int index = port / 32, offset = port % 32;
-    if ((offset == 0 or offset == 1 or offset == 2) && index >= 0 && index <= 3) {
+    if ((offset == 0 or offset == 1 or offset == 2) && index >= 0 && index <= 31) {
         return index;
     }
     return -1;

@@ -4,7 +4,7 @@
 
 #ifndef BAAS_CXX_REFACTOR_BAASSCREENSHOT_H
 #define BAAS_CXX_REFACTOR_BAASSCREENSHOT_H
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
 #include "BAASNemu.h"
 #include "BAASScrcpyCore.h"
 #define screenshotAdb (1 << 0)

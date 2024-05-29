@@ -8,9 +8,9 @@
 #include <filesystem>
 #include "BAASAdbUtils.h"
 extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libswscale/swscale.h>
+#include "libavcodec/avcodec.h"
+#include "libavformat/avformat.h"
+#include "libswscale/swscale.h"
 }
 
 class BAASScrcpyCore {
@@ -33,7 +33,7 @@ public:
     private:
         cv::Mat lastFrame;
 
-        long long lastFrameTime = LLONG_MAX;
+        long long lastFrameTime = LLONG_MIN;
 
         bool alive = false;
 
@@ -41,7 +41,7 @@ public:
 
         int maxFPS = 60;
 
-        int bitrate = 8000000;
+        int bitrate = 1000000000;
 
         bool stayAwake = false;
 
@@ -49,9 +49,9 @@ public:
 
         std::string encoderName = "";
 
-        BAASAdbConnection* videoSocket;
+        SOCKET videoSocket;
 
-        BAASAdbConnection* controlSocket;
+        SOCKET controlSocket;
 
         std::string host = "";
 
@@ -60,6 +60,8 @@ public:
         std::string serial = "";
 
         BAASAdbDevice* device = nullptr;
+
+        BAASAdbConnection* serverStream = nullptr;
 
         std::mutex frameMutex;
 

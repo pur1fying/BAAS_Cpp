@@ -6,7 +6,7 @@
 #define BAAS_CXX_REFACTOR_BAASNEMU_H
 #include <Windows.h>
 #include "BAASGlobals.h"
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
 #include <map>
 #include <filesystem>
 #include <mutex>

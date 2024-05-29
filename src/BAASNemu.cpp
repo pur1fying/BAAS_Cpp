@@ -91,7 +91,7 @@ bool BAASNemu::screenshot(const int connectionID, cv::Mat &image) {
 
 bool BAASNemu::getResolution(int connectionId, int displayId, std::pair<int, int> &resolution) {
     if (nemu_capture_display(connectionId, displayId, 0, &resolution.first, &resolution.second, nullptr) != 0) {
-        BAASLoggerInstance->BAASError("Nemu get display information failed");
+        BAASLoggerInstance->BAASError("Nemu get resolution failed");
         return false;
     }
     return true;

@@ -4,8 +4,8 @@
 
 #ifndef BAAS_CXX_REFACTOR_BAASCONFIG_H
 #define BAAS_CXX_REFACTOR_BAASCONFIG_H
-#include <nlohmann/json.hpp>
-#include <BAASGlobals.h>
+#include "nlohmann/json.hpp"
+#include "BAASGlobals.h"
 #include <filesystem>
 #include <vector>
 #include <mutex>

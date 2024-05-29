@@ -4,7 +4,6 @@
 #include "BAASAdbUtils.h"
 
 using namespace std;
-
 // Connection
 bool BAASAdbConnection::checkServer(std::string host, std::string port) {
     SOCKET connection = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -122,7 +121,14 @@ SOCKET BAASAdbConnection::getConnection() {
 
 
 BAASAdbConnection::~BAASAdbConnection() {
-    closesocket(connection);
+    if(closeSocketWhenDestruct){
+        closesocket(connection);
+    }
+}
+
+bool BAASAdbConnection::setCloseSocketWhenDestruct(bool state) {
+    closeSocketWhenDestruct = state;
+    return true;
 }
 
 // BaseClient
