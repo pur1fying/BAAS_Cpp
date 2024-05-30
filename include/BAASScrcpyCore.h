@@ -7,6 +7,7 @@
 #include <thread>
 #include <filesystem>
 #include "BAASAdbUtils.h"
+#include <format>
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"

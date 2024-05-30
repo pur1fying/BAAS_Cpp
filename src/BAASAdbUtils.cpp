@@ -327,7 +327,7 @@ int BAASAdbBaseDevice::stat(const string path) {
 
 
 int BAASAdbBaseDevice::push(const string &src, const string &dst, const int mode,bool check) {
-    if (not (filesystem::exists(src) && filesystem::is_regular_file(src))) {
+    if (! (filesystem::exists(src) && filesystem::is_regular_file(src))) {
         string msg = "File " + src + " not exists or not a regular file.";
         throw(ValueError(msg.c_str()));
     }

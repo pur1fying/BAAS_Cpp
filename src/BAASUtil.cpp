@@ -4,7 +4,7 @@
 #include "BAASUtil.h"
 using namespace std::chrono;
 using namespace std;
-
+using namespace cv;
 bool BAASUtil::initWinsock() {
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -306,3 +306,5 @@ long long BAASUtil::getCurrentTimeMS() {
     std::chrono::milliseconds duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     return duration.count();
 }
+
+

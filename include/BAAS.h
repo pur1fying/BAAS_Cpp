@@ -13,4 +13,9 @@
 #include "BAASScrcpyCore.h"
 #include "BAASAdbUtils.h"
 #include "BAASNemu.h"
+#include "BAASScreenshot.h"
+#include "BAASAutoFight.h"
+#include "BAASImageUtil.h"
+#include "BAASDevelopUtils.h"
+#include "BAASImageResource.h"
 #endif //BAAS_CXX_REFACTOR_BAAS_H

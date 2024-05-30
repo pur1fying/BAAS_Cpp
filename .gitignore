@@ -2,3 +2,6 @@
 cmake-build-debug
 config
 out
+.vs
+cmake-build-debug-visual-studio-1
+cmake-build-debug-visual-studio

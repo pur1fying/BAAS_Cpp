@@ -10,7 +10,7 @@ BAASNemu::BAASNemu() {
     cout<<nemuDllPath;
     cout<<std::filesystem::exists(nemuDllPath);
     hDllInst = LoadLibrary(nemuDllPath.c_str());
-    if (hDllInst == NULL) {
+    if (hDllInst == nullptr) {
         std::cout << "LoadLibrary failed" << std::endl;
         throw std::runtime_error("LoadLibrary : [ " + nemuDllPath + " ] failed");
     }

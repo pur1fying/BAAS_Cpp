@@ -9,19 +9,19 @@
 using namespace cv;
 using namespace std;
 int main() {
+    initGlobals();
     if(filesystem::exists("output")){
         filesystem::remove_all("output");
     }
     filesystem::create_directory("output");
 
-    initGlobals();
-    adb.connect("127.0.0.1:16384");
-    BAASScrcpyCore::Client client("127.0.0.1:16384");
-    client.start();
-    Mat im;
-    client.screenshot(im);
-    cout<<im.cols<<" "<<im.rows<<endl;
-    imwrite("output\\im.png", im);
+    //adb.connect("127.0.0.1:16384");
+    //BAASScrcpyCore::Client client("127.0.0.1:16384");
+    //client.start();
+    //Mat im;
+    //client.screenshot(im);
+    //cout<<im.cols<<" "<<im.rows<<endl;
+    //imwrite("output\\im.png", im);
 //    BAASAdbDevice* d = adb.iterDevice()[1];
 //    // screencap
 //    Mat im;
@@ -39,14 +39,16 @@ int main() {
 //    int max_width = 1280;
 //    adb.connect("127.0.0.1:16512");
 //    BAASScrcpyCore::Client client = BAASScrcpyCore::Client("127.0.0.1:16512");
-    BAASNemu* nemu = BAASNemu::getInstance();
-    int conn = nemu->connect("H:\\MuMuPlayer-12.0", "127.0.0.1:16384");
-    Mat image;
-    nemu->screenshot(conn, image);
-
-    imwrite("output\\test.png", image);
+    BAASImageResource IconResource;
+    BAASDevelopUtils::getThreeStudentSkillScreenshot("1", "2", "3");
     int mm;
     cin>>mm;
     return 0;
 //    BAASUtil::executeCommandWithoutOutPut("adb forward tcp:27183 tcp:27183");
 }
+/*
+    y -->   601 ,  662
+    x -->   847 , 932
+            946, 1038
+            1048, 1130
+*/

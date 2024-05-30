@@ -16,6 +16,17 @@ extern std::string scrcpyJarName;
 
 extern std::string nemuDllPath;
 
+/*
+ *  BAAS_CPP --
+ *           -- cmake-build-debug (this is BAAS_PROJECT_DIR)
+ *              -- resource
+ *           -- resource (developer need to modify resource in this directory)
+ *
+ */
+extern std::string DEVELOPER_PROJECT_DIR;
+
+static bool inited = false;
+
 void initGlobals();
 
 
