@@ -15,11 +15,14 @@ class BAASScreenshot {
 public:
     BAASScreenshot();
 
-    void setScreenshotMode(int mode);
+    BAASScreenshot(const int Method = screenshotNemu, double interval = 0.01);
+
+    void setScreenshotMethod(const int Method);
 
     void setInterval(double interval);
 
     bool screenshot(cv::Mat &output);
+
 private:
     double interval;
 
@@ -27,6 +30,6 @@ private:
 
     double lastScreenshotTime;
 
-    int screenshotMode;
+    int screenshotMethod;
 };
 #endif //BAAS_CXX_REFACTOR_BAASSCREENSHOT_H

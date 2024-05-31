@@ -30,7 +30,7 @@ add_executable(
 
 target_link_libraries(
         BAAS_CXX_Refactor
-        opencv_world490d.lib
+        opencv_world490.lib
         avcodec.lib
         avdevice.lib
         avfilter.lib

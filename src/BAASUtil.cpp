@@ -15,10 +15,10 @@ bool BAASUtil::initWinsock() {
 }
 
 string BAASUtil::int2hex(int a) {
-    string st = "";
+    string st;
     int length = 4;
     for (int i = 0; i < length; ++i) {
-        st.push_back((a >> (length - i - 1) * 4) & 0xF);
+        st.push_back(static_cast<char>((a >> (length - i - 1) * 4) & 0xF));
         if (st[i] < 10) st[i] += '0';
         else st[i] += 'a' - 10;
     }
@@ -26,12 +26,12 @@ string BAASUtil::int2hex(int a) {
 }
 
 string BAASUtil::int2binary(int a) {
-    string st = "";
-    for (int i = 0; i < 4; ++i)st += (a >> (24 - i * 8) & 0xFF);
+    string st;
+    for (int i = 0; i < 4; ++i)st += static_cast<char>((a >> (24 - i * 8) & 0xFF));
     return st;
 }
 
-int BAASUtil::hex2int(const string input, int length) {
+int BAASUtil::hex2int(const string& input, int length) {
     int output = 0;
     for (int i = 0; i < length; ++i) {
         if (input[i] >= '0' && input[i] <= '9') output = output * 16 + input[i] - '0';
@@ -41,7 +41,7 @@ int BAASUtil::hex2int(const string input, int length) {
     return output;
 }
 
-int BAASUtil::unsignedBinary2int(const string input, int length) {
+int BAASUtil::unsignedBinary2int(const string& input, int length) {
     int output = 0;
     int temp = 1;
     unsigned int t;
@@ -53,7 +53,7 @@ int BAASUtil::unsignedBinary2int(const string input, int length) {
     return output;
 }
 
-int BAASUtil::binary2int(const string input, int length) {
+int BAASUtil::binary2int(const string& input, int length) {
     int res = 0;
     int mask = 0xFF;
     for (int i = 0; i < length; ++i) {
@@ -70,7 +70,7 @@ string BAASUtil::getCurrentTimeString() {
     return oss.str();
 }
 
-string BAASUtil::executeCommandAndGetOutput(const string command) {
+string BAASUtil::executeCommandAndGetOutput(const string& command) {
     FILE* stream = _popen(command.c_str(), "rb");
     if(stream == nullptr) {
         throw RuntimeError("Failed to execute command");
@@ -134,7 +134,7 @@ string BAASUtil::int2String(int a) {
     return st;
 }
 
-bool BAASUtil::checkImageBroken(const std::string path) {
+bool BAASUtil::checkImageBroken(const std::string& path) {
     if(!filesystem::exists(path)){
         throw ValueError("File : [ " + path + " ] not exists");
     }
@@ -254,16 +254,15 @@ void BAASUtil::stringReplace(const std::string OLD, const std::string NEW, strin
 }
 
 void BAASUtil::stringSplit(const string &src, const string &separator, vector<std::string> &dst) {
-    string str = src;
     int currentStart,currentEnd;
     currentStart = currentEnd = 0;
-    while((currentEnd = str.find(separator, currentStart)) != string::npos) {
-        dst.push_back(str.substr(currentStart, currentEnd - currentStart));
+    while((currentEnd = src.find(separator, currentStart)) != string::npos) {
+        dst.push_back(src.substr(currentStart, currentEnd - currentStart));
         currentStart = currentEnd + separator.length();
     }
 }
 
-int BAASUtil::MuMuSerialToDisplayId(const std::string serial) {
+int BAASUtil::MuMuSerialToDisplayId(const std::string &serial) {
     int port;
     serialPort(serial, port);
     port -= 16384;
@@ -283,7 +282,7 @@ void BAASUtil::stringJoin(const vector<std::string> &src, const string &joiner, 
     }
 }
 
-std::pair<std::string, std::string> BAASUtil::serialToHostPort(const std::string serial) {
+std::pair<std::string, std::string> BAASUtil::serialToHostPort(const std::string &serial) {
     int pos = serial.find(':');
     if(pos == string::npos) {
         return make_pair("", "");
@@ -306,5 +305,21 @@ long long BAASUtil::getCurrentTimeMS() {
     std::chrono::milliseconds duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     return duration.count();
 }
+
+double BAASUtil::genRandDouble(const double &min,const double &max) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> dis(min, max);
+    return dis(gen);
+}
+
+int BAASUtil::genRandInt(const int &min, const int &max) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dis(min, max);
+    return dis(gen);
+}
+
+
 
 

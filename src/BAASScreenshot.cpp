@@ -7,4 +7,9 @@ BAASScreenshot::BAASScreenshot() {
 
 }
 
+BAASScreenshot::BAASScreenshot(const int Method, double interval) {
+    this->screenshotMethod = Method;
+    this->interval = interval;
+    this->lastScreenshotTime = 0;
+}
 

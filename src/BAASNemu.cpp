@@ -5,10 +5,148 @@
 #include "BAASNemu.h"
 using namespace std;
 
-BAASNemu *BAASNemu::instance = nullptr;
-BAASNemu::BAASNemu() {
-    cout<<nemuDllPath;
-    cout<<std::filesystem::exists(nemuDllPath);
+bool BAASNemu::dllLoaded = false;
+
+nemuConnect BAASNemu::nemu_connect = nullptr;
+
+nemuDisconnect BAASNemu::nemu_disconnect = nullptr;
+
+nemuCaptureDisplay BAASNemu::nemu_capture_display = nullptr;
+
+nemuInputText BAASNemu::nemu_input_text = nullptr;
+
+nemuInputEventTouchDown BAASNemu::nemu_input_event_touch_down = nullptr;
+
+nemuInputEventTouchUp BAASNemu::nemu_input_event_touch_up = nullptr;
+
+nemuInputEventKeyDown BAASNemu::nemu_input_event_key_down = nullptr;
+
+nemuInputEventKeyUp BAASNemu::nemu_input_event_key_up = nullptr;
+
+HINSTANCE BAASNemu::hDllInst = nullptr;
+
+std::map<int, BAASNemu*> BAASNemu::connections;
+
+BAASNemu::BAASNemu(string &installPath) {
+    if(!dllLoaded) {
+        init();
+        dllLoaded = true;
+    }
+    connect(installPath);
+    getResolution(connectionId, displayId, resolution);
+}
+
+BAASNemu::BAASNemu(string &installPath, string &port) {
+    if(!dllLoaded) {
+        init();
+        dllLoaded = true;
+    }
+    connect(installPath, port);
+    getResolution(connectionId, displayId, resolution);
+}
+
+bool BAASNemu::connect(const string& installPath,const string& serial) {
+    int displayId = BAASUtil::MuMuSerialToDisplayId(serial);
+    for(auto &connection: connections) {
+        if(connection.second->installPath == installPath && connection.second->displayId == displayId) {
+            BAASLoggerInstance->BAASError("Already connected");
+            return true;
+        }
+    }
+    if(displayId == -1) {
+        BAASLoggerInstance->BAASError("Invalid serial");
+        return false;
+    }
+    int connection = nemu_connect(BAASUtil::stringToWString(installPath).c_str(), displayId);
+    if (connection == 0) {
+        BAASLoggerInstance->BAASError("Nemu connect failed");
+        return false;
+    }
+    this->installPath = installPath;
+    this->displayId = displayId;
+    connectionId = connection;
+    connections[connection] = this;
+    if(!getResolution(connection, displayId, resolution)) {
+        BAASLoggerInstance->BAASError("Nemu get display resolution failed.");
+        return false;
+    }
+    pixels.resize(resolution.first * resolution.second * 4);
+    vector<string> msg = {
+            "Nemu connected :   {",
+            "                   Serial:\t" + serial,
+            "                   MuMuPath:\t" + installPath,
+            "                   DisplayID:\t" + to_string(displayId),
+            "                   ConnID:\t" + to_string(connection),
+            "                   Resolution:\t" + to_string(resolution.first) + "x" + to_string(resolution.second),
+            "                   }"
+    };
+    BAASLoggerInstance->BAASInfo(msg);
+    return true;
+}
+
+bool BAASNemu::disconnect() {
+    if(connections.find(connectionId) == connections.end()) {
+        BAASLoggerInstance->BAASError("Invalid connectionID");
+        return false;
+    }
+    nemu_disconnect(connectionId);
+    connections.erase(connectionId);
+    return true;
+}
+
+
+bool BAASNemu::screenshot(cv::Mat &image) {
+    if(nemu_capture_display(connectionId, 0, int(pixels.size()), &resolution.first, &resolution.second, pixels.data()) != 0) {
+        throw std::runtime_error("Nemu capture display failed");
+    }
+    imageOpMutex.lock();
+    image = cv::Mat(resolution.second, resolution.first, CV_8UC4, pixels.data());
+    cv::cvtColor(image, image, cv::COLOR_BGRA2RGB);
+    cv::flip(image, image, 0);
+    imageOpMutex.unlock();
+    return true;
+}
+
+bool BAASNemu::getResolution(int connectionId, int displayId, std::pair<int, int> &resolution) {
+    if (nemu_capture_display(connectionId, displayId, 0, &resolution.first, &resolution.second, nullptr) != 0) {
+        BAASLoggerInstance->BAASError("Nemu get resolution failed");
+        return false;
+    }
+    return true;
+}
+
+
+bool BAASNemu::connect(const string &installPath) {
+    return connect(installPath, "127.0.0.1:16384");
+}
+
+bool BAASNemu::click(BAASPoint point) {
+    int t = BAASUtil::genRandInt(10, 20);
+    down(point);
+    BAASUtil::sleepMS(t);
+    up();
+    BAASUtil::sleepMS(50 - t);
+    return true;
+}
+
+bool BAASNemu::down(BAASPoint point) const {
+    convertXY(point);
+    int ret = nemu_input_event_touch_down(connectionId, displayId, point.x, point.y);
+    if(ret > 0)
+        throw NemuIpcError("nemu_input_event_touch_down failed");
+    return true;
+}
+
+void BAASNemu::convertXY(BAASPoint &point) const {
+    int temp = point.x;
+    point.x = resolution.second - point.y;
+    point.y = temp;
+}
+
+void BAASNemu::init() {
+    if(!filesystem::exists(nemuDllPath)) {
+        throw std::runtime_error("Nemu dll not found");
+    }
     hDllInst = LoadLibrary(nemuDllPath.c_str());
     if (hDllInst == nullptr) {
         std::cout << "LoadLibrary failed" << std::endl;
@@ -24,75 +162,10 @@ BAASNemu::BAASNemu() {
     nemu_input_event_key_up = (nemuInputEventKeyUp)GetProcAddress(hDllInst, "nemu_input_event_key_up");
 }
 
-BAASNemu *BAASNemu::getInstance() {
-    if (instance == nullptr) instance = new BAASNemu();
-    return instance;
-}
-
-bool BAASNemu::connect(const string installPath,const string serial) {
-    int displayId = BAASUtil::MuMuSerialToDisplayId(serial);
-    if(displayId == -1) {
-        BAASLoggerInstance->BAASError("Invalid serial");
-        return false;
-    }
-    int connection = nemu_connect(BAASUtil::stringToWString(installPath).c_str(), displayId);
-    if (connection == 0) {
-        BAASLoggerInstance->BAASError("Nemu connect failed");
-        return false;
-    }
-    MuMuDevice *device = new MuMuDevice();
-    device->installPath = installPath;
-    device->displayId = displayId;
-    device->connectionId = connection;
-    connections[connection] = device;
-    if(!getResolution(connection, displayId, device->resolution)) {
-        BAASLoggerInstance->BAASError("Nemu get display resolution failed.");
-        return false;
-    }
-    device->pixels.resize(device->resolution.first * device->resolution.second * 4);
-    vector<string> msg = {
-            "Nemu connected :   {",
-            "                   Serial:\t" + serial,
-            "                   MuMuPath:\t" + installPath,
-            "                   DisplayID:\t" + to_string(displayId),
-            "                   ConnID:\t" + to_string(connection),
-            "                   Resolution:\t" + to_string(device->resolution.first) + "x" + to_string(device->resolution.second),
-            "                   }"
-    };
-    BAASLoggerInstance->BAASInfo(msg);
+bool BAASNemu::up() const {
+    int ret = nemu_input_event_touch_up(connectionId, displayId);
+    if(ret > 0)
+        throw NemuIpcError("nemu_input_event_touch_up failed");
     return true;
 }
 
-bool BAASNemu::disconnect(const int connectionID) {
-    if(connections.find(connectionID) == connections.end()) {
-        BAASLoggerInstance->BAASError("Invalid connectionID");
-        return false;
-    }
-    MuMuDevice *device = connections[connectionID];
-    nemu_disconnect(connectionID);
-    connections.erase(connectionID);
-    delete device;
-    return true;
-}
-
-bool BAASNemu::screenshot(const int connectionID, cv::Mat &image) {
-    MuMuDevice *device = connections[connectionID];
-    if(nemu_capture_display(connectionID, 0, int(device->pixels.size()), &device->resolution.first, &device->resolution.second, device->pixels.data()) != 0) {
-        return false;
-    }
-    device->imageOpMutex.lock();
-    image = cv::Mat(device->resolution.second, device->resolution.first, CV_8UC4, device->pixels.data());
-    cv::cvtColor(image, image, cv::COLOR_BGRA2RGB);
-    cv::flip(image, image, 0);
-    device->imageOpMutex.unlock();
-    return true;
-}
-
-
-bool BAASNemu::getResolution(int connectionId, int displayId, std::pair<int, int> &resolution) {
-    if (nemu_capture_display(connectionId, displayId, 0, &resolution.first, &resolution.second, nullptr) != 0) {
-        BAASLoggerInstance->BAASError("Nemu get resolution failed");
-        return false;
-    }
-    return true;
-}

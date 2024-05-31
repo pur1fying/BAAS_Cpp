@@ -1,7 +1,6 @@
 //
 // Created by pc on 2024/4/12.
 //
-#pragma once
 #ifndef BAAS_CXX_REFACTOR_UTIL_H
 #define BAAS_CXX_REFACTOR_UTIL_H
 #include <chrono>
@@ -12,8 +11,8 @@
 #include <filesystem>
 #include <locale>
 #include <codecvt>
-
-
+#include "BAASImageUtil.h"
+#include <random>
 
 class BAASUtil {
 public:
@@ -35,15 +34,15 @@ public:
      * Convert hex char to integer
      * @example "0x001B" -> 27 (1 * 16^1 + 11 * 16^0)
      */
-      static int hex2int(const std::string input, int length);
+      static int hex2int(const std::string& input, int length);
 
-      static int unsignedBinary2int(const std::string input, int length);
+      static int unsignedBinary2int(const std::string& input, int length);
 
-      static int binary2int(const std::string input, int length);
+      static int binary2int(const std::string& input, int length);
 
       static std::string getCurrentTimeString();
 
-      static std::string executeCommandAndGetOutput(const std::string command);
+      static std::string executeCommandAndGetOutput(const std::string& command);
 
       static std::string executeCommandAndGetOutput(const std::vector<std::string> commandList, int n);
 
@@ -64,9 +63,7 @@ public:
    */
       static std::string int2String(int a);
 
-      static bool compareImage(const cv::Mat &image1);
-
-      static bool checkImageBroken(const std::string path);
+      static bool checkImageBroken(const std::string& path);
 
       static std::pair<int, int> deleteBrokenImage(const std::string path);
 
@@ -92,9 +89,9 @@ public:
 
       static void stringJoin(const std::vector<std::string> &src, const std::string &joiner, std::string &dst);
 
-      static int MuMuSerialToDisplayId(const std::string serial);
+      static int MuMuSerialToDisplayId(const std::string &serial);
 
-      static std::pair<std::string, std::string> serialToHostPort(const std::string serial);
+      static std::pair<std::string, std::string> serialToHostPort(const std::string &serial);
 
       static bool sleepMS(int ms);
 
@@ -102,5 +99,8 @@ public:
 
       static long long getCurrentTimeMS();
 
+      static double genRandDouble(const double& min,const double& max);
+
+    static int genRandInt(const int &min, const int &max);
 };
 #endif //BAAS_CXX_REFACTOR_UTIL_H

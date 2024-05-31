@@ -15,6 +15,14 @@ int main() {
     }
     filesystem::create_directory("output");
 
+//    BAASDevelopUtils::shotStudentSkill("a", SKILL1_LEFT, SKILL_LEFT);
+//    BAASDevelopUtils::shotStudentSkill("b", SKILL2_LEFT, SKILL_LEFT);
+//    BAASDevelopUtils::shotStudentSkill("c", SKILL3_LEFT, SKILL_LEFT);
+//    BAASDevelopUtils::shotStudentSkill("d", SKILL1_RIGHT, SKILL_RIGHT);
+//    BAASDevelopUtils::shotStudentSkill("e", SKILL2_RIGHT, SKILL_RIGHT);
+//    BAASDevelopUtils::shotStudentSkill("f", SKILL3_RIGHT, SKILL_RIGHT);
+
+//    return 0;
     //adb.connect("127.0.0.1:16384");
     //BAASScrcpyCore::Client client("127.0.0.1:16384");
     //client.start();
@@ -39,10 +47,38 @@ int main() {
 //    int max_width = 1280;
 //    adb.connect("127.0.0.1:16512");
 //    BAASScrcpyCore::Client client = BAASScrcpyCore::Client("127.0.0.1:16512");
-    BAASImageResource IconResource;
-    BAASDevelopUtils::getThreeStudentSkillScreenshot("1", "2", "3");
-    int mm;
-    cin>>mm;
+    BAASAutoFight autoFight;
+    autoFight.procedure = {
+            {"Akane", BOSS_POSITION, 6.5},
+            {"Ako", {380, 235}, 9.5},
+            {"Maki", BOSS_POSITION, 6.5},
+            {"Chinatsu (Hot Spring)", {380, 235}, 2.0},
+            {"Akane", BOSS_POSITION, 7.5},
+            {"Ako", {380, 235}, 9.0},
+            {"Maki", BOSS_POSITION, 6.5},
+            {"Karin", BOSS_POSITION, 4.1},
+            {"Ako", {985,  621}, 9.5},
+            {"Maki", BOSS_POSITION, 6.5},
+            {"Chinatsu (Hot Spring)", {985,  621}, 2},
+            {"Akane", BOSS_POSITION, 3},
+            {"Ako", {985,  621}, 5.5},
+            {"Karin", BOSS_POSITION, 7.5},
+            {"Maki", BOSS_POSITION, 5},
+    };
+    BAASImageResource SkillIconResource;
+    SkillIconResource.loadDirectoryImage("resource/image/CN/skill_icon_bright", "", "_bright");
+    SkillIconResource.loadDirectoryImage("resource/image/CN/skill_icon_left_black", "", "_left");
+    SkillIconResource.loadDirectoryImage("resource/image/CN/skill_icon_right_grey", "", "_right");
+    SkillIconResource.showResource();
+    autoFight.setImageResource(&SkillIconResource);
+    autoFight.setSkills({"Maki", "Akane", "Karin", "Ako", "Cherino", "Chinatsu (Hot Spring)"});
+    autoFight.startLoop();
+
+//        autoFight.refreshSkillPosition();
+//        long long t2 = BAASUtil::getCurrentTimeMS();
+//        cout<<"Time : "<<t2 - t1<<endl;
+
+    cout<<"exit"<<endl;
     return 0;
 //    BAASUtil::executeCommandWithoutOutPut("adb forward tcp:27183 tcp:27183");
 }
@@ -51,4 +87,10 @@ int main() {
     x -->   847 , 932
             946, 1038
             1048, 1130
+
+            883, 688
+            985, 621
+            1087, 622
+
+
 */

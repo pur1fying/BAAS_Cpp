@@ -1,20 +1,21 @@
 //
 // Created by pc on 2024/5/29.
 //
+#ifndef BAAS_CPP_BAASIMAGERESOURCE_H
+#define BAAS_CPP_BAASIMAGERESOURCE_H
 #include "BAASImageUtil.h"
 #include <nlohmann/json.hpp>
 #include "BAASGlobals.h"
-#ifndef BAAS_CPP_BAASIMAGERESOURCE_H
-#define BAAS_CPP_BAASIMAGERESOURCE_H
-
 class BAASImageResource{
+public:
     struct Image{
         std::string path;
         BAASRectangle region;
         cv::Mat image;
     };
-public:
     BAASImageResource();
+
+    void getResource(const std::string& key, Image &out);
 
     bool addResource(const std::string& key, const std::string& path);
 
@@ -26,7 +27,12 @@ public:
 
     void showResource();
 
+    void loadDirectoryImage(const std::string& path, const std::string& prefix="", const std::string& postfix="");
+
     bool isLoaded(const std::string& key);
+
+    void keys(std::vector<std::string> &out);
+
 
 private:
     std::map<std::string, Image> resource;

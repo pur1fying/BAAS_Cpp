@@ -1,3 +1,219 @@
 //
 // Created by pc on 2024/5/31.
 //
+#include "BAASAutoFight.h"
+
+using namespace std;
+using namespace cv;
+BAASRectangle const BAASAutoFight::threeStudentSkillRegion = {847, 594, 1130, 670};
+BAASPoint const BAASAutoFight::threeStudentSkillPositionCenter[3] = {
+        {883,  621},
+        {985,  621},
+        {1087, 621}
+};
+
+BAASRectangle const BAASAutoFight::costRegion = {820, 681, 1141, 696};
+
+double const BAASAutoFight::costLineDeltaX = 31.7;
+BAASAutoFight::BAASAutoFight() {
+    string installPath = "H:\\MuMuPlayer-12.0";
+    string serial = "127.0.0.1:16384";
+    nemu = new BAASNemu(installPath, serial);         // temporarily use menu method
+    currentSkill.resize(3);
+}
+
+void BAASAutoFight::refreshSkillPosition() {
+    currentSkill.clear();
+    currentSkill.resize(3);
+}
+
+BAASAutoFight::CharacterSkill::CharacterSkill() = default;
+
+void BAASAutoFight::setFormation(const std::vector<std::string>& studentNames) {
+    this->formation = studentNames;
+}
+
+void BAASAutoFight::setSkills(const std::vector<std::string>& skillNames) {
+    string temp;
+    for(auto &name: skillNames){
+        CharacterSkill skill;
+        skill.name = name;
+        temp = name + "_bright";
+        this->resource->getResource(temp, skill.iconBright);
+        temp = name + "_left";
+        this->resource->getResource(temp, skill.iconLeftBlack);
+        temp = name + "_right";
+        this->resource->getResource(temp, skill.iconRightGrey);
+        this->skills[name] = skill;
+    }
+    this->skillNames = skillNames;
+}
+
+void BAASAutoFight::setImageResource(BAASImageResource *imageResource) {
+    this->resource = imageResource;
+}
+
+void BAASAutoFight::searchAllSkillPosition() {
+    if(skillFull()) {
+        return;
+    }
+    BAASPoint p;
+    for(auto &key: skillNames){
+        if(skillFull())
+            break;
+        p = BAASImageUtil::imageSearch(lastScreenshot, skills[key].iconLeftBlack.image, threeStudentSkillRegion, 0.8, false);
+        if(p.x != -1){
+            currentSkill[pointToSkillIndex(p)] = key;
+            continue;
+        }
+        p = BAASImageUtil::imageSearch(lastScreenshot, skills[key].iconRightGrey.image, threeStudentSkillRegion, 0.8, false);
+        if(p.x != -1){
+            currentSkill[pointToSkillIndex(p)] = key;
+            continue;
+        }
+        Mat img = skills[key].iconBright.image;
+        Mat left =  BAASImageUtil::imageCrop(img, 0, 0, img.cols/2-3, img.rows);
+        Mat right = BAASImageUtil::imageCrop(img, img.cols/2+3, 0, img.cols, img.rows);
+        BAASImageUtil::imageSearch(lastScreenshot, left, threeStudentSkillRegion, 0.8, true);
+        if(p.x != -1){
+            currentSkill[pointToSkillIndex(p)] = key;
+            continue;
+        }
+        p = BAASImageUtil::imageSearch(lastScreenshot, right, threeStudentSkillRegion, 0.8, true);
+        if(p.x != -1){
+            currentSkill[pointToSkillIndex(p)] = key;
+            continue;
+        }
+    }
+}
+
+int BAASAutoFight::pointToSkillIndex(const BAASPoint& p){
+    int minLoc = INT_MAX;
+    int minIndex = -1;
+    int temp;
+    for(int i = 0; i < 3; i++){
+        temp = BAASImageUtil::pointDistance(p, threeStudentSkillPositionCenter[i]);
+        if(temp < minLoc){
+            minLoc = temp;
+            minIndex = i;
+        }
+    }
+    return minIndex;
+}
+
+void BAASAutoFight::showSkillPosition() {
+//    imshow("Skill Position", lastScreenshot);
+    for(int i = 0; i < 3; i++) {
+        if(currentSkill[i].empty()){
+            BAASLoggerInstance->BAASInfo("Position : " + to_string(i) + " [ Empty ]");
+            continue;
+        }
+        BAASLoggerInstance->BAASInfo("Position : " + to_string(i) + " [ " + currentSkill[i] + " ]");
+    }
+//    waitKey(0);
+}
+
+void BAASAutoFight::updateCost() {
+    currentCost = 0;
+    Vec3b brightPixelMin = {250, 250, 250}, brightPixelMax = {255, 255, 255};
+    for(int i = costRegion.lr.x; i >= costRegion.ul.x; i--){
+        for(int j = costRegion.ul.y; j <= costRegion.lr.y; j++){
+            if(BAASImageUtil::judgeRGBRange(lastScreenshot, {i, j}, brightPixelMin, brightPixelMax)){
+                int x = i - (costRegion.ul.x + (costRegion.lr.y - j) / 5);
+                int integer = int(double(x) *1.0 / costLineDeltaX);
+                double decimal = double((x - integer* 32 )) * 1.0 / 28;
+                if(decimal < 0)
+                    decimal = 0;
+                currentCost = integer + decimal;
+                currentCost = currentCost > 10.0 ? 10.0 : currentCost;
+                return;
+            }
+        }
+    }
+}
+
+void BAASAutoFight::updateScreenshot() {
+    nemu->screenshot(lastScreenshot);
+}
+
+void BAASAutoFight::showCost() const{
+    BAASLoggerInstance->BAASInfo("Cost : " + to_string(currentCost));
+}
+
+void BAASAutoFight::showLastScreenshot() const {
+    imshow("Last Screenshot", lastScreenshot);
+    waitKey(0);
+
+}
+
+bool BAASAutoFight::skillFull() const {
+    for(auto &skill: currentSkill){
+        if(skill.empty())
+            return false;
+    }
+    return true;
+}
+
+void BAASAutoFight::click(const BAASPoint &point) const {
+    BAASLoggerInstance->BAASInfo("Click : (" + to_string(point.x) + ", " + to_string(point.y) + ")");
+    nemu->click(point);
+}
+
+void BAASAutoFight::appendNextSkill(const string &skillName) {
+    nextSkillQueue.push(skillName);
+}
+
+bool BAASAutoFight::releaseSkill(const string &skillName, const BAASPoint &position) {
+    for(int i = 0; i < 3; i++){
+        if(currentSkill[i] == skillName){
+            BAASLoggerInstance->BAASInfo("SKILL SLOT : " + to_string(i) );
+            click(threeStudentSkillPositionCenter[i]);
+            click(position);
+            currentSkill[i] = nextSkillQueue.front();
+            nextSkillQueue.pop();
+            nextSkillQueue.push(skillName);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool BAASAutoFight::startLoop() {
+    nextSkillQueue.emplace("");
+    nextSkillQueue.emplace("");
+    nextSkillQueue.emplace("");
+    for(auto &step: procedure){
+        BAASLoggerInstance->BAASInfo("Step : {");
+        BAASLoggerInstance->BAASInfo("       Skill : " + step.skillName);
+        BAASLoggerInstance->BAASInfo("       Position : (" + to_string(step.position.x) + ", " + to_string(step.position.y) + ")");
+        BAASLoggerInstance->BAASInfo("       Cost : " + to_string(step.cost));
+        BAASLoggerInstance->BAASInfo("       }");
+        showSkillPosition();
+        while(true) {
+            updateScreenshot();
+            searchAllSkillPosition();
+            updateCost();
+//            showCost();
+//            showSkillPosition();
+            if(step.cost <= currentCost){
+                BAASLoggerInstance->BAASInfo("Release skill : [ " + step.skillName + " ] at position : " + to_string(step.position.x) + " " + to_string(step.position.y));
+                double lastCost = currentCost;
+                while(!releaseSkill(step.skillName, step.position)){
+                    refreshSkillPosition();
+                    cout<<"Release skill failed"<<endl;
+                    updateScreenshot();
+                    searchAllSkillPosition();
+                }
+                while(true){
+                    updateScreenshot();
+                    searchAllSkillPosition();
+                    updateCost();
+                    if(currentCost < lastCost)break;
+                }
+                BAASUtil::sleepMS(300);
+                break;
+            }
+        }
+    }
+    return true;
+}

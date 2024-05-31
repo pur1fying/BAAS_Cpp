@@ -22,42 +22,67 @@ typedef int (*nemuInputEventKeyUp)(int, int, int);
 
 class BAASNemu {
 public:
-    static BAASNemu* getInstance();
+    BAASNemu(std::string& installPath);
 
-    bool connect(const std::string installPath,const std::string port);
+    BAASNemu(std::string& installPath, std::string& port);
 
-    bool disconnect(const int connectionId);
+    bool connect(const std::string& installPath);
 
-    bool screenshot(const int connectionID, cv::Mat &image);
+    bool connect(const std::string& installPath,const std::string& port);
 
-    bool getResolution(int connectionId, int displayId, std::pair<int, int> &resolution);
+    bool disconnect();
 
-    bool click(int x, int y, int displayId);
+    bool screenshot(cv::Mat &image);
 
+    static bool getResolution(int connectionId, int displayId, std::pair<int, int> &resolution);
+
+    bool click(BAASPoint point);
+
+    bool down(BAASPoint point) const;
+
+    bool up() const;
+
+    void convertXY(BAASPoint &point) const;
 private:
-    struct MuMuDevice {
-        std::string installPath;
-        int displayId;
-        int connectionId;
-        std::pair<int, int> resolution;
-        std::vector<unsigned char> pixels;
-        cv::Mat image;
-        std::mutex imageOpMutex;
-        int alive;
-    };
-    static BAASNemu *instance;
-    HINSTANCE hDllInst;
-    std::map<int, MuMuDevice*> connections;     // connectionId -> connection
-    BAASNemu();
-    bool dllLoaded;
-    nemuConnect nemu_connect;
-    nemuDisconnect nemu_disconnect;
-    nemuCaptureDisplay nemu_capture_display;
-    nemuInputText nemu_input_text;
-    nemuInputEventTouchDown nemu_input_event_touch_down;
-    nemuInputEventTouchUp nemu_input_event_touch_up;
-    nemuInputEventKeyDown nemu_input_event_key_down;
-    nemuInputEventKeyUp nemu_input_event_key_up;
+    std::string installPath;
+
+    int displayId = -1;
+
+    int connectionId = -1;
+
+    std::pair<int, int> resolution;
+
+    std::vector<unsigned char> pixels;
+
+    std::mutex imageOpMutex;
+
+    bool alive = false;
+
+    static std::map<int, BAASNemu*> connections;
+
+    static HINSTANCE hDllInst;
+
+    static void init();
+
+    static bool dllLoaded;
+
+    static nemuConnect nemu_connect;
+
+    static nemuDisconnect nemu_disconnect;
+
+    static nemuCaptureDisplay nemu_capture_display;
+
+    static nemuInputText nemu_input_text;
+
+    static nemuInputEventTouchDown nemu_input_event_touch_down;
+
+
+    static nemuInputEventTouchUp nemu_input_event_touch_up;
+
+    static nemuInputEventKeyDown nemu_input_event_key_down;
+
+    static nemuInputEventKeyUp nemu_input_event_key_up;
+//
 //    auto connection = nemu_connect(L"H:\\MuMuPlayer-12.0", 0);
 //        if (nemu_input_event_touch_down(connection, displayId, 500, 500) != 0) {
 //            break;
@@ -68,7 +93,19 @@ private:
 //    }
 //    nemu_disconnect(connection);
 
-
+    /*
+    Contact down, continuous contact down will be considered as swipe
+    */
 };
 
+class NemuIpcError : public std::exception {
+public:
+    explicit NemuIpcError(const std::string& message) : message(message) {}
+
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+private:
+    std::string message;
+};
 #endif //BAAS_CXX_REFACTOR_BAASNEMU_H
