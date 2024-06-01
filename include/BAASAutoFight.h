@@ -18,7 +18,11 @@ public:
         double cost;
     };
 
+    bool restart = false;
+
     std::vector<SimpleTrigger> procedure;
+
+    void restartLoop();
 
     BAASAutoFight();
 
@@ -46,11 +50,17 @@ public:
 
     void showLastScreenshot() const;
 
-    void click(const BAASPoint& point) const;
+    void click(const BAASPoint& point, int duration = 0) const;
 
     void appendNextSkill(const std::string& skillName);
 
     bool startLoop();
+
+    bool keyboardInputThread();
+
+    bool inCurrentSkill(const std::string& skillName) const;
+
+    void waitCost(double cost);
 private:
     class CharacterSkill {
         public:
@@ -69,6 +79,8 @@ private:
     double currentCost = 0;
 
     int mode;
+
+    std::string lastSkill= "None";
 
     BAASNemu* nemu;
 

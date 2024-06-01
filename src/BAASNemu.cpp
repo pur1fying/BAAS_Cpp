@@ -42,7 +42,9 @@ BAASNemu::BAASNemu(string &installPath, string &port) {
         dllLoaded = true;
     }
     connect(installPath, port);
-    getResolution(connectionId, displayId, resolution);
+    if(!getResolution(connectionId, displayId, resolution)) {
+        throw std::runtime_error("Nemu Connection Failed");
+    }
 }
 
 bool BAASNemu::connect(const string& installPath,const string& serial) {
@@ -145,11 +147,12 @@ void BAASNemu::convertXY(BAASPoint &point) const {
 
 void BAASNemu::init() {
     if(!filesystem::exists(nemuDllPath)) {
+        BAASLoggerInstance->BAASError("Nemu dll not found : [ " + nemuDllPath + " ]");
         throw std::runtime_error("Nemu dll not found");
     }
     hDllInst = LoadLibrary(nemuDllPath.c_str());
     if (hDllInst == nullptr) {
-        std::cout << "LoadLibrary failed" << std::endl;
+        BAASLoggerInstance->BAASError("LoadLibrary : [ " + nemuDllPath + " ] failed");
         throw std::runtime_error("LoadLibrary : [ " + nemuDllPath + " ] failed");
     }
     nemu_connect = (nemuConnect)GetProcAddress(hDllInst, "nemu_connect");

@@ -16,6 +16,7 @@ extern std::string scrcpyJarName;
 
 extern std::string nemuDllPath;
 
+extern std::string MuMuInstallPath;
 /*
  *  BAAS_CPP --
  *           -- cmake-build-debug (this is BAAS_PROJECT_DIR)

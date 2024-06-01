@@ -9,12 +9,10 @@
 using namespace cv;
 using namespace std;
 int main() {
-    initGlobals();
-    if(filesystem::exists("output")){
-        filesystem::remove_all("output");
-    }
-    filesystem::create_directory("output");
 
+    initGlobals();
+    BAASLoggerInstance->BAASInfo("Please enter your MuMu install path : ");
+    cin>>MuMuInstallPath;
 //    BAASDevelopUtils::shotStudentSkill("a", SKILL1_LEFT, SKILL_LEFT);
 //    BAASDevelopUtils::shotStudentSkill("b", SKILL2_LEFT, SKILL_LEFT);
 //    BAASDevelopUtils::shotStudentSkill("c", SKILL3_LEFT, SKILL_LEFT);
@@ -47,38 +45,59 @@ int main() {
 //    int max_width = 1280;
 //    adb.connect("127.0.0.1:16512");
 //    BAASScrcpyCore::Client client = BAASScrcpyCore::Client("127.0.0.1:16512");
+try{
     BAASAutoFight autoFight;
     autoFight.procedure = {
-            {"Akane", BOSS_POSITION, 6.5},
-            {"Ako", {380, 235}, 9.5},
-            {"Maki", BOSS_POSITION, 6.5},
-            {"Chinatsu (Hot Spring)", {380, 235}, 2.0},
-            {"Akane", BOSS_POSITION, 7.5},
-            {"Ako", {380, 235}, 9.0},
-            {"Maki", BOSS_POSITION, 6.5},
-            {"Karin", BOSS_POSITION, 4.1},
-            {"Ako", {985,  621}, 9.5},
-            {"Maki", BOSS_POSITION, 6.5},
-            {"Chinatsu (Hot Spring)", {985,  621}, 2},
-            {"Akane", BOSS_POSITION, 3},
-            {"Ako", {985,  621}, 5.5},
-            {"Karin", BOSS_POSITION, 7.5},
-            {"Maki", BOSS_POSITION, 5},
+            {"Akane", BOSS_POSITION, 5.2},
+            {"Ako", {380, 235}, 9.8},
+            {"Maki", BOSS_POSITION, 7.0},
+            {"Chinatsu (Hot Spring)", {380, 235}, 2.8},
+            {"Karin", BOSS_POSITION, 5.3},
+            {"Akane", {380, 235}, 2.5},
+            {"Ako", {380, 235}, 5.9},
+            {"Maki", BOSS_POSITION, 5.1},
+            {"Chinatsu (Hot Spring)", {380, 235}, 2.1},
+            {"Akane", BOSS_POSITION, 9.5},
+            {"Ako", {283, 315}, 8.7},
+            {"Karin", BOSS_POSITION, 8.0},
+            {"Maki", BOSS_POSITION, 5.1},
+            {"Chinatsu (Hot Spring)", {283, 315}, 2.1},
+            {"Akane", BOSS_POSITION, 2.1},
+            {"Ako", {287, 555}, 3.9},
+            {"Karin", BOSS_POSITION, 4},
     };
     BAASImageResource SkillIconResource;
     SkillIconResource.loadDirectoryImage("resource/image/CN/skill_icon_bright", "", "_bright");
     SkillIconResource.loadDirectoryImage("resource/image/CN/skill_icon_left_black", "", "_left");
     SkillIconResource.loadDirectoryImage("resource/image/CN/skill_icon_right_grey", "", "_right");
-    SkillIconResource.showResource();
+//    SkillIconResource.showResource();
     autoFight.setImageResource(&SkillIconResource);
     autoFight.setSkills({"Maki", "Akane", "Karin", "Ako", "Cherino", "Chinatsu (Hot Spring)"});
-    autoFight.startLoop();
+    thread t(&BAASAutoFight::keyboardInputThread, &autoFight);
+    while(true) {
+        autoFight.startLoop();
+        if(autoFight.restart){
+            autoFight.restartLoop();
+            autoFight.restart = false;
+        }
+        else {
+            break;
+        }
+    }
+}
+catch (const std::exception& e){
+    cout<<e.what()<<endl;
+}
+
+
 
 //        autoFight.refreshSkillPosition();
 //        long long t2 = BAASUtil::getCurrentTimeMS();
 //        cout<<"Time : "<<t2 - t1<<endl;
 
     cout<<"exit"<<endl;
+    string st;
+    cin>>st;
     return 0;
 //    BAASUtil::executeCommandWithoutOutPut("adb forward tcp:27183 tcp:27183");
 }

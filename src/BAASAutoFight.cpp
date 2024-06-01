@@ -16,9 +16,8 @@ BAASRectangle const BAASAutoFight::costRegion = {820, 681, 1141, 696};
 
 double const BAASAutoFight::costLineDeltaX = 31.7;
 BAASAutoFight::BAASAutoFight() {
-    string installPath = "H:\\MuMuPlayer-12.0";
     string serial = "127.0.0.1:16384";
-    nemu = new BAASNemu(installPath, serial);         // temporarily use menu method
+    nemu = new BAASNemu(MuMuInstallPath, serial);         // temporarily use menu method
     currentSkill.resize(3);
 }
 
@@ -154,9 +153,10 @@ bool BAASAutoFight::skillFull() const {
     return true;
 }
 
-void BAASAutoFight::click(const BAASPoint &point) const {
+void BAASAutoFight::click(const BAASPoint &point, int duration) const {
     BAASLoggerInstance->BAASInfo("Click : (" + to_string(point.x) + ", " + to_string(point.y) + ")");
     nemu->click(point);
+    BAASUtil::sleepMS(duration);
 }
 
 void BAASAutoFight::appendNextSkill(const string &skillName) {
@@ -178,42 +178,103 @@ bool BAASAutoFight::releaseSkill(const string &skillName, const BAASPoint &posit
     return false;
 }
 
+
+
 bool BAASAutoFight::startLoop() {
+    while(!nextSkillQueue.empty()) nextSkillQueue.pop();
     nextSkillQueue.emplace("");
     nextSkillQueue.emplace("");
     nextSkillQueue.emplace("");
-    for(auto &step: procedure){
+    int needCheckLast;
+    for(int i = 0; i < procedure.size(); i++){
+        if(restart)
+            return false;
+        auto &step = procedure[i];
         BAASLoggerInstance->BAASInfo("Step : {");
         BAASLoggerInstance->BAASInfo("       Skill : " + step.skillName);
         BAASLoggerInstance->BAASInfo("       Position : (" + to_string(step.position.x) + ", " + to_string(step.position.y) + ")");
         BAASLoggerInstance->BAASInfo("       Cost : " + to_string(step.cost));
         BAASLoggerInstance->BAASInfo("       }");
         showSkillPosition();
-        while(true) {
+        while(!restart) {
             updateScreenshot();
-            searchAllSkillPosition();
             updateCost();
-//            showCost();
-//            showSkillPosition();
             if(step.cost <= currentCost){
+                BAASLoggerInstance->BAASInfo("Cost : " + to_string(currentCost) );
                 BAASLoggerInstance->BAASInfo("Release skill : [ " + step.skillName + " ] at position : " + to_string(step.position.x) + " " + to_string(step.position.y));
-                double lastCost = currentCost;
-                while(!releaseSkill(step.skillName, step.position)){
+                if(!releaseSkill(step.skillName, step.position)){
+                    updateScreenshot();
                     refreshSkillPosition();
-                    cout<<"Release skill failed"<<endl;
-                    updateScreenshot();
                     searchAllSkillPosition();
-                }
-                while(true){
-                    updateScreenshot();
-                    searchAllSkillPosition();
-                    updateCost();
-                    if(currentCost < lastCost)break;
+                    if(!releaseSkill(step.skillName, step.position)) {
+                        cout << "Release skill failed" << endl;
+                        return false;
+                    }
                 }
                 BAASUtil::sleepMS(300);
+                double lastCost = currentCost;
+                updateScreenshot();
+                updateCost();
+                cout<<"Updated Cost : "<<currentCost<<endl;
+                if(lastCost > currentCost){
+                    needCheckLast = false;
+                    break;
+                }
+                else {
+                    needCheckLast = true;
+                }
                 break;
+            }
+            else {
+                refreshSkillPosition();
+                searchAllSkillPosition();
+                if(i > 0 && inCurrentSkill(procedure[i-1].skillName) && needCheckLast) {
+                    BAASLoggerInstance->BAASInfo("Again Release : [ " + procedure[i-1].skillName + " ] ");
+                    waitCost(procedure[i-1].cost);
+                    releaseSkill(procedure[i-1].skillName, procedure[i-1].position);
+                    BAASUtil::sleepMS(300);
+                }
             }
         }
     }
     return true;
+}
+
+bool BAASAutoFight::keyboardInputThread() {
+    while(true){
+        char c = getchar();
+        if(c == 'r'){
+            restart = true;
+        }
+        if(c == 'q'){
+            return false;
+        }
+    }
+}
+
+
+bool BAASAutoFight::inCurrentSkill(const string &skillName) const {
+    for(auto &skill: currentSkill){
+        if(skill == skillName)
+            return true;
+    }
+    return false;
+}
+
+void BAASAutoFight::waitCost(double cost) {
+    while(currentCost < cost){
+        updateScreenshot();
+        updateCost();
+        refreshSkillPosition();
+        searchAllSkillPosition();
+        BAASUtil::sleepMS(1);
+    }
+}
+
+void BAASAutoFight::restartLoop() {
+    click({1228, 50}, 500);
+    click({724, 509}, 500);
+    click({724, 509}, 5000);
+    click({724, 509}, 500);
+    click({724, 509}, 500);
 }

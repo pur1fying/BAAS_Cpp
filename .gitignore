@@ -6,3 +6,4 @@ out
 cmake-build-debug-visual-studio-1
 cmake-build-debug-visual-studio
 cmake-build-release-visual-studio
+*.7z
