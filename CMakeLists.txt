@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(BAAS_CXX_Refactor)
+project(BAAS)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -23,14 +23,14 @@ file(
         "dll/*.dll"
 )
 add_executable(
-        BAAS_CXX_Refactor
+        BAAS
         main.cpp
         ${SOURCES}
 )
 
 target_link_libraries(
-        BAAS_CXX_Refactor
-        opencv_world490.lib
+        BAAS
+        opencv_world490d.lib
         avcodec.lib
         avdevice.lib
         avfilter.lib

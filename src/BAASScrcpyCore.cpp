@@ -8,7 +8,7 @@ bool BAASScrcpyCore::Client::deployServer() {
         device->push(scrcpyJarPath, "/data/local/tmp/" + scrcpyJarName, 493, true);
     }catch (AdbError &e) {
         string msg(e.what());
-        BAASLoggerInstance->BAASError("Fail to push scrcpy-server : " + msg);
+        BAASGlobalLogger->BAASError("Fail to push scrcpy-server : " + msg);
         return false;
     }
     vector<string> cmd = {
@@ -39,7 +39,7 @@ bool BAASScrcpyCore::Client::deployServer() {
     }
     catch (AdbError &e) {
         string msg(e.what());
-        BAASLoggerInstance->BAASError("Fail to start scrcpy server : " + msg);
+        BAASGlobalLogger->BAASError("Fail to start scrcpy server : " + msg);
         return false;
     }
     return true;
@@ -59,7 +59,7 @@ bool BAASScrcpyCore::Client::initServerSocketConnection() {
     }
     string buffer = videoStream->readFully(1);
     if(buffer.size() != 1 || buffer[0] != 0) {
-        BAASLoggerInstance->BAASError("Invalid scrcpy server response");
+        BAASGlobalLogger->BAASError("Invalid scrcpy server response");
         return false;
     }
     controlStream = device->createConnection(Network::LOCAL_ABSTRACT, "scrcpy");
@@ -107,11 +107,11 @@ string BAASScrcpyCore::Client::getSerial() {
 bool BAASScrcpyCore::Client::start() {
     device = new BAASAdbDevice(&adb, serial);
     if (!deployServer()) {
-        BAASLoggerInstance->BAASError("Fail to deploy scrcpy server.");
+        BAASGlobalLogger->BAASError("Fail to deploy scrcpy server.");
         return false;
     }
     if (!initServerSocketConnection()) {
-        BAASLoggerInstance->BAASError("Cannot connect to scrcpy server.");
+        BAASGlobalLogger->BAASError("Cannot connect to scrcpy server.");
         return false;
     }
     alive = true;
@@ -164,10 +164,10 @@ bool BAASScrcpyCore::Client::screenshotLoop() {
             }
         }
     } catch (AdbError &e) {
-        BAASLoggerInstance->BAASError(e.what());
+        BAASGlobalLogger->BAASError(e.what());
         return false;
     } catch (...) {
-        BAASLoggerInstance->BAASError("Unknown Error");
+        BAASGlobalLogger->BAASError("Unknown Error");
         return false;
     }
     return true;

@@ -2,12 +2,14 @@
 // Created by pc on 2024/5/31.
 //
 
-#ifndef BAAS_CXX_REFACTOR_BAASAUTOFIGHT_H
-#define BAAS_CXX_REFACTOR_BAASAUTOFIGHT_H
+#ifndef BAAS_BAASAUTOFIGHT_H
+#define BAAS_BAASAUTOFIGHT_H
 #include "BAASScreenshot.h"
-#include <map>
 #include "BAASImageUtil.h"
 #include "BAASImageResource.h"
+
+#include <map>
+
 #define EVENT_RELEASE_SKILL 0
 #define BOSS_POSITION BAASPoint(1106, 365)
 class BAASAutoFight {
@@ -21,6 +23,8 @@ public:
     bool restart = false;
 
     std::vector<SimpleTrigger> procedure;
+
+    bool getAlive();
 
     void restartLoop();
 
@@ -61,11 +65,16 @@ public:
     bool inCurrentSkill(const std::string& skillName) const;
 
     void waitCost(double cost);
+
+    bool enableStart;
+
+    bool alive = true;
 private:
     class CharacterSkill {
         public:
             CharacterSkill();
         private:
+
             std::string name;
             BAASImageResource::Image iconBright;
             BAASImageResource::Image iconLeftBlack;
@@ -106,4 +115,4 @@ private:
 
     static const double costLineDeltaX;
 };
-#endif //BAAS_CXX_REFACTOR_BAASAUTOFIGHT_H
+#endif //BAAS_BAASAUTOFIGHT_H

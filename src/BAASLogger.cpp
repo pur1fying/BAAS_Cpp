@@ -4,104 +4,92 @@
 
 
 #include "BAASLogger.h"
+
 #include <iostream>
+
+#include "BAASUtil.h"
+#include "BAASGlobals.h"
+
 using namespace std;
-BAASLogger *BAASLogger::instance = nullptr;
-BAASLogger *BAASLogger::getInstance() {
-    if (instance == nullptr) {
+
+string GlobalLogger::folder_path;
+
+GlobalLogger *GlobalLogger::global_logger = nullptr;
+
+GlobalLogger *GlobalLogger::getGlobalLogger() {
+    if (global_logger == nullptr) {
         mutex m;
         m.lock();
-        if (instance == nullptr) {
-            instance = new BAASLogger();
+        if (global_logger == nullptr) {
+            global_logger = new GlobalLogger();
         }
         m.unlock();
     }
-    return instance;
+    return global_logger;
 }
 
-BAASLogger::BAASLogger() {
-    consoleLogger = spdlog::stdout_color_mt("console");
-    fileLogger = spdlog::basic_logger_mt("file_logger", "logs.txt");
+GlobalLogger::GlobalLogger() {
+    try{
+        enable = 0b11;
+        consoleLogger = spdlog::stdout_color_mt("console");
+        if(!filesystem::exists("output")) {
+            filesystem::create_directory("output");
+        }
+
+        string currTime = BAASUtil::getCurrentTimeString();
+        folder_path = BAAS_OUTPUT_DIR + "\\" + currTime;
+        filesystem::create_directory(folder_path);
+        fstream file(folder_path + "\\global_log.txt", ios::out);
+        file.close();
+        fileLogger = spdlog::basic_logger_mt("file_logger", folder_path + "\\global_log.txt");
+    }
+    catch (const spdlog::spdlog_ex& ex) {
+        cout << "Log init failed: " << ex.what() << endl;
+    }
     spdlog::set_default_logger(consoleLogger);
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
     consoleLogger->set_level(spdlog::level::debug);
     fileLogger->set_level(spdlog::level::debug);
 }
 
-void BAASLogger::BAASTrance(std::string message) {
-    consoleLogger->trace(message);
-    fileLogger->trace(message);
-}
 
-void BAASLogger::BAASTrance(std::vector<std::string> messages) {
-    for (auto &message : messages) {
-        consoleLogger->trace(message);
-        fileLogger->trace(message);
-    }
-}
 
-void BAASLogger::BAASDebug(std::string message) {
-    consoleLogger->debug(message);
-    fileLogger->debug(message);
-}
-
-void BAASLogger::BAASDebug(std::vector<std::string> messages) {
-    for (auto &message : messages) {
-        consoleLogger->debug(message);
-        fileLogger->debug(message);
-    }
-}
-
-void BAASLogger::BAASWarn(std::string message) {
-    consoleLogger->warn(message);
-    fileLogger->warn(message);
-}
-
-void BAASLogger::BAASWarn(std::vector<std::string> messages) {
-    for (auto &message : messages) {
-        consoleLogger->warn(message);
-        fileLogger->warn(message);
-    }
-}
-
-void BAASLogger::BAASInfo(std::string message) {
-    consoleLogger->info(message);
-    fileLogger->info(message);
-}
-
-void BAASLogger::BAASInfo(std::vector<std::string> messages) {
-    for (auto &message : messages) {
-        consoleLogger->info(message);
-        fileLogger->info(message);
-    }
-}
-
-void BAASLogger::BAASError(std::string message) {
-    consoleLogger->error(message);
-    fileLogger->error(message);
-}
-
-void BAASLogger::BAASError(std::vector<std::string> messages) {
-    for (auto &message : messages) {
-        consoleLogger->error(message);
-        fileLogger->error(message);
-    }
-}
-
-void BAASLogger::BAASCritical(std::string message) {
-    consoleLogger->critical(message);
-    fileLogger->critical(message);
-}
-
-void BAASLogger::BAASCritical(std::vector<std::string> messages) {
-    for (auto &message : messages) {
-        consoleLogger->critical(message);
-        fileLogger->critical(message);
+void GlobalLogger::clearLogData() {
+    for(filesystem::directory_iterator itr(BAAS_OUTPUT_DIR); itr != filesystem::directory_iterator(); ++itr) {
+        if((itr->path().string() != folder_path) && filesystem::is_directory(itr->path())) {
+            BAASGlobalLogger->BAASInfo("Remove folder : [ " + itr->path().string() + " ]." );
+            filesystem::remove_all(itr->path());
+        }
     }
 }
 
 
-BAASLogger *BAASLoggerInstance = nullptr;
+
+GlobalLogger *BAASGlobalLogger = nullptr;
+
+map<string, BAASLogger*> BAASLogger::instances;
+
+BAASLogger *BAASLogger::get(const std::string& name) {
+    auto it = instances.find(name);
+    if(it != instances.end()) return it->second;
+
+    instances[name] = new BAASLogger(name);
+    return instances[name];
+}
+
+BAASLogger::BAASLogger(const string& name) {
+    enable = 0b11;
+    consoleLogger = spdlog::stdout_color_mt(name + "_console");
+    if(!filesystem::exists("output")) {
+        filesystem::create_directory("output");
+    }
+    string currTime = BAASUtil::getCurrentTimeString();
+    filename = name + ".txt";
+    fstream file(GlobalLogger::folder_path + "\\" + filename, ios::out);
+    file.close();
+    fileLogger = spdlog::basic_logger_mt(name + "_file_logger", GlobalLogger::folder_path + "\\" + filename);
+}
 
 
 
+BAASLogger::~BAASLogger() = default;

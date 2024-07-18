@@ -3,8 +3,9 @@
 //
 #ifndef BAAS_CPP_BAASIMAGERESOURCE_H
 #define BAAS_CPP_BAASIMAGERESOURCE_H
-#include "BAASImageUtil.h"
 #include <nlohmann/json.hpp>
+
+#include "BAASImageUtil.h"
 #include "BAASGlobals.h"
 class BAASImageResource{
 public:

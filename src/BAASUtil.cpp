@@ -2,13 +2,16 @@
 // Created by pc on 2024/4/12.
 //
 #include "BAASUtil.h"
+
+#include "BAASGlobals.h"
+
 using namespace std::chrono;
 using namespace std;
 using namespace cv;
 bool BAASUtil::initWinsock() {
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        BAASLoggerInstance->BAASError("WSAStartup failed");
+        BAASGlobalLogger->BAASError("WSAStartup failed");
         return false;
     }
     return true;
@@ -66,9 +69,11 @@ string BAASUtil::getCurrentTimeString() {
     time_t currentTime = time(nullptr);
     tm* localTime = localtime(&currentTime);
     ostringstream oss;
-    oss << std::put_time(localTime, "|%Y-%m-%d|%H:%M:%S|");
-    return oss.str();
+    oss << std::put_time(localTime, "%Y-%m-%d_%H-%M-%S");
+    CURRENT_TIME_STRING = oss.str();
+    return CURRENT_TIME_STRING;
 }
+
 
 string BAASUtil::executeCommandAndGetOutput(const string& command) {
     FILE* stream = _popen(command.c_str(), "rb");
@@ -80,32 +85,32 @@ string BAASUtil::executeCommandAndGetOutput(const string& command) {
     return output;
 }
 
-string BAASUtil::executeCommandAndGetOutput(const vector<string> commandList, int n) {
+string BAASUtil::executeCommandAndGetOutput(const vector<string> &commandList, int n) {
     string command;
     BAASUtil::stringJoin(commandList, " ", command);
     return executeCommandAndGetOutput(command);
 }
 
-FILE* BAASUtil::executeCommand(string command) {
+FILE* BAASUtil::executeCommand(const string& command) {
     return _popen(command.c_str(), "rb");
 }
 
 string BAASUtil::getStreamOutput(FILE* stream) {
     char buffer[128];
-    string output = "";
+    string output;
     while(fgets(buffer, 128, stream) != nullptr) {
         output += buffer;
     }
     return output;
 }
 
-void BAASUtil::executeCommandWithoutOutPut(const string command) {
+void BAASUtil::executeCommandWithoutOutPut(const string &command) {
     if(system(command.c_str())) {
         throw RuntimeError("Failed to execute command : " + command);
     }
 }
 
-void BAASUtil::executeCommandWithoutOutPut(const vector<string> commandList, int n) {
+void BAASUtil::executeCommandWithoutOutPut(const vector<string> &commandList, int n) {
     string command;
     BAASUtil::stringJoin(commandList, " ", command);
     if(system(command.c_str())) {
@@ -122,7 +127,7 @@ string BAASUtil::changeEndian(int a) {
 }
 
 int BAASUtil::getCurrentTimeStamp() {
-    return chrono::system_clock::to_time_t(chrono::system_clock::now());
+    return static_cast<int>(chrono::system_clock::to_time_t(chrono::system_clock::now()));
 }
 
 string BAASUtil::int2String(int a) {
@@ -140,13 +145,13 @@ bool BAASUtil::checkImageBroken(const std::string& path) {
     }
     cv::Mat image = cv::imread(path);
     if(image.empty()) {
-        BAASLoggerInstance->BAASError("Broken Image Path : " + path);
+        BAASGlobalLogger->BAASError("Broken Image Path : " + path);
         return false;
     }
     return true;
 }
 
-pair<int, int> BAASUtil::deleteBrokenImage(const std::string path) {
+pair<int, int> BAASUtil::deleteBrokenImage(const std::string &path) {
     int totalFiles = 0, brokenFiles = 0;
     if(filesystem::is_directory(path)) {
          for(auto &p: filesystem::directory_iterator(path)) {
@@ -178,25 +183,8 @@ string BAASUtil::wstringToString(const std::wstring& wstr) {
     return converter.to_bytes(wstr);
 }
 
-bool BAASUtil::reviseEmulatorSerial(std::string &serial) {
-    stringReplace(" ", "", serial, serial);
-    stringReplace("；", ":", serial, serial);
-    stringReplace("。", ".", serial, serial);
-    stringReplace(",", ".", serial, serial);
-    stringReplace("，", ".", serial, serial);
-    stringReplace("127.0.0.1.", "127.0.0.1:", serial, serial);
-    try{
-        stoi(serial);
-        serial = "127.0.0.1:" + serial;
-    }
-    catch (invalid_argument &e) {
-
-    }
-    return true;
-}
-
-bool BAASUtil::serialHost(const std::string serial, string &host) {
-    int pos = serial.find(':');
+bool BAASUtil::serialHost(const std::string &serial, string &host) {
+    int pos = static_cast<int>(serial.find(':'));
     if(pos == string::npos) {
         host = "";
         return false;
@@ -205,8 +193,8 @@ bool BAASUtil::serialHost(const std::string serial, string &host) {
     return true;
 }
 
-bool BAASUtil::serialPort(const std::string serial, string &port) {
-    int pos = serial.find(':');
+bool BAASUtil::serialPort(const std::string &serial, string &port) {
+    int pos = static_cast<int>(serial.find(':'));
     if(pos == string::npos) {
         port = "";
         return false;
@@ -215,8 +203,8 @@ bool BAASUtil::serialPort(const std::string serial, string &port) {
     return true;
 }
 
-bool BAASUtil::serialPort(const std::string serial, int &port) {
-    int pos = serial.find(':');
+bool BAASUtil::serialPort(const std::string &serial, int &port) {
+    int pos = static_cast<int>(serial.find(':'));
     if(pos == string::npos) {
         port = 0;
         return false;
@@ -231,34 +219,47 @@ bool BAASUtil::serialPort(const std::string serial, int &port) {
     return true;
 }
 
-bool BAASUtil::isMuMuFamily(const std::string serial) {
-    return serial == "127.0.0.1:7555" or isMuMuFamily(serial);
+bool BAASUtil::isMuMuFamily(const std::string &serial) {
+    return serial == "127.0.0.1:7555" or isMuMu12Family(serial);
 }
 
-bool BAASUtil::isMuMu12Family(const std::string serial) {
+bool BAASUtil::isMuMu12Family(const std::string &serial) {
     int port;
     serialPort(serial, port);
     return port >= 16384 and port <= 17408;
 }
 
-void BAASUtil::stringReplace(const std::string OLD, const std::string NEW, string &src, string &dst) {
-    cout << &src << " " << &dst << endl;
+void BAASUtil::stringReplace(const std::string& OLD, const std::string& NEW, string &src, string &dst) {
     if(&src != &dst) {
         dst = src;
     }
     int start = 0;
-    while((start = dst.find(OLD, start)) != string::npos) {
+    while((start = int(dst.find(OLD, start))) != string::npos) {
         dst.replace(start, OLD.length(), NEW);
-        start += NEW.length();
+        start += int(NEW.length());
+    }
+}
+
+void BAASUtil::stringReplace(const string &OLD, const string &NEW, string &tar) {
+    int start = 0;
+    while((start = int(tar.find(OLD, start))) != string::npos) {
+        tar.replace(start, OLD.length(), NEW);
+        start += int(NEW.length());
     }
 }
 
 void BAASUtil::stringSplit(const string &src, const string &separator, vector<std::string> &dst) {
+    dst.clear();
     int currentStart,currentEnd;
-    currentStart = currentEnd = 0;
-    while((currentEnd = src.find(separator, currentStart)) != string::npos) {
+    currentStart = 0;
+    currentEnd = int(src.find(separator, currentStart));
+    while(currentEnd != string::npos) {
         dst.push_back(src.substr(currentStart, currentEnd - currentStart));
-        currentStart = currentEnd + separator.length();
+        currentStart = currentEnd + int(separator.length());
+        currentEnd = int(src.find(separator, currentStart));
+    }
+    if(currentStart != currentEnd) {
+        dst.push_back(src.substr(currentStart, currentEnd - currentStart));
     }
 }
 
@@ -283,7 +284,7 @@ void BAASUtil::stringJoin(const vector<std::string> &src, const string &joiner, 
 }
 
 std::pair<std::string, std::string> BAASUtil::serialToHostPort(const std::string &serial) {
-    int pos = serial.find(':');
+    int pos = int(serial.find(':'));
     if(pos == string::npos) {
         return make_pair("", "");
     }
@@ -320,6 +321,34 @@ int BAASUtil::genRandInt(const int &min, const int &max) {
     return dis(gen);
 }
 
+bool BAASUtil::endsWith(const string &src, const string &suffix) {
+    if(src.length() < suffix.length()) return false;
+    return src.substr(src.length() - suffix.length()) == suffix;
+}
 
+bool BAASUtil::allNumberChar(const string &src) {
+    auto it = src.begin();
+    if(*it == '-') it++;
+    for(; it != src.end(); it++) {
+        if((*it < '0' or *it > '9') && *it !='.') return false;
+    }
+    return true;
+}
+
+
+void BAASUtil::stringSplit(const string &src, const char separator, vector<std::string> &dst) {
+    dst.clear();
+    int currentStart,currentEnd;
+    currentStart = 0;
+    currentEnd = int(src.find(separator, currentStart));
+    while(currentEnd != string::npos) {
+        if(currentStart != currentEnd)dst.push_back(src.substr(currentStart, currentEnd - currentStart));
+        currentStart = currentEnd + 1;
+        currentEnd = int(src.find(separator, currentStart));
+    }
+    if(currentStart != currentEnd) {
+        dst.push_back(src.substr(currentStart, currentEnd - currentStart));
+    }
+}
 
 

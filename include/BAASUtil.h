@@ -1,18 +1,19 @@
 //
 // Created by pc on 2024/4/12.
 //
-#ifndef BAAS_CXX_REFACTOR_UTIL_H
-#define BAAS_CXX_REFACTOR_UTIL_H
+#ifndef BAAS_UTIL_H
+#define BAAS_UTIL_H
 #include <chrono>
-#include "opencv2/opencv.hpp"
 #include <WinSock2.h>
-#include "BAASLogger.h"
-#include "BAASExceptions.h"
 #include <filesystem>
 #include <locale>
 #include <codecvt>
-#include "BAASImageUtil.h"
 #include <random>
+#include <opencv2/opencv.hpp>
+
+#include "BAASLogger.h"
+#include "BAASImageUtil.h"
+#include "BAASExceptions.h"
 
 class BAASUtil {
 public:
@@ -44,48 +45,50 @@ public:
 
       static std::string executeCommandAndGetOutput(const std::string& command);
 
-      static std::string executeCommandAndGetOutput(const std::vector<std::string> commandList, int n);
+      static std::string executeCommandAndGetOutput(const std::vector<std::string> &commandList, int n);
 
-      static FILE* executeCommand(std::string command);
+      static FILE* executeCommand(const std::string& command);
 
       static std::string getStreamOutput(FILE* stream);
 
-      static void executeCommandWithoutOutPut(const std::string command);
+      static void executeCommandWithoutOutPut(const std::string &command);
 
-      static void executeCommandWithoutOutPut(const std::vector<std::string> commandList, int n);
+      static void executeCommandWithoutOutPut(const std::vector<std::string> &commandList, int n);
 
       static std::string changeEndian(int a);
 
       static int getCurrentTimeStamp();
       /**
-   * Convert int to string
-   * @example 123 -> "123"
-   */
+       * Convert int to string
+       * @example 123 -> "123"
+      */
       static std::string int2String(int a);
 
       static bool checkImageBroken(const std::string& path);
 
-      static std::pair<int, int> deleteBrokenImage(const std::string path);
+      static std::pair<int, int> deleteBrokenImage(const std::string &path);
 
       static std::wstring stringToWString(const std::string& str);
 
       static std::string wstringToString(const std::wstring& wstr);
 
-      static bool reviseEmulatorSerial(std::string &serial);
+      static bool serialHost(const std::string &serial, std::string &host);
 
-      static bool serialHost(const std::string serial, std::string &host);
+      static bool serialPort(const std::string &serial, std::string &port);
 
-      static bool serialPort(const std::string serial, std::string &port);
+      static bool serialPort(const std::string &serial, int &port);
 
-      static bool serialPort(const std::string serial, int &port);
+      static bool isMuMuFamily(const std::string &serial);
 
-      static bool isMuMuFamily(const std::string serial);
+      static bool isMuMu12Family(const std::string &serial);
 
-      static bool isMuMu12Family(const std::string serial);
+      static void stringReplace(const std::string& OLD,const std::string& NEW,std::string &src,std::string &dst);
 
-      static void stringReplace(const std::string OLD,const std::string NEW,std::string &src,std::string &dst);
+      static void stringReplace(const std::string& OLD,const std::string& NEW,std::string &src);
 
       static void stringSplit(const std::string &src, const std::string &separator, std::vector<std::string> &dst);
+
+      static void stringSplit(const std::string &src, const char separator, std::vector<std::string> &dst);
 
       static void stringJoin(const std::vector<std::string> &src, const std::string &joiner, std::string &dst);
 
@@ -101,6 +104,47 @@ public:
 
       static double genRandDouble(const double& min,const double& max);
 
-    static int genRandInt(const int &min, const int &max);
+      static int genRandInt(const int &min, const int &max);
+
+      static bool endsWith(const std::string &src, const std::string &suffix);
+
+      static bool allNumberChar(const std::string &src);
+
+    // from tinyObjLoader
+    // See
+// http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
+    static std::istream &safeGetLine(std::istream &is, std::string &t) {
+        t.clear();
+
+        // The characters in the stream are read one-by-one using a std::streambuf.
+        // That is faster than reading them one-by-one using the std::istream.
+        // Code that uses streambuf this way must be guarded by a sentry object.
+        // The sentry object performs various tasks,
+        // such as thread synchronization and updating the stream state.
+
+        std::istream::sentry se(is, true);
+        std::streambuf *sb = is.rdbuf();
+
+        if (se) {
+            for (;;) {
+                int c = sb->sbumpc();
+                switch (c) {
+                    case '\n':
+                        return is;
+                    case '\r':
+                        if (sb->sgetc() == '\n') sb->sbumpc();
+                        return is;
+                    case EOF:
+                        // Also handle the case when the last line has no line ending
+                        if (t.empty()) is.setstate(std::ios::eofbit);
+                        return is;
+                    default:
+                        t += static_cast<char>(c);
+                }
+            }
+        }
+
+        return is;
+    }
 };
-#endif //BAAS_CXX_REFACTOR_UTIL_H
+#endif //BAAS_UTIL_H

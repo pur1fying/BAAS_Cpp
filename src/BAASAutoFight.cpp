@@ -104,10 +104,10 @@ void BAASAutoFight::showSkillPosition() {
 //    imshow("Skill Position", lastScreenshot);
     for(int i = 0; i < 3; i++) {
         if(currentSkill[i].empty()){
-            BAASLoggerInstance->BAASInfo("Position : " + to_string(i) + " [ Empty ]");
+            BAASGlobalLogger->BAASInfo("Position : " + to_string(i) + " [ Empty ]");
             continue;
         }
-        BAASLoggerInstance->BAASInfo("Position : " + to_string(i) + " [ " + currentSkill[i] + " ]");
+        BAASGlobalLogger->BAASInfo("Position : " + to_string(i) + " [ " + currentSkill[i] + " ]");
     }
 //    waitKey(0);
 }
@@ -136,7 +136,7 @@ void BAASAutoFight::updateScreenshot() {
 }
 
 void BAASAutoFight::showCost() const{
-    BAASLoggerInstance->BAASInfo("Cost : " + to_string(currentCost));
+    BAASGlobalLogger->BAASInfo("Cost : " + to_string(currentCost));
 }
 
 void BAASAutoFight::showLastScreenshot() const {
@@ -154,7 +154,7 @@ bool BAASAutoFight::skillFull() const {
 }
 
 void BAASAutoFight::click(const BAASPoint &point, int duration) const {
-    BAASLoggerInstance->BAASInfo("Click : (" + to_string(point.x) + ", " + to_string(point.y) + ")");
+    BAASGlobalLogger->BAASInfo("Click : (" + to_string(point.x) + ", " + to_string(point.y) + ")");
     nemu->click(point);
     BAASUtil::sleepMS(duration);
 }
@@ -166,7 +166,7 @@ void BAASAutoFight::appendNextSkill(const string &skillName) {
 bool BAASAutoFight::releaseSkill(const string &skillName, const BAASPoint &position) {
     for(int i = 0; i < 3; i++){
         if(currentSkill[i] == skillName){
-            BAASLoggerInstance->BAASInfo("SKILL SLOT : " + to_string(i) );
+            BAASGlobalLogger->BAASInfo("SKILL SLOT : " + to_string(i) );
             click(threeStudentSkillPositionCenter[i]);
             click(position);
             currentSkill[i] = nextSkillQueue.front();
@@ -190,18 +190,18 @@ bool BAASAutoFight::startLoop() {
         if(restart)
             return false;
         auto &step = procedure[i];
-        BAASLoggerInstance->BAASInfo("Step : {");
-        BAASLoggerInstance->BAASInfo("       Skill : " + step.skillName);
-        BAASLoggerInstance->BAASInfo("       Position : (" + to_string(step.position.x) + ", " + to_string(step.position.y) + ")");
-        BAASLoggerInstance->BAASInfo("       Cost : " + to_string(step.cost));
-        BAASLoggerInstance->BAASInfo("       }");
+        BAASGlobalLogger->BAASInfo("Step : {");
+        BAASGlobalLogger->BAASInfo("       Skill : " + step.skillName);
+        BAASGlobalLogger->BAASInfo("       Position : (" + to_string(step.position.x) + ", " + to_string(step.position.y) + ")");
+        BAASGlobalLogger->BAASInfo("       Cost : " + to_string(step.cost));
+        BAASGlobalLogger->BAASInfo("       }");
         showSkillPosition();
         while(!restart) {
             updateScreenshot();
             updateCost();
             if(step.cost <= currentCost){
-                BAASLoggerInstance->BAASInfo("Cost : " + to_string(currentCost) );
-                BAASLoggerInstance->BAASInfo("Release skill : [ " + step.skillName + " ] at position : " + to_string(step.position.x) + " " + to_string(step.position.y));
+                BAASGlobalLogger->BAASInfo("Cost : " + to_string(currentCost) );
+                BAASGlobalLogger->BAASInfo("Release skill : [ " + step.skillName + " ] at position : " + to_string(step.position.x) + " " + to_string(step.position.y));
                 if(!releaseSkill(step.skillName, step.position)){
                     updateScreenshot();
                     refreshSkillPosition();
@@ -229,7 +229,7 @@ bool BAASAutoFight::startLoop() {
                 refreshSkillPosition();
                 searchAllSkillPosition();
                 if(i > 0 && inCurrentSkill(procedure[i-1].skillName) && needCheckLast) {
-                    BAASLoggerInstance->BAASInfo("Again Release : [ " + procedure[i-1].skillName + " ] ");
+                    BAASGlobalLogger->BAASInfo("Again Release : [ " + procedure[i - 1].skillName + " ] ");
                     waitCost(procedure[i-1].cost);
                     releaseSkill(procedure[i-1].skillName, procedure[i-1].position);
                     BAASUtil::sleepMS(300);
@@ -243,11 +243,15 @@ bool BAASAutoFight::startLoop() {
 bool BAASAutoFight::keyboardInputThread() {
     while(true){
         char c = getchar();
-        if(c == 'r'){
+        if(c == 'q'){
+            alive = false;
+            return false;
+        }
+        else if(c == 'r'){
             restart = true;
         }
-        if(c == 'q'){
-            return false;
+        else if(!enableStart){
+            enableStart = true;
         }
     }
 }
@@ -277,4 +281,9 @@ void BAASAutoFight::restartLoop() {
     click({724, 509}, 5000);
     click({724, 509}, 500);
     click({724, 509}, 500);
+
+}
+
+bool BAASAutoFight::getAlive() {
+    return alive;
 }

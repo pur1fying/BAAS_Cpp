@@ -4,10 +4,12 @@
 #include "BAASAdbUtils.h"
 
 using namespace std;
+
+
 // Connection
 bool BAASAdbConnection::checkServer(std::string host, std::string port) {
     SOCKET connection = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    sockaddr_in serverAddr;
+    sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(atoi(port.c_str()));
     inet_pton(AF_INET, host.c_str(), &serverAddr.sin_addr);
@@ -20,7 +22,7 @@ BAASAdbConnection::BAASAdbConnection() {
 
 }
 
-BAASAdbConnection::BAASAdbConnection(const string host, const string port, double socketTimeout) {
+BAASAdbConnection::BAASAdbConnection(const string& host, const string& port, double socketTimeout) {
     this->host = host;
     this->port = port;
     this->serial = host + ":" + port;
@@ -28,7 +30,7 @@ BAASAdbConnection::BAASAdbConnection(const string host, const string port, doubl
     this->connection = safeCreateSocket();
 }
 
-BAASAdbConnection::BAASAdbConnection(const string serial, double socketTimeout) {
+BAASAdbConnection::BAASAdbConnection(const string &serial, double socketTimeout) {
     pair<string, string> hostPort = BAASUtil::serialToHostPort(serial);
     if(hostPort.first == "" || hostPort.second == "") throw ValueError("Invalid serial : " + serial);
     this->serial = serial;
@@ -108,7 +110,7 @@ SOCKET BAASAdbConnection::safeCreateSocket() {
     try {
         return createSocket();
     } catch (ConnectionRefusedError &e) {
-        BAASLoggerInstance->BAASInfo("Start ADB server.");
+        BAASGlobalLogger->BAASInfo("Start ADB server.");
         BAASEmulatorController::startAdbServer();
         return createSocket();
     }
@@ -355,7 +357,7 @@ int BAASAdbBaseDevice::push(const string &src, const string &dst, const int mode
         conn->checkOKAY();
         file.close();
     } catch (AdbError &e) {
-        BAASLoggerInstance->BAASError(e.what());
+        BAASGlobalLogger->BAASError(e.what());
         file.close();
         return -1;
     }
@@ -363,14 +365,14 @@ int BAASAdbBaseDevice::push(const string &src, const string &dst, const int mode
         int remoteSize = stat(dst);
         if(remoteSize != fileSize) {
             string msg = format("Push file failed. Remote size: {0}, local size: {1}", remoteSize, fileSize);
-            BAASLoggerInstance->BAASError("Push file failed.");
+            BAASGlobalLogger->BAASError("Push file failed.");
             delete conn;
             throw AdbError(msg.c_str());
         }
     }
     delete conn;
     string msg = "Push file :[ " + src + " ]  --> [ " + dst + " ] \nSUCCESS.";
-    BAASLoggerInstance->BAASInfo(msg.c_str());
+    BAASGlobalLogger->BAASInfo(msg.c_str());
     return fileSize;
 }
 

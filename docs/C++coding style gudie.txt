@@ -1,0 +1,78 @@
+本篇用于学习google C++代码规范，同时也将作为BAAS（CPP） 所遵循的规范
+https://google.github.io/styleguide/cppguide.html#Inline_Functions
+
+C++标准：20
+
+1.Inline Functions(内联函数)  
+inline 与 __inline 作用相同
+__forceinline 强制内联
+注意：
+内联函数必须在声明的文件中定义[ When a header declares inline functions or templates that clients of the header will instantiate, the inline functions and templates must also have definitions in the header ] 
+宏始终是内联扩展的。 但内联函数仅当编译器确定内联函数是最佳操作时才会内联
+如果某个函数的地址已被占用或编译器判定函数过大，则编译器不会内联该函数。
+内联函数节省的开销：
+*函数调用（包括参数传递和在堆栈上放置对象地址）
+*保留调用者的堆栈帧
+*设置新的堆栈帧
+*返回值通信
+*还原旧堆栈帧
+*返回值
+
+定义：内联函数应当小于等于10行
+
+决定：
+递归函数不应该是内联的
+虚函数通常不应该是内联的
+
+2.
+源文件和头文件应该分别以.cpp和.h结尾	
+源文件应该都保存在在include文件夹中
+头文件应该都保存在src文件夹中	
+ 
+每一个源文件（.cpp）应该有对应头文件（.h） [ every .cc file should have an associated .h file ]
+
+3.头文件保护
+
+头文件需要有头文件保护[ Specifically, a header should have header guards and include all other headers it needs. ]
+头文件保护格式 <项目名>(BAAS)_<路径>_<文件名> [ The format of the symbol name should be <PROJECT>_<PATH>_<FILE>_H_. ] 
+例：include/util/ImageUtil.h 的头文件保护：
+#ifndef BAAS_UTIL_IMAGEUTIL_H_
+#define BAAS_UTIL_IMAGEUTIL_H_
+
+...
+
+#endif  // BAAS_UTIL_IMAGEUTIL_H_
+
+3.头文件包含 #include 的使用
+当且仅当你想要引用某一头文件中符号时引用该头文件
+
+3.1头文件包含顺序 [ Names and Order of Includes ]
+源文件
+例：
+BAASImageUtil.cpp文件中：
+先包含关联头文件（对应.h文件） 
+#include "BAASImageUtil.h"
+
+c标头	
+#include <stdlib.h>
+
+c++标头	
+#include <map>
+
+其他库文件 
+#include <opencv2/opencv.hpp>
+
+项目中其他头文件
+#include "BAASUtil.h"
+
+每一类头文件中该有空行隔开
+
+
+4.前向声明
+不要使用前向声明，使用include  [ Avoid using forward declarations where possible .Instead, include the headers you need. ]
+
+5.命名空间 namespace
+
+
+
+

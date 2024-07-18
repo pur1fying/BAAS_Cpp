@@ -2,21 +2,23 @@
 // Created by pc on 2024/5/27.
 //
 
-#ifndef BAAS_CXX_REFACTOR_BAASADBUTILS_H
-#define BAAS_CXX_REFACTOR_BAASADBUTILS_H
-#include "BAASGlobals.h"
+#ifndef BAAS_BAASADBUTILS_H
+#define BAAS_BAASADBUTILS_H
 #include "WinSock2.h"
-#include "BAASUtil.h"
 #include "WS2tcpip.h"
-#include "BAASExceptions.h"
-#include "Network.h"
-#include "BAASEmulatorController.h"
+
 #include <vector>
 #include <fstream>
+
+#include "BAASEmulatorController.h"
+#include "BAASExceptions.h"
+#include "BAASGlobals.h"
+#include "BAASUtil.h"
+#include "Network.h"
+
 #define _OKAY "OKAY"
 #define _FAIL "FAIL"
 #define _STAT "STAT"
-
 
 // Connection
 class BAASAdbConnection {
@@ -25,15 +27,13 @@ public:
 
     BAASAdbConnection();
 
-    BAASAdbConnection(const std::string host, const std::string port, double socketTimeout=3000.0);
+    BAASAdbConnection(const std::string &host, const std::string &port, double socketTimeout=3000.0);
 
-    BAASAdbConnection(const std::string serial, double socketTimeout=3000.0);
+    BAASAdbConnection(const std::string &serial, double socketTimeout=3000.0);
 
     std::string readFully(int length);
 
     bool readUntilClose(std::string &res);
-
-    int push(const std::string src, const std::string dst, const int mode, bool check);
 
     bool sendMessage(const std::string &data);
 
@@ -196,4 +196,4 @@ public:
 
 extern BAASAdbClient adb;
 
-#endif //BAAS_CXX_REFACTOR_BAASADBUTILS_H
+#endif //BAAS_BAASADBUTILS_H

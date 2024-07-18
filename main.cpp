@@ -8,11 +8,45 @@
 #pragma comment(lib, "ws2_32.lib")
 using namespace cv;
 using namespace std;
-int main() {
+using json = nlohmann::json;
 
-    initGlobals();
-    BAASLoggerInstance->BAASInfo("Please enter your MuMu install path : ");
-    cin>>MuMuInstallPath;
+
+optional<int> func(int c) {
+    if(c == 0) return 0;
+    return nullopt;
+}
+int main() {
+    system("chcp 65001");
+    try{
+        initGlobals();
+//        fstream file("resource/config_name_change.json");
+//        json j = json::parse(file);
+//        cout << j.dump(4) <<endl;
+//
+//        optional<int> a;
+//        cout << *a << endl;
+//        a.has_value();
+//        a.reset();
+//        cout << a.value_or(1) << endl;
+//        a = func(1);
+//        cout << a.value_or(1) << endl;
+//        GlobalLogger::clearLogData();
+        config_name_change->my_flatten();
+        string path = "1708148000\\config.json";
+        UserConfig config(path);
+        config.update_name();
+        config.show();
+        config.show_modify_history();
+        config.save();
+    }
+    catch (const std::exception& e){
+        BAASGlobalLogger->BAASInfo(e.what());
+    }
+
+    return 0;
+//    BAASLoggerInstance->BAASInfo("Please enter your MuMu install path : ");
+//    getline(cin, MuMuInstallPath);
+    MuMuInstallPath = "H:\\MuMuPlayer-12.0";
 //    BAASDevelopUtils::shotStudentSkill("a", SKILL1_LEFT, SKILL_LEFT);
 //    BAASDevelopUtils::shotStudentSkill("b", SKILL2_LEFT, SKILL_LEFT);
 //    BAASDevelopUtils::shotStudentSkill("c", SKILL3_LEFT, SKILL_LEFT);
@@ -63,8 +97,8 @@ try{
             {"Maki", BOSS_POSITION, 5.1},
             {"Chinatsu (Hot Spring)", {283, 315}, 2.1},
             {"Akane", BOSS_POSITION, 2.1},
-            {"Ako", {287, 555}, 3.9},
-            {"Karin", BOSS_POSITION, 4},
+//            {"Ako", {287, 555}, 3.9},
+//            {"Karin", BOSS_POSITION, 4},
     };
     BAASImageResource SkillIconResource;
     SkillIconResource.loadDirectoryImage("resource/image/CN/skill_icon_bright", "", "_bright");
@@ -74,16 +108,28 @@ try{
     autoFight.setImageResource(&SkillIconResource);
     autoFight.setSkills({"Maki", "Akane", "Karin", "Ako", "Cherino", "Chinatsu (Hot Spring)"});
     thread t(&BAASAutoFight::keyboardInputThread, &autoFight);
-    while(true) {
-        autoFight.startLoop();
-        if(autoFight.restart){
-            autoFight.restartLoop();
-            autoFight.restart = false;
-        }
-        else {
-            break;
-        }
+    BAASGlobalLogger->BAASInfo("---------------------");
+    BAASGlobalLogger->BAASInfo("| Input 'q' to Quit |");
+    BAASGlobalLogger->BAASInfo("---------------------");
+    BAASGlobalLogger->BAASInfo("Press Any Key to Start");
+    BAASGlobalLogger->BAASInfo("Input 'r' to Restart");
+    autoFight.enableStart = false;
+    while(!autoFight.enableStart) {
+        BAASUtil::sleepMS(1);
     }
+    autoFight.alive = true;
+    while(autoFight.alive) {
+        BAASGlobalLogger->BAASInfo("------------------------------------------------------");
+        autoFight.restart = false;
+        autoFight.startLoop();
+        if(autoFight.restart) {
+            autoFight.restartLoop();
+        }
+        BAASGlobalLogger->BAASInfo("Loop finished");
+        BAASGlobalLogger->BAASInfo("------------------------------------------------------");
+    }
+
+    t.join();
 }
 catch (const std::exception& e){
     cout<<e.what()<<endl;
@@ -95,9 +141,6 @@ catch (const std::exception& e){
 //        long long t2 = BAASUtil::getCurrentTimeMS();
 //        cout<<"Time : "<<t2 - t1<<endl;
 
-    cout<<"exit"<<endl;
-    string st;
-    cin>>st;
     return 0;
 //    BAASUtil::executeCommandWithoutOutPut("adb forward tcp:27183 tcp:27183");
 }

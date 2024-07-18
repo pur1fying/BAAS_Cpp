@@ -2,15 +2,18 @@
 // Created by pc on 2024/4/19.
 //
 #define WIN32_LEAN_AND_MEAN
-#ifndef BAAS_CXX_REFACTOR_BAASNEMU_H
-#define BAAS_CXX_REFACTOR_BAASNEMU_H
+#ifndef BAAS_BAASNEMU_H
+#define BAAS_BAASNEMU_H
 #include <Windows.h>
-#include "BAASGlobals.h"
-#include "opencv2/opencv.hpp"
 #include <map>
 #include <filesystem>
 #include <mutex>
 #include <thread>
+
+#include <opencv2/opencv.hpp>
+
+#include "BAASGlobals.h"
+
 typedef int (*nemuConnect)(const wchar_t* , int);
 typedef void (*nemuDisconnect)(int);
 typedef int (*nemuCaptureDisplay)(int, unsigned int, int, int*, int*, unsigned char*);
@@ -108,4 +111,4 @@ public:
 private:
     std::string message;
 };
-#endif //BAAS_CXX_REFACTOR_BAASNEMU_H
+#endif //BAAS_BAASNEMU_H

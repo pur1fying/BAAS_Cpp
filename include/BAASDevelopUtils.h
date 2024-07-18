@@ -2,8 +2,8 @@
 // Created by pc on 2024/5/31.
 //
 
-#ifndef BAAS_CXX_REFACTOR_BAASDEVELOPUTILS_H
-#define BAAS_CXX_REFACTOR_BAASDEVELOPUTILS_H
+#ifndef BAAS_BAASDEVELOPUTILS_H
+#define BAAS_BAASDEVELOPUTILS_H
 #include "BAAS.h"
 #define SKILL1_FULL BAASRectangle(845, 601, 923, 662)
 #define SKILL1_LEFT BAASRectangle(845, 601, 886, 662)
@@ -25,4 +25,4 @@ class BAASDevelopUtils {
 public:
     static void shotStudentSkill(const std::string &name = "student", const BAASRectangle &r = SKILL1_FULL, const int type = SKILL_FULL);
 };
-#endif //BAAS_CXX_REFACTOR_BAASDEVELOPUTILS_H
+#endif //BAAS_BAASDEVELOPUTILS_H

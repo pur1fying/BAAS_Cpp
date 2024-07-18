@@ -2,9 +2,10 @@
 // Created by pc on 2024/5/25.
 //
 
-#ifndef BAAS_CXX_REFACTOR_BAASSCREENSHOT_H
-#define BAAS_CXX_REFACTOR_BAASSCREENSHOT_H
-#include "opencv2/opencv.hpp"
+#ifndef BAAS_BAASSCREENSHOT_H
+#define BAAS_BAASSCREENSHOT_H
+#include <opencv2/opencv.hpp>
+
 #include "BAASNemu.h"
 #include "BAASScrcpyCore.h"
 #define screenshotAdb (1 << 0)
@@ -32,4 +33,4 @@ private:
 
     int screenshotMethod;
 };
-#endif //BAAS_CXX_REFACTOR_BAASSCREENSHOT_H
+#endif //BAAS_BAASSCREENSHOT_H

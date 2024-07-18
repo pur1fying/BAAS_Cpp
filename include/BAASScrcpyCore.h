@@ -2,12 +2,13 @@
 // Created by pc on 2024/4/17.
 //
 
-#ifndef BAAS_CXX_REFACTOR_BAASSCRCPYCORE_H
-#define BAAS_CXX_REFACTOR_BAASSCRCPYCORE_H
+#ifndef BAAS_BAASSCRCPYCORE_H
+#define BAAS_BAASSCRCPYCORE_H
 #include <thread>
 #include <filesystem>
-#include "BAASAdbUtils.h"
 #include <format>
+
+#include "BAASAdbUtils.h"
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
@@ -79,4 +80,4 @@ private:
 
 };
 
-#endif //BAAS_CXX_REFACTOR_BAASSCRCPYCORE_H
+#endif //BAAS_BAASSCRCPYCORE_H

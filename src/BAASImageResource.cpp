@@ -36,7 +36,7 @@ void BAASImageResource::clearResource() {
 void BAASImageResource::showResource() {
     for (auto &i : resource) {
         if(i.second.image.empty())continue;
-        BAASLoggerInstance->BAASDebug(i.first + ":\n" +i.second.path);
+        BAASGlobalLogger->BAASDebug(i.first + ":\n" + i.second.path);
     }
 }
 
@@ -49,7 +49,7 @@ bool BAASImageResource::isLoaded(const string &key) {
 
 void BAASImageResource::loadDirectoryImage(const string &dirPath, const string &prefix, const string &postfix) {
     if(!filesystem::exists(dirPath)){
-        BAASLoggerInstance->BAASError("Directory not exist : " + dirPath);
+        BAASGlobalLogger->BAASError("Directory not exist : " + dirPath);
         return;
     }
     string temp;

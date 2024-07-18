@@ -51,17 +51,17 @@ bool BAASNemu::connect(const string& installPath,const string& serial) {
     int displayId = BAASUtil::MuMuSerialToDisplayId(serial);
     for(auto &connection: connections) {
         if(connection.second->installPath == installPath && connection.second->displayId == displayId) {
-            BAASLoggerInstance->BAASError("Already connected");
+            BAASGlobalLogger->BAASError("Already connected");
             return true;
         }
     }
     if(displayId == -1) {
-        BAASLoggerInstance->BAASError("Invalid serial");
+        BAASGlobalLogger->BAASError("Invalid serial");
         return false;
     }
     int connection = nemu_connect(BAASUtil::stringToWString(installPath).c_str(), displayId);
     if (connection == 0) {
-        BAASLoggerInstance->BAASError("Nemu connect failed");
+        BAASGlobalLogger->BAASError("Nemu connect failed");
         return false;
     }
     this->installPath = installPath;
@@ -69,7 +69,7 @@ bool BAASNemu::connect(const string& installPath,const string& serial) {
     connectionId = connection;
     connections[connection] = this;
     if(!getResolution(connection, displayId, resolution)) {
-        BAASLoggerInstance->BAASError("Nemu get display resolution failed.");
+        BAASGlobalLogger->BAASError("Nemu get display resolution failed.");
         return false;
     }
     pixels.resize(resolution.first * resolution.second * 4);
@@ -82,13 +82,13 @@ bool BAASNemu::connect(const string& installPath,const string& serial) {
             "                   Resolution:\t" + to_string(resolution.first) + "x" + to_string(resolution.second),
             "                   }"
     };
-    BAASLoggerInstance->BAASInfo(msg);
+    BAASGlobalLogger->BAASInfo(msg);
     return true;
 }
 
 bool BAASNemu::disconnect() {
     if(connections.find(connectionId) == connections.end()) {
-        BAASLoggerInstance->BAASError("Invalid connectionID");
+        BAASGlobalLogger->BAASError("Invalid connectionID");
         return false;
     }
     nemu_disconnect(connectionId);
@@ -111,7 +111,7 @@ bool BAASNemu::screenshot(cv::Mat &image) {
 
 bool BAASNemu::getResolution(int connectionId, int displayId, std::pair<int, int> &resolution) {
     if (nemu_capture_display(connectionId, displayId, 0, &resolution.first, &resolution.second, nullptr) != 0) {
-        BAASLoggerInstance->BAASError("Nemu get resolution failed");
+        BAASGlobalLogger->BAASError("Nemu get resolution failed");
         return false;
     }
     return true;
@@ -147,12 +147,12 @@ void BAASNemu::convertXY(BAASPoint &point) const {
 
 void BAASNemu::init() {
     if(!filesystem::exists(nemuDllPath)) {
-        BAASLoggerInstance->BAASError("Nemu dll not found : [ " + nemuDllPath + " ]");
+        BAASGlobalLogger->BAASError("Nemu dll not found : [ " + nemuDllPath + " ]");
         throw std::runtime_error("Nemu dll not found");
     }
     hDllInst = LoadLibrary(nemuDllPath.c_str());
     if (hDllInst == nullptr) {
-        BAASLoggerInstance->BAASError("LoadLibrary : [ " + nemuDllPath + " ] failed");
+        BAASGlobalLogger->BAASError("LoadLibrary : [ " + nemuDllPath + " ] failed");
         throw std::runtime_error("LoadLibrary : [ " + nemuDllPath + " ] failed");
     }
     nemu_connect = (nemuConnect)GetProcAddress(hDllInst, "nemu_connect");

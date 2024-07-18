@@ -2,14 +2,20 @@
 // Created by pc on 2024/4/11.
 //
 
-#ifndef BAAS_CXX_REFACTOR_BAASEMULATORCONTROLLER_H
-#define BAAS_CXX_REFACTOR_BAASEMULATORCONTROLLER_H
+#ifndef BAAS_BAASEMULATORCONTROLLER_H
+#define BAAS_BAASEMULATORCONTROLLER_H
 #include <map>
 #include <vector>
+
+#include <opencv2/opencv.hpp>
+
 #include "BAASUtil.h"
 #include "BAASGlobals.h"
 #include "BAASLogger.h"
-#include "opencv2/opencv.hpp"
+class ConnectionAttr {
+
+};
+
 struct AutoScanPort {
     explicit AutoScanPort() = default;
 };
@@ -52,4 +58,4 @@ private:
     static BAASEmulatorController* instance;
     static std::vector<Device*> deviceList;
 };
-#endif //BAAS_CXX_REFACTOR_BAASEMULATORCONTROLLER_H
+#endif //BAAS_BAASEMULATORCONTROLLER_H

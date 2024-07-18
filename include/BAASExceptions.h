@@ -1,8 +1,8 @@
 //
 // Created by pc on 2024/4/12.
 //
-#ifndef BAAS_CXX_REFACTOR_BAASEXCEPTIONS_H
-#define BAAS_CXX_REFACTOR_BAASEXCEPTIONS_H
+#ifndef BAAS_BAASEXCEPTIONS_H
+#define BAAS_BAASEXCEPTIONS_H
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -33,4 +33,14 @@ public:
 private:
     std::string message;
 };
-#endif //BAAS_CXX_REFACTOR_BAASEXCEPTIONS_H
+
+class PathError: public std::exception {
+public:
+    explicit PathError(const std::string msg): message(msg) {}
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+private:
+    std::string message;
+};
+#endif //BAAS_BAASEXCEPTIONS_H

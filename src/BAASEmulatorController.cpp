@@ -1,4 +1,5 @@
 #include "BAASEmulatorController.h"
+
 #include <string>
 #include <vector>
 #include <mutex>
@@ -38,13 +39,13 @@ Mat Device::screenshot() {
     }
     _pclose(fp);
     int endTime = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
-    BAASLoggerInstance->BAASInfo("Screenshot Time : " + to_string(endTime - startTime) + "ms");
+    BAASGlobalLogger->BAASInfo("Screenshot Time : " + to_string(endTime - startTime) + "ms");
     cv::Mat image = cv::imdecode(buffer, cv::IMREAD_COLOR);
     return image;
 }
 
 vector<string> BAASEmulatorController::detectEmulators() {
-    BAASLoggerInstance->BAASInfo("-- BAAS Detect Emulators --");
+    BAASGlobalLogger->BAASInfo("-- BAAS Detect Emulators --");
     string output = BAASUtil::executeCommandAndGetOutput("adb devices");
     vector<string> emulators;
     size_t pos = 0;
@@ -60,11 +61,11 @@ vector<string> BAASEmulatorController::detectEmulators() {
         }
         output = output.substr(pos + 1);
     }
-    if(emulators.empty()) BAASLoggerInstance->BAASInfo("NO EMULATOR CONNECTED");
+    if(emulators.empty()) BAASGlobalLogger->BAASInfo("NO EMULATOR CONNECTED");
     else {
 
-        BAASLoggerInstance->BAASInfo("Emulators Connected : ");
-        for(auto &emulator : emulators) BAASLoggerInstance->BAASInfo(emulator);
+        BAASGlobalLogger->BAASInfo("Emulators Connected : ");
+        for(auto &emulator : emulators) BAASGlobalLogger->BAASInfo(emulator);
     }
     return emulators;
 }
@@ -82,11 +83,11 @@ BAASEmulatorController* BAASEmulatorController::getInstance() {
 }
 
 void BAASEmulatorController::startAdbServer() {
-    BAASLoggerInstance->BAASInfo("-- BAAS Start adb server --");
+    BAASGlobalLogger->BAASInfo("-- BAAS Start adb server --");
     BAASUtil::executeCommandWithoutOutPut("adb start-server");
 }
 void BAASEmulatorController::stopAdbServer() {
-    BAASLoggerInstance->BAASInfo("-- BAAS Stop adb server --");
+    BAASGlobalLogger->BAASInfo("-- BAAS Stop adb server --");
     BAASUtil::executeCommandWithoutOutPut("adb kill-server");
 }
 
@@ -99,32 +100,32 @@ Device::~Device() {
 }
 
 void BAASEmulatorController::disconnectAllEmulators() {
-    BAASLoggerInstance->BAASInfo("-- BAAS Disconnect all emulators --");
+    BAASGlobalLogger->BAASInfo("-- BAAS Disconnect all emulators --");
     string output = BAASUtil::executeCommandAndGetOutput("adb disconnect");
-    BAASLoggerInstance->BAASInfo("adb : " + output);
+    BAASGlobalLogger->BAASInfo("adb : " + output);
 }
 
 Device* BAASEmulatorController::connect(string serial) {
-    BAASLoggerInstance->BAASInfo("-- BAAS Connect to Emulator : " + serial + " --");
+    BAASGlobalLogger->BAASInfo("-- BAAS Connect to Emulator : " + serial + " --");
     for(int i = 0; i < deviceList.size(); i++) {
         if(deviceList[i]->serial == serial) {
-            BAASLoggerInstance->BAASInfo("Instance exists");
+            BAASGlobalLogger->BAASInfo("Instance exists");
             return deviceList[i];
         }
     }
     string output = BAASUtil::executeCommandAndGetOutput("adb connect " + serial);
-    BAASLoggerInstance->BAASInfo("adb : " + output);
+    BAASGlobalLogger->BAASInfo("adb : " + output);
     Device device(serial);
     return &device;
 }
 
 void BAASEmulatorController::listControlledEmulators() {
-    BAASLoggerInstance->BAASInfo("-- BAAS List Controlled Emulators --");
+    BAASGlobalLogger->BAASInfo("-- BAAS List Controlled Emulators --");
     if(deviceList.empty()) {
-        BAASLoggerInstance->BAASInfo("NO EMULATOR CONTROLLED");
+        BAASGlobalLogger->BAASInfo("NO EMULATOR CONTROLLED");
     } else {
         for(auto &device : deviceList) {
-            BAASLoggerInstance->BAASInfo("Emulator : " + device->serial);
+            BAASGlobalLogger->BAASInfo("Emulator : " + device->serial);
         }
     }
 }
