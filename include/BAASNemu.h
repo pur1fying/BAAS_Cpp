@@ -1,9 +1,11 @@
 //
 // Created by pc on 2024/4/19.
 //
+#ifndef BAAS_BAASNEMU_H_
+#define BAAS_BAASNEMU_H_
+
 #define WIN32_LEAN_AND_MEAN
-#ifndef BAAS_BAASNEMU_H
-#define BAAS_BAASNEMU_H
+
 #include <Windows.h>
 #include <map>
 #include <filesystem>
@@ -111,4 +113,4 @@ public:
 private:
     std::string message;
 };
-#endif //BAAS_BAASNEMU_H
+#endif //BAAS_BAASNEMU_H_

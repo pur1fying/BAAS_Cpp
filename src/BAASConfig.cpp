@@ -1,7 +1,7 @@
 //
 // Created by pc on 2024/4/12.
 //
-#include "BAASConfig.h"
+#include "config/BAASConfig.h"
 
 #include <string>
 
@@ -75,9 +75,7 @@ BAASConfig::BAASConfig(const string &path) {
             logger->BAASError("Config file [ " + this->path + " ] parse error : " + e.what());
             throw ValueError("Config file parse error : [ " + this->path + " ] : " + e.what());
         }
-//        cout << config.dump(4) <<endl;
         preProcessValue();
-        cout << modified.dump(4) << endl;
         save();
     }
     else throw PathError("Config file not exist : [ " + this->path + " ].");

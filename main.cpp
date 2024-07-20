@@ -31,7 +31,8 @@ int main() {
 //        a = func(1);
 //        cout << a.value_or(1) << endl;
 //        GlobalLogger::clearLogData();
-        config_name_change->my_flatten();
+//        config_name_change->my_flatten();
+//        config_name_change->show();
         string path = "1708148000\\config.json";
         UserConfig config(path);
         config.update_name();

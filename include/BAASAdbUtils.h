@@ -2,8 +2,8 @@
 // Created by pc on 2024/5/27.
 //
 
-#ifndef BAAS_BAASADBUTILS_H
-#define BAAS_BAASADBUTILS_H
+#ifndef BAAS_BAASADBUTILS_H_
+#define BAAS_BAASADBUTILS_H_
 #include "WinSock2.h"
 #include "WS2tcpip.h"
 
@@ -196,4 +196,4 @@ public:
 
 extern BAASAdbClient adb;
 
-#endif //BAAS_BAASADBUTILS_H
+#endif //BAAS_BAASADBUTILS_H_

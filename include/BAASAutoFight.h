@@ -2,8 +2,8 @@
 // Created by pc on 2024/5/31.
 //
 
-#ifndef BAAS_BAASAUTOFIGHT_H
-#define BAAS_BAASAUTOFIGHT_H
+#ifndef BAAS_BAASAUTOFIGHT_H_
+#define BAAS_BAASAUTOFIGHT_H_
 #include "BAASScreenshot.h"
 #include "BAASImageUtil.h"
 #include "BAASImageResource.h"
@@ -115,4 +115,4 @@ private:
 
     static const double costLineDeltaX;
 };
-#endif //BAAS_BAASAUTOFIGHT_H
+#endif //BAAS_BAASAUTOFIGHT_H_

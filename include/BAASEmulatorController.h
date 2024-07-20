@@ -2,8 +2,8 @@
 // Created by pc on 2024/4/11.
 //
 
-#ifndef BAAS_BAASEMULATORCONTROLLER_H
-#define BAAS_BAASEMULATORCONTROLLER_H
+#ifndef BAAS_BAASEMULATORCONTROLLER_H_
+#define BAAS_BAASEMULATORCONTROLLER_H_
 #include <map>
 #include <vector>
 
@@ -58,4 +58,4 @@ private:
     static BAASEmulatorController* instance;
     static std::vector<Device*> deviceList;
 };
-#endif //BAAS_BAASEMULATORCONTROLLER_H
+#endif //BAAS_BAASEMULATORCONTROLLER_H_

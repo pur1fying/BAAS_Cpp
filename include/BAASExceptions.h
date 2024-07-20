@@ -1,8 +1,8 @@
 //
 // Created by pc on 2024/4/12.
 //
-#ifndef BAAS_BAASEXCEPTIONS_H
-#define BAAS_BAASEXCEPTIONS_H
+#ifndef BAAS_BAASEXCEPTIONS_H_
+#define BAAS_BAASEXCEPTIONS_H_
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -43,4 +43,4 @@ public:
 private:
     std::string message;
 };
-#endif //BAAS_BAASEXCEPTIONS_H
+#endif //BAAS_BAASEXCEPTIONS_H_

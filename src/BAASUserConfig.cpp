@@ -2,7 +2,7 @@
 // Created by pc on 2024/7/18.
 //
 
-#include "BAASUserConfig.h"
+#include "config/BAASUserConfig.h"
 
 using namespace std;
 
@@ -58,7 +58,6 @@ void UserConfig::update_name() {
     for(auto &it : config_name_change->get_config().items()) {
         assert(it.value().is_string());
         t = it.value();
-        cout << t <<endl;
         if(config.contains(it.key())) {
             updateByKey(it.value(), config[it.key()]);
             removeByKey(it.key());

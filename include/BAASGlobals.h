@@ -1,15 +1,15 @@
 //
 // Created by pc on 2024/4/12.
 //
-#pragma once
-#ifndef BAAS_BAASGLOBALS_H
-#define BAAS_BAASGLOBALS_H
+
+#ifndef BAAS_BAASGLOBALS_H_
+#define BAAS_BAASGLOBALS_H_
 #include <filesystem>
 
 #include "BAASLogger.h"
 #include "BAASAdbUtils.h"
-#include "BAASConfig.h"
-#include "BAASUserConfig.h"
+#include "config/BAASConfig.h"
+#include "config/BAASUserConfig.h"
 
 extern std::string BAAS_PROJECT_DIR;
 
@@ -43,4 +43,4 @@ void initGlobals();
 
 
 
-#endif //BAAS_BAASGLOBALS_H
+#endif //BAAS_BAASGLOBALS_H_

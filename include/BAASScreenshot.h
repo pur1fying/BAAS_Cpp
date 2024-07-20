@@ -2,8 +2,8 @@
 // Created by pc on 2024/5/25.
 //
 
-#ifndef BAAS_BAASSCREENSHOT_H
-#define BAAS_BAASSCREENSHOT_H
+#ifndef BAAS_BAASSCREENSHOT_H_
+#define BAAS_BAASSCREENSHOT_H_
 #include <opencv2/opencv.hpp>
 
 #include "BAASNemu.h"
@@ -33,4 +33,4 @@ private:
 
     int screenshotMethod;
 };
-#endif //BAAS_BAASSCREENSHOT_H
+#endif //BAAS_BAASSCREENSHOT_H_

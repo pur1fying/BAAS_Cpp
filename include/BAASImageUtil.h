@@ -1,6 +1,6 @@
 
-#ifndef BAAS_CPP_BAASIMAGEUTIL_H
-#define BAAS_CPP_BAASIMAGEUTIL_H
+#ifndef BAAS_BAASIMAGEUTIL_H_
+#define BAAS_BAASIMAGEUTIL_H_
 #include <map>
 #include <string>
 #include <filesystem>
@@ -130,4 +130,4 @@ public:
     static bool isSmallerRGB(const cv::Vec3b &a, const cv::Vec3b &b);
 };
 
-#endif //BAAS_CPP_BAASIMAGEUTIL_H
+#endif //BAAS_BAASIMAGEUTIL_H_

@@ -2,8 +2,8 @@
 // Created by pc on 2024/4/12.
 //
 
-#ifndef BAAS_BAASLOGGER_H
-#define BAAS_BAASLOGGER_H
+#ifndef BAAS_BAASLOGGER_H_
+#define BAAS_BAASLOGGER_H_
 #include <mutex>
 #include <set>
 #include <map>
@@ -210,4 +210,4 @@ private:
 
 };
 
-#endif //BAAS_BAASLOGGER_H
+#endif //BAAS_BAASLOGGER_H_

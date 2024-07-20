@@ -1,8 +1,8 @@
 //
 // Created by pc on 2024/5/29.
 //
-#ifndef BAAS_CPP_BAASIMAGERESOURCE_H
-#define BAAS_CPP_BAASIMAGERESOURCE_H
+#ifndef BAAS_BAASIMAGERESOURCE_H_
+#define BAAS_BAASIMAGERESOURCE_H_
 #include <nlohmann/json.hpp>
 
 #include "BAASImageUtil.h"
@@ -40,4 +40,4 @@ private:
 };
 
 
-#endif //BAAS_CPP_BAASIMAGERESOURCE_H
+#endif //BAAS_BAASIMAGERESOURCE_H_

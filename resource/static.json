@@ -1,4 +1,9 @@
 {
+  "emulator_type" : {
+    "mumu": "MuMu模拟器",
+    "bluestacks_nxt_cn": "蓝叠模拟器",
+    "bluestacks_nxt": "蓝叠国际版"
+  },
   "common_shop_price_list": {
     "CN": [
       ["悬赏通缉[光碟]券",30,"pyroxene"],["悬赏通缉[技术笔记]券",30,"pyroxene"],["悬赏通缉[神秘古物]券",30,"pyroxene"],["日程券",30,"pyroxene"],

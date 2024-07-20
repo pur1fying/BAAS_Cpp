@@ -2,8 +2,8 @@
 // Created by pc on 2024/4/17.
 //
 
-#ifndef BAAS_BAASSCRCPYCORE_H
-#define BAAS_BAASSCRCPYCORE_H
+#ifndef BAAS_BAASSCRCPYCORE_H_
+#define BAAS_BAASSCRCPYCORE_H_
 #include <thread>
 #include <filesystem>
 #include <format>
@@ -80,4 +80,4 @@ private:
 
 };
 
-#endif //BAAS_BAASSCRCPYCORE_H
+#endif //BAAS_BAASSCRCPYCORE_H_
