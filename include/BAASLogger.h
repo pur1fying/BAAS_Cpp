@@ -8,10 +8,15 @@
 #include <set>
 #include <map>
 
+#include <iostream>
+
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
-#include <iostream>
+
+extern std::string BAAS_LOGGER_HR_LINE;
+
+void gen_hr_msg(const std::string &msg,std::string& out);
 
 class GlobalLogger {
 public:
@@ -87,6 +92,21 @@ public:
             if(enable & 0b10) fileLogger->critical(message);
         }
     }
+    inline void hr(const std::string& message) {
+        std::string msg;
+        gen_hr_msg(message, msg);
+        if(enable & 0b1) {
+            consoleLogger->info(BAAS_LOGGER_HR_LINE);
+            consoleLogger->info(msg);
+            consoleLogger->info(BAAS_LOGGER_HR_LINE);
+        }
+        if(enable & 0b10) {
+            fileLogger->info(BAAS_LOGGER_HR_LINE);
+            fileLogger->info(msg);
+            fileLogger->info(BAAS_LOGGER_HR_LINE);
+        }
+    }
+
 
     static void clearLogData();
 
@@ -191,6 +211,21 @@ public:
         for (auto &message : messages) {
             if(enable & 0b1) consoleLogger->critical(message);
             if(enable & 0b10) fileLogger->critical(message);
+        }
+    }
+
+    inline void hr(const std::string& message) {
+        std::string msg;
+        gen_hr_msg(message, msg);
+        if(enable & 0b1) {
+            consoleLogger->info(BAAS_LOGGER_HR_LINE);
+            consoleLogger->info(msg);
+            consoleLogger->info(BAAS_LOGGER_HR_LINE);
+        }
+        if(enable & 0b10) {
+            fileLogger->info(BAAS_LOGGER_HR_LINE);
+            fileLogger->info(msg);
+            fileLogger->info(BAAS_LOGGER_HR_LINE);
         }
     }
 private:

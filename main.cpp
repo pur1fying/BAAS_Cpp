@@ -34,11 +34,16 @@ int main() {
 //        config_name_change->my_flatten();
 //        config_name_change->show();
         string path = "1708148000\\config.json";
-        UserConfig config(path);
-        config.update_name();
-        config.show();
-        config.show_modify_history();
-        config.save();
+        BAASUserConfig config(path);
+//        config.update_name();
+//        config.show();
+//        config.show_modify_history();
+//        config.save();
+
+        BAASConnection connection(&config);
+        vector<string> d;
+        connection.list_package(d);
+
     }
     catch (const std::exception& e){
         BAASGlobalLogger->BAASInfo(e.what());

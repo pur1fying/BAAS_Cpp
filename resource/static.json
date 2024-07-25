@@ -1,9 +1,13 @@
 {
-  "emulator_type" : {
+  "emulator_types" : {
     "mumu": "MuMu模拟器",
     "bluestacks_nxt_cn": "蓝叠模拟器",
     "bluestacks_nxt": "蓝叠国际版"
   },
+  "adb_binary_dirs": [
+      "resource/platform-tools/adb.exe",
+      "env/Lib/site-packages/adbutils/binaries/adb.exe"
+  ],
   "common_shop_price_list": {
     "CN": [
       ["悬赏通缉[光碟]券",30,"pyroxene"],["悬赏通缉[技术笔记]券",30,"pyroxene"],["悬赏通缉[神秘古物]券",30,"pyroxene"],["日程券",30,"pyroxene"],
@@ -176,16 +180,41 @@
     "Global": null,
     "JP": null
   },
+  "valid_packages": [
+    "com.RoamingStar.BlueArchive",
+    "com.RoamingStar.BlueArchive.bilibili",
+    "com.nexon.bluearchive",
+    "com.nexon.bluearchiveteen",
+    "com.nexon.bluearchiveone",
+    "com.YostarJP.BlueArchive"
+  ],
   "package_name": {
     "官服": "com.RoamingStar.BlueArchive",
     "B服": "com.RoamingStar.BlueArchive.bilibili",
     "国际服": "com.nexon.bluearchive",
+    "国际服青少年": "com.nexon.bluearchiveteen",
+    "韩国ONE": "com.nexon.bluearchiveone",
     "日服": "com.YostarJP.BlueArchive"
   },
+  "package2server": {
+    "com.RoamingStar.BlueArchive": "CN",
+    "com.RoamingStar.BlueArchive.bilibili": "CN",
+    "com.nexon.bluearchive": "Global",
+    "com.nexon.bluearchiveteen": "Global",
+    "com.nexon.bluearchiveone": "Global",
+    "com.YostarJP.BlueArchive": "JP"
+  },
+  "servers": [
+    "CN",
+    "Global",
+    "JP"
+  ],
   "activity_name": {
     "官服": "com.yostar.sdk.bridge.YoStarUnityPlayerActivity",
     "B服": "com.yostar.sdk.bridge.YoStarUnityPlayerActivity",
     "国际服": ".MxUnityPlayerActivity",
+    "国际服青少年": ".MxUnityPlayerActivity",
+    "韩国ONE": ".MxUnityPlayerActivity",
     "日服": "com.yostarjp.bluearchive.MxUnityPlayerActivity"
   },
   "total_assault_difficulties": {

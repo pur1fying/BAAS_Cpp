@@ -17,7 +17,7 @@ class ConnectionAttr {
 };
 
 struct AutoScanPort {
-    explicit AutoScanPort() = default;
+    AutoScanPort() = default;
 };
 class Device {
 public:
@@ -26,7 +26,7 @@ public:
     std::string serial,path;
     std::pair<int, int> resolution;
 private:
-    Device(std::string serial);
+    explicit Device(std::string serial);
     Device(std::string serial,std::string path);
     void initDeviceInfo();
     friend class BAASEmulatorController;

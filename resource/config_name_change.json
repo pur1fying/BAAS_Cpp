@@ -46,7 +46,7 @@
     "/pierce1": "/explore_normal_task/pierce1",
     "/pierce2": "/explore_normal_task/pierce2",
     "/purchase_arena_ticket_times": "/arena/purchase_ticket_times",
-    "/purchase_lesson_ticket_times": "/lesson/purchase_lesson_ticket_times",
+    "/purchase_lesson_ticket_times": "/lesson/purchase_ticket_times",
     "/purchase_rewarded_task_ticket_times": "/rewarded_task/purchase_ticket_times",
     "/purchase_scrimmage_ticket_times": "/scrimmage/purchase_ticket_times",
     "/push_after_completion": "/error_handle/push_after_completion",

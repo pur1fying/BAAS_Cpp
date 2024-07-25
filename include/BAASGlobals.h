@@ -7,9 +7,7 @@
 #include <filesystem>
 
 #include "BAASLogger.h"
-#include "BAASAdbUtils.h"
-#include "config/BAASConfig.h"
-#include "config/BAASUserConfig.h"
+#include "device/BAASAdbUtils.h"
 
 extern std::string BAAS_PROJECT_DIR;
 

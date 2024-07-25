@@ -2,8 +2,8 @@
 // Created by pc on 2024/5/27.
 //
 
-#ifndef BAAS_BAASADBUTILS_H_
-#define BAAS_BAASADBUTILS_H_
+#ifndef BAAS_DEVICE_BAASADBUTILS_H_
+#define BAAS_DEVICE_BAASADBUTILS_H_
 #include "WinSock2.h"
 #include "WS2tcpip.h"
 
@@ -23,7 +23,7 @@
 // Connection
 class BAASAdbConnection {
 public:
-    static bool checkServer(std::string host, std::string port);
+    static bool checkServer(std::string& host, std::string& port);
 
     BAASAdbConnection();
 
@@ -31,11 +31,11 @@ public:
 
     BAASAdbConnection(const std::string &serial, double socketTimeout=3000.0);
 
-    std::string readFully(int length);
+    std::string readFully(int length) const;
 
     bool readUntilClose(std::string &res);
 
-    bool sendMessage(const std::string &data);
+    bool sendMessage(const std::string &data) const;
 
     bool checkOKAY();
 
@@ -70,7 +70,7 @@ protected:
 
 class ConnectionRefusedError : public std::exception {
 public:
-    const char* what() const noexcept override {
+    [[nodiscard]] const char* what() const noexcept override {
         return "Connection refused";
     }
 };
@@ -80,7 +80,7 @@ public:
     AdbError(const char* msg) {
         message = msg;
     }
-    const char* what() const noexcept override {
+    [[nodiscard]] const char* what() const noexcept override {
         if(message.size() == 0) return "Adb Error";
         return message.c_str();
     }
@@ -94,9 +94,9 @@ class BAASAdbBaseClient{
 public:
     BAASAdbBaseClient();
 
-    BAASAdbBaseClient(const std::string serial="127.0.0.1:5037", double socketTimeout=3000.0);
+    BAASAdbBaseClient(const std::string& serial="127.0.0.1:5037", double socketTimeout=3000.0);
 
-    BAASAdbBaseClient(const std::string host="127.0.0.1", const std::string port="5037", double socketTimeout=3000.0);
+    BAASAdbBaseClient(const std::string& host="127.0.0.1", const std::string& port="5037", double socketTimeout=3000.0);
 
     BAASAdbConnection* makeConnection(double socketTimeout=0);
     /*
@@ -108,15 +108,15 @@ public:
 
     bool serverKill();
 
-    std::string connect(const std::string address, double socketTimeout=3000.0);
+    std::string connect(const std::string& address, double timeout=3000.0);
 
-    std::string disconnect(const std::string address, double socketTimeout=3000.0);
+    std::string disconnect(const std::string& address, double timeout=3000.0);
 
-    std::string getHost() const;
+    [[nodiscard]] const std::string& getHost() const;
 
-    std::string getPort() const;
+    [[nodiscard]] const std::string& getPort() const;
 
-    std::string getSerial() const;
+    [[nodiscard]] const std::string& getSerial() const;
 
 protected:
     std::string host;
@@ -135,11 +135,11 @@ public:
 
     BAASAdbBaseDevice(BAASAdbBaseClient* client, const std::string& serial,const int transportId = 0);
 
-    std::string getSerial() const;
+    [[nodiscard]] std::string getSerial() const;
 
-    BAASAdbConnection *openTransport(const std::string& command="", double socketTimeout=60000.0);
+    BAASAdbConnection *openTransport(const std::string& command, double socketTimeout=60000.0);
 
-    std::string getCommandResult(std::string command, double socketTimeout=60000.0);
+    std::string getCommandResult(const std::string& command, double socketTimeout=60000.0);
 
     std::string getState(double socketTimeout=60000.0);
 
@@ -149,19 +149,19 @@ public:
 
     std::string getFeatures(double socketTimeout=60000.0);
 
-    BAASAdbConnection* createConnection(const std::string network,const std::string address);
+    BAASAdbConnection* createConnection(const std::string& network,const std::string& address);
 
-    BAASAdbConnection* shellStream(const std::string command, double socketTimeout = 3000.0);
+    BAASAdbConnection* shellStream(const std::string& command, double socketTimeout = 3000.0);
 
-    BAASAdbConnection* shellStream(const std::vector<std::string> commandList, double socketTimeout = 3000.0);
+    BAASAdbConnection* shellStream(const std::vector<std::string>& commandList, double socketTimeout = 3000.0);
 
-    bool shellBytes(const std::string command, std::string &out,double socketTimeout = 3000.0);
+    bool shellBytes(const std::string& command, std::string &out,double socketTimeout = 3000.0);
 
-    bool shellBytes(const std::vector<std::string> commandList, std::string &out,double socketTimeout = 3000.0);
+    bool shellBytes(const std::vector<std::string>& commandList, std::string &out,double socketTimeout = 3000.0);
 
-    BAASAdbConnection* prepareSync(const std::string path,const std::string cmd);
+    BAASAdbConnection* prepareSync(const std::string& path,const std::string& cmd);
 
-    int stat(const std::string path);
+    int stat(const std::string& path);
 
     int push(const std::string &src, const std::string &dst, const int mode, bool check);
 
@@ -187,13 +187,23 @@ class BAASAdbClient: public BAASAdbBaseClient{
 public:
     BAASAdbClient();
 
-    std::vector<std::pair<std::string, int>> listDevices();
+    BAASAdbClient(const std::string& serial, double socketTimeout=3000.0);
 
-    std::vector<BAASAdbDevice*> iterDevice();
+    BAASAdbClient(const std::string& host, const std::string& port, double socketTimeout=3000.0);
+    /*
+     * static method
+     * List all devices
+     * Returns:
+     *     vector<pair<string,      int>>
+     *     list of     serial       status (0: offline, 1: online 2: unauthorized, 3: other)
+     */
+    static void list_device(std::vector<std::pair<std::string, int>> &devices);
 
-    BAASAdbDevice* device(const std::string serial);
+    std::vector<BAASAdbDevice*> iter_device();
+
+    BAASAdbDevice* device(const std::string& serial);
 };
 
 extern BAASAdbClient adb;
 
-#endif //BAAS_BAASADBUTILS_H_
+#endif //BAAS_DEVICE_BAASADBUTILS_H_

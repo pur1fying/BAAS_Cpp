@@ -65,11 +65,16 @@ int BAASUtil::binary2int(const string& input, int length) {
     return res;
 }
 
-string BAASUtil::getCurrentTimeString() {
-    time_t currentTime = time(nullptr);
-    tm* localTime = localtime(&currentTime);
-    ostringstream oss;
-    oss << std::put_time(localTime, "%Y-%m-%d_%H-%M-%S");
+string BAASUtil::current_time_string() {
+    auto now = std::chrono::system_clock::now();
+    auto timeT = std::chrono::system_clock::to_time_t(now);
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+    std::tm localTime = *std::localtime(&timeT);
+    std::ostringstream oss;
+    oss << std::put_time(&localTime, "%Y-%m-%d_%H-%M-%S");
+    oss << '.' << std::setw(4) << std::setfill('0') << ms.count();
+    std::string formattedTime = oss.str();
+    std::cout << formattedTime << std::endl;
     CURRENT_TIME_STRING = oss.str();
     return CURRENT_TIME_STRING;
 }
@@ -141,7 +146,7 @@ string BAASUtil::int2String(int a) {
 
 bool BAASUtil::checkImageBroken(const std::string& path) {
     if(!filesystem::exists(path)){
-        throw ValueError("File : [ " + path + " ] not exists");
+        throw PathError("File : [ " + path + " ] not exists");
     }
     cv::Mat image = cv::imread(path);
     if(image.empty()) {
@@ -203,20 +208,19 @@ bool BAASUtil::serialPort(const std::string &serial, string &port) {
     return true;
 }
 
-bool BAASUtil::serialPort(const std::string &serial, int &port) {
-    int pos = static_cast<int>(serial.find(':'));
-    if(pos == string::npos) {
-        port = 0;
-        return false;
+int BAASUtil::serial2port(const std::string &serial) {
+    int res = 0;
+    if(serial.starts_with("127.0.0.1:")) {
+        try{
+            res = stoi(serial.substr(10));
+        }catch (invalid_argument &e) {}
     }
-    try{
-        port = stoi(serial.substr(pos + 1));
+    else if(serial.starts_with("emulator-")) {
+        try{
+            res = stoi(serial.substr(9));
+        }catch (invalid_argument &e) {}
     }
-    catch (invalid_argument &e) {
-        port = 0;
-        return false;
-    }
-    return true;
+    return res;
 }
 
 bool BAASUtil::isMuMuFamily(const std::string &serial) {
@@ -224,8 +228,7 @@ bool BAASUtil::isMuMuFamily(const std::string &serial) {
 }
 
 bool BAASUtil::isMuMu12Family(const std::string &serial) {
-    int port;
-    serialPort(serial, port);
+    int port = serial2port(serial);
     return port >= 16384 and port <= 17408;
 }
 
@@ -264,8 +267,7 @@ void BAASUtil::stringSplit(const string &src, const string &separator, vector<st
 }
 
 int BAASUtil::MuMuSerialToDisplayId(const std::string &serial) {
-    int port;
-    serialPort(serial, port);
+    int port = serial2port(serial);
     port -= 16384;
     int index = port / 32, offset = port % 32;
     if ((offset == 0 or offset == 1 or offset == 2) && index >= 0 && index <= 31) {
@@ -349,6 +351,24 @@ void BAASUtil::stringSplit(const string &src, const char separator, vector<std::
     if(currentStart != currentEnd) {
         dst.push_back(src.substr(currentStart, currentEnd - currentStart));
     }
+}
+
+void BAASUtil::re_find_all(const string &src, const string &pattern, vector<std::string> &dst) {
+    dst.clear();
+
+    std::regex regex_pattern(pattern);
+    std::smatch match;
+    std::string::const_iterator search_start(src.cbegin());
+
+    while (std::regex_search(search_start, src.cend(), match, regex_pattern)) {
+        dst.push_back(match[1].str()); // 提取第一个捕获组的内容
+        search_start = match.suffix().first;
+    }
+}
+
+bool BAASUtil::re_match(const string &src, const string &pattern) {
+    std::regex regex_pattern(pattern);
+    return std::regex_match(src, regex_pattern);
 }
 
 

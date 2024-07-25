@@ -17,7 +17,8 @@
       "program_address": null,
       "control_method": "adb",
       "screenshot_method": "adb",
-      "server": "官服"
+      "server": "官服",
+      "package_name": "auto"
     },
     "script": {
       "screenshot_interval": 0.3

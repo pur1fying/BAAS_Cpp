@@ -8,11 +8,13 @@
 #include "BAASLogger.h"
 #include "BAASExceptionHandler.h"
 #include "BAASEmulatorController.h"
-#include "config/BAASConfig.h"
-#include "config/BAASUserConfig.h"
+
+#include "config.h"
+
+#include "device.h"
+
 #include "BAASGlobals.h"
 #include "BAASScrcpyCore.h"
-#include "BAASAdbUtils.h"
 #include "BAASNemu.h"
 #include "BAASScreenshot.h"
 #include "BAASAutoFight.h"

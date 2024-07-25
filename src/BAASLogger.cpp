@@ -16,6 +16,15 @@ string GlobalLogger::folder_path;
 
 GlobalLogger *GlobalLogger::global_logger = nullptr;
 
+string BAAS_LOGGER_HR_LINE = std::string(80, '-');
+
+void gen_hr_msg(const string &msg, string &out) {
+    int msg_len = int(msg.length());
+    int left_space_len = (80 - 2 - msg_len) / 2 ;    // space len / 2
+    int right_space_len = 80 - msg_len - left_space_len - 2;
+    out = "|" + std::string(left_space_len, ' ') + msg + std::string(right_space_len, ' ') + "|";
+}
+
 GlobalLogger *GlobalLogger::getGlobalLogger() {
     if (global_logger == nullptr) {
         mutex m;
@@ -36,7 +45,7 @@ GlobalLogger::GlobalLogger() {
             filesystem::create_directory("output");
         }
 
-        string currTime = BAASUtil::getCurrentTimeString();
+        string currTime = BAASUtil::current_time_string();
         folder_path = BAAS_OUTPUT_DIR + "\\" + currTime;
         filesystem::create_directory(folder_path);
         fstream file(folder_path + "\\global_log.txt", ios::out);
@@ -83,7 +92,7 @@ BAASLogger::BAASLogger(const string& name) {
     if(!filesystem::exists("output")) {
         filesystem::create_directory("output");
     }
-    string currTime = BAASUtil::getCurrentTimeString();
+    string currTime = BAASUtil::current_time_string();
     filename = name + ".txt";
     fstream file(GlobalLogger::folder_path + "\\" + filename, ios::out);
     file.close();

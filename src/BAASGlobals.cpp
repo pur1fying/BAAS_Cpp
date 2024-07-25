@@ -3,6 +3,9 @@
 //
 
 #include "BAASGlobals.h"
+
+#include "config.h"
+
 using namespace std::filesystem;
 using namespace std;
 string BAAS_PROJECT_DIR;
@@ -46,11 +49,12 @@ void initGlobals() {
 
     DEVELOPER_PROJECT_DIR = curr.parent_path().parent_path().string();
 
-    static_config = new BAASConfig(CONFIG_TYPE_STATIC_CONFIG);
+    static_config = BAASStaticConfig::getStaticConfig();
+    Server::init();
 
     config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);
 
-    config_template = new UserConfig(CONFIG_TYPE_DEFAULT_CONFIG);
+    config_template = new BAASUserConfig(CONFIG_TYPE_DEFAULT_CONFIG);
 
 
 }

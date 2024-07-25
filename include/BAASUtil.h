@@ -3,12 +3,16 @@
 //
 #ifndef BAAS_UTIL_H_
 #define BAAS_UTIL_H_
-#include <chrono>
+
 #include <WinSock2.h>
+
+#include <chrono>
 #include <filesystem>
 #include <locale>
 #include <codecvt>
 #include <random>
+#include <regex>
+
 #include <opencv2/opencv.hpp>
 
 #include "BAASLogger.h"
@@ -41,7 +45,7 @@ public:
 
       static int binary2int(const std::string& input, int length);
 
-      static std::string getCurrentTimeString();
+      static std::string current_time_string();
 
       static std::string executeCommandAndGetOutput(const std::string& command);
 
@@ -76,7 +80,7 @@ public:
 
       static bool serialPort(const std::string &serial, std::string &port);
 
-      static bool serialPort(const std::string &serial, int &port);
+      static int serial2port(const std::string &serial);
 
       static bool isMuMuFamily(const std::string &serial);
 
@@ -110,6 +114,9 @@ public:
 
       static bool allNumberChar(const std::string &src);
 
+      static void re_find_all(const std::string &src, const std::string &pattern, std::vector<std::string> &dst);
+
+      static bool re_match(const std::string &src, const std::string &pattern);
     // from tinyObjLoader
     // See
 // http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf

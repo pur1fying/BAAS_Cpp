@@ -18,9 +18,9 @@ bool BAASScrcpyCore::Client::deployServer() {
             "com.genymobile.scrcpy.Server",
             "1.20",                                 // Server version
             "info",                                 // Log level
-            format("{}", Client::maxWidth),         // Max screen width
-            format("{}", Client::bitrate),          // Bit rate
-            format("{}", Client::maxFPS),           // Max frame rate
+            fmt::format("{}", Client::maxWidth),         // Max screen width
+            fmt::format("{}", Client::bitrate),          // Bit rate
+            fmt::format("{}", Client::maxFPS),           // Max frame rate
             "-1",                                   // Lock video orientation
             "true",                                 // Tunnel forward
             "-",                                    // Crop screen
