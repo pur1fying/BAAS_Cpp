@@ -335,22 +335,22 @@ int BAASAdbBaseDevice::push(const string &src, const string &dst, const int mode
     string dstPath = dst + "," + to_string(32768 | mode);
     BAASAdbConnection *conn = prepareSync(dstPath, "SEND");
     ifstream file(src, ios::binary);
-    int fileSize = filesystem::file_size(src);
+    int fileSize = int(filesystem::file_size(src));
     char buffer[4096];
     string head;
     try{
         SOCKET connection = conn->getConnection();
         while(true) {
             file.read(buffer, 4096);
-            int readSize = file.gcount();
+            int readSize = int(file.gcount());
             if(readSize == 0) {
                 string time = BAASUtil::changeEndian(BAASUtil::getCurrentTimeStamp());
                 head = "DONE" + time;
-                send(connection, head.c_str(), head.length(), 0);
+                send(connection, head.c_str(), int(head.length()), 0);
                 break;
             }
             head = "DATA" + BAASUtil::changeEndian(readSize);
-            send(connection, head.c_str(), head.length(), 0);
+            send(connection, head.c_str(), int(head.length()), 0);
             send(connection, buffer, readSize, 0);
         }
         conn->checkOKAY();
@@ -363,15 +363,14 @@ int BAASAdbBaseDevice::push(const string &src, const string &dst, const int mode
     if(check) {
         int remoteSize = stat(dst);
         if(remoteSize != fileSize) {
-            string msg = fmt::format("Push file failed. Remote size: {0}, local size: {1}", remoteSize, fileSize);
+            string msg = fmt::format("Push FAILED. Remote size: {0}, local size: {1}", remoteSize, fileSize);
             BAASGlobalLogger->BAASError("Push file failed.");
             delete conn;
             throw AdbError(msg.c_str());
         }
     }
     delete conn;
-    string msg = "Push file :[ " + src + " ]  --> [ " + dst + " ] \nSUCCESS.";
-    BAASGlobalLogger->BAASInfo(msg.c_str());
+    BAASGlobalLogger->BAASInfo("Push SUCCEEDED.");
     return fileSize;
 }
 

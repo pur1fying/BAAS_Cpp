@@ -30,17 +30,39 @@ public:
     //        str, str: `127.0.0.1:5555+{X}` and `emulator-5554+{X}`, 0 <= X <= 32
     static std::pair<std::string, std::string> port_emu_pair_serial(const std::string& serial);
 
-    BAASAdbDevice* adb_device();
+    int adb_push(const std::string& local, const std::string& remote);
+
+    std::string adb_command(const std::string& command);
 
     std::string adb_shell_bytes(const std::string& command);
 
     std::string adb_shell_bytes(const std::vector<std::string>& commandList);
 
+    BAASAdbConnection* adb_shell_stream(const std::string& command);
+
+    BAASAdbConnection* adb_shell_stream(const std::vector<std::string>& commandList);
+
     std::string adb_getprop(const std::string& name);
 
     std::string nemud_app_keep_alive();
 
-    int sdk_ver();
+    inline int sdk_ver() {
+        std::string t = adb_getprop("ro.build.version.sdk");
+        logger->BAASInfo("SDK Version : " + t);
+        try{
+            return stoi(t);
+        }catch (std::invalid_argument& e) {
+            logger->BAASWarn("Invalid SDK Version : " + t);
+            return 0;
+        }
+    }
+
+    inline std::string cpu_abi() {
+        std::string res = adb_getprop("ro.product.cpu.abi");
+        if(res.empty())logger->BAASError("Invalid CPU ABI : " + res);
+        if(res[res.size()-1] == '\n') res.pop_back();
+        return res;
+    }
 
     bool is_avd(const std::string &serial);
 
@@ -60,8 +82,6 @@ public:
         return package_name;
     }
 private:
-
-
 
     void adb_connect();
 

@@ -39,11 +39,19 @@ int main() {
 //        config.show();
 //        config.show_modify_history();
 //        config.save();
+        string mumuInstallPath = "H:\\MuMuPlayer-12.0";
+        BAASNemu nemu(mumuInstallPath);
+        nemu.connect(mumuInstallPath);
+
 
         BAASConnection connection(&config);
         vector<string> d;
         connection.list_package(d);
+        AScreenCap screenCap(&connection);
+        screenCap.init();
 
+        Mat im_a;
+        screenCap.screenshot(im_a);
     }
     catch (const std::exception& e){
         BAASGlobalLogger->BAASInfo(e.what());

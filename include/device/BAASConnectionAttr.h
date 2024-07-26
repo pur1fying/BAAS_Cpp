@@ -76,6 +76,13 @@ public:
 
     ~BAASConnectionAttr();
 
+    [[nodiscard]] inline BAASLogger* get_logger() const {
+        return logger;
+    }
+
+    [[nodiscard]] inline std::string get_serial() {
+        return serial;
+    }
 protected:
     BAASUserConfig* config;
 

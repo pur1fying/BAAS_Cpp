@@ -25,6 +25,9 @@ extern std::string BAAS_OUTPUT_DIR;
 
 extern std::string CURRENT_TIME_STRING;
 
+extern std::string ASCREENCAP_BIN_DIR;
+
+extern std::string ASCREENCAP_REMOTE_DIR;
 /*
  *  BAAS_CPP --
  *           -- cmake-build-debug (this is BAAS_PROJECT_DIR)

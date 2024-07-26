@@ -5,8 +5,6 @@
 #ifndef BAAS_DEVICE_H_
 #define BAAS_DEVICE_H_
 
-#include <device/BAASConnection.h>
-#include <device/BAASAdbUtils.h>
-#include <device/BAASConnectionAttr.h>
+#include <device/screenshot/AscreenCap.h>
 
 #endif //BAAS_DEVICE_H_

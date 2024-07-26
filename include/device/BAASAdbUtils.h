@@ -163,7 +163,7 @@ public:
 
     int stat(const std::string& path);
 
-    int push(const std::string &src, const std::string &dst, const int mode, bool check);
+    int push(const std::string &src, const std::string &dst, const int mode=493, bool check=true);
 
 
 protected:

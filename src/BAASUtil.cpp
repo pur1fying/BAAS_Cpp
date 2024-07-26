@@ -371,4 +371,10 @@ bool BAASUtil::re_match(const string &src, const string &pattern) {
     return std::regex_match(src, regex_pattern);
 }
 
+uint32_t BAASUtil::st2u32(const string &src) {
+    uint32_t ret;
+    memcpy(&ret, src.data(), sizeof(uint32_t));
+    return ret;
+}
+
 

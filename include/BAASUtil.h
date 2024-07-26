@@ -117,6 +117,9 @@ public:
       static void re_find_all(const std::string &src, const std::string &pattern, std::vector<std::string> &dst);
 
       static bool re_match(const std::string &src, const std::string &pattern);
+
+      static uint32_t st2u32(const std::string &src);
+
     // from tinyObjLoader
     // See
 // http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf

@@ -26,6 +26,10 @@ string BAAS_OUTPUT_DIR;
 
 string CURRENT_TIME_STRING;
 
+string ASCREENCAP_BIN_DIR;
+
+string ASCREENCAP_REMOTE_DIR;
+
 void initGlobals() {
     if (inited) {
         return;
@@ -41,9 +45,12 @@ void initGlobals() {
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
 
     scrcpyJarName = "scrcpy-server.jar";
-    scrcpyJarPath = BAAS_PROJECT_DIR + "\\resource\\scrcpy-server.jar";
+    scrcpyJarPath = BAAS_PROJECT_DIR + R"(\resource\bin\scrcpy\scrcpy-server.jar)";
 
-    nemuDllPath = BAAS_PROJECT_DIR + "\\resource\\nemu_dll\\external_renderer_ipc.dll";
+    ASCREENCAP_BIN_DIR = BAAS_PROJECT_DIR + R"(\resource\bin\ascreencap\)";
+    ASCREENCAP_REMOTE_DIR = "/data/local/tmp/ascreencap";
+
+    nemuDllPath = BAAS_PROJECT_DIR + R"(\resource\nemu_dll\external_renderer_ipc.dll)";
 
     BAASGlobalLogger->BAASInfo(BAAS_PROJECT_DIR);
 

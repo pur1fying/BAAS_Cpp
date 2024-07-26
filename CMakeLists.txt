@@ -52,11 +52,6 @@ file(
 
 )
 
-file(
-        GLOB
-        SCRCPY_SERVER
-        ${CMAKE_CURRENT_LIST_DIR}/resource/scrcpy-server.jar
-)
 
 foreach (header ${HEADERS})
     message(STATUS "Found header: ${header}")
@@ -70,6 +65,7 @@ file(
         GLOB DLL
         "dll/*.dll"
 )
+
 add_executable(
         BAAS
         main.cpp
@@ -87,6 +83,7 @@ target_link_libraries(
         postproc.lib
         swresample.lib
         swscale.lib
+        liblz4.lib
 )
 
 file(
@@ -114,4 +111,11 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/resource/nemu_dll
         DESTINATION ${CMAKE_BINARY_DIR}/resource
 )
+
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/bin
+        DESTINATION ${CMAKE_BINARY_DIR}/resource
+)
+
 file(COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR})

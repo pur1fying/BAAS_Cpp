@@ -267,24 +267,18 @@ std::pair<std::string, std::string> BAASConnection::port_emu_pair_serial(const s
     return {"", ""};
 }
 
-BAASAdbDevice *BAASConnection::adb_device() {
-    return new BAASAdbDevice(&adb, serial);
-}
 
 std::string BAASConnection::adb_shell_bytes(const string &command) {
-    BAASAdbDevice* d = adb_device();
+    BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     string res;
-    int t1 = BAASUtil::getCurrentTimeMS();
-    d->shellBytes(command, res);
-    int t2 = BAASUtil::getCurrentTimeMS();
-    logger->BAASInfo("Shell Time : " + to_string(t2 - t1) + " ms");
+    d.shellBytes(command, res);
     return res;
 }
 
 std::string BAASConnection::adb_shell_bytes(const vector<std::string> &commandList) {
-    BAASAdbDevice* d = adb_device();
+    BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     string res;
-    d->shellBytes(commandList, res);
+    d.shellBytes(commandList, res);
     return res;
 }
 
@@ -312,16 +306,6 @@ std::string BAASConnection::nemud_app_keep_alive() {
     return t;
 }
 
-int BAASConnection::sdk_ver() {
-    string t = adb_getprop("ro.build.version.sdk");
-    logger->BAASInfo("SDK Version : " + t);
-    try{
-        return stoi(t);
-    }catch (std::invalid_argument& e) {
-        logger->BAASWarn("Invalid SDK Version : " + t);
-        return 0;
-    }
-}
 
 bool BAASConnection::is_avd(const string &serial) {
     pair<string, string> p = BAASConnection::port_emu_pair_serial(serial);
@@ -389,6 +373,26 @@ void BAASConnection::auto_detect_package() {
         logger->BAASCritical("Multiple packages found, choose the one you want to run and fill in the config [ /emulator/package_name ].");
         throw RequestHumanTakeOver("Multiple packages detected.");
     }
+}
+
+int BAASConnection::adb_push(const string &local, const string &remote) {
+    BAASAdbDevice d = BAASAdbDevice(&adb, serial);
+    return d.push(local, remote);
+}
+
+string BAASConnection::adb_command(const string &command) {
+    BAASAdbDevice d = BAASAdbDevice(&adb, serial);
+    return d.getCommandResult(command);
+}
+
+BAASAdbConnection *BAASConnection::adb_shell_stream(const string &command) {
+    BAASAdbDevice d = BAASAdbDevice(&adb, serial);
+    return d.shellStream(command);
+}
+
+BAASAdbConnection *BAASConnection::adb_shell_stream(const vector<std::string> &commandList) {
+    BAASAdbDevice d = BAASAdbDevice(&adb, serial);
+    return d.shellStream(commandList);
 }
 
 
