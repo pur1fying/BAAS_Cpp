@@ -14,14 +14,13 @@ public:
 
     void screenshot(cv::Mat &img) override;
 
+    void exit() override;
+private:
     void uninstall();
 
-private:
     static std::string shot_cmd;
 
     void decompress();
-
-    BAASLogger* logger;
 
     BAASConnection* connection;
 

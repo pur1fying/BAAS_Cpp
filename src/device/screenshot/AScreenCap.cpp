@@ -11,15 +11,15 @@ using namespace std;
 string AScreenCap::shot_cmd = " --pack 2 --stdout";
 
 AScreenCap::AScreenCap(BAASConnection *connection) : BaseScreenshot(connection) {
-    logger = connection->get_logger();
     this->connection = connection;
     byte_pointer = 0;
     available = true;
     shot_cmd = ASCREENCAP_REMOTE_DIR + shot_cmd;
+
 }
 
 void AScreenCap::init() {
-    logger->BAASInfo("AScreenCap init");
+    logger->BAASInfo("ScreenShot Method AScreenCap");
     string arch = connection->cpu_abi();
     int sdk = connection->sdk_ver();
     std::string ver = "0";
@@ -62,7 +62,10 @@ void AScreenCap::init() {
 }
 
 void AScreenCap::screenshot(cv::Mat &img) {
+    // 100ms +
     ret_buffer = connection->adb_shell_bytes(shot_cmd);
+
+    // 4ms
     decompress();
     img = image.clone();
 }
@@ -101,4 +104,8 @@ void AScreenCap::reposition_byte_pointer() {
         }
     }
     ret_buffer = ret_buffer.substr(byte_pointer);
+}
+
+void AScreenCap::exit() {
+    uninstall();
 }

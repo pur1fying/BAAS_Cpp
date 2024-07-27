@@ -41,17 +41,19 @@ public:
 
     bool checkSTAT();
 
-    std::string readAdbReturnMessage();
+    // ret message has a len in the head of the message
+    std::string readAdbReturnMessage() const;
 
     SOCKET createSocket();
 
     SOCKET safeCreateSocket();
 
-    SOCKET getConnection();
+    SOCKET getConnection() const;
 
     ~BAASAdbConnection();
 
     bool setCloseSocketWhenDestruct(bool state);
+
 protected:
     std::string host;
 
@@ -77,11 +79,11 @@ public:
 class AdbError : public std::exception {
 public:
     AdbError() = default;
-    AdbError(const char* msg) {
+    explicit AdbError(const char* msg) {
         message = msg;
     }
     [[nodiscard]] const char* what() const noexcept override {
-        if(message.size() == 0) return "Adb Error";
+        if(message.empty()) return "Adb Error";
         return message.c_str();
     }
 private:
@@ -94,9 +96,9 @@ class BAASAdbBaseClient{
 public:
     BAASAdbBaseClient();
 
-    BAASAdbBaseClient(const std::string& serial="127.0.0.1:5037", double socketTimeout=3000.0);
+    explicit BAASAdbBaseClient(const std::string& serial="127.0.0.1:5037", double socketTimeout=3000.0);
 
-    BAASAdbBaseClient(const std::string& host="127.0.0.1", const std::string& port="5037", double socketTimeout=3000.0);
+    explicit BAASAdbBaseClient(const std::string& host="127.0.0.1", const std::string& port="5037", double socketTimeout=3000.0);
 
     BAASAdbConnection* makeConnection(double socketTimeout=0);
     /*
@@ -165,7 +167,7 @@ public:
 
     int push(const std::string &src, const std::string &dst, const int mode=493, bool check=true);
 
-
+    ~BAASAdbBaseDevice();
 protected:
     BAASAdbBaseClient* client;
 
@@ -179,6 +181,8 @@ protected:
 class BAASAdbDevice : public BAASAdbBaseDevice {
 public:
     BAASAdbDevice(BAASAdbBaseClient *client, const std::string &serial, const int transportId = 0);
+
+    ~BAASAdbDevice();
 };
 
 

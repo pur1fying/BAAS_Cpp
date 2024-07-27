@@ -15,14 +15,18 @@ public:
 
     virtual void init();
 
+    // return image must be 3 channels
     virtual void screenshot(cv::Mat &img);
 
+    virtual void exit();
 protected:
     BAASConnection *connection;
 
     cv::Mat image;
 
     std::mutex screenshot_mtx;
+
+    BAASLogger* logger;
 };
 
 

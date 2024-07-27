@@ -70,7 +70,6 @@ bool BAASAdbConnection::readUntilClose(string &res) {
 bool BAASAdbConnection::sendMessage(const string &data) const {
     string msgLengthHex = BAASUtil::int2hex(int(data.length()));
     msgLengthHex = msgLengthHex + data;
-    cout<<"send : "<<msgLengthHex<<endl;
     send(connection, msgLengthHex.c_str(), int(msgLengthHex.length()), 0);
     return true;
 }
@@ -89,14 +88,13 @@ bool BAASAdbConnection::checkSTAT() {
     else throw AdbError("UNKNOWN ADB ERROR.");
 }
 
-string BAASAdbConnection::readAdbReturnMessage() {
+string BAASAdbConnection::readAdbReturnMessage() const {
     int length = BAASUtil::hex2int(readFully(4), 4);
     string message = readFully(length);
     return message;
 }
 
 SOCKET BAASAdbConnection::createSocket() {
-    cout<<"create socket to "<<host<<":"<<port<<endl;
     connection = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(atoi(port.c_str()));
@@ -116,11 +114,9 @@ SOCKET BAASAdbConnection::safeCreateSocket() {
     }
 }
 
-SOCKET BAASAdbConnection::getConnection() {
+SOCKET BAASAdbConnection::getConnection() const {
     return connection;
 }
-
-
 
 BAASAdbConnection::~BAASAdbConnection() {
     if(closeSocketWhenDestruct){
@@ -143,7 +139,7 @@ BAASAdbBaseClient::BAASAdbBaseClient() {
 }
 
 BAASAdbBaseClient::BAASAdbBaseClient(const std::string& serial, double socketTimeout) {
-    int pos = serial.find(":");
+    auto pos = serial.find(':');
     if(pos == std::string::npos) throw ValueError("Invalid serial : " + serial);
     this->serial = serial;
     this->host = serial.substr(0, pos);
@@ -220,7 +216,7 @@ BAASAdbBaseDevice::BAASAdbBaseDevice(BAASAdbBaseClient *client, const string& se
 
 BAASAdbConnection *BAASAdbBaseDevice::openTransport(const string& command="", double socketTimeout) {
     BAASAdbConnection *conn = client->makeConnection(socketTimeout);
-    if(command != ""){
+    if(!command.empty()){
         if(transportId != 0) conn->sendMessage("host-transport-id:" + to_string(transportId) + ":" + command);
         else conn->sendMessage("host-serial:" + serial + ":" + command);
         conn->checkOKAY();
@@ -301,7 +297,8 @@ bool BAASAdbBaseDevice::shellBytes(const string& command, string &out, double so
 bool BAASAdbBaseDevice::shellBytes(const vector<string>& commandList, string &out, double socketTimeout) {
     string cmd;
     BAASUtil::stringJoin(commandList, " ", cmd);
-    return shellBytes(cmd, out, socketTimeout);
+    shellBytes(cmd, out, socketTimeout);
+    return true;
 }
 
 BAASAdbConnection* BAASAdbBaseDevice::prepareSync(const string& path,const string& cmd) {
@@ -311,9 +308,8 @@ BAASAdbConnection* BAASAdbBaseDevice::prepareSync(const string& path,const strin
     conn->checkOKAY();
     conn->sendMessage("sync:");
     conn->checkOKAY();
-    msg = cmd + BAASUtil::changeEndian(path.length()) + path;
-    cout<<"send : "<<msg<<endl;
-    send(conn->getConnection(), msg.c_str(), msg.length(), 0);
+    msg = cmd + BAASUtil::changeEndian(int(path.length())) + path;
+    send(conn->getConnection(), msg.c_str(), int(msg.length()), 0);
     return conn;
 }
 
@@ -321,7 +317,6 @@ int BAASAdbBaseDevice::stat(const string& path) {
     BAASAdbConnection *conn = prepareSync(path, _STAT);
     conn->checkSTAT();
     string data = conn->readFully(12);
-    cout<<data.size()<<endl;
     int temp = BAASUtil::binary2int(data.substr(4, 4), 4);
     int sizeInt = BAASUtil::binary2int(BAASUtil::changeEndian(temp), 4);
     return sizeInt;
@@ -356,6 +351,7 @@ int BAASAdbBaseDevice::push(const string &src, const string &dst, const int mode
         conn->checkOKAY();
         file.close();
     } catch (AdbError &e) {
+        delete conn;
         BAASGlobalLogger->BAASError(e.what());
         file.close();
         return -1;
@@ -378,12 +374,16 @@ std::string BAASAdbBaseDevice::getSerial() const {
     return serial;
 }
 
+BAASAdbBaseDevice::~BAASAdbBaseDevice() = default;
+
 // Device
 
 
 BAASAdbDevice::BAASAdbDevice(BAASAdbBaseClient *client, const std::string &serial, const int transportId) : BAASAdbBaseDevice(client, serial, transportId) {
 
 }
+
+BAASAdbDevice::~BAASAdbDevice() = default;
 
 // Client
 
@@ -410,12 +410,8 @@ void BAASAdbClient::list_device(std::vector<std::pair<std::string, int>> &device
         else if(status == "device") devices.emplace_back(serial, 1);
         else if(status == "unauthorized") devices.emplace_back(serial, 2);
         else devices.emplace_back(serial, 3);
-        serial = "";
-        status = "";
-    }
-    cout << "devices : " << devices.size() << endl;
-    for (auto &device : devices) {
-        cout << device.first << " " << device.second << endl;
+        serial.clear();
+        status.clear();
     }
 }
 

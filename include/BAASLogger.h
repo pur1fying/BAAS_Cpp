@@ -107,6 +107,9 @@ public:
         }
     }
 
+    inline void set_enable(uint8_t enable) {
+        this->enable = enable;
+    }
 
     static void clearLogData();
 
@@ -227,6 +230,10 @@ public:
             fileLogger->info(msg);
             fileLogger->info(BAAS_LOGGER_HR_LINE);
         }
+    }
+
+    inline void set_enable(uint8_t enable) {
+        this->enable = enable;
     }
 private:
     explicit BAASLogger(const std::string& name);

@@ -277,6 +277,7 @@ int BAASUtil::MuMuSerialToDisplayId(const std::string &serial) {
 }
 
 void BAASUtil::stringJoin(const vector<std::string> &src, const string &joiner, string &dst) {
+    dst.clear();
     for(int i = 0; i < src.size(); i++) {
         dst += src[i];
         if(i != src.size() - 1) {

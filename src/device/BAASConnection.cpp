@@ -111,8 +111,8 @@ void BAASConnection::detect_device() {
         else {
             // try to find the ld serial, if fail try paired serial
             bool found = false;
-            for(auto &i: d) {
-                if(i.first == serial) {
+            for(auto &i: available) {
+                if(i == serial) {
                     logger->BAASInfo("LDPlayer device serial [ " + serial + " ] is online.");
                     found = true;
                     break;
@@ -393,6 +393,15 @@ BAASAdbConnection *BAASConnection::adb_shell_stream(const string &command) {
 BAASAdbConnection *BAASConnection::adb_shell_stream(const vector<std::string> &commandList) {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     return d.shellStream(commandList);
+}
+
+BAASAdbConnection *BAASConnection::create_connection(const string &network, const string &address) {
+    BAASAdbDevice d = BAASAdbDevice(&adb, serial);
+    return d.createConnection(network, address);
+}
+
+BAASAdbDevice *BAASConnection::adb_device() {
+    return new BAASAdbDevice(&adb, serial);
 }
 
 

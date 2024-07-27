@@ -42,9 +42,13 @@ public:
 
     BAASAdbConnection* adb_shell_stream(const std::vector<std::string>& commandList);
 
+    BAASAdbConnection* create_connection(const std::string& network, const std::string& address);
+
     std::string adb_getprop(const std::string& name);
 
     std::string nemud_app_keep_alive();
+
+    BAASAdbDevice* adb_device();
 
     inline int sdk_ver() {
         std::string t = adb_getprop("ro.build.version.sdk");

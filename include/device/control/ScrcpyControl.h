@@ -1,0 +1,8 @@
+//
+// Created by pc on 2024/7/27.
+//
+
+#ifndef CONFIG_JSON_SCRCPYCONTROL_H
+#define CONFIG_JSON_SCRCPYCONTROL_H
+
+#endif //CONFIG_JSON_SCRCPYCONTROL_H

@@ -47,11 +47,31 @@ int main() {
         BAASConnection connection(&config);
         vector<string> d;
         connection.list_package(d);
-        AScreenCap screenCap(&connection);
-        screenCap.init();
+        BAASScrcpyClient* clt = BAASScrcpyClient::get_client(&connection);
+        Mat im;
+        for(int i = 1; i<= 10000; ++i) {
+            clt->start();
+            this_thread::sleep_for(chrono::milliseconds(500));
+            clt->stop();
+        }
+        clt->start();
+        long long t = BAASUtil::getCurrentTimeMS();
+        while (1){
+            clt->screenshot(im);
+            imshow("im", im);
+            waitKey(1);
+        }
+        clt->stop();
 
-        Mat im_a;
-        screenCap.screenshot(im_a);
+        return 0;
+        AdbControl control(&connection);
+        control.init();
+        control.click(100, 100);
+
+        long long start = BAASUtil::getCurrentTimeMS();
+        control.swipe(100, 100, 200, 200, 0.1);
+        cout << BAASUtil::getCurrentTimeMS() - start << endl;
+
     }
     catch (const std::exception& e){
         BAASGlobalLogger->BAASInfo(e.what());
