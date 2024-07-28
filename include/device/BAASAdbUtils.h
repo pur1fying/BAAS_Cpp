@@ -29,9 +29,9 @@ public:
 
     BAASAdbConnection(const std::string &host, const std::string &port, double socketTimeout=3000.0);
 
-    BAASAdbConnection(const std::string &serial, double socketTimeout=3000.0);
+    explicit BAASAdbConnection(const std::string &serial, double socketTimeout=3000.0);
 
-    std::string readFully(int length) const;
+    [[nodiscard]] std::string readFully(int length) const;
 
     bool readUntilClose(std::string &res);
 
@@ -42,13 +42,13 @@ public:
     bool checkSTAT();
 
     // ret message has a len in the head of the message
-    std::string readAdbReturnMessage() const;
+    [[nodiscard]] std::string readAdbReturnMessage() const;
 
     SOCKET createSocket();
 
     SOCKET safeCreateSocket();
 
-    SOCKET getConnection() const;
+    [[nodiscard]] SOCKET getConnection() const;
 
     ~BAASAdbConnection();
 

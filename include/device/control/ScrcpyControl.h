@@ -2,7 +2,28 @@
 // Created by pc on 2024/7/27.
 //
 
-#ifndef CONFIG_JSON_SCRCPYCONTROL_H
-#define CONFIG_JSON_SCRCPYCONTROL_H
+#ifndef BAAS_DEVICE_CONTROL_SCRCPYCONTROL_H_
+#define BAAS_DEVICE_CONTROL_SCRCPYCONTROL_H_
 
-#endif //CONFIG_JSON_SCRCPYCONTROL_H
+#include "device/control/BaseControl.h"
+#include "device/BAASScrcpyClient.h"
+
+class ScrcpyControl : public BaseControl {
+public:
+    explicit ScrcpyControl(BAASConnection *connection);
+
+    void init() override;
+
+    void click(int x, int y) override;
+
+    void swipe(int x1, int y1, int x2, int y2, double duration) override;
+
+    void exit() override;
+
+private:
+    BAASConnection *connection;
+
+    BAASScrcpyClient *client;
+};
+
+#endif //BAAS_DEVICE_CONTROL_SCRCPYCONTROL_H_

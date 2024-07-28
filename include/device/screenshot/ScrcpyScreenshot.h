@@ -8,7 +8,24 @@
 #include "device/screenshot/BaseScreenshot.h"
 #include "device/BAASScrcpyClient.h"
 
-class ScrcpyScreenshot {
+class ScrcpyScreenshot : public BaseScreenshot {
+public:
+    explicit ScrcpyScreenshot(BAASConnection *connection);
+
+    void init() override;
+
+    void screenshot(cv::Mat &img) override;
+
+    void exit() override;
+
+private:
+
+    BAASConnection *connection;
+
+    BAASScrcpyClient *client;
 
 };
+
+
+
 #endif //CONFIG_JSON_SCRCPYSCREENSHOT_H

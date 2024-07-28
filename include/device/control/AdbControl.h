@@ -17,10 +17,6 @@ public:
 
     void swipe(int x1, int y1, int x2, int y2, double duration) override;
 
-    void click(BAASPoint p) override;
-
-    void swipe(BAASPoint p1, BAASPoint p2, double duration) override;
-
     void exit() override;
 };
 

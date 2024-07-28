@@ -120,6 +120,20 @@ public:
 
       static uint32_t st2u32(const std::string &src);
 
+      template <typename T>
+      static inline void append_big_endian(std::string &dst, T src) {
+            for (int i = sizeof(T) - 1; i >= 0; i--) {
+                dst.push_back((src >> (i * 8)) & 0xFF);
+            }
+      }
+
+      template <typename T>
+      static inline void append_little_endian(std::string &dst, T src) {
+            for (int i = 0; i < sizeof(T); i++) {
+                dst.push_back((src >> (i * 8)) & 0xFF);
+            }
+      }
+
     // from tinyObjLoader
     // See
 // http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf

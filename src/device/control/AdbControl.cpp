@@ -29,14 +29,6 @@ void AdbControl::swipe(int x1, int y1, int x2, int y2, double duration) {
     connection->adb_shell_bytes("input swipe " + to_string(x1) + " " + to_string(y1) + " " + to_string(x2) + " " + to_string(y2) + " " + to_string(duration_int));
 }
 
-void AdbControl::click(BAASPoint p) {
-    click(p.x, p.y);
-}
-
-void AdbControl::swipe(BAASPoint p1, BAASPoint p2, double duration) {
-    swipe(p1.x, p1.y, p2.x, p2.y, duration);
-}
-
 void AdbControl::exit() {
 
 }

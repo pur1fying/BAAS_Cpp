@@ -126,7 +126,7 @@ void BAASUtil::executeCommandWithoutOutPut(const vector<string> &commandList, in
 
 
 string BAASUtil::changeEndian(int a) {
-    string st = "";
+    string st;
     for (int i = 0; i < 4; ++i)st.push_back(a >> (i * 8) & 0xFF);
     return st;
 }
@@ -377,5 +377,4 @@ uint32_t BAASUtil::st2u32(const string &src) {
     memcpy(&ret, src.data(), sizeof(uint32_t));
     return ret;
 }
-
 

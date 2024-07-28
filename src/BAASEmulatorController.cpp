@@ -83,11 +83,11 @@ BAASEmulatorController* BAASEmulatorController::getInstance() {
 }
 
 void BAASEmulatorController::startAdbServer() {
-    BAASGlobalLogger->BAASInfo("-- BAAS Start adb server --");
+    BAASGlobalLogger->BAASInfo("Start adb server.");
     BAASUtil::executeCommandWithoutOutPut("adb start-server");
 }
 void BAASEmulatorController::stopAdbServer() {
-    BAASGlobalLogger->BAASInfo("-- BAAS Stop adb server --");
+    BAASGlobalLogger->BAASInfo("Stop adb server.");
     BAASUtil::executeCommandWithoutOutPut("adb kill-server");
 }
 

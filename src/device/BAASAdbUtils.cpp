@@ -108,9 +108,11 @@ SOCKET BAASAdbConnection::safeCreateSocket() {
     try {
         return createSocket();
     } catch (ConnectionRefusedError &e) {
-        BAASGlobalLogger->BAASInfo("Start ADB server.");
         BAASEmulatorController::startAdbServer();
-        return createSocket();
+    }
+    for(int i = 0; i < 30; i++) {
+        try {return createSocket();}
+        catch (ConnectionRefusedError &e) {this_thread::sleep_for(chrono::milliseconds(100));}
     }
 }
 
@@ -319,6 +321,7 @@ int BAASAdbBaseDevice::stat(const string& path) {
     string data = conn->readFully(12);
     int temp = BAASUtil::binary2int(data.substr(4, 4), 4);
     int sizeInt = BAASUtil::binary2int(BAASUtil::changeEndian(temp), 4);
+    delete conn;
     return sizeInt;
 }
 
@@ -362,6 +365,7 @@ int BAASAdbBaseDevice::push(const string &src, const string &dst, const int mode
             string msg = fmt::format("Push FAILED. Remote size: {0}, local size: {1}", remoteSize, fileSize);
             BAASGlobalLogger->BAASError("Push file failed.");
             delete conn;
+            file.close();
             throw AdbError(msg.c_str());
         }
     }

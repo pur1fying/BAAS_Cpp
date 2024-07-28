@@ -42,24 +42,40 @@ int main() {
         string mumuInstallPath = "H:\\MuMuPlayer-12.0";
         BAASNemu nemu(mumuInstallPath);
         nemu.connect(mumuInstallPath);
-
-
         BAASConnection connection(&config);
+
         vector<string> d;
         connection.list_package(d);
         BAASScrcpyClient* clt = BAASScrcpyClient::get_client(&connection);
         Mat im;
-        for(int i = 1; i<= 10000; ++i) {
-            clt->start();
-            this_thread::sleep_for(chrono::milliseconds(500));
-            clt->stop();
-        }
         clt->start();
+        clt->set_clipboard("Hello World");
+//        clt->keycode(ScrcpyConst::KEYCODE_PLUS, ScrcpyConst::ACTION_DOWN);
+//        clt->keycode(ScrcpyConst::KEYCODE_PLUS, ScrcpyConst::ACTION_UP);
+        clt->touch(281, 991);
+//        this_thread::sleep_for(chrono::milliseconds(5));
+//        clt->touch(281, 991, ScrcpyConst::ACTION_UP);
+//
+//        this_thread::sleep_for(chrono::milliseconds(5000));
+//
+//        clt->touch(360, 1000);
+//        clt->touch(360, 1000, ScrcpyConst::ACTION_UP);
+//
+//        clt->touch(100, 100);
+//        clt->touch(100, 100, ScrcpyConst::ACTION_UP);
+//        clt->touch(100, 100);
+//        clt->touch(100, 100, ScrcpyConst::ACTION_UP);
+//        return 0;
+        clt->scroll(720, 360, 100, 100);
+        return 0;
         long long t = BAASUtil::getCurrentTimeMS();
         while (1){
-            clt->screenshot(im);
-            imshow("im", im);
-            waitKey(1);
+            this_thread::sleep_for(chrono::milliseconds(5));
+            clt->touch(281, 991, ScrcpyConst::ACTION_UP);
+            this_thread::sleep_for(chrono::milliseconds(1000));
+//            clt->screenshot(im);
+//            imshow("im", im);
+//            waitKey(1);
         }
         clt->stop();
 
