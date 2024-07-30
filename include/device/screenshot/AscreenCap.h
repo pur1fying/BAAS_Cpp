@@ -15,6 +15,8 @@ public:
     void screenshot(cv::Mat &img) override;
 
     void exit() override;
+
+    bool is_lossy() override;
 private:
     void uninstall();
 

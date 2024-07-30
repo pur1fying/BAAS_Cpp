@@ -21,6 +21,7 @@ void gen_hr_msg(const std::string &msg,std::string& out);
 class GlobalLogger {
 public:
     static GlobalLogger* getGlobalLogger();
+
     inline void BAASTrance(const std::string& message) {
         if(enable & 0b1) consoleLogger->trace(message);
         if(enable & 0b10)fileLogger->trace(message);
@@ -127,6 +128,8 @@ private:
 
     GlobalLogger();
 
+    explicit GlobalLogger(const int);
+
     std::shared_ptr<spdlog::logger> consoleLogger;
 
     std::shared_ptr<spdlog::logger> fileLogger;
@@ -141,112 +144,16 @@ extern GlobalLogger* BAASGlobalLogger;
 /*
  * each config file has it's unique logger
  */
-class BAASLogger {
+class BAASLogger : public GlobalLogger {
 public:
     static BAASLogger* get(const std::string& name);
 
-    inline void BAASTrance(const std::string &message) {
-        if(enable & 0b1) consoleLogger->trace(message);
-        if(enable & 0b10)fileLogger->trace(message);
-    }
-
-    inline void BAASTrance(const std::vector<std::string> &messages) {
-        for (auto &message : messages) {
-            if(enable & 0b1) consoleLogger->trace(message);
-            if(enable & 0b10) fileLogger->trace(message);
-        }
-    }
-
-    inline void BAASDebug(const std::string &message) {
-        if(enable & 0b1) consoleLogger->debug(message);
-        if(enable & 0b10)fileLogger->debug(message);
-    }
-
-    inline void BAASDebug(const std::vector<std::string> &messages) {
-        for (auto &message : messages) {
-            if(enable & 0b1) consoleLogger->debug(message);
-            if(enable & 0b10) fileLogger->debug(message);
-        }
-    }
-
-    inline void BAASWarn(const std::string &message) {
-        if(enable & 0b1) consoleLogger->warn(message);
-        if(enable & 0b10)fileLogger->warn(message);
-    }
-
-    inline void BAASWarn(const std::vector<std::string> &messages) {
-        for (auto &message : messages) {
-            if(enable & 0b1) consoleLogger->warn(message);
-            if(enable & 0b10) fileLogger->warn(message);
-        }
-    }
-
-    inline void BAASInfo(const std::string &message) {
-        if(enable & 0b1) consoleLogger->info(message);
-        if(enable & 0b10)fileLogger->info(message);
-    }
-
-    inline void BAASInfo(const std::vector<std::string> &messages) {
-        for (auto &message : messages) {
-            if(enable & 0b1) consoleLogger->info(message);
-            if(enable & 0b10) fileLogger->info(message);
-        }
-    }
-
-    inline void BAASError(const std::string &message) {
-        if(enable & 0b1) consoleLogger->error(message);
-        if(enable & 0b10)fileLogger->error(message);
-    }
-
-    inline void BAASError(const std::vector<std::string> &messages) {
-        for (auto &message : messages) {
-            if(enable & 0b1) consoleLogger->error(message);
-            if(enable & 0b10) fileLogger->error(message);
-        }
-    }
-
-    inline void BAASCritical(const std::string &message) {
-        if(enable & 0b1) consoleLogger->critical(message);
-        if(enable & 0b10)fileLogger->critical(message);
-    }
-
-    inline void BAASCritical(const std::vector<std::string> &messages) {
-        for (auto &message : messages) {
-            if(enable & 0b1) consoleLogger->critical(message);
-            if(enable & 0b10) fileLogger->critical(message);
-        }
-    }
-
-    inline void hr(const std::string& message) {
-        std::string msg;
-        gen_hr_msg(message, msg);
-        if(enable & 0b1) {
-            consoleLogger->info(BAAS_LOGGER_HR_LINE);
-            consoleLogger->info(msg);
-            consoleLogger->info(BAAS_LOGGER_HR_LINE);
-        }
-        if(enable & 0b10) {
-            fileLogger->info(BAAS_LOGGER_HR_LINE);
-            fileLogger->info(msg);
-            fileLogger->info(BAAS_LOGGER_HR_LINE);
-        }
-    }
-
-    inline void set_enable(uint8_t enable) {
-        this->enable = enable;
-    }
 private:
     explicit BAASLogger(const std::string& name);
 
     ~BAASLogger();
 
-    uint8_t enable;
-
     std::string filename;
-
-    std::shared_ptr<spdlog::logger> consoleLogger;
-
-    std::shared_ptr<spdlog::logger> fileLogger;
 
     static std::map<std::string, BAASLogger*> instances;
 

@@ -208,7 +208,10 @@ bool BAASScrcpyClient::screenshot(cv::Mat &output) {
 }
 
 bool BAASScrcpyClient::start() {
-    if(get_alive()) return true;
+    if(get_alive()) {
+        logger->BAASInfo("Client already started.");
+        return true;
+    }
 
     device = connection->adb_device();
 
@@ -430,6 +433,23 @@ void BAASScrcpyClient::rotate_device() {
 
     control_socket_send(msg);
 }
+
+// total sleep time = step_delay * (points.size() - 2)
+void BAASScrcpyClient::swipe(int start_x, int start_y, int end_x, int end_y, int step_len, double step_delay) {
+    touch(start_x, start_y, ScrcpyConst::ACTION_DOWN);
+
+    vector<pair<int, int>> points;
+    BAASUtil::insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
+
+    int sleep_time = int(step_delay * 1000);
+    for(int i = 1; i < points.size() - 1; ++i) {
+        touch(points[i].first, points[i].second, ScrcpyConst::ACTION_MOVE);
+        BAASUtil::sleepMS(sleep_time);
+    }
+
+    touch(end_x, end_y, ScrcpyConst::ACTION_UP);
+}
+
 
 
 

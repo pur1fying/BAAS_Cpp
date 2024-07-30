@@ -85,11 +85,30 @@ public:
     [[nodiscard]] inline const std::string& get_package_name() const{
         return package_name;
     }
+
+    [[nodiscard]] inline const std::string& get_server() const{
+        return server;
+    }
+
+    [[nodiscard]] inline const std::string& get_language() const{
+        return language;
+    }
+    void detect_package();
+
+    void set_server();
+
+    void set_language();
+
+    void auto_detect_language();
 private:
 
     void adb_connect();
 
     std::string package_name;
+
+    std::string server;
+
+    std::string language;
 
 };
 #endif //BAAS_DEVICE_BAASCONNECTION_H_

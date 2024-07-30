@@ -19,6 +19,9 @@ public:
     virtual void screenshot(cv::Mat &img);
 
     virtual void exit();
+
+    // return true if the screenshot method returns a lossy image
+    virtual bool is_lossy();
 protected:
     BAASConnection *connection;
 

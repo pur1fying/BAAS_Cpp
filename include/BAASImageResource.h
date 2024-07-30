@@ -8,21 +8,26 @@
 #include "BAASImageUtil.h"
 #include "BAASGlobals.h"
 class BAASImageResource{
+
 public:
-    struct Image{
-        std::string path;
+    // <server>.<language>.<group>.<name>
+    struct BAASImage{
         BAASRectangle region;
         cv::Mat image;
+        uint8_t direction;  // some app rotates the screen
     };
+
     BAASImageResource();
 
-    void getResource(const std::string& key, Image &out);
+    void get_image(const std::string& server, const std::string& language, const std::string& task, const std::string& name, BAASImage &out);
 
-    bool addResource(const std::string& key, const std::string& path);
+    void get_image(const std::string& key, BAASImage &out);
 
-    bool removeResource(const std::string& key);
+    bool add(const std::string& key, const std::string& path);
 
-    void setResource(const std::string& key, const Image &src);
+    bool remove(const std::string& key);
+
+    void setResource(const std::string& key, const BAASImage &src);
 
     void clearResource();
 
@@ -36,7 +41,7 @@ public:
 
 
 private:
-    std::map<std::string, Image> resource;
+    std::map<std::string, BAASImage> resource;
 };
 
 

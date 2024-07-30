@@ -100,9 +100,13 @@ public:
 
       static std::pair<std::string, std::string> serialToHostPort(const std::string &serial);
 
-      static bool sleepMS(int ms);
+      static inline void sleepMS(int ms) {
+          std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+      }
 
-      static bool sleepS(int s);
+      static inline void sleepS(int s) {
+          std::this_thread::sleep_for(std::chrono::seconds(s));
+      }
 
       static long long getCurrentTimeMS();
 
@@ -120,6 +124,13 @@ public:
 
       static uint32_t st2u32(const std::string &src);
 
+      static void insert_swipe(std::vector<std::pair<int, int>> &output, int start_x, int start_y, int end_x, int end_y, int step_len = 5);
+
+      //  not use real distance for accuracy and int will not overflow in this case (x and y are both less than 10000)
+      static inline int squared_distance(int x1, int y1, int x2, int y2) {
+          return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+      }
+
       template <typename T>
       static inline void append_big_endian(std::string &dst, T src) {
             for (int i = sizeof(T) - 1; i >= 0; i--) {
@@ -136,39 +147,9 @@ public:
 
     // from tinyObjLoader
     // See
-// http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
-    static std::istream &safeGetLine(std::istream &is, std::string &t) {
-        t.clear();
+    // http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
+    static std::istream &safeGetLine(std::istream &is, std::string &t);
 
-        // The characters in the stream are read one-by-one using a std::streambuf.
-        // That is faster than reading them one-by-one using the std::istream.
-        // Code that uses streambuf this way must be guarded by a sentry object.
-        // The sentry object performs various tasks,
-        // such as thread synchronization and updating the stream state.
 
-        std::istream::sentry se(is, true);
-        std::streambuf *sb = is.rdbuf();
-
-        if (se) {
-            for (;;) {
-                int c = sb->sbumpc();
-                switch (c) {
-                    case '\n':
-                        return is;
-                    case '\r':
-                        if (sb->sgetc() == '\n') sb->sbumpc();
-                        return is;
-                    case EOF:
-                        // Also handle the case when the last line has no line ending
-                        if (t.empty()) is.setstate(std::ios::eofbit);
-                        return is;
-                    default:
-                        t += static_cast<char>(c);
-                }
-            }
-        }
-
-        return is;
-    }
 };
 #endif //BAAS_UTIL_H_

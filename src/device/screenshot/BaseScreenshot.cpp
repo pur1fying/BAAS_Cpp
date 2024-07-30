@@ -20,3 +20,7 @@ void BaseScreenshot::screenshot(cv::Mat &img) {
 void BaseScreenshot::exit() {
     throw std::runtime_error("Base screenshot class exit function should not be called.");
 }
+
+bool BaseScreenshot::is_lossy() {
+    throw std::runtime_error("Base screenshot class is_lossy function should not be called.");
+}

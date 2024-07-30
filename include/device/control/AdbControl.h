@@ -15,6 +15,8 @@ public:
 
     void click(int x, int y) override;
 
+    void long_click(int x, int y, double duration) override;
+
     void swipe(int x1, int y1, int x2, int y2, double duration) override;
 
     void exit() override;

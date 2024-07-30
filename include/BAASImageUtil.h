@@ -80,9 +80,9 @@ struct BAASRectangle {
 
     BAASRectangle(BAASPoint p1, BAASPoint p2);
 
-    bool contains(BAASPoint p) const;
+    [[nodiscard]] bool contains(BAASPoint p) const;
 
-    bool empty() const;
+    [[nodiscard]] bool empty() const;
 };
 
 bool operator==(const BAASRectangle &r1, const BAASRectangle &r2);      // same rect

@@ -9,7 +9,6 @@
 using namespace std;
 BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg) {
     logger = cfg->get_logger();
-    logger->hr("Device");
     config = cfg;
     logger->BAASInfo("Adb Binary : " + adb_binary());
     serial = cfg->serial();

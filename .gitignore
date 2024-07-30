@@ -1,6 +1,7 @@
 .idea
 cmake-build-debug
 config
+!include/config
 out
 .vs
 cmake-build-debug-visual-studio-1

@@ -384,6 +384,7 @@ public:
 
     void rotate_device();
 
+    void swipe(int start_x, int start_y, int end_x, int end_y, int step_len = 5, double step_delay = 0.005);
 private:
     inline bool ffmpeg_init() {
         codec = avcodec_find_decoder(AV_CODEC_ID_H264);

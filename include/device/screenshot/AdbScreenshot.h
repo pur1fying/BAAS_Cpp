@@ -17,7 +17,10 @@ public:
     void screenshot(cv::Mat &img) override;
 
     void exit() override;
+
+    bool is_lossy() override;
 private:
+
 };
 
 #endif //BAAS_DEVICE_SCREENSHOT_ADBSCREENSHOT_H_

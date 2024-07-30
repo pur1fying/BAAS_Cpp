@@ -19,7 +19,7 @@ AScreenCap::AScreenCap(BAASConnection *connection) : BaseScreenshot(connection) 
 }
 
 void AScreenCap::init() {
-    logger->BAASInfo("ScreenShot Method AScreenCap");
+    logger->hr("ScreenShot Method AScreenCap Init.");
     string arch = connection->cpu_abi();
     int sdk = connection->sdk_ver();
     std::string ver = "0";
@@ -108,4 +108,8 @@ void AScreenCap::reposition_byte_pointer() {
 
 void AScreenCap::exit() {
     uninstall();
+}
+
+bool AScreenCap::is_lossy() {
+    return false;
 }

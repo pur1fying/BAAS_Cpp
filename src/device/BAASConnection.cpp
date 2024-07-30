@@ -7,18 +7,12 @@
 
 using namespace std;
 BAASConnection::BAASConnection(BAASUserConfig *cfg) : BAASConnectionAttr(cfg) {
-    if(!is_over_http()) {
-        detect_device();
-    }
+    detect_device();
     adb_connect();
-
-    package_name = config->getString("/emulator/package_name", "auto");
-    if(package_name == "auto") {
-        auto_detect_package();
-    }
-    else{
-
-    }
+    detect_package();
+    set_server();
+    set_language();
+    check_mumu_app_keep_alive();
 }
 
 BAASConnection::BAASConnection(const std::string &cfg_path) : BAASConnectionAttr(cfg_path) {
@@ -283,7 +277,9 @@ std::string BAASConnection::adb_shell_bytes(const vector<std::string> &commandLi
 }
 
 std::string BAASConnection::adb_getprop(const string &name) {
-    return adb_shell_bytes("getprop " + name);
+    string temp = adb_shell_bytes("getprop " + name);
+    if(temp.ends_with("\n")) temp.pop_back();
+    return temp;
 }
 
 void BAASConnection::check_mumu_app_keep_alive() {
@@ -302,6 +298,7 @@ void BAASConnection::check_mumu_app_keep_alive() {
 
 std::string BAASConnection::nemud_app_keep_alive() {
     std::string t = adb_getprop("nemud.app_keep_alive");
+
     logger->BAASInfo("nemud.app_keep_alive : " + t);
     return t;
 }
@@ -327,12 +324,12 @@ bool BAASConnection::is_mumu_over_version_356() {
 
 void BAASConnection::list_package(vector<std::string> &packages) {
     logger->BAASInfo("Get Package List");
-    // faster 10ms
+    // faster : 10ms
     string res = adb_shell_bytes(R"(pm list packages)");
     BAASUtil::re_find_all(res, R"(package:([^\s]+))", packages);
 
     if(!packages.empty()) return;
-    // slower but list system packages 200 - 500ms
+    // slower ,but list system packages : 200 - 500ms
     res = adb_shell_bytes(R"(dumpsys package | grep "Package \[")");
     BAASUtil::re_find_all(res, R"(Package \[([^\]]+)\])", packages);
 }
@@ -348,16 +345,15 @@ void BAASConnection::list_all_known_packages(vector<std::string> &packages) {
     for(auto &i: packages_in_device)
         if(std::find(valid_packages.begin(), valid_packages.end(), i) != valid_packages.end())
             packages.push_back(i);
+    logger->BAASInfo("Packages Found in device [ " + serial + " ] are listed below.");
+    for(int i = 0; i < packages.size(); ++i)logger->BAASInfo(to_string(i+1) + " : [ " + packages[i] + " ]");
 }
 
 void BAASConnection::auto_detect_package() {
-    logger->BAASInfo("Detect Package");
+    logger->BAASInfo("Auto Detect Package");
 
     vector<string> packages;
     list_all_known_packages(packages);
-    logger->BAASInfo("Packages Found in device [ " + serial + " ] are listed below.");
-
-    for(int i = 0; i < packages.size(); ++i)logger->BAASInfo(to_string(i+1) + " : [ " + packages[i] + " ]");
 
     if(packages.empty()) {
         logger->BAASCritical("No Blue Archive package found in device [ " + serial + " ], please install game first.");
@@ -402,6 +398,48 @@ BAASAdbConnection *BAASConnection::create_connection(const string &network, cons
 
 BAASAdbDevice *BAASConnection::adb_device() {
     return new BAASAdbDevice(&adb, serial);
+}
+
+void BAASConnection::set_server() {
+    server = Server::package2server(package_name);
+    config->replace("/emulator/server", server);
+    logger->BAASInfo("Server : " + server);
+}
+
+void BAASConnection::set_language() {
+    language = config->getString("/emulator/language", "auto");
+    if(language == "auto")
+        auto_detect_language();
+    logger->BAASInfo("Language : " + language);
+}
+
+void BAASConnection::detect_package() {
+    package_name = config->getString("/emulator/package_name", "auto");
+    if(package_name == "auto")
+        auto_detect_package();
+    else{
+        logger->BAASInfo("Check package [ " + package_name + " ] exist.");
+        vector<string> packages;
+        list_all_known_packages(packages);
+        if(std::find(packages.begin(), packages.end(), package_name) == packages.end()) {
+            logger->BAASCritical("Package [ " + package_name + " ] not found in device [ " + serial + " ], please install game first.");
+            throw RequestHumanTakeOver("Package not found.");
+        }
+        logger->BAASInfo("Package Matched");
+    }
+}
+
+void BAASConnection::auto_detect_language() {
+    auto languages = static_config->get<vector<string>>("/server_language_choice/" + server);
+    assert(!languages.empty());
+    if(languages.size() == 1) {
+        config->replace("/emulator/language", languages[0]);
+        language = languages[0];
+    }
+    else {
+        logger->BAASCritical("Multiple languages found, choose the one you want to run and fill in the config [ /emulator/language ].");
+        throw RequestHumanTakeOver("Multiple languages detected.");
+    }
 }
 
 

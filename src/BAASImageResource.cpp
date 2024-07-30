@@ -8,16 +8,16 @@ BAASImageResource::BAASImageResource() {
     resource.clear();
 }
 
-bool BAASImageResource::addResource(const string &key, const string &path) {
+bool BAASImageResource::add(const string &key, const string &path) {
     cv::Mat image;
     if (!BAASImageUtil::loadImage(path, image)) {
         return false;
     }
-    resource[key] = {path, BAASRectangle(-1, -1, -1, -1), image};
+    resource[key] = {BAASRectangle(-1, -1, -1, -1), image};
     return true;
 }
 
-bool BAASImageResource::removeResource(const string &key) {
+bool BAASImageResource::remove(const string &key) {
     if (resource.find(key) == resource.end()) {
         return false;
     }
@@ -25,7 +25,7 @@ bool BAASImageResource::removeResource(const string &key) {
     return true;
 }
 
-void BAASImageResource::setResource(const string &key, const Image &src) {
+void BAASImageResource::setResource(const string &key, const BAASImage &src) {
     resource[key] = src;
 }
 
@@ -36,7 +36,6 @@ void BAASImageResource::clearResource() {
 void BAASImageResource::showResource() {
     for (auto &i : resource) {
         if(i.second.image.empty())continue;
-        BAASGlobalLogger->BAASDebug(i.first + ":\n" + i.second.path);
     }
 }
 
@@ -58,7 +57,7 @@ void BAASImageResource::loadDirectoryImage(const string &dirPath, const string &
         string extension = p.path().extension().string();
         if(extension != ".png" && extension != ".jpg" && extension != ".jpeg")continue;
         temp = prefix + key + postfix;
-        addResource(temp, p.path().string());
+        add(temp, p.path().string());
     }
 }
 
@@ -69,10 +68,9 @@ void BAASImageResource::keys(std::vector<std::string> &out) {
     }
 }
 
-void BAASImageResource::getResource(const string &key, BAASImageResource::Image &out) {
+void BAASImageResource::get_image(const string &key, BAASImageResource::BAASImage &out) {
     auto it = resource.find(key);
     if(it == resource.end()){
-        out = {"", BAASRectangle(), cv::Mat()};
         return;
     }
     out = it->second;

@@ -186,7 +186,8 @@
     "com.nexon.bluearchive",
     "com.nexon.bluearchiveteen",
     "com.nexon.bluearchiveone",
-    "com.YostarJP.BlueArchive"
+    "com.YostarJP.BlueArchive",
+    "com.bandainamcoent.idolmaster_gakuen"
   ],
   "package_name": {
     "官服": "com.RoamingStar.BlueArchive",
@@ -202,13 +203,19 @@
     "com.nexon.bluearchive": "Global",
     "com.nexon.bluearchiveteen": "Global",
     "com.nexon.bluearchiveone": "Global",
-    "com.YostarJP.BlueArchive": "JP"
+    "com.YostarJP.BlueArchive": "JP",
+    "com.bandainamcoent.idolmaster_gakuen": "JP"
   },
   "servers": [
     "CN",
     "Global",
     "JP"
   ],
+  "server_language_choice": {
+    "CN": ["zh-cn"],
+    "Global": ["en-us", "zh-hk", "ko-kr"],
+    "JP": ["ja-jp"]
+  },
   "activity_name": {
     "官服": "com.yostar.sdk.bridge.YoStarUnityPlayerActivity",
     "B服": "com.yostar.sdk.bridge.YoStarUnityPlayerActivity",

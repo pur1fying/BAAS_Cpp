@@ -19,10 +19,13 @@ void BaseControl::click(int x, int y) {
     throw std::runtime_error("Base control class click function should not be called.");
 }
 
+void BaseControl::long_click(int x, int y, double duration) {
+    throw std::runtime_error("Base control class long_click function should not be called.");
+}
+
 void BaseControl::swipe(int x1, int y1, int x2, int y2, double duration) {
     throw std::runtime_error("Base control class swipe function should not be called.");
 }
-
 
 void BaseControl::exit() {
     throw std::runtime_error("Base control class exit function should not be called.");

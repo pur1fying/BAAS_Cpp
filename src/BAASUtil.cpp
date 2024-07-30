@@ -74,7 +74,6 @@ string BAASUtil::current_time_string() {
     oss << std::put_time(&localTime, "%Y-%m-%d_%H-%M-%S");
     oss << '.' << std::setw(4) << std::setfill('0') << ms.count();
     std::string formattedTime = oss.str();
-    std::cout << formattedTime << std::endl;
     CURRENT_TIME_STRING = oss.str();
     return CURRENT_TIME_STRING;
 }
@@ -294,15 +293,6 @@ std::pair<std::string, std::string> BAASUtil::serialToHostPort(const std::string
     return make_pair(serial.substr(0, pos), serial.substr(pos + 1));
 }
 
-bool BAASUtil::sleepMS(int ms) {
-    this_thread::sleep_for(chrono::milliseconds(ms));
-    return true;
-}
-
-bool BAASUtil::sleepS(int s) {
-    this_thread::sleep_for(chrono::seconds(s));
-    return true;
-}
 
 long long BAASUtil::getCurrentTimeMS() {
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
@@ -362,7 +352,7 @@ void BAASUtil::re_find_all(const string &src, const string &pattern, vector<std:
     std::string::const_iterator search_start(src.cbegin());
 
     while (std::regex_search(search_start, src.cend(), match, regex_pattern)) {
-        dst.push_back(match[1].str()); // 提取第一个捕获组的内容
+        dst.push_back(match[1].str());
         search_start = match.suffix().first;
     }
 }
@@ -377,4 +367,62 @@ uint32_t BAASUtil::st2u32(const string &src) {
     memcpy(&ret, src.data(), sizeof(uint32_t));
     return ret;
 }
+
+void BAASUtil::insert_swipe(vector<std::pair<int, int>> &output, int start_x, int start_y, int end_x, int end_y, int step_len) {
+    step_len = std::max(1, step_len);
+
+    output.clear();
+    output.emplace_back(start_x, start_y);
+    if(squared_distance(start_x, start_y, end_x, end_y) < step_len * step_len) {
+        output.emplace_back(end_x, end_y);
+        return;
+    }
+
+    double total_len = sqrt(squared_distance(start_x, start_y, end_x, end_y));
+    int step_num = ceil(total_len / step_len);
+    double dx = double((end_x - start_x)*1.0) / step_num;
+    double dy = double((end_y - start_y)*1.0) / step_num;
+    for(int i = 1; i < step_num; i++) {
+        output.emplace_back(start_x + int(round(i * dx)), start_y + int(round(i * dy)));
+    }
+
+    output.emplace_back(end_x, end_y);
+}
+
+std::istream &BAASUtil::safeGetLine(istream &is, string &t) {
+    t.clear();
+
+    // The characters in the stream are read one-by-one using a std::streambuf.
+    // That is faster than reading them one-by-one using the std::istream.
+    // Code that uses streambuf this way must be guarded by a sentry object.
+    // The sentry object performs various tasks,
+    // such as thread synchronization and updating the stream state.
+
+    std::istream::sentry se(is, true);
+    std::streambuf *sb = is.rdbuf();
+
+    if (se) {
+        for (;;) {
+            int c = sb->sbumpc();
+            switch (c) {
+                case '\n':
+                    return is;
+                case '\r':
+                    if (sb->sgetc() == '\n') sb->sbumpc();
+                    return is;
+                case EOF:
+                    // Also handle the case when the last line has no line ending
+                    if (t.empty()) is.setstate(std::ios::eofbit);
+                    return is;
+                default:
+                    t += static_cast<char>(c);
+            }
+        }
+    }
+
+    return is;
+}
+
+
+
 

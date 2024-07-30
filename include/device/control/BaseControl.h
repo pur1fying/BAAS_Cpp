@@ -15,6 +15,8 @@ public:
 
     virtual void click(int x, int y);
 
+    virtual void long_click(int x, int y, double duration);
+
     virtual void swipe(int x1, int y1, int x2, int y2, double duration);
 
     virtual void exit();

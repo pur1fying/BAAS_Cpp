@@ -18,6 +18,7 @@ public:
 
     void exit() override;
 
+    bool is_lossy() override;
 private:
 
     BAASConnection *connection;

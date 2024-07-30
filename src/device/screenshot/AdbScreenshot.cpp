@@ -12,7 +12,7 @@ AdbScreenshot::AdbScreenshot(BAASConnection *connection) : BaseScreenshot(connec
 }
 
 void AdbScreenshot::init() {
-    logger->BAASInfo("Screenshot Method AdbScreenshot");
+    logger->hr("Screenshot Method AdbScreenshot");
     string ret = connection->adb_shell_bytes("echo 000");
     assert(ret == "000\n");
 }
@@ -28,4 +28,8 @@ void AdbScreenshot::screenshot(cv::Mat &img) {
 void AdbScreenshot::exit() {
     logger->BAASInfo("Screenshot Method AdbScreenshot Exit");
 
+}
+
+bool AdbScreenshot::is_lossy() {
+    return false;
 }

@@ -72,7 +72,9 @@ void GlobalLogger::clearLogData() {
     }
 }
 
+GlobalLogger::GlobalLogger(const int) {
 
+}
 
 GlobalLogger *BAASGlobalLogger = nullptr;
 
@@ -86,7 +88,7 @@ BAASLogger *BAASLogger::get(const std::string& name) {
     return instances[name];
 }
 
-BAASLogger::BAASLogger(const string& name) {
+BAASLogger::BAASLogger(const string& name) : GlobalLogger(1) {
     enable = 0b11;
     consoleLogger = spdlog::stdout_color_mt(name + "_console");
     if(!filesystem::exists("output")) {
