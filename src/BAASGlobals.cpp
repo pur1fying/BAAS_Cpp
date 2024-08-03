@@ -20,6 +20,8 @@ string nemuDllPath;
 
 string DEVELOPER_PROJECT_DIR;
 
+string BAAS_IMAGE_RESOURCE_DIR;
+
 string MuMuInstallPath;
 
 string BAAS_OUTPUT_DIR;
@@ -41,6 +43,7 @@ void initGlobals() {
     BAAS_PROJECT_DIR = curr.string();
     BAAS_OUTPUT_DIR = BAAS_PROJECT_DIR + "\\output";
     BAAS_CONFIG_DIR = BAAS_PROJECT_DIR + "\\config";
+    BAAS_IMAGE_RESOURCE_DIR = BAAS_PROJECT_DIR + "\\resource\\image";
 
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
 
@@ -62,6 +65,4 @@ void initGlobals() {
     config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);
 
     config_template = new BAASUserConfig(CONFIG_TYPE_DEFAULT_CONFIG);
-
-
 }

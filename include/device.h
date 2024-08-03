@@ -8,7 +8,11 @@
 #include <device/screenshot/AscreenCap.h>
 #include <device/screenshot/AdbScreenshot.h>
 #include <device/screenshot/ScrcpyScreenshot.h>
+#include <device/screenshot/NemuScreenshot.h>
 
 #include <device/control/AdbControl.h>
 #include <device/control/ScrcpyControl.h>
+#include <device/control/NemuControl.h>
+
+
 #endif //BAAS_DEVICE_H_

@@ -266,6 +266,7 @@ std::string BAASConnection::adb_shell_bytes(const string &command) {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     string res;
     d.shellBytes(command, res);
+    if(res.ends_with("\n")) res.pop_back();
     return res;
 }
 
@@ -278,7 +279,6 @@ std::string BAASConnection::adb_shell_bytes(const vector<std::string> &commandLi
 
 std::string BAASConnection::adb_getprop(const string &name) {
     string temp = adb_shell_bytes("getprop " + name);
-    if(temp.ends_with("\n")) temp.pop_back();
     return temp;
 }
 
@@ -396,6 +396,49 @@ BAASAdbConnection *BAASConnection::create_connection(const string &network, cons
     return d.createConnection(network, address);
 }
 
+bool BAASConnection::clear_cache(const string &package) {
+    logger->BAASInfo("Clear Cache for package [ " + package + " ]");
+    string res = adb_shell_bytes("pm clear " + package);
+    if(res.find("Success") != string::npos) return true;
+    else {
+        logger->BAASError("Clear Cache Failed." + res);
+        return false;
+    }
+}
+
+void BAASConnection::current_app(string &pkg,string &activity, int& pid) {
+    logger->BAASInfo("Get Current App");
+    string res = adb_shell_bytes("dumpsys activity top");
+    vector<smatch> m;
+    string pat = R"(ACTIVITY ([^\s]+)/([^/\s]+) \w+ pid=(\d+))";
+    BAASUtil::re_find_all(res, pat, m);
+    if(m.empty()) {
+        logger->BAASError("No current app found.");
+        throw RequestHumanTakeOver("Couldn't get focused app.");
+    }
+    int tar = int(m.size())-1;
+    pkg = m[tar][1];
+    activity = m[tar][2];
+    pid = stoi(m[tar][3]);
+}
+
+
+void BAASConnection::app_stop(const string &package) {
+    adb_shell_bytes("am force-stop " + package);
+}
+
+void BAASConnection::app_start(const string &package) {
+    adb_shell_bytes("monkey -p " + package + " -c android.intent.category.LAUNCHER 1");
+}
+
+void BAASConnection::app_start(const string &package, const string &activity) {
+    adb_shell_bytes("am start -a android.intent.action.MAIN -c android.intent.category.LAUNCHER -n " + package + "/" + activity);
+}
+
+void BAASConnection::start_self() {
+    if(activity_name.empty()) app_start(package_name);
+    else app_start(package_name, activity_name);
+}
 BAASAdbDevice *BAASConnection::adb_device() {
     return new BAASAdbDevice(&adb, serial);
 }
@@ -429,6 +472,10 @@ void BAASConnection::detect_package() {
     }
 }
 
+void BAASConnection::set_activity() {
+    activity_name = static_config->getString("/activity_name/" + package_name);
+}
+
 void BAASConnection::auto_detect_language() {
     auto languages = static_config->get<vector<string>>("/server_language_choice/" + server);
     assert(!languages.empty());
@@ -441,6 +488,13 @@ void BAASConnection::auto_detect_language() {
         throw RequestHumanTakeOver("Multiple languages detected.");
     }
 }
+
+
+
+
+
+
+
 
 
 

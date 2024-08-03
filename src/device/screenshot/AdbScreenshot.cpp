@@ -14,7 +14,7 @@ AdbScreenshot::AdbScreenshot(BAASConnection *connection) : BaseScreenshot(connec
 void AdbScreenshot::init() {
     logger->hr("Screenshot Method AdbScreenshot");
     string ret = connection->adb_shell_bytes("echo 000");
-    assert(ret == "000\n");
+    assert(ret == "000");
 }
 
 void AdbScreenshot::screenshot(cv::Mat &img) {

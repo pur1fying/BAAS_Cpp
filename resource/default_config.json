@@ -19,7 +19,8 @@
       "screenshot_method": "adb",
       "server": "官服",
       "package_name": "auto",
-      "language": "auto"
+      "language": "auto",
+      "emulator_folder_path": ""
     },
     "script": {
       "screenshot_interval": 0.3

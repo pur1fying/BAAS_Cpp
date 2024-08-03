@@ -7,23 +7,35 @@
 
 #include "BAASImageUtil.h"
 #include "BAASGlobals.h"
+#include "config/BAASConfig.h"
+
+struct BAASImage{
+    BAASRectangle region;
+    uint8_t direction={};  // some app rotates the screen
+    cv::Mat image;
+    explicit BAASImage(int ulx, int uly, int lrx, int lry, uint8_t dir);
+    explicit BAASImage(std::vector<int> &rg, uint8_t dir);
+    BAASImage() = default;
+};
+
+typedef std::map<std::string, BAASImage> BAASNameImageMap;
+typedef std::map<std::string, BAASNameImageMap> BAASGroupImageMap;
+typedef std::map<std::string, BAASGroupImageMap> BAASLanguageImageMap;
+typedef std::map<std::string, BAASLanguageImageMap> BAASServerImageMap;
+
+
 class BAASImageResource{
 
 public:
     // <server>.<language>.<group>.<name>
-    struct BAASImage{
-        BAASRectangle region;
-        cv::Mat image;
-        uint8_t direction;  // some app rotates the screen
-    };
 
     BAASImageResource();
 
-    void get_image(const std::string& server, const std::string& language, const std::string& task, const std::string& name, BAASImage &out);
+    void get(const std::string& server, const std::string& language, const std::string& task, const std::string& name, cv::Mat &out);
 
-    void get_image(const std::string& key, BAASImage &out);
+    void get(const std::string& server, const std::string& language, const std::string& task, const std::string& name, BAASImage &out);
 
-    bool add(const std::string& key, const std::string& path);
+    void set(const std::string& server, const std::string& language, const std::string& group, const std::string& name, const BAASImage &res);
 
     bool remove(const std::string& key);
 
@@ -33,15 +45,25 @@ public:
 
     void showResource();
 
-    void loadDirectoryImage(const std::string& path, const std::string& prefix="", const std::string& postfix="");
-
-    bool isLoaded(const std::string& key);
+    bool is_loaded(const std::string& key);
 
     void keys(std::vector<std::string> &out);
 
+    void load(const std::string& server, const std::string& language);
 
+    bool is_loaded(const std::string& server, const std::string& language="", const std::string& group="", const std::string& name="");
+
+    int load_from_json(const std::string& server, const std::string& language, const std::string &json_path);
+
+    static std::string resource_pointer(const std::string& server, const std::string& language, const std::string& group, const std::string& name);
+
+    static void resource_path(const std::string& server, const std::string& language, const std::string& suffix, std::string& out);
+
+    static bool check_shape(const BAASImage &image, const std::string server, const std::string language, const std::string group, const std::string name);
 private:
-    std::map<std::string, BAASImage> resource;
+    BAASServerImageMap resource;
+
+    std::mutex resource_mutex;
 };
 
 

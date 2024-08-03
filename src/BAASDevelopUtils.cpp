@@ -7,8 +7,7 @@ using namespace cv;
 
 void BAASDevelopUtils::shotStudentSkill(const string &name, const BAASRectangle &r, const int type) {
     string MuMuPlayerPath = "H:\\MuMuPlayer-12.0";
-    string serial = "127.0.0.1:16384";
-    BAASNemu* nemu = new BAASNemu(MuMuPlayerPath, serial);
+    BAASNemu* nemu = new BAASNemu(MuMuPlayerPath);
     string temp = BAAS_PROJECT_DIR + R"(\resource\image\CN\)";
     if(type == SKILL_FULL) {
         temp = temp + "skill_icon_bright";
@@ -21,6 +20,7 @@ void BAASDevelopUtils::shotStudentSkill(const string &name, const BAASRectangle 
     }
     Mat image;
     nemu->screenshot(image);
-    Mat im = BAASImageUtil::imageCrop(image, r);
-    BAASImageUtil::saveImage(im, name, temp, true);
+    Mat im = BAASImageUtil::crop(image, r);
+    BAASImageUtil::save(im, name, temp, true);
+    delete nemu;
 }

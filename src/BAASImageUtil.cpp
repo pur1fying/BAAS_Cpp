@@ -92,25 +92,45 @@ inline istream &operator >> (istream &is, BAASRectangle &rect) {
     return is;
 }
 
-bool BAASImageUtil::loadImage(const string& path, Mat& dst) {
+bool BAASImageUtil::load(const std::string &path, cv::Mat &dst) {
     dst = imread(path);
     return !dst.empty();
 }
 
-Mat BAASImageUtil::imageCrop(const Mat& src, const BAASRectangle region) {
+Mat BAASImageUtil::crop(const Mat& src, const BAASRectangle region) {
+    if (!(region.ul < region.lr)) {
+        throw ValueError("Invalid Crop Image Region, ul should be smaller than lr");
+    }
+    if (region.lr.x > src.cols || region.lr.y > src.rows) {
+        throw ValueError("Invalid Crop Image Region, out of bound");
+    }
 	return src(Range(region.ul.y, region.lr.y), Range(region.ul.x, region.lr.x));
 }
 
-Mat BAASImageUtil::imageCrop(const Mat &src, int x1, int y1, int x2, int y2) {
+Mat BAASImageUtil::crop(const Mat &src, int x1, int y1, int x2, int y2) {
     return src(Range(y1, y2), Range(x1, x2));
 }
 
-bool BAASImageUtil::imageResize(const Mat& src, Mat &dst, const double ratio) {
-	resize(src, dst, Size(), ratio, ratio, INTER_CUBIC);
+bool BAASImageUtil::resize(const Mat& src, Mat &dst, const double ratio) {
+	cv::resize(src, dst, Size(), ratio, ratio, INTER_CUBIC);
     return true;
 }
 
-bool BAASImageUtil::saveImage(const Mat& image, const string& imageName, const string& path, const bool& check) {
+void BAASImageUtil::filter_rgb(Mat &src,const cv::Scalar& min_scalar,const cv::Scalar& max_scalar) {
+    cv::Mat mask, out_put;
+    cv::inRange(src, min_scalar, max_scalar, mask);
+    src.copyTo(out_put, mask);
+    src = out_put;
+}
+
+void BAASImageUtil::filter_rgb(Mat &src, const Scalar &min_scalar, const Scalar &max_scalar, Mat &dst) {
+    cv::Mat mask, out_put;
+    cv::inRange(src, min_scalar, max_scalar, mask);
+    src.copyTo(out_put, mask);
+    dst = out_put;
+}
+
+bool BAASImageUtil::save(const Mat& image, const string& imageName, const string& path, const bool& check) {
     if (!filesystem::exists(path)) {
         filesystem::create_directories(path);
     }
@@ -127,7 +147,7 @@ bool BAASImageUtil::saveImage(const Mat& image, const string& imageName, const s
     else return true;
 }
 
-pair<int, int> BAASImageUtil::imageSize(const Mat &src) {
+pair<int, int> BAASImageUtil::size(const Mat &src) {
     return make_pair(src.cols, src.rows);
 }
 
@@ -141,7 +161,7 @@ BAASPoint BAASImageUtil::imageSearch(const Mat &screenshot, const Mat &templateI
         inputCopy = screenshot.clone();
     }
     if (region.ul.x != -1) {
-        inputCopy = imageCrop(inputCopy, region);
+        inputCopy = crop(inputCopy, region);
     }
     if(toGrey) {
         templateCopy = templateImage.clone();
@@ -217,6 +237,10 @@ bool BAASImageUtil::isSmallerRGB(const Vec3b &a, const Vec3b &b) {
     return false;
 }
 
+void BAASImageUtil::filter_region_rgb(Mat &src, BAASRectangle region, const Scalar &min_scalar, const Scalar &max_scalar) {
+    src = crop(src, region);
+    filter_rgb(src, min_scalar, max_scalar);
+}
 
 BAASPoint::BAASPoint(int xx, int yy) {
     x = xx;

@@ -265,7 +265,7 @@ void BAASUtil::stringSplit(const string &src, const string &separator, vector<st
     }
 }
 
-int BAASUtil::MuMuSerialToDisplayId(const std::string &serial) {
+int BAASUtil::MuMu_serial2instance_id(const std::string &serial) {
     int port = serial2port(serial);
     port -= 16384;
     int index = port / 32, offset = port % 32;
@@ -421,6 +421,22 @@ std::istream &BAASUtil::safeGetLine(istream &is, string &t) {
     }
 
     return is;
+}
+
+void BAASUtil::re_find_all(const string &src, const string &pattern, vector<std::smatch> &dst) {
+    std::regex regex_pattern(pattern);
+    std::string::const_iterator search_start(src.cbegin());
+
+    std::smatch match;
+    while (std::regex_search(search_start, src.cend(), match, regex_pattern)) {
+        dst.push_back(match);
+        search_start = match.suffix().first;
+    }
+}
+
+void BAASUtil::re_find(const string &src, const string &pattern, smatch &dst) {
+    std::regex regex_pattern(pattern);
+    std::regex_search(src, dst, regex_pattern);
 }
 
 

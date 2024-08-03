@@ -44,6 +44,18 @@ public:
 
     BAASAdbConnection* create_connection(const std::string& network, const std::string& address);
 
+    bool clear_cache(const std::string& package);
+
+    void current_app(std::string& pkg, std::string& activity, int& pid);
+
+    void app_stop(const std::string& package);
+
+    void app_start(const std::string& package);
+
+    void app_start(const std::string& package, const std::string& activity);
+
+    void start_self();
+
     std::string adb_getprop(const std::string& name);
 
     std::string nemud_app_keep_alive();
@@ -93,18 +105,29 @@ public:
     [[nodiscard]] inline const std::string& get_language() const{
         return language;
     }
+
+    [[nodiscard]] inline const std::string emulator_folder_path() const{
+        return config->getString("/emulator/emulator_folder_path");
+    }
+
     void detect_package();
+
+    void set_activity();
 
     void set_server();
 
     void set_language();
 
     void auto_detect_language();
+
+
 private:
 
     void adb_connect();
 
     std::string package_name;
+
+    std::string activity_name;
 
     std::string server;
 

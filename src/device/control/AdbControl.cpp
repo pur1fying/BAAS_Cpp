@@ -14,7 +14,7 @@ AdbControl::AdbControl(BAASConnection *connection) : BaseControl(connection) {
 void AdbControl::init() {
     logger->hr("Control Method AdbControl");
     string res = connection->adb_shell_bytes("echo 000");
-    assert(res == "000\n");
+    assert(res == "000");
 }
 
 void AdbControl::click(int x, int y) {

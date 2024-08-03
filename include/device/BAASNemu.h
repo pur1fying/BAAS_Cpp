@@ -1,8 +1,8 @@
 //
 // Created by pc on 2024/4/19.
 //
-#ifndef BAAS_BAASNEMU_H_
-#define BAAS_BAASNEMU_H_
+#ifndef BAAS_DEVICE_BAASNEMU_H_
+#define BAAS_DEVICE_BAASNEMU_H_
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -12,9 +12,10 @@
 #include <mutex>
 #include <thread>
 
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
 
 #include "BAASGlobals.h"
+#include "BAASConnection.h"
 
 typedef int (*nemuConnect)(const wchar_t* , int);
 typedef void (*nemuDisconnect)(int);
@@ -27,19 +28,21 @@ typedef int (*nemuInputEventKeyUp)(int, int, int);
 
 class BAASNemu {
 public:
-    BAASNemu(std::string& installPath);
+    static BAASNemu* get_instance(BAASConnection* connection);
 
-    BAASNemu(std::string& installPath, std::string& port);
+    explicit BAASNemu(BAASConnection* connection);
 
-    bool connect(const std::string& installPath);
+    explicit BAASNemu(std::string& installPath);
 
-    bool connect(const std::string& installPath,const std::string& port);
+    void reconnect();
+
+    void connect();
 
     bool disconnect();
 
     bool screenshot(cv::Mat &image);
 
-    static bool getResolution(int connectionId, int displayId, std::pair<int, int> &resolution);
+    static int get_resolution(int connectionId, int displayId, std::pair<int, int> &resolution);
 
     bool click(BAASPoint point);
 
@@ -48,12 +51,19 @@ public:
     bool up() const;
 
     void convertXY(BAASPoint &point) const;
+
 private:
-    std::string installPath;
+    void init_dll();
 
-    int displayId = -1;
+    BAASLogger* logger;
 
-    int connectionId = -1;
+    std::string mumu_install_path;
+
+    int instance_id = -1;
+
+    int display_id = -1;
+
+    int connection_id = -1;
 
     std::pair<int, int> resolution;
 
@@ -67,8 +77,6 @@ private:
 
     static HINSTANCE hDllInst;
 
-    static void init();
-
     static bool dllLoaded;
 
     static nemuConnect nemu_connect;
@@ -80,7 +88,6 @@ private:
     static nemuInputText nemu_input_text;
 
     static nemuInputEventTouchDown nemu_input_event_touch_down;
-
 
     static nemuInputEventTouchUp nemu_input_event_touch_up;
 
@@ -107,10 +114,10 @@ class NemuIpcError : public std::exception {
 public:
     explicit NemuIpcError(const std::string& message) : message(message) {}
 
-    const char* what() const noexcept override {
+    [[nodiscard]] const char* what() const noexcept override {
         return message.c_str();
     }
 private:
     std::string message;
 };
-#endif //BAAS_BAASNEMU_H_
+#endif //BAAS_DEVICE_BAASNEMU_H_

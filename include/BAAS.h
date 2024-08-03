@@ -14,9 +14,8 @@
 #include "device.h"
 
 #include "BAASGlobals.h"
-#include "BAASScrcpyCore.h"
-#include "BAASNemu.h"
 #include "BAASScreenshot.h"
+
 #include "BAASAutoFight.h"
 #include "BAASImageUtil.h"
 #include "BAASDevelopUtils.h"

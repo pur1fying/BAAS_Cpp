@@ -23,7 +23,10 @@
 
 class BAASConfig {
 public:
-    // explicit BAASConfig(const char *path);
+    /*
+     *  create a simple json read and write config
+     */
+    explicit BAASConfig(const std::string &path, BAASLogger *logger);
 
     /* special config files which are read only
      *  use global logger
@@ -75,7 +78,10 @@ public:
         std::lock_guard<std::mutex> lock(mtx);
         if(key[0] != '/') {
             auto it = config.find(key);
-            if(it == config.end()) return default_value;
+            if(it == config.end()) {
+                logger->BAASInfo("Key [ " + key + " ] not found, use default value.");
+                return default_value;
+            }
             return *it;
         }
         try {

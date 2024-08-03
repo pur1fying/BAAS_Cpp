@@ -222,7 +222,8 @@
     "国际服": ".MxUnityPlayerActivity",
     "国际服青少年": ".MxUnityPlayerActivity",
     "韩国ONE": ".MxUnityPlayerActivity",
-    "日服": "com.yostarjp.bluearchive.MxUnityPlayerActivity"
+    "日服": "com.yostarjp.bluearchive.MxUnityPlayerActivity",
+    "com.bandainamcoent.idolmaster_gakuen" : "com.google.firebase.MessagingUnityPlayerActivity"
   },
   "total_assault_difficulties": {
     "CN": [ "NORMAL", "HARD", "VERYHARD", "HARDCORE", "EXTREME", "INSANE"],

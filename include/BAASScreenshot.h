@@ -6,8 +6,8 @@
 #define BAAS_BAASSCREENSHOT_H_
 #include <opencv2/opencv.hpp>
 
-#include "BAASNemu.h"
-#include "BAASScrcpyCore.h"
+#include "device/BAASNemu.h"
+
 #define screenshotAdb (1 << 0)
 #define screenshotNemu (1 << 1)
 #define screenshotScrcpy (1 << 2)

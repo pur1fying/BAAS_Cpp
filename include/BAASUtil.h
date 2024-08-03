@@ -96,7 +96,7 @@ public:
 
       static void stringJoin(const std::vector<std::string> &src, const std::string &joiner, std::string &dst);
 
-      static int MuMuSerialToDisplayId(const std::string &serial);
+      static int MuMu_serial2instance_id(const std::string &serial);
 
       static std::pair<std::string, std::string> serialToHostPort(const std::string &serial);
 
@@ -118,7 +118,11 @@ public:
 
       static bool allNumberChar(const std::string &src);
 
+      static void re_find_all(const std::string &src, const std::string &pattern, std::vector<std::smatch> &dst);
+
       static void re_find_all(const std::string &src, const std::string &pattern, std::vector<std::string> &dst);
+
+      static void re_find(const std::string &src, const std::string &pattern, std::smatch &dst);
 
       static bool re_match(const std::string &src, const std::string &pattern);
 

@@ -17,8 +17,6 @@ extern std::string scrcpyJarPath;
 
 extern std::string scrcpyJarName;
 
-extern std::string nemuDllPath;
-
 extern std::string MuMuInstallPath;
 
 extern std::string BAAS_OUTPUT_DIR;
@@ -37,6 +35,7 @@ extern std::string ASCREENCAP_REMOTE_DIR;
  */
 extern std::string DEVELOPER_PROJECT_DIR;
 
+extern std::string BAAS_IMAGE_RESOURCE_DIR;
 
 static bool inited = false;
 
