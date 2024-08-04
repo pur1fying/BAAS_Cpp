@@ -19,20 +19,25 @@ int main() {
     system("chcp 65001");
     try {
         initGlobals();
-        string path = "1708148000\\config.json";
+        string path = "default_config\\config.json";
         BAASUserConfig config(path);
         config.update_name();
+        config.config_update();
         config.save();
         BAASConnection connection(&config);
 //        connection.clear_cache("com.android.vending");
 //        connection.start_self();
         cv::Mat img;
         NemuScreenshot nemu = NemuScreenshot(&connection);
+        NemuControl nemuControl = NemuControl(&connection);
         nemu.init();
         nemu.screenshot(img);
-
         BAASImageResource resource;
         resource.load(connection.get_server(), connection.get_language());
+
+//        resource.get(connection.get_server(), connection.get_language(), "plot", "skip", img);
+//        BAASDevelopUtils::extract_image_rgb_range(img, "chat-unchecked", {65, 1062,144, 1157}, {0, 0, 0}, {100, 100, 100});
+
         return 0;
         AdbScreenshot screenCap(&connection);
         screenCap.init();

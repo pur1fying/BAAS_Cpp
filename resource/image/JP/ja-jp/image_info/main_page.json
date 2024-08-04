@@ -1,0 +1,46 @@
+{
+  "group": "main_page",
+  "path": "main_page",
+  "image": {
+    "home-checked": {
+      "direction": 1,
+      "region": [338, 1131, 382,1176]
+    },
+    "home-unchecked": {
+      "direction": 1,
+      "region": [332, 1131, 387, 1201]
+    },
+    "draw-card-checked": {
+      "direction": 1,
+      "region": [585, 1067, 634, 1117]
+    },
+    "draw-card-unchecked": {
+      "direction": 1,
+      "region": [585, 1066, 648, 1144]
+    },
+    "idol-checked": {
+      "direction": 1,
+      "region": [213, 1115, 257, 1161]
+    },
+    "idol-unchecked": {
+      "direction": 1,
+      "region": [187, 1115, 259, 1191]
+    },
+    "chat-checked": {
+      "direction": 1,
+      "region": [86, 1072, 139, 1107]
+    },
+    "chat-unchecked": {
+      "direction": 1,
+      "region": [69, 1072, 139, 1144]
+    },
+    "competition-checked": {
+      "direction": 1,
+      "region": [460, 1114, 508, 1160]
+    },
+    "competition-unchecked": {
+      "direction": 1,
+      "region": [451, 1114, 543, 1193]
+    }
+  }
+}

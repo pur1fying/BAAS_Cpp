@@ -111,10 +111,6 @@ bool BAASImageResource::is_loaded(const string &server, const string &language, 
     return true;
 }
 
-inline void BAASImageResource::resource_path(const string &server, const string &language, const std::string& suffix, string &out) {
-    out = BAAS_IMAGE_RESOURCE_DIR + "\\" + server + "\\" + language + "\\" + suffix;
-}
-
 int BAASImageResource::load_from_json(const string &server, const string &language, const string &json_path) {
     int successfully_loaded_cnt = 0;
     BAASConfig info(json_path, (BAASLogger*)BAASGlobalLogger);
@@ -149,11 +145,15 @@ int BAASImageResource::load_from_json(const string &server, const string &langua
     return successfully_loaded_cnt;
 }
 
+inline void BAASImageResource::resource_path(const string &server, const string &language, const std::string& suffix, string &out) {
+    out = BAAS_IMAGE_RESOURCE_DIR + "\\" + server + "\\" + language + "\\" + suffix;
+}
+
 std::string BAASImageResource::resource_pointer(const string &server, const string &language, const string &group,const string &name) {
     return server + "." + language + "." + group + "." + name;
 }
 
-inline bool BAASImageResource::check_shape(const BAASImage &image, const string server, const string language, const string group, const string name) {
+inline bool BAASImageResource::check_shape(const BAASImage &image, const string& server, const string& language, const string& group, const string& name) {
     int h_record = image.region.lr.y - image.region.ul.y;
     int w_record = image.region.lr.x - image.region.ul.x;
     int h_true = image.image.rows;

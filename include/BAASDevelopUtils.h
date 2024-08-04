@@ -24,5 +24,7 @@ enum {
 class BAASDevelopUtils {
 public:
     static void shotStudentSkill(const std::string &name = "student", const BAASRectangle &r = SKILL1_FULL, const int type = SKILL_FULL);
+
+    static void extract_image_rgb_range(const cv::Mat& img, const std::string &name, const BAASRectangle &r, const cv::Scalar &min_ , const cv::Scalar &max_, const uint8_t cut_edge = true);
 };
 #endif //BAAS_BAASDEVELOPUTILS_H_

@@ -93,6 +93,7 @@ inline istream &operator >> (istream &is, BAASRectangle &rect) {
 }
 
 bool BAASImageUtil::load(const std::string &path, cv::Mat &dst) {
+    if(!filesystem::exists(path)) return false;
     dst = imread(path);
     return !dst.empty();
 }
@@ -118,7 +119,11 @@ bool BAASImageUtil::resize(const Mat& src, Mat &dst, const double ratio) {
 
 void BAASImageUtil::filter_rgb(Mat &src,const cv::Scalar& min_scalar,const cv::Scalar& max_scalar) {
     cv::Mat mask, out_put;
-    cv::inRange(src, min_scalar, max_scalar, mask);
+    Scalar min_scalar_ = min_scalar;
+    Scalar max_scalar_ = max_scalar;
+    swap(min_scalar_[0], min_scalar_[2]);
+    swap(max_scalar_[0], max_scalar_[2]);
+    cv::inRange(src, min_scalar_, max_scalar_, mask);
     src.copyTo(out_put, mask);
     src = out_put;
 }
@@ -128,6 +133,56 @@ void BAASImageUtil::filter_rgb(Mat &src, const Scalar &min_scalar, const Scalar 
     cv::inRange(src, min_scalar, max_scalar, mask);
     src.copyTo(out_put, mask);
     dst = out_put;
+}
+
+void BAASImageUtil::crop_edge(Mat &src, uint8_t enable, vector<int>& cnt, const cv::Scalar& min_scalar, const cv::Scalar& max_scalar, Mat &dst) {
+    cnt.resize(4, 0);
+    cv::Mat line, mask;
+    if(enable & 0b1000) {
+        for (int i = 0; i < src.rows; i++) {
+            line = src.row(i);
+            cv::inRange(line, min_scalar, max_scalar, mask);
+            if (countNonZero(mask) == src.cols) {
+                cnt[0]++;
+            } else break;
+        }
+    }
+
+    if(enable & 0b0100) {
+        for (int i = src.rows - 1; i >= cnt[0]; i--) {
+            line = src.row(i);
+            cv::inRange(line, min_scalar, max_scalar, mask);
+            if (countNonZero(mask) == src.cols) {
+                cnt[1]++;
+            } else break;
+        }
+    }
+
+    if(enable & 0b0010) {
+        for (int i = 0; i < src.cols; i++) {
+            line = src.col(i);
+            cv::inRange(line, min_scalar, max_scalar, mask);
+            if (countNonZero(mask) == src.rows) {
+                cnt[2]++;
+            } else break;
+        }
+    }
+
+    if(enable & 0b0001) {
+        for (int i = src.cols - 1; i >= cnt[2]; i--) {
+            line = src.col(i);
+            cv::inRange(line, min_scalar, max_scalar, mask);
+            if (countNonZero(mask) == src.rows) {
+                cnt[3]++;
+            } else break;
+        }
+    }
+
+    dst = crop(src, cnt[2], cnt[0], src.cols - cnt[3], src.rows - cnt[1]);
+}
+
+void BAASImageUtil::crop_edge(Mat &src, uint8_t enable, vector<int> &cnt, const Scalar &color, Mat &dst) {
+    crop_edge(src, enable, cnt, color, color, dst);
 }
 
 bool BAASImageUtil::save(const Mat& image, const string& imageName, const string& path, const bool& check) {
@@ -145,10 +200,6 @@ bool BAASImageUtil::save(const Mat& image, const string& imageName, const string
         return true;
     }
     else return true;
-}
-
-pair<int, int> BAASImageUtil::size(const Mat &src) {
-    return make_pair(src.cols, src.rows);
 }
 
 void BAASImageUtil::imagePaste(Mat &src, const Mat &dst, const BAASPoint &point) {

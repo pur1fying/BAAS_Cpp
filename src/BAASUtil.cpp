@@ -439,6 +439,22 @@ void BAASUtil::re_find(const string &src, const string &pattern, smatch &dst) {
     std::regex_search(src, dst, regex_pattern);
 }
 
+void BAASUtil::calc_swipe_params(int x1, int y1, int x2, int y2, double duration, int &step_len, double &sleep_delay) {
+    int dis_squared = BAASUtil::squared_distance(x1, y1, x2, y2);
+    sleep_delay = 0.005;
+    if(dis_squared <= 25) step_len = 5;
+    else {
+        int total_steps = int(duration * 1000) / 5;
+        int dis = int(sqrt(dis_squared));
+        step_len = int(dis / total_steps) + 1;
+        if(step_len < 5) {
+            step_len = 5;
+            total_steps = dis / 5;
+            sleep_delay = duration / total_steps;
+        }
+    }
+}
+
 
 
 

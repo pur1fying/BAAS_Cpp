@@ -24,19 +24,9 @@ void ScrcpyControl::click(int x, int y) {
 }
 
 void ScrcpyControl::swipe(int x1, int y1, int x2, int y2, double duration) {
-    int step_len, dis_squared = BAASUtil::squared_distance(x1, y1, x2, y2);
-    double sleep_delay = 0.005;
-    if(dis_squared <= 25) step_len = 5;
-    else {
-        int total_steps = int(duration * 1000) / 5;
-        int dis = int(sqrt(dis_squared));
-        step_len = int(dis / total_steps) + 1;
-        if(step_len < 5) {
-            step_len = 5;
-            total_steps = dis / 5;
-            sleep_delay = duration / total_steps;
-        }
-    }
+    int step_len;
+    double sleep_delay;
+    BAASUtil::calc_swipe_params(x1, y1, x2, y2, duration, step_len, sleep_delay);
 
     client->swipe(x1, y1, x2, y2, step_len, sleep_delay);
 }

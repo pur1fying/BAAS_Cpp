@@ -38,19 +38,33 @@ public:
 
     void connect();
 
-    bool disconnect();
+    void disconnect();
 
-    bool screenshot(cv::Mat &image);
+    void screenshot(cv::Mat &image);
 
     static int get_resolution(int connectionId, int displayId, std::pair<int, int> &resolution);
 
-    bool click(BAASPoint point);
+    void click(int x, int y);
 
-    bool down(BAASPoint point) const;
+    void click(BAASPoint point);
 
-    bool up() const;
+    void long_click(int x, int y, double duration);
+
+    void long_click(BAASPoint point, double duration);
+
+    void swipe(int start_x, int start_y, int end_x, int end_y, int step_len = 5, double step_duration = 0.005);
+
+    void down(int x, int y) const;
+
+    void down(BAASPoint point) const;
+
+    void up() const;
+
+    void convertXY(int &x, int &y) const;
 
     void convertXY(BAASPoint &point) const;
+
+    void update_resolution();
 
 private:
     void init_dll();

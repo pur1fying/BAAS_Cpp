@@ -2,21 +2,6 @@
   "group": "plot",
   "path": "plot",
   "image": {
-    "skip": {
-      "direction": 1,
-      "region": [176, 1183, 272, 1219]
-    },
-    "logo": {
-      "direction": 1,
-      "region": [0, 0, 100, 100]
-    },
-    "auto": {
-      "direction": 1,
-      "region": [0, 0, 100, 100]
-    },
-    "speed-up": {
-      "direction": 1,
-      "region": [0, 0, 100, 100]
-    }
+
   }
 }

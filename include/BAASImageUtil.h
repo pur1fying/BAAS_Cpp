@@ -114,7 +114,14 @@ public:
 
     static void filter_rgb(cv::Mat &src, const cv::Scalar& min_scalar, const cv::Scalar& max_scalar, cv::Mat &dst);
 
-    static std::pair<int, int> size(const cv::Mat& src);
+    /*
+     *  crop image edge with color min_scalar and max_scalar
+     *  enable: 0b0000  1<<4 top 1<<3 bottom 1<<2 left 1<<1 right
+     *          example 0b1111 means crop all edge 0x1010 means crop top and left edge
+     */
+    static void crop_edge(cv::Mat &src, uint8_t enable ,std::vector<int>& cnt, const cv::Scalar& min_scalar, const cv::Scalar& max_scalar,cv::Mat &dst);
+
+    static void crop_edge(cv::Mat &src, uint8_t enable ,std::vector<int>& cnt, const cv::Scalar& color, cv::Mat &dst);
 
     static void imagePaste(cv::Mat& src, const cv::Mat& dst, const BAASPoint& point = BAASPoint(0, 0));
 

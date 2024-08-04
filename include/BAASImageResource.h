@@ -59,7 +59,8 @@ public:
 
     static void resource_path(const std::string& server, const std::string& language, const std::string& suffix, std::string& out);
 
-    static bool check_shape(const BAASImage &image, const std::string server, const std::string language, const std::string group, const std::string name);
+    static bool check_shape(const BAASImage &image, const std::string& server, const std::string& language, const std::string& group, const std::string& name);
+
 private:
     BAASServerImageMap resource;
 

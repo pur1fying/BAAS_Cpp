@@ -154,6 +154,7 @@ public:
     // http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf
     static std::istream &safeGetLine(std::istream &is, std::string &t);
 
+    static void calc_swipe_params(int x1, int y1, int x2, int y2, double duration,int &step_len, double &sleep_delay);
 
 };
 #endif //BAAS_UTIL_H_
