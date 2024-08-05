@@ -25,8 +25,8 @@ int main() {
         config.config_update();
         config.save();
         BAASConnection connection(&config);
-//        connection.clear_cache("com.android.vending");
-//        connection.start_self();
+        connection.clear_cache("com.android.vending");
+        connection.start_self();
         cv::Mat img;
         NemuScreenshot nemu = NemuScreenshot(&connection);
         NemuControl nemuControl = NemuControl(&connection);
@@ -36,7 +36,7 @@ int main() {
         resource.load(connection.get_server(), connection.get_language());
 
 //        resource.get(connection.get_server(), connection.get_language(), "plot", "skip", img);
-//        BAASDevelopUtils::extract_image_rgb_range(img, "chat-unchecked", {65, 1062,144, 1157}, {0, 0, 0}, {100, 100, 100});
+        BAASDevelopUtils::extract_image_rgb_range(img, "activity-fee", {43, 739, 168, 791}, {0, 0, 0}, {255, 255, 255});
 
         return 0;
         AdbScreenshot screenCap(&connection);

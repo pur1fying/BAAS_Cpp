@@ -1,0 +1,15 @@
+{
+  "group": "restart",
+  "path": "restart",
+  "image": {
+    "date-changed": {
+      "direction": 1,
+      "region": [42, 950, 205, 1000]
+    },
+    "login-bonus": {
+        "direction": 1,
+        "region": [71, 60, 646, 210]
+    }
+  }
+
+}

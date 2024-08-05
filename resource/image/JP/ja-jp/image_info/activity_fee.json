@@ -1,0 +1,15 @@
+{
+  "group": "activity_fee",
+  "path": "activity_fee",
+  "image": {
+    "date-changed": {
+      "direction": 1,
+      "region": [43, 739, 168, 791]
+    },
+    "login-bonus": {
+      "direction": 1,
+      "region": [71, 60, 646, 210]
+    }
+  }
+
+}
