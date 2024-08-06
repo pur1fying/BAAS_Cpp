@@ -242,20 +242,20 @@ int BAASImageUtil::pointDistance(const BAASPoint &p1, const BAASPoint &p2) {
     return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
 }
 
-bool BAASImageUtil::judgeRGBRange(Vec3b target, Vec3b min, Vec3b max) {
+bool BAASImageUtil::judgeRGBRange(const Vec3b& target,const Vec3b& min,const Vec3b& max) {
     if(target[0] >= min[0] && target[0] <= max[0] && target[1] >= min[1] && target[1] <= max[1] && target[2] >= min[2] && target[2] <= max[2])
         return true;
     return false;
 }
 
-bool BAASImageUtil::judgeRGBRange(Mat &target, BAASPoint position, Vec3b min, Vec3b max) {
+bool BAASImageUtil::judgeRGBRange(const Mat &target,const BAASPoint& position,const Vec3b& min,const Vec3b& max) {
     Vec3b pixel = target.at<Vec3b>(position.y, position.x);
     if(pixel[0] >= min[0] && pixel[0] <= max[0] && pixel[1] >= min[1] && pixel[1] <= max[1] && pixel[2] >= min[2] && pixel[2] <= max[2])
         return true;
     return false;
 }
 
-bool BAASImageUtil::judgeRGBRange(Mat &target, BAASPoint position, Vec3b min, Vec3b max, bool checkAround, int aroundRange) {
+bool BAASImageUtil::judgeRGBRange(const Mat &target,const BAASPoint& position,const Vec3b& min,const Vec3b& max, bool checkAround, int aroundRange) {
     if(judgeRGBRange(target, position, min, max))return true;
     if (checkAround)
         for (int i = -aroundRange; i <= aroundRange; i++)
@@ -265,11 +265,11 @@ bool BAASImageUtil::judgeRGBRange(Mat &target, BAASPoint position, Vec3b min, Ve
     return false;
 }
 
-Vec3b BAASImageUtil::getRegionMeanRGB(Mat &target, BAASRectangle region) {
+Vec3b BAASImageUtil::getRegionMeanRGB(const Mat &target,const BAASRectangle &region) {
     return getRegionMeanRGB(target, Rect(region.ul.x, region.ul.y, region.lr.x - region.ul.x, region.lr.y - region.ul.y));
 }
 
-Vec3b BAASImageUtil::getRegionMeanRGB(Mat &target, Rect region) {
+Vec3b BAASImageUtil::getRegionMeanRGB(const Mat &target,const Rect &region) {
     Scalar m = mean(target(region));
     return Vec3b {(unsigned char)m[2], (unsigned char)m[1], (unsigned char)m[0]};
 }
@@ -291,6 +291,25 @@ bool BAASImageUtil::isSmallerRGB(const Vec3b &a, const Vec3b &b) {
 void BAASImageUtil::filter_region_rgb(Mat &src, BAASRectangle region, const Scalar &min_scalar, const Scalar &max_scalar) {
     src = crop(src, region);
     filter_rgb(src, min_scalar, max_scalar);
+}
+
+cv::Vec3b BAASImageUtil::getRegionMeanRGB(const Mat &target) {
+    Scalar m = mean(target);
+    return Vec3b {(unsigned char)m[2], (unsigned char)m[1], (unsigned char)m[0]};
+}
+
+cv::Vec3b BAASImageUtil::calc_abs_diff(const Vec3b &a, const Vec3b &b) {
+    Vec3b diff;
+    if(a[0] > b[0]) diff[0] = a[0] - b[0];
+    else diff[0] = b[0] - a[0];
+
+    if(a[1] > b[1]) diff[1] = a[1] - b[1];
+    else diff[1] = b[1] - a[1];
+
+    if(a[2] > b[2]) diff[2] = a[2] - b[2];
+    else diff[2] = b[2] - a[2];
+
+    return diff;
 }
 
 BAASPoint::BAASPoint(int xx, int yy) {

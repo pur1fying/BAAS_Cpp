@@ -13,6 +13,10 @@ extern std::string BAAS_PROJECT_DIR;
 
 extern std::string BAAS_CONFIG_DIR;
 
+extern std::string BAAS_IMAGE_RESOURCE_DIR;
+
+extern std::string BAAS_FEATURE_DIR;
+
 extern std::string scrcpyJarPath;
 
 extern std::string scrcpyJarName;
@@ -35,7 +39,6 @@ extern std::string ASCREENCAP_REMOTE_DIR;
  */
 extern std::string DEVELOPER_PROJECT_DIR;
 
-extern std::string BAAS_IMAGE_RESOURCE_DIR;
 
 static bool inited = false;
 

@@ -1,0 +1,22 @@
+{
+  "group": "competition",
+  "path": "competition",
+  "image": {
+    "menu": {
+      "direction": 1,
+      "region": [50, 524, 222, 569]
+    },
+    "skip": {
+      "direction": 1,
+      "region": [594, 1149, 681, 1176]
+    },
+    "start-competition": {
+      "direction": 1,
+      "region": [251, 1130, 457, 1186]
+    },
+    "start-battle": {
+      "direction": 1,
+      "region": [266, 1056, 446, 1109]
+    }
+  }
+}

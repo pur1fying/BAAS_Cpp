@@ -13,6 +13,8 @@
 
 #include "device.h"
 
+#include "feature/BAASFeature.h"
+
 #include "BAASGlobals.h"
 #include "BAASScreenshot.h"
 
@@ -20,4 +22,6 @@
 #include "BAASImageUtil.h"
 #include "BAASDevelopUtils.h"
 #include "BAASImageResource.h"
+
+
 #endif //BAAS_BAAS_H

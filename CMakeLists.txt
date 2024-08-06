@@ -118,4 +118,10 @@ file(
         DESTINATION ${CMAKE_BINARY_DIR}/resource
 )
 
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/features
+        DESTINATION ${CMAKE_BINARY_DIR}/resource
+)
+
 file(COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR})

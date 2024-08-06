@@ -31,23 +31,22 @@ int main() {
         NemuScreenshot nemu = NemuScreenshot(&connection);
         NemuControl nemuControl = NemuControl(&connection);
         nemu.init();
-        nemu.screenshot(img);
-        BAASImageResource resource;
-        resource.load(connection.get_server(), connection.get_language());
-
-//        resource.get(connection.get_server(), connection.get_language(), "plot", "skip", img);
-        BAASDevelopUtils::extract_image_rgb_range(img, "activity-fee", {43, 739, 168, 791}, {0, 0, 0}, {255, 255, 255});
+        resource->load(connection.get_server(), connection.get_language());
+        BAASFeature::show();
+        while(true) {
+            nemu.screenshot(img);
+            BAASConfig output;
+            if(BAASFeature::appear(&connection, "competition_start-battle_appear", img, output, true)) {
+                BAASGlobalLogger->BAASInfo("Found");
+            }
+            this_thread::sleep_for(chrono::seconds(1));
+        }
+//        resource->get(connection.get_server(), connection.get_language(), "plot", "skip", img);
+//        string name = "competition-checked";
+//        BAASRectangle region = {446, 1112, 544, 1196};
+//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {120, 127, 120});
 
         return 0;
-        AdbScreenshot screenCap(&connection);
-        screenCap.init();
-        screenCap.screenshot(img);
-        BAASImageUtil::filter_region_rgb(img, {924, 46, 1228, 116}, {180, 180, 180}, {255, 255, 255});
-        string name = "skip.png";
-        cv::imwrite(name, img);
-        ScrcpyControl control(&connection);
-        control.init();
-
 
     }
     catch (const std::exception& e){

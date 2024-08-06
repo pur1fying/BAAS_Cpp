@@ -16,6 +16,9 @@ struct BAASImage{
     explicit BAASImage(int ulx, int uly, int lrx, int lry, uint8_t dir);
     explicit BAASImage(std::vector<int> &rg, uint8_t dir);
     BAASImage() = default;
+
+    [[nodiscard]] std::string get_size() const;
+    [[nodiscard]] std::string gen_info() const;
 };
 
 typedef std::map<std::string, BAASImage> BAASNameImageMap;
@@ -23,17 +26,17 @@ typedef std::map<std::string, BAASNameImageMap> BAASGroupImageMap;
 typedef std::map<std::string, BAASGroupImageMap> BAASLanguageImageMap;
 typedef std::map<std::string, BAASLanguageImageMap> BAASServerImageMap;
 
+// <server>.<language>.<group>.<name>
 
 class BAASImageResource{
-
 public:
-    // <server>.<language>.<group>.<name>
-
-    BAASImageResource();
+    static BAASImageResource* get_instance();
 
     void get(const std::string& server, const std::string& language, const std::string& task, const std::string& name, cv::Mat &out);
 
     void get(const std::string& server, const std::string& language, const std::string& task, const std::string& name, BAASImage &out);
+
+    void get(const std::string& resource_pointer, cv::Mat &out);
 
     void set(const std::string& server, const std::string& language, const std::string& group, const std::string& name, const BAASImage &res);
 
@@ -62,10 +65,26 @@ public:
     static bool check_shape(const BAASImage &image, const std::string& server, const std::string& language, const std::string& group, const std::string& name);
 
 private:
-    BAASServerImageMap resource;
+    static BAASImageResource* instance;
+
+    BAASImageResource();
+
+    BAASServerImageMap images;
 
     std::mutex resource_mutex;
 };
 
+
+class GetResourceError : public std::exception{
+public:
+    explicit GetResourceError(const std::string& msg) : msg(msg) {}
+    const char* what() const noexcept override {
+        return msg.c_str();
+    }
+private:
+    std::string msg;
+};
+
+extern BAASImageResource* resource;
 
 #endif //BAAS_BAASIMAGERESOURCE_H_

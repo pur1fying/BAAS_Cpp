@@ -23,9 +23,11 @@
 
 class BAASConfig {
 public:
-    /*
-     *  create a simple json read and write config
-     */
+    explicit BAASConfig() = default;
+
+    explicit BAASConfig(const nlohmann::json &j, BAASLogger *logger);
+
+    //  create a simple json read and write config with json path and logger
     explicit BAASConfig(const std::string &path, BAASLogger *logger);
 
     /* special config files which are read only
@@ -58,6 +60,10 @@ public:
 
     inline float getFloat(const std::string &key, float default_value = 0.0f) {
         return get<float>(key, default_value);
+    }
+
+    inline double getDouble(const std::string &key, double default_value = 0.0) {
+        return get<double>(key, default_value);
     }
 
     inline std::string getString(const std::string &key, const std::string& default_value = "") {
@@ -179,6 +185,13 @@ public:
     inline void update_and_save(const std::string &key, T &value) {
         update(key, value);
         save();
+    }
+
+    template<typename T>
+    inline void insert(const std::string &key, T &value) {
+        assert(!key.empty());
+        std::lock_guard<std::mutex> lock(mtx);
+        config[key] = value;
     }
 
     /*

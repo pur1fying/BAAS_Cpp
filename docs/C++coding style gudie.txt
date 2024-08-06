@@ -1,5 +1,5 @@
 本篇用于学习google C++代码规范，同时也将作为BAAS（CPP） 所遵循的规范
-https://google.github.io/styleguide/cppguide.html#Inline_Functions
+https://google.github.io/styleguide/cppguide.html
 
 C++标准：20
 

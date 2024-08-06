@@ -1,7 +1,22 @@
 {
   "group": "common",
   "path": "common",
-  "image": [
-
-  ]
+  "image": {
+    "home":{
+      "direction": 1,
+      "region": [63, 1190, 108, 1236]
+    },
+    "tip":{
+      "direction": 1,
+      "region": [171, 1191, 215, 1235]
+    },
+    "back":{
+      "direction": 1,
+      "region": [281, 1193, 318, 1234]
+    },
+    "close-notice-button":{
+      "direction": 1,
+      "region": [254, 1136, 452, 1189]
+    }
+  }
 }

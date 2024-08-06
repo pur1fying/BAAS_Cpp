@@ -2,14 +2,13 @@
   "group": "activity_fee",
   "path": "activity_fee",
   "image": {
-    "date-changed": {
-      "direction": 1,
-      "region": [43, 739, 168, 791]
+    "unable-to-collect": {
+        "direction": 1,
+        "region": [242, 629, 478, 651]
     },
-    "login-bonus": {
-      "direction": 1,
-      "region": [71, 60, 646, 210]
+    "activity-fee": {
+        "direction": 1,
+        "region": [52, 745, 165, 788]
     }
   }
-
 }

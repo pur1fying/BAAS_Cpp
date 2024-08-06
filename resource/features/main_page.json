@@ -1,0 +1,12 @@
+{
+  "competition_start-battle_appear":{
+    "feature_type": 0,
+
+    "group": "competition",
+    "name": "start-battle",
+
+    "check_mean_rgb": true,
+    "mean_rgb_diff": [10, 10, 10],
+    "threshold": 0.8
+  }
+}

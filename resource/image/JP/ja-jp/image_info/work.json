@@ -1,0 +1,46 @@
+{
+  "group": "work",
+  "path": "work",
+  "image": {
+    "work-finished": {
+      "direction": 1,
+      "region": [50, 524, 222, 569]
+    },
+    "work-finished-button": {
+      "direction": 1,
+      "region": [248, 1128, 464, 1187]
+    },
+    "person-select-button": {
+      "direction": 1,
+      "region": [252, 1059, 457, 1112]
+    },
+    "person-decide-button": {
+      "direction": 1,
+      "region": [252, 1059, 457, 1112]
+    },
+    "menu": {
+      "direction": 1,
+      "region": [8, 38, 154, 76]
+    },
+    "start-work-confirm": {
+      "direction": 1,
+      "region": [49, 527, 291, 573]
+    },
+    "start-work-button": {
+      "direction": 1,
+      "region": [109, 1137, 317, 1187]
+    },
+    "cancel-start-work-button": {
+      "direction": 1,
+      "region": [389, 1136, 597, 1183]
+    },
+    "work-position1-acceleration": {
+      "direction": 1,
+      "region": [121, 1023, 252,1060]
+    },
+    "work-position2-acceleration": {
+      "direction": 1,
+      "region": [464, 1023, 594,1060]
+    }
+  }
+}

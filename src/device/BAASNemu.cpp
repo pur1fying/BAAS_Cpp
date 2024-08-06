@@ -79,7 +79,7 @@ void BAASNemu::connect() {
             "Nemu connected :   {",
             "                   MuMuPath:\t" + mumu_install_path,
             "                   DisplayID:\t" + to_string(display_id),
-            "                   ConnID:\t" + to_string(connection_id),
+            "                   ConnID:   \t" + to_string(connection_id),
             "                   Resolution:\t" + to_string(resolution.first) + "x" + to_string(resolution.second),
             "                   }"
     };

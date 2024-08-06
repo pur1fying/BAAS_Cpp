@@ -7,6 +7,10 @@
 using namespace std;
 using namespace nlohmann;
 
+BAASImageResource *BAASImageResource::instance = nullptr;
+
+BAASImageResource* resource = nullptr;
+
 BAASImage::BAASImage(int ulx, int uly, int lrx, int lry, uint8_t dir) {
     region = {ulx, uly, lrx, lry};
     direction = dir;
@@ -17,30 +21,54 @@ BAASImage::BAASImage(vector<int> &rg, uint8_t dir) {
     direction = dir;
 }
 
-BAASImageResource::BAASImageResource() {
-    resource.clear();
+std::string BAASImage::get_size() const {
+    return to_string(region.lr.x - region.ul.x) + "x" + to_string(region.lr.y - region.ul.y);
+}
+
+std::string BAASImage::gen_info() const {
+    string info = "Region : [ " + to_string(region.ul.x) + ", " + to_string(region.ul.y) + " ] [ " + to_string(region.lr.x) + ", " + to_string(region.lr.y) + " ]";
+    info += " Direction : " + to_string(direction);
+    info += " Size : " + get_size();
+    return info;
+}
+
+BAASImageResource *BAASImageResource::get_instance() {
+    if(instance == nullptr) {
+        instance = new BAASImageResource();
+    }
+    return instance;
 }
 
 void BAASImageResource::get(const string &server, const string &language, const string &task, const string &name, cv::Mat &out) {
+    if(!is_loaded(server, language, task, name))throw GetResourceError("Image Resource [ " + resource_pointer(server, language, task, name) + " ] not loaded");
     lock_guard<mutex> lock(resource_mutex);
-    out = resource[server][language][task][name].image;
+    out = images[server][language][task][name].image;
 }
 
 void BAASImageResource::get(const string &server, const string &language, const string &task, const string &name, BAASImage &out) {
+    if(!is_loaded(server, language, task, name)) throw GetResourceError("Image Resource [ " + resource_pointer(server, language, task, name) + " ] not loaded");
     lock_guard<mutex> lock(resource_mutex);
-    out = resource[server][language][task][name];
+    out = images[server][language][task][name];
+}
+
+void BAASImageResource::get(const string &resource_pointer, cv::Mat &out) {
+    vector<string> tokens;
+    BAASUtil::stringSplit(resource_pointer, ".", tokens);
+    if(tokens.size() != 4)throw GetResourceError("Resource pointer [ " + resource_pointer + " ]  format error");
+    get(tokens[0], tokens[1], tokens[2], tokens[3], out);
+
 }
 
 void BAASImageResource::set(const string &server, const string &language, const string &group, const string &name,const BAASImage &res) {
     lock_guard<mutex> lock(resource_mutex);
-    resource[server][language][group][name] = res;
+    images[server][language][group][name] = res;
 }
 
 bool BAASImageResource::remove(const string &key) {
-    if (resource.find(key) == resource.end()) {
+    if (images.find(key) == images.end()) {
         return false;
     }
-    resource.erase(key);
+    images.erase(key);
     return true;
 }
 
@@ -49,7 +77,7 @@ void BAASImageResource::setResource(const string &key, const BAASImage &src) {
 }
 
 void BAASImageResource::clearResource() {
-    resource.clear();
+    images.clear();
 }
 
 void BAASImageResource::showResource() {
@@ -57,19 +85,20 @@ void BAASImageResource::showResource() {
 }
 
 bool BAASImageResource::is_loaded(const string &key) {
-    auto it = resource.find(key);
-    if(it == resource.end())return false;
+    auto it = images.find(key);
+    if(it == images.end())return false;
     return true;
 }
 
 void BAASImageResource::keys(std::vector<std::string> &out) {
     out.clear();
-    for(auto &i: resource){
+    for(auto &i: images){
         out.push_back(i.first);
     }
 }
 
 void BAASImageResource::load(const string &server, const string &language) {
+    BAASGlobalLogger->BAASInfo("Load Image Resource Server : [ " + server + " ] Language : [ " + language + " ]");
     if(is_loaded(server, language)) {
         BAASGlobalLogger->BAASInfo("Image Resource [ " + server + " ] [ " + language + " ] already loaded");
         return;
@@ -94,8 +123,8 @@ void BAASImageResource::load(const string &server, const string &language) {
 }
 
 bool BAASImageResource::is_loaded(const string &server, const string &language, const string &group, const string &name) {
-    auto it1 = resource.find(server);
-    if(it1 == resource.end()) return false;
+    auto it1 = images.find(server);
+    if(it1 == images.end()) return false;
     if(language.empty()) return true;
 
     auto it2 = it1->second.find(language);
@@ -114,7 +143,6 @@ bool BAASImageResource::is_loaded(const string &server, const string &language, 
 int BAASImageResource::load_from_json(const string &server, const string &language, const string &json_path) {
     int successfully_loaded_cnt = 0;
     BAASConfig info(json_path, (BAASLogger*)BAASGlobalLogger);
-    info.show();
     string group = info.getString("group");
     string path = info.getString("path");
     json j = info.get<json>("image");
@@ -122,7 +150,7 @@ int BAASImageResource::load_from_json(const string &server, const string &langua
     string image_path;
     resource_path(server, language, group, group_path);
     for(auto &it: j.items()){
-        string name = it.key();
+        const string& name = it.key();
         json image_info = it.value();
         vector<int> region = image_info["region"];
         if (region.size()!= 4) {
@@ -133,9 +161,11 @@ int BAASImageResource::load_from_json(const string &server, const string &langua
         if(image_info.contains("direction"))
             d = image_info["direction"];
         BAASImage image(region, d);
-        image_path = group_path + "\\" + name + ".png";
+        image_path = group_path;
+        image_path += "\\";
+        image_path += name+".png";
         if(!BAASImageUtil::load(image_path, image.image)){
-            BAASGlobalLogger->BAASError("Image [ " + resource_pointer(server, language, group, name) + " ] load failed");
+            BAASGlobalLogger->BAASError("Image [ " + resource_pointer(server, language, group, name) + " ] load failed, reason : not exist or broken");
             continue;
         }
         if(!check_shape(image, server, language, group, name)) continue;
@@ -166,6 +196,12 @@ inline bool BAASImageResource::check_shape(const BAASImage &image, const string&
     }
     return true;
 }
+
+BAASImageResource::BAASImageResource() {
+    images.clear();
+}
+
+
 
 
 

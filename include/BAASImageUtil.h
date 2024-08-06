@@ -129,16 +129,20 @@ public:
 
     static int pointDistance(const BAASPoint &p1, const BAASPoint &p2);
     
-    static bool judgeRGBRange(cv::Vec3b target, cv::Vec3b min, cv::Vec3b max);
+    static bool judgeRGBRange(const cv::Vec3b& target,const cv::Vec3b& min,const cv::Vec3b& max);
     
-    static bool judgeRGBRange(cv::Mat &target, BAASPoint position, cv::Vec3b min, cv::Vec3b max);
+    static bool judgeRGBRange(const cv::Mat &target,const BAASPoint& position,const cv::Vec3b& min,const cv::Vec3b& max);
 
-    static bool judgeRGBRange(cv::Mat &target, BAASPoint position, cv::Vec3b min, cv::Vec3b max, bool checkAround, int aroundRange=1);
+    static bool judgeRGBRange(const cv::Mat &target,const BAASPoint& position,const cv::Vec3b& min,const cv::Vec3b& max,bool checkAround,int aroundRange=1);
 
-    static cv::Vec3b getRegionMeanRGB(cv::Mat &target, BAASRectangle region);
+    static cv::Vec3b getRegionMeanRGB(const cv::Mat &target,const BAASRectangle& region);
 
-    static cv::Vec3b getRegionMeanRGB(cv::Mat &target, cv::Rect region);
-    
+    static cv::Vec3b getRegionMeanRGB(const cv::Mat &target,const cv::Rect& region);
+
+    static cv::Vec3b calc_abs_diff(const cv::Vec3b &a, const cv::Vec3b &b);
+
+    static cv::Vec3b getRegionMeanRGB(const cv::Mat &target);
+
     static bool isLargerRGB(const cv::Vec3b &a, const cv::Vec3b &b);
     
     static bool isSmallerRGB(const cv::Vec3b &a, const cv::Vec3b &b);

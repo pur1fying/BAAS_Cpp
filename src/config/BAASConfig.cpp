@@ -10,6 +10,12 @@
 using namespace std;
 using json = nlohmann::json;
 
+BAASConfig::BAASConfig(const json &j, BAASLogger *logger) {
+    assert(logger != nullptr);
+    this->logger = logger;
+    config = j;
+}
+
 
 BAASConfig::BAASConfig(const string &path, BAASLogger *logger) {
     assert(logger != nullptr);
@@ -302,7 +308,6 @@ void BAASConfig::unflatten(json &value) {
     }
     value = result;
 }
-
 
 
 BAASConfig *config_name_change = nullptr;

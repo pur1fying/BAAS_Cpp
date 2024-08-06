@@ -8,4 +8,6 @@ out
 cmake-build-debug-visual-studio-1
 cmake-build-debug-visual-studio
 cmake-build-release-visual-studio
+cmake-build-release
 *.7z
+dll/opencv_world490d.dll
