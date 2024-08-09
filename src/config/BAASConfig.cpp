@@ -254,6 +254,16 @@ void BAASConfig::diff(json &j, nlohmann::json& result) {
     result = json::diff(j, config);
 }
 
+void BAASConfig::clear() noexcept{
+    std::lock_guard<std::mutex> lock(mtx);
+    config.clear();
+}
+
+void BAASConfig::replace_all(json &new_config) {
+    std::lock_guard<std::mutex> lock(mtx);
+    config = new_config;
+}
+
 void BAASConfig::my_flatten() {
     std::lock_guard<std::mutex> lock(mtx);
     json res = json::object({});
@@ -308,6 +318,7 @@ void BAASConfig::unflatten(json &value) {
     }
     value = result;
 }
+
 
 
 BAASConfig *config_name_change = nullptr;

@@ -125,6 +125,12 @@ public:
 
     static void imagePaste(cv::Mat& src, const cv::Mat& dst, const BAASPoint& point = BAASPoint(0, 0));
 
+    static void gen_not_black_region_mask(const cv::Mat &src, cv::Mat &mask);
+
+    static void gen_not_black_region_mask(const cv::Mat &src, cv::Mat &mask, const BAASRectangle &region);
+
+    static void gen_not_black_region_mask(const cv::Mat &src, cv::Mat &mask, const cv::Rect &region);
+
     static BAASPoint imageSearch(const cv::Mat& screenshot, const cv::Mat& templateImage, BAASRectangle region={-1,-1,-1,-1}, double threshold=0.7, bool toGrey=false);
 
     static int pointDistance(const BAASPoint &p1, const BAASPoint &p2);
@@ -138,6 +144,12 @@ public:
     static cv::Vec3b getRegionMeanRGB(const cv::Mat &target,const BAASRectangle& region);
 
     static cv::Vec3b getRegionMeanRGB(const cv::Mat &target,const cv::Rect& region);
+
+    static cv::Vec3b get_region_not_black_mean_rgb(const cv::Mat &target);
+
+    static cv::Vec3b get_region_not_black_mean_rgb(const cv::Mat &target,const BAASRectangle& region);
+
+    static cv::Vec3b get_region_not_black_mean_rgb(const cv::Mat &target,const cv::Rect& region);
 
     static cv::Vec3b calc_abs_diff(const cv::Vec3b &a, const cv::Vec3b &b);
 

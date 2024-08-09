@@ -74,7 +74,7 @@ add_executable(
 
 target_link_libraries(
         BAAS
-        opencv_world490d.lib
+        opencv_world490.lib
         avcodec.lib
         avdevice.lib
         avfilter.lib
@@ -121,6 +121,12 @@ file(
 file(
         COPY
         ${CMAKE_CURRENT_LIST_DIR}/resource/features
+        DESTINATION ${CMAKE_BINARY_DIR}/resource
+)
+
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/module_usage
         DESTINATION ${CMAKE_BINARY_DIR}/resource
 )
 

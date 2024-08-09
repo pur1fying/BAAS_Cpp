@@ -1,0 +1,12 @@
+{
+  "common_close-notice-button_appear":{
+    "feature_type": 0,
+
+    "group": "common",
+    "name": "close-notice-button",
+
+    "check_mean_rgb": true,
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
+  }
+}

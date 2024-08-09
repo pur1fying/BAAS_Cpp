@@ -17,6 +17,10 @@
     "close-notice-button":{
       "direction": 1,
       "region": [254, 1136, 452, 1189]
+    },
+    "game-recover-notice": {
+        "direction": 1,
+        "region": [265, 628, 454, 652]
     }
   }
 }

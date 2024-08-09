@@ -112,4 +112,53 @@ public:
 private:
     std::string message;
 };
+
+// stop by flag_run manually
+class HumanTakeOverError: public std::exception {
+public:
+    explicit HumanTakeOverError(const std::string& msg){
+        message = msg;
+    }
+    [[nodiscard]] const char* what() const noexcept override {
+        return message.c_str();
+    }
+private:
+    std::string message;
+};
+
+class GameStuckError : public std::exception {
+public:
+    explicit GameStuckError(const std::string& msg){
+        message = msg;
+    }
+    [[nodiscard]] const char* what() const noexcept override {
+        return message.c_str();
+    }
+private:
+    std::string message;
+};
+
+class TooManyClicksAtOnePlaceError : public std::exception {
+public:
+    explicit TooManyClicksAtOnePlaceError(const std::string& msg){
+        message = msg;
+    }
+    [[nodiscard]] const char* what() const noexcept {
+        return message.c_str();
+    }
+private:
+    std::string message;
+};
+
+class TooManyClicksBetweenTwoClicksError : public std::exception {
+public:
+    explicit TooManyClicksBetweenTwoClicksError(const std::string& msg){
+        message = msg;
+    }
+    [[nodiscard]] const char* what() const noexcept {
+        return message.c_str();
+    }
+private:
+    std::string message;
+};
 #endif //BAAS_BAASEXCEPTIONS_H_

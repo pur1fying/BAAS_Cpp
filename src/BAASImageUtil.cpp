@@ -312,6 +312,56 @@ cv::Vec3b BAASImageUtil::calc_abs_diff(const Vec3b &a, const Vec3b &b) {
     return diff;
 }
 
+cv::Vec3b BAASImageUtil::get_region_not_black_mean_rgb(const Mat &target) {
+    vector<Mat> channels(3);
+    split(target, channels);
+    vector<double> sum(3, 0);
+    int cnt;
+    for(int i =0 ; i < 3; ++i) {
+        sum[i] = cv::sum(channels[i])[0];
+        cnt = cv::countNonZero(channels[i]);
+        if(sum[i]!=0)
+            sum[i] /= cnt;
+    }
+    return Vec3b {(unsigned char)sum[2], (unsigned char)sum[1], (unsigned char)sum[0]};
+}
+
+cv::Vec3b BAASImageUtil::get_region_not_black_mean_rgb(const Mat &target, const BAASRectangle &region) {
+    return get_region_not_black_mean_rgb(target, Rect(region.ul.x, region.ul.y, region.lr.x - region.ul.x, region.lr.y - region.ul.y));
+}
+
+cv::Vec3b BAASImageUtil::get_region_not_black_mean_rgb(const Mat &target, const Rect &region) {
+    Mat roi = target(region);
+    vector<Mat> channels(3);
+    split(roi, channels);
+    vector<double> sum(3, 0);
+    int cnt;
+    for(int i =0 ; i < 3; ++i) {
+        sum[i] = cv::sum(channels[i])[0];
+        cnt = cv::countNonZero(channels[i]);
+        if(sum[i]!=0)
+            sum[i] /= cnt;
+    }
+    return Vec3b {(unsigned char)sum[2], (unsigned char)sum[1], (unsigned char)sum[0]};
+}
+
+void BAASImageUtil::gen_not_black_region_mask(const Mat &src, Mat &mask, const BAASRectangle &region) {
+    gen_not_black_region_mask(src, mask, Rect(region.ul.x, region.ul.y, region.lr.x - region.ul.x, region.lr.y - region.ul.y));
+}
+
+void BAASImageUtil::gen_not_black_region_mask(const Mat &src, Mat &mask, const Rect &region) {
+    Mat roi = src(region);
+    inRange(roi, Scalar(0, 0, 0), Scalar(0, 0, 0), mask);
+    bitwise_not(mask, mask);
+}
+
+void BAASImageUtil::gen_not_black_region_mask(const Mat &src, Mat &mask) {
+    inRange(src, Scalar(0, 0, 0), Scalar(0, 0, 0), mask);
+    bitwise_not(mask, mask);
+}
+
+
+
 BAASPoint::BAASPoint(int xx, int yy) {
     x = xx;
     y = yy;

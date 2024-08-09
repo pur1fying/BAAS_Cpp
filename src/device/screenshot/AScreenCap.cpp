@@ -15,7 +15,6 @@ AScreenCap::AScreenCap(BAASConnection *connection) : BaseScreenshot(connection) 
     byte_pointer = 0;
     available = true;
     shot_cmd = ASCREENCAP_REMOTE_DIR + shot_cmd;
-
 }
 
 void AScreenCap::init() {

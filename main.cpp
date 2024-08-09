@@ -3,8 +3,6 @@
 #include <winsock2.h>
 #include "BAAS.h"
 
-#include <cstdint>
-#include <cstring>
 #pragma comment(lib, "ws2_32.lib")
 using namespace cv;
 using namespace std;
@@ -15,40 +13,33 @@ optional<int> func(int c) {
     if(c == 0) return 0;
     return nullopt;
 }
+
 int main() {
     system("chcp 65001");
     try {
-        initGlobals();
-        string path = "default_config\\config.json";
-        BAASUserConfig config(path);
-        config.update_name();
-        config.config_update();
-        config.save();
-        BAASConnection connection(&config);
-        connection.clear_cache("com.android.vending");
-        connection.start_self();
+        init_globals();
+        string config_name = "default_config";
         cv::Mat img;
-        NemuScreenshot nemu = NemuScreenshot(&connection);
-        NemuControl nemuControl = NemuControl(&connection);
-        nemu.init();
-        resource->load(connection.get_server(), connection.get_language());
-        BAASFeature::show();
-        while(true) {
-            nemu.screenshot(img);
-            BAASConfig output;
-            if(BAASFeature::appear(&connection, "competition_start-battle_appear", img, output, true)) {
-                BAASGlobalLogger->BAASInfo("Found");
-            }
-            this_thread::sleep_for(chrono::seconds(1));
+        BAAS baas(config_name);
+        BAASConnection* connection = baas.get_connection();
+        connection->start_self();
+//        resource->show();
+        config_name = "resource\\module_usage\\main_page.json";
+        BAASConfig procedure(config_name, baas.get_logger());
+        BAASConfig c = BAASConfig(procedure.get<json>("UI-GO-TO_main_page_home"), baas.get_logger());
+
         }
-//        resource->get(connection.get_server(), connection.get_language(), "plot", "skip", img);
-//        string name = "competition-checked";
-//        BAASRectangle region = {446, 1112, 544, 1196};
-//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {120, 127, 120});
+//        resource->get(connection.get_server(), connection.get_language(), "common", "back", img);
+//        cv::Mat mast;
+//        BAASRectangle region = {0, 0, img.cols, img.rows};
+//        BAASImageUtil::gen_not_black_region_mask(img, mast, region);
+//        string name = "competition-unchecked";
+//        BAASRectangle region = {445, 1107, 550, 1198};
+//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {100, 100, 100});
 
-        return 0;
+//        return 0;
 
-    }
+//    }
     catch (const std::exception& e){
         BAASGlobalLogger->BAASInfo(e.what());
     }

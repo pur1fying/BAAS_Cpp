@@ -13,6 +13,7 @@
 
 #include "config/BAASConfig.h"
 #include "feature/MatchTemplateFeature.h"
+#include "feature/FilterRGBMatchTemplateFeature.h"
 #include "device/BAASConnection.h"
 
 class BAASFeature {
@@ -24,7 +25,13 @@ public:
     static bool appear(BAASConnection* connection,const std::string& name ,const cv::Mat &image, BAASConfig &output, bool show_log = false);
 
     static bool appear(const std::string& server,const std::string& language,const std::string& name,const cv::Mat &image, BAASConfig &output, bool show_log = false);
+
+    static void reset_feature(const std::string& name);
+
+    static const BaseFeature* get_feature(const std::string& name);
+
 private:
+
     static void init_funcs();
 
     static void load();
@@ -36,11 +43,18 @@ private:
     // parameters, image from emulator, output, return means the feature is found or not
     static std::vector<std::function<bool (BAASConfig* parameters, const cv::Mat& image, BAASConfig& output)>> compare_functions;
 
-    static std::map<std::string, BAASConfig*> features;
+    static std::map<std::string, BaseFeature*> features;
 
     static BAASFeature *instance;
 };
 
 extern BAASFeature *features;
+
+class BAASFeatureError : public std::exception {
+public:
+    explicit BAASFeatureError(const std::string &msg) : msg(msg) {}
+private:
+    std::string msg;
+};
 
 #endif //BAAS_FEATURE_BAASFEATURE_H_

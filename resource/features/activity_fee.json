@@ -1,0 +1,19 @@
+{
+  "activity_fee_activity-fee_appear":{
+    "feature_type": 0,
+
+    "group": "activity_fee",
+    "name": "activity-fee",
+
+    "check_mean_rgb": true,
+    "mean_rgb_diff": [10, 10, 10],
+    "threshold": 0.8
+  },
+  "UI-AT_activity_fee": {
+    "feature_type": -1,
+    "and_features": [
+      "common_close-notice-button_appear",
+      "activity_fee_activity-fee_appear"
+    ]
+  }
+}

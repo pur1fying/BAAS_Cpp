@@ -33,6 +33,8 @@ void ScrcpyControl::swipe(int x1, int y1, int x2, int y2, double duration) {
 
 void ScrcpyControl::exit() {
     client->stop();
+    delete client;
+    BAASScrcpyClient::release_client(connection);
 }
 
 void ScrcpyControl::long_click(int x, int y, double duration) {

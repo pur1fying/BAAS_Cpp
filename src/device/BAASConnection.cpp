@@ -4,6 +4,7 @@
 
 #include "device/BAASConnection.h"
 #include "device/BAASAdbUtils.h"
+#include "BAASImageResource.h"
 
 using namespace std;
 BAASConnection::BAASConnection(BAASUserConfig *cfg) : BAASConnectionAttr(cfg) {
@@ -11,7 +12,11 @@ BAASConnection::BAASConnection(BAASUserConfig *cfg) : BAASConnectionAttr(cfg) {
     adb_connect();
     detect_package();
     set_server();
+    set_activity();
     set_language();
+
+    resource->load(server, language);
+
     check_mumu_app_keep_alive();
 }
 
@@ -474,6 +479,10 @@ void BAASConnection::detect_package() {
 
 void BAASConnection::set_activity() {
     activity_name = static_config->getString("/activity_name/" + package_name);
+    if(activity_name.empty()) {
+        logger->BAASInfo("Activity name not found");
+    }
+    else logger->BAASInfo("Activity name : [ " + activity_name + " ]");
 }
 
 void BAASConnection::auto_detect_language() {

@@ -35,7 +35,7 @@ string ASCREENCAP_BIN_DIR;
 
 string ASCREENCAP_REMOTE_DIR;
 
-void initGlobals() {
+void init_globals() {
     if (inited) {
         return;
     }

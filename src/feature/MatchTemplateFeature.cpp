@@ -3,7 +3,7 @@
 //
 
 #include "feature/MatchTemplateFeature.h"
-
+#include "feature/BAASFeature.h"
 
 using namespace std;
 using namespace cv;
@@ -20,13 +20,18 @@ using namespace nlohmann;
  *      "name": "draw-card-checked",
  *
  *      "check_mean_rgb": true,
- *      "mean_rgb_diff": 10,
+ *      "mean_rgb_diff": [10, 10, 10],
  *      "threshold": 0.8
  * }
  */
+
+MatchTemplateFeature::MatchTemplateFeature(BAASConfig *config) : BaseFeature(config) {
+
+}
+
 bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, BAASConfig &output) {
     vector<string> log;
-    log.emplace_back("Compare Method [ MatchTemplateFeature ].");
+    log.emplace_back("Compare Method :[ MatchTemplateFeature ].");
     log.push_back("Parameters : " + parameter->get_config().dump(4));
 
     BAASImage template_image;
@@ -45,7 +50,6 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
         output.insert("log", log);
         return false;
     }
-
 
     if (parameter->getBool("check_mean_rgb", false)) {
         Vec3b cropped_diff = BAASImageUtil::getRegionMeanRGB(image, template_image.region);
@@ -82,20 +86,24 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
     json j = json::array();
     output.insert("log", log);
     output.insert("max_similarity", maxVal);
-    j.push_back(maxLoc.x + cropped.cols);
-    j.push_back(maxLoc.y + cropped.rows);
+    j.push_back(template_image.region.ul.x + cropped.cols/2);
+    j.push_back(template_image.region.ul.x + cropped.rows/2);
     output.insert("center", j);
     return true;
 }
 
-void MatchTemplateFeature::get_image(BAASConfig* parameter, BAASImage &image) {
-    string server = parameter->getString("server");
-    assert(!server.empty());
-    string language = parameter->getString("language");
-    assert(!language.empty());
-    string group = parameter->getString("group");
+
+
+double MatchTemplateFeature::self_average_cost(const Mat &image, const string& server, const string& language) const {
+    string group = config->getString("group");
     assert(!group.empty());
-    string name = parameter->getString("name");
+    string name = config->getString("name");
     assert(!name.empty());
-    resource->get(server, language, group, name, image);
+
+    BAASImage template_image;
+    resource->get(server, language, group, name, template_image);
+    return template_image.image.rows * template_image.image.cols;
 }
+
+
+

@@ -8,6 +8,7 @@
 #include "BAASImageUtil.h"
 #include "BAASGlobals.h"
 #include "config/BAASConfig.h"
+#include "device/BAASConnection.h"
 
 struct BAASImage{
     BAASRectangle region;
@@ -42,15 +43,15 @@ public:
 
     bool remove(const std::string& key);
 
-    void setResource(const std::string& key, const BAASImage &src);
+    void clear();
 
-    void clearResource();
-
-    void showResource();
+    void show();
 
     bool is_loaded(const std::string& key);
 
     void keys(std::vector<std::string> &out);
+
+    void load(const BAASConnection* conn);
 
     void load(const std::string& server, const std::string& language);
 

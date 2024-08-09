@@ -21,6 +21,7 @@
 #include "BAASUtil.h"
 #include "BAASExceptions.h"
 
+
 class BAASConfig {
 public:
     explicit BAASConfig() = default;
@@ -85,7 +86,6 @@ public:
         if(key[0] != '/') {
             auto it = config.find(key);
             if(it == config.end()) {
-                logger->BAASInfo("Key [ " + key + " ] not found, use default value.");
                 return default_value;
             }
             return *it;
@@ -94,7 +94,6 @@ public:
             return config.at(nlohmann::json::json_pointer(key));
         }
         catch (std::exception &e) {
-            logger->BAASInfo("Key [ " + key + " ] not found, use default value.");
             return default_value;
         }
     }
@@ -217,6 +216,11 @@ public:
     void show_modify_history();
 
     void diff(nlohmann::json &j, nlohmann::json& result);
+
+    // clear and replace_all do not change modify history
+    void clear() noexcept;
+
+    void replace_all(nlohmann::json& new_config);
 
     static inline void parent_pointer(std::string &ptr) {
         if(!ptr.empty()) ptr = ptr.substr(0, ptr.find_last_of('/'));

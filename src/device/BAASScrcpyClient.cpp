@@ -256,8 +256,6 @@ BAASScrcpyClient *BAASScrcpyClient::get_client(BAASConnection *connection) {
 void BAASScrcpyClient::release_client(BAASConnection *connection) {
     auto it = clients.find(connection);
     if(it != clients.end()) {
-        it->second->stop();
-        delete it->second;
         clients.erase(connection);
     }
 }

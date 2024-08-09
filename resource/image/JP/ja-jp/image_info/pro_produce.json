@@ -1,0 +1,42 @@
+{
+  "group": "pro_produce",
+  "path": "pro_produce",
+  "image": {
+    "accept-card-bright": {
+      "direction": 1,
+      "region": [284, 1057, 443, 1104]
+    },
+    "accept-card-grey": {
+      "direction": 1,
+      "region": [284, 1057, 443, 1104]
+    },
+    "draw-card-again":{
+        "direction": 1,
+        "region": [573, 1069, 647, 1097]
+    },
+    "draw-card-left-three-times": {
+        "direction": 1,
+        "region": [615, 1035, 629, 1057]
+    },
+    "draw-card-left-two-times": {
+      "direction": 1,
+      "region": [615, 1035, 629, 1057]
+    },
+    "draw-card-left-one-times": {
+      "direction": 1,
+      "region": [615, 1035, 629, 1057]
+    },
+    "train-skip-button" : {
+      "direction": 1,
+      "region": [635, 789, 693, 813]
+    },
+    "skip-recover-zero-health": {
+        "direction": 1,
+        "region": [654, 758, 673, 780]
+    },
+    "action-select-notice": {
+        "direction": 1,
+        "region": [252, 856, 468, 875]
+    }
+  }
+}

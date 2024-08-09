@@ -28,7 +28,7 @@ std::string BAASImage::get_size() const {
 std::string BAASImage::gen_info() const {
     string info = "Region : [ " + to_string(region.ul.x) + ", " + to_string(region.ul.y) + " ] [ " + to_string(region.lr.x) + ", " + to_string(region.lr.y) + " ]";
     info += " Direction : " + to_string(direction);
-    info += " Size : " + get_size();
+    info += " Resolution : " + get_size();
     return info;
 }
 
@@ -72,16 +72,17 @@ bool BAASImageResource::remove(const string &key) {
     return true;
 }
 
-void BAASImageResource::setResource(const string &key, const BAASImage &src) {
-
-}
-
-void BAASImageResource::clearResource() {
+void BAASImageResource::clear() {
     images.clear();
 }
 
-void BAASImageResource::showResource() {
-
+void BAASImageResource::show() {
+    BAASGlobalLogger->hr("Image Resource");
+    for(auto &i: images)
+        for(auto &j: i.second)
+            for(auto &k: j.second)
+                for(auto &l: k.second)
+                    BAASGlobalLogger->BAASInfo("Image [ " + resource_pointer(i.first, j.first, k.first, l.first) + " ]\n" + l.second.gen_info());
 }
 
 bool BAASImageResource::is_loaded(const string &key) {
@@ -95,6 +96,10 @@ void BAASImageResource::keys(std::vector<std::string> &out) {
     for(auto &i: images){
         out.push_back(i.first);
     }
+}
+
+void BAASImageResource::load(const BAASConnection *conn) {
+    load(conn->get_server(), conn->get_language());
 }
 
 void BAASImageResource::load(const string &server, const string &language) {
@@ -200,6 +205,9 @@ inline bool BAASImageResource::check_shape(const BAASImage &image, const string&
 BAASImageResource::BAASImageResource() {
     images.clear();
 }
+
+
+
 
 
 

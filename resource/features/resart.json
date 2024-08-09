@@ -1,0 +1,11 @@
+{
+  "UI-AT_restart_login-bonus": {
+    "feature_type": 1,
+
+    "group": "restart",
+    "name": "login-bonus",
+    "check_mean_rgb": true,
+    "mean_rgb_diff": [10, 10, 10],
+    "threshold": 0.8
+  }
+}

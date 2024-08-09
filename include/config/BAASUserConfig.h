@@ -28,6 +28,17 @@ public:
         return getString("/emulator/serial");
     }
 
+    inline std::string screenshot_method() {
+        return getString("/emulator/screenshot_method");
+    }
+
+    inline std::string control_method() {
+        return getString("/emulator/control_method");
+    }
+
+    inline const double screenshot_interval() {
+        return getDouble("/script/screenshot_interval");
+    }
 };
 
 extern BAASUserConfig* config_template;

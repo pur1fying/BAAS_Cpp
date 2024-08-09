@@ -42,7 +42,7 @@ extern std::string DEVELOPER_PROJECT_DIR;
 
 static bool inited = false;
 
-void initGlobals();
+void init_globals();
 
 
 

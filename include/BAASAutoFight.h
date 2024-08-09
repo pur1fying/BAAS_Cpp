@@ -4,7 +4,7 @@
 
 #ifndef BAAS_BAASAUTOFIGHT_H_
 #define BAAS_BAASAUTOFIGHT_H_
-#include "BAASScreenshot.h"
+
 #include "BAASImageUtil.h"
 #include "BAASImageResource.h"
 
