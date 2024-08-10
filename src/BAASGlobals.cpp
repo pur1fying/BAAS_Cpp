@@ -4,6 +4,7 @@
 
 #include "BAASGlobals.h"
 #include "feature/BAASFeature.h"
+#include "procedure/BAASProcedure.h"
 #include "config.h"
 #include "BAASImageResource.h"
 
@@ -16,6 +17,8 @@ string BAAS_CONFIG_DIR;
 string BAAS_IMAGE_RESOURCE_DIR;
 
 string BAAS_FEATURE_DIR;
+
+string BAAS_PROCEDURE_DIR;
 
 string scrcpyJarPath;
 
@@ -48,6 +51,7 @@ void init_globals() {
     BAAS_CONFIG_DIR = BAAS_PROJECT_DIR + "\\config";
     BAAS_IMAGE_RESOURCE_DIR = BAAS_PROJECT_DIR + "\\resource\\image";
     BAAS_FEATURE_DIR = BAAS_PROJECT_DIR + "\\resource\\features";
+    BAAS_PROCEDURE_DIR = BAAS_PROJECT_DIR + "\\resource\\procedure";
 
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
 
@@ -64,7 +68,8 @@ void init_globals() {
     DEVELOPER_PROJECT_DIR = curr.parent_path().parent_path().string();
 
     static_config = BAASStaticConfig::getStaticConfig();
-    features = BAASFeature::get_instance();
+    baas_features = BAASFeature::get_instance();
+    baas_procedures = BAASProcedure::get_instance();
     resource = BAASImageResource::get_instance();
 
     Server::init();

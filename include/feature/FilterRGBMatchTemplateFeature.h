@@ -11,7 +11,6 @@
 #define BAAS_FILTER_RGB_MATCH_TEMPLATE_FEATURE 1
 class FilterRGBMatchTemplateFeature : public BaseFeature {
 public:
-
     explicit FilterRGBMatchTemplateFeature(BAASConfig* config);
 
     static bool compare(BAASConfig* parameter, const cv::Mat& image, BAASConfig& output);

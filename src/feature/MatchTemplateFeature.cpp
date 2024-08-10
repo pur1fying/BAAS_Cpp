@@ -51,7 +51,7 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
         return false;
     }
 
-    if (parameter->getBool("check_mean_rgb", false)) {
+    if (parameter->getBool("check_mean_rgb", true)) {
         Vec3b cropped_diff = BAASImageUtil::getRegionMeanRGB(image, template_image.region);
         Vec3b template_diff = BAASImageUtil::getRegionMeanRGB(template_image.image);
         log.push_back("Screenshot Mean RGB  : [\t" + to_string(cropped_diff[0]) + " ,\t" + to_string(cropped_diff[1]) + " ,\t" + to_string(cropped_diff[2]) + " ]");

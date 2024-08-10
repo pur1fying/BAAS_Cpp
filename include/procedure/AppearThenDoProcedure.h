@@ -11,11 +11,13 @@
 
 class AppearThenDoProcedure : public BaseProcedure {
 public:
-    explicit AppearThenDoProcedure(BAAS* baas);
+    explicit AppearThenDoProcedure(BAASConfig *possible_feature);
 
+    void implement(BAAS *baas, BAASConfig& output) override;
+
+    void clear_resource() override;
+private:
     void wait_loading();
-
-    void appear_then_do(BAASConfig *possible_feature);
 
     void clear_possibles();
 
@@ -31,7 +33,6 @@ public:
 
     void insert_last_clicked_queue(std::string& feature_name);
 
-private:
     std::vector<BAASConfig*> possibles;
 
     std::vector<std::string> possibles_feature_names;

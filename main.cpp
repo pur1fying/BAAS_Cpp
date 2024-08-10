@@ -21,21 +21,31 @@ int main() {
         string config_name = "default_config";
         cv::Mat img;
         BAAS baas(config_name);
-        BAASConnection* connection = baas.get_connection();
-        connection->start_self();
+        BAASConfig config;
+        baas.update_screenshot_array();
+        baas.get_latest_screenshot(img);
+//        baas.feature_appear("UI-AT_competition_start_battle", config, true);
+//        return 0;
+        baas.solve_procedure("UI-GO-TO_main_page_competition", config);
+        baas.solve_procedure("COMPETITION_SOLVE", config);
+//        BAASConnection* connection = baas.get_connection();
+//        connection->start_self();
 //        resource->show();
-        config_name = "resource\\module_usage\\main_page.json";
-        BAASConfig procedure(config_name, baas.get_logger());
-        BAASConfig c = BAASConfig(procedure.get<json>("UI-GO-TO_main_page_home"), baas.get_logger());
 
+
+
+//        config_name = "resource\\module_usage\\main_page.json";
+//        BAASConfig procedure(config_name, baas.get_logger());
+//        BAASConfig c = BAASConfig(procedure.get<json>("UI-GO-TO_main_page_home"), baas.get_logger());
+        string name = "daily-chance-all-used";
+        BAASRectangle region = {217, 867, 501, 902};
+        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {200, 200, 200}, {255, 255, 255});
         }
 //        resource->get(connection.get_server(), connection.get_language(), "common", "back", img);
 //        cv::Mat mast;
 //        BAASRectangle region = {0, 0, img.cols, img.rows};
 //        BAASImageUtil::gen_not_black_region_mask(img, mast, region);
-//        string name = "competition-unchecked";
-//        BAASRectangle region = {445, 1107, 550, 1198};
-//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {100, 100, 100});
+
 
 //        return 0;
 

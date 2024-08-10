@@ -4,7 +4,7 @@
   "image": {
     "menu": {
       "direction": 1,
-      "region": [50, 524, 222, 569]
+      "region": [68, 46, 200, 69]
     },
     "skip": {
       "direction": 1,
@@ -14,9 +14,33 @@
       "direction": 1,
       "region": [251, 1130, 457, 1186]
     },
+    "fight-history-button": {
+      "direction": 1,
+      "region": [342, 376, 430, 406]
+    },
     "start-battle": {
       "direction": 1,
       "region": [266, 1056, 446, 1109]
+    },
+    "lose-one-competition": {
+      "direction": 1,
+      "region": [185, 408, 535, 518]
+    },
+    "win-one-competition": {
+      "direction": 1,
+      "region": [206, 410, 513, 517]
+    },
+    "next": {
+      "direction": 1,
+      "region": [353, 1145, 418, 1181]
+    },
+    "end": {
+      "direction": 1,
+      "region": [353, 1145, 418, 1181]
+    },
+    "daily-chance-all-used": {
+      "direction": 1,
+      "region": [231, 876, 488, 894]
     }
   }
 }

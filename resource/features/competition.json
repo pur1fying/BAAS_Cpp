@@ -1,12 +1,75 @@
 {
+  "competition_lose-one-competition_appear": {
+    "feature_type": 1,
+    "group": "competition",
+    "name": "lose-one-competition"
+  },
+  "competition_next_appear": {
+    "feature_type": 0,
+    "group": "competition",
+    "name": "next"
+  },
+  "competition_daily-chance-all-used_appear": {
+    "feature_type": 1,
+    "group": "competition",
+    "name": "daily-chance-all-used"
+  },
+  "competition_fight-history-button_appear": {
+    "feature_type": 0,
+    "group": "competition",
+    "name": "fight-history-button"
+  },
+  "competition_end_appear": {
+    "feature_type": 0,
+    "group": "competition",
+    "name": "end"
+  },
+  "competition_win-one-competition_appear": {
+    "feature_type": 1,
+    "group": "competition",
+    "name": "win-one-competition"
+  },
   "competition_start-battle_appear":{
     "feature_type": 0,
-
     "group": "competition",
-    "name": "start-battle",
-
-    "check_mean_rgb": true,
-    "mean_rgb_diff": [10, 10, 10],
-    "threshold": 0.8
+    "name": "start-battle"
+  },
+  "competition_skip_appear":{
+    "feature_type": 0,
+    "group": "competition",
+    "name": "skip"
+  },
+  "competition_start-competition_appear":{
+    "feature_type": 0,
+    "group": "competition",
+    "name": "start-competition"
+  },
+  "competition_menu_appear":{
+    "feature_type": 1,
+    "group": "competition",
+    "name": "menu"
+  },
+  "UI-AT_competition_menu": {
+    "feature_type": -1,
+    "and_features": [
+      "competition_menu_appear",
+      "common_tip_appear",
+      "common_home_appear",
+      "common_back_appear"
+    ]
+  },
+  "UI-AT_competition_start_battle": {
+    "feature_type": -1,
+    "and_features": [
+      "competition_start-battle_appear",
+      "competition_menu_appear"
+    ]
+  },
+  "UI-AT_competition_start_competition": {
+    "feature_type": -1,
+    "and_features": [
+      "competition_start-competition_appear",
+      "competition_skip_appear"
+    ]
   }
 }

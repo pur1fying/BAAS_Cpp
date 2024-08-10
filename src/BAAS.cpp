@@ -2,6 +2,7 @@
 // Created by pc on 2024/8/9.
 //
 #include "BAAS.h"
+#include "procedure/BAASProcedure.h"
 
 using namespace std;
 
@@ -39,6 +40,17 @@ void BAAS::get_latest_screenshot(cv::Mat &img) {
     if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
     img = latest_screenshot.clone();
 }
+
+void BAAS::solve_procedure(const string &name, BAASConfig &output) {
+    if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+    BAASProcedure::implement(this, name, output);
+}
+
+void BAAS::feature_appear(const string &feature_name,BAASConfig &output, bool show_log) {
+    if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+    BAASFeature::appear(connection, feature_name, latest_screenshot, output, show_log);
+}
+
 
 
 

@@ -3,8 +3,17 @@
 //
 #include "procedure/BaseProcedure.h"
 
-BaseProcedure::BaseProcedure(BAAS *baas) {
-    this->baas = baas;
-    this->logger = baas->get_logger();
+BaseProcedure::BaseProcedure(BAASConfig *possible_feature) {
+    this->possible_feature = possible_feature;
+    logger = nullptr;
+    baas = nullptr;
+}
+
+void BaseProcedure::implement(BAAS* baas, BAASConfig& output) {
+    throw std::runtime_error("BaseProcedure::implement() should not be called");
+}
+
+void BaseProcedure::clear_resource() {
+    throw std::runtime_error("BaseProcedure::clear_resource() should not be called");
 }
 

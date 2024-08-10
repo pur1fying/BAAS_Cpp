@@ -8,5 +8,45 @@
     "check_mean_rgb": true,
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
+  },
+  "common_back_appear": {
+    "feature_type": 1,
+
+    "group": "common",
+    "name": "back",
+
+    "check_mean_rgb": true,
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
+  },
+  "common_home_appear": {
+    "feature_type": 1,
+
+    "group": "common",
+    "name": "home",
+
+    "check_mean_rgb": true,
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
+  },
+  "common_tip_appear": {
+    "feature_type": 1,
+
+    "group": "common",
+    "name": "tip",
+
+    "check_mean_rgb": true,
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
+  },
+  "common_game-recover-notice_appear": {
+    "feature_type": 1,
+
+    "group": "common",
+    "name": "game-recover-notice",
+
+    "check_mean_rgb": true,
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
   }
 }

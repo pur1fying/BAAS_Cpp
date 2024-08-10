@@ -11,7 +11,7 @@ std::map<std::string, BaseFeature*> BAASFeature::features;
 
 BAASFeature *BAASFeature::instance = nullptr;
 
-BAASFeature *features = nullptr;
+BAASFeature *baas_features = nullptr;
 
 BAASFeature *BAASFeature::get_instance() {
     if(instance == nullptr) {
@@ -80,7 +80,6 @@ int BAASFeature::load_from_json(const string &path) {
         }
         if (f != nullptr) {
             f->set_path(path);
-            f->set_enabled(temp->getBool("enabled", true));
             features[i.key()] = f;
             loaded++;
         }

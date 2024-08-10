@@ -48,7 +48,7 @@ private:
     static BAASFeature *instance;
 };
 
-extern BAASFeature *features;
+extern BAASFeature *baas_features;
 
 class BAASFeatureError : public std::exception {
 public:

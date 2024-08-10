@@ -14,6 +14,7 @@ BaseFeature::BaseFeature(BAASConfig* config) {
     this->config = config;
     this->and_features = this->config->get<vector<string>>("and_features", {});
     this->or_features = this->config->get<vector<string>>("or_features", {});
+    is_enabled = this->config->getBool("enabled", true);
 }
 
 double BaseFeature::self_average_cost(const cv::Mat &image, const string& server, const string& language) const {

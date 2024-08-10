@@ -1,0 +1,17 @@
+{
+  "COMPETITION_SOLVE": {
+    "procedure_type": 0,
+    "ends": "competition_daily-chance-all-used_appear",
+    "possibles": [
+      ["main_page_competition-checked_appear", 475, 893],
+      ["competition_fight-history-button_appear", 346, 671],
+      ["UI-AT_competition_start_battle", 361, 1085],
+      ["UI-AT_competition_start_competition", 632, 1163],
+      ["competition_win-one-competition_appear", 360, 640],
+      ["competition_lose-one-competition_appear", 360, 640],
+      ["competition_next_appear", 368, 1164],
+      ["competition_end_appear", 368, 1164],
+      ["common_close-notice-button_appear", 368, 1164]
+    ]
+  }
+}

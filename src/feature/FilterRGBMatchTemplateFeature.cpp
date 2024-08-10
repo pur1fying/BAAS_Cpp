@@ -50,7 +50,7 @@ bool FilterRGBMatchTemplateFeature::compare(BAASConfig *parameter, const cv::Mat
     BAASImageUtil::gen_not_black_region_mask(template_image.image, mask);
     bitwise_and(cropped, cropped, filtered, mask);
 
-    if (parameter->getBool("check_mean_rgb", false)) {
+    if (parameter->getBool("check_mean_rgb", true)) {
         Vec3b cropped_diff = BAASImageUtil::get_region_not_black_mean_rgb(filtered);
         Vec3b template_diff = BAASImageUtil::get_region_not_black_mean_rgb(template_image.image);
         log.push_back("Screenshot Mean RGB  : [\t" + to_string(cropped_diff[0]) + " ,\t" + to_string(cropped_diff[1]) + " ,\t" + to_string(cropped_diff[2]) + " ]");

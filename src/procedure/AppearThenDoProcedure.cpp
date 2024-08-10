@@ -7,11 +7,14 @@
 using namespace std;
 using namespace nlohmann;
 
-AppearThenDoProcedure::AppearThenDoProcedure(BAAS *baas) : BaseProcedure(baas) {
+AppearThenDoProcedure::AppearThenDoProcedure(BAASConfig *possible_feature) : BaseProcedure(possible_feature) {
 
 }
 
-void AppearThenDoProcedure::appear_then_do(BAASConfig *possible_feature) {
+void AppearThenDoProcedure::implement(BAAS *baas, BAASConfig& output) {
+    this->baas = baas;
+    logger = baas->logger;
+
     json end = possible_feature->get<json>("end");
     vector<string> end_feature_names;
 
@@ -29,7 +32,7 @@ void AppearThenDoProcedure::appear_then_do(BAASConfig *possible_feature) {
 
     max_stuck_time = possible_feature->getInt("max_stuck_time", 20);
     max_click = possible_feature->getInt("max_click_times", 20);
-
+    output.clear();
     pop_last_clicked_queue(0);
 
     last_appeared_feature_name.clear();
@@ -63,7 +66,8 @@ void AppearThenDoProcedure::appear_then_do(BAASConfig *possible_feature) {
         for(int i = 0; i < end_feature_names.size(); ++i) {
             current_comparing_feature_name = end_feature_names[i];
             if(BAASFeature::appear(baas->connection, current_comparing_feature_name, baas->latest_screenshot, temp_output, show_log)) {
-                logger->BAASInfo("End [ " + end_feature_names[i] + " ]. ");
+                logger->BAASInfo("End [ " + current_comparing_feature_name + " ]. ");
+                output.insert("end", current_comparing_feature_name);
                 return;
             }
         }
@@ -177,5 +181,9 @@ void AppearThenDoProcedure::insert_last_clicked_queue(string &feature_name) {
         logger->BAASInfo(to_string(max_click) + " Clicks Between : " + last_clicked_pair_counter.first.first + " and " + last_clicked_pair_counter.second.first);
         throw TooManyClicksBetweenTwoClicksError("Too Many clicks between two features.");
     }
+}
+
+void AppearThenDoProcedure::clear_resource() {
+    clear_possibles();
 }
 

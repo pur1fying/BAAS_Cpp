@@ -14,20 +14,12 @@
 #include "device/control/BAASControl.h"
 
 #include "feature/BAASFeature.h"
-#include "procedure/BAASProcedure.h"
 #include "BAASGlobals.h"
 
 #include "BAASAutoFight.h"
 #include "BAASImageUtil.h"
 #include "BAASDevelopUtils.h"
 #include "BAASImageResource.h"
-
-#define BAAS_ACTION_TYPE_DO_NOTHING 0
-#define BAAS_ACTION_TYPE_CLICK 1
-#define BAAS_ACTION_TYPE_LONG_CLICK 2
-#define BAAS_ACTION_TYPE_SWIPE 3
-
-
 
 class BAAS{
 public:
@@ -36,6 +28,10 @@ public:
     void update_screenshot_array();
 
     void get_latest_screenshot(cv::Mat& img);
+
+    void feature_appear(const std::string& feature_name, BAASConfig &output, bool show_log = false);
+
+    void solve_procedure(const std::string &name, BAASConfig& output);
 
     ~BAAS() = default;
 
@@ -103,12 +99,7 @@ public:
 
 
 
-
 private:
-    void init_procedures();
-
-    std::function<void(BAASConfig*)> procedures;
-
     bool flag_run;
 
     cv::Mat latest_screenshot;
@@ -125,7 +116,8 @@ private:
 
     BAASControl* control;
 
-    friend class AppearThenDoProcedure
+    friend class AppearThenDoProcedure;
+    friend class AppearThenClickProcedure;
 };
 
 
