@@ -10,7 +10,7 @@
     "name": "next"
   },
   "competition_daily-chance-all-used_appear": {
-    "feature_type": 1,
+    "feature_type": 0,
     "group": "competition",
     "name": "daily-chance-all-used"
   },
