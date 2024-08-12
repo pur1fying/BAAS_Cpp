@@ -30,5 +30,11 @@
   },
   "available_screenshot_methods": ["adb", "scrcpy", "ascreencap", "nemu"],
   "available_control_methods": ["adb", "scrcpy", "nemu"],
-  "google_store_package_name": "com.android.vending"
+  "google_store_package_name": "com.android.vending",
+  "available_task_list": [
+    "competition",
+    "collect_activity_fee",
+    "mail",
+    "restart"
+  ]
 }

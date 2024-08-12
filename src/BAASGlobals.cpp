@@ -73,6 +73,7 @@ void init_globals() {
     resource = BAASImageResource::get_instance();
 
     Server::init();
+    BAAS::init_implement_funcs();
 
     config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);
 

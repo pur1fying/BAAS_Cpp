@@ -77,8 +77,16 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
     log.emplace_back("Match Template Result : ");
     log.push_back("Max Similarity : " + to_string(maxVal));
 
-    if (maxVal < parameter->getDouble("threshold", 0.8)) {
-        log.emplace_back("Max Similarity less than threshold, Quit.");
+    double threshold_min, threshold_max;
+    try{
+        threshold_min = parameter->get <double>("/threshold/0");
+        threshold_max = parameter->get <double>("/threshold/1");
+    } catch (KeyError &e) {
+        threshold_min = parameter->getDouble("threshold", 0.8);
+        threshold_max = 1.0;
+    }
+    if (maxVal < threshold_min || maxVal > threshold_max)  {
+        log.emplace_back("maxVal not in range [" + to_string(threshold_min) + ", " + to_string(threshold_max) + "], Quit.");
         output.insert("log", log);
         return false;
     }

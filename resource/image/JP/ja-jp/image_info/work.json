@@ -20,19 +20,19 @@
     },
     "menu": {
       "direction": 1,
-      "region": [8, 38, 154, 76]
+      "region": [17, 40, 147, 72]
     },
     "start-work-confirm": {
       "direction": 1,
       "region": [49, 527, 291, 573]
     },
-    "start-work-button": {
+    "start-work-confirm-button": {
       "direction": 1,
-      "region": [109, 1137, 317, 1187]
+      "region": [389, 1136, 597, 1183]
     },
     "cancel-start-work-button": {
       "direction": 1,
-      "region": [389, 1136, 597, 1183]
+      "region": [109, 1137, 317, 1187]
     },
     "work-position1-acceleration": {
       "direction": 1,
@@ -41,6 +41,14 @@
     "work-position2-acceleration": {
       "direction": 1,
       "region": [464, 1023, 594,1060]
+    },
+    "work-position1-unoccupied": {
+      "direction": 1,
+      "region": [115, 400, 258, 539]
+    },
+    "work-position2-unoccupied": {
+      "direction": 1,
+      "region": [470, 429, 596, 505]
     }
   }
 }

@@ -1,0 +1,112 @@
+{
+  "work_menu_appear": {
+    "feature_type": 1,
+    "group": "work",
+    "name": "menu"
+  },
+  "work_cancel-start-work-button_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "cancel-start-work-button"
+  },
+  "work_person-decide-button_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "person-decide-button"
+  },
+  "work_person-select-button_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "person-select-button"
+  },
+  "work_start-work-confirm_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "start-work-confirm"
+  },
+  "work_start-work-confirm-button_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "start-work-confirm-button"
+  },
+  "work_work-finished_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "work-finished"
+  },
+  "work_work-finished-button_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "work-finished-button"
+  },
+  "work_position1-acceleration_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "work-position1-acceleration"
+  },
+  "work_position2-acceleration_appear": {
+    "feature_type": 0,
+    "group": "work",
+    "name": "work-position2-acceleration"
+  },
+  "work_position1-unoccupied_appear": {
+    "feature_type": 1,
+    "group": "work",
+    "name": "work-position1-unoccupied"
+  },
+  "work_position2-unoccupied_appear": {
+    "feature_type": 1,
+    "group": "work",
+    "name": "work-position2-unoccupied"
+  },
+  "UI_work-position1_appear": {
+    "or_features": [
+      "work_position1-acceleration_appear",
+      "work_position1-unoccupied_appear"
+    ]
+  },
+  "UI_work-position2_appear": {
+    "or_features": [
+      "work_position2-acceleration_appear",
+      "work_position2-unoccupied_appear"
+    ]
+  },
+  "UI-AT_work_finished": {
+    "and_features": [
+      "work_work-finished_appear",
+      "work_work-finished-button_appear"
+    ]
+  },
+  "UI-AT_work_menu": {
+    "and_features": [
+      "work_menu_appear",
+      "common_navigation-bar_appear"
+    ]
+  },
+  "UI-AT_work_selection": {
+    "and_features": [
+      "UI-AT_work_menu",
+      "UI_work-position1_appear",
+      "UI_work-position2_appear"
+    ]
+  },
+  "UI-AT_work_person_select": {
+    "and_features": [
+      "UI-AT_work_menu",
+      "work_person-select-button_appear"
+    ]
+  },
+  "UI-AT_work_person_decide": {
+    "and_features": [
+        "UI-AT_work_menu",
+        "work_person-decide-button_appear"
+    ]
+  },
+  "UI-AT_work_start_work_confirm": {
+    "and_features": [
+      "work_start-work-confirm_appear",
+      "UI_work-position1_appear",
+      "work_cancel-start-work-button_appear"
+    ]
+  }
+}

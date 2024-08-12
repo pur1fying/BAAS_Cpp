@@ -48,5 +48,12 @@
     "check_mean_rgb": true,
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
+  },
+  "common_navigation-bar_appear": {
+    "and_features": [
+      "common_home_appear",
+      "common_tip_appear",
+      "common_back_appear"
+    ]
   }
 }

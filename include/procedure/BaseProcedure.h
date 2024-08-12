@@ -21,6 +21,10 @@ public:
     virtual void implement(BAAS* baas, BAASConfig& output);
 
     virtual void clear_resource();
+
+    inline BAASConfig* get_config() {
+        return possible_feature;
+    }
 protected:
     BAASConfig* possible_feature;
 

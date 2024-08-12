@@ -53,6 +53,8 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
     max_stuck_time = possible_feature->getInt("max_stuck_time", 20);
     max_click = possible_feature->getInt("max_click_times", 20);
 
+    bool skip_first_screenshot = possible_feature->getBool("skip_first_screenshot", false);
+
     output.clear();
 
     start_time = BAASUtil::getCurrentTimeStamp();
@@ -69,7 +71,8 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
         for (auto &i: end_feature_names) BAASFeature::reset_feature(i);
         for (auto &i: possibles_feature_names) BAASFeature::reset_feature(i);
 
-        wait_loading();
+        if(!skip_first_screenshot)wait_loading();
+        else skip_first_screenshot = false;
 
         for (int i = 0; i < end_feature_names.size(); ++i) {
             current_comparing_feature_name = end_feature_names[i];

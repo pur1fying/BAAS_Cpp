@@ -59,22 +59,7 @@ int BAASProcedure::load_from_json(const std::string &path) {
             delete temp;
             continue;
         }
-        int tp = temp->getInt("procedure_type", -1);
-        BaseProcedure *p = nullptr;
-        switch (tp) {
-            case -1:
-                p = new BaseProcedure(temp);
-                break;
-            case BAAS_PROCEDURE_TYPE_APPEAR_THEN_CLICK:
-                p = new AppearThenClickProcedure(temp);
-                break;
-            case BAAS_PROCEDURE_TYPE_APPEAR_THEN_DO:
-                p = new AppearThenDoProcedure(temp);
-                break;
-            default:
-                BAASGlobalLogger->BAASError("Procedure Type [ " + to_string(tp) + " ] not found");
-                break;
-        }
+        BaseProcedure *p = create_procedure(temp);
         if (p != nullptr) {
             procedures[i.key()] = p;
             loaded++;
@@ -85,6 +70,46 @@ int BAASProcedure::load_from_json(const std::string &path) {
 
 BAASProcedure::BAASProcedure() {
     load();
+}
+
+void BAASProcedure::implement(BAAS *baas, const string &procedure_name,const BAASConfig &patch, BAASConfig &output) {
+    assert(baas != nullptr);
+    auto it = procedures.find(procedure_name);
+    if(it == procedures.end()) {
+        BAASGlobalLogger->BAASError("Procedure [ " + procedure_name + " ] not found");
+        return;
+    }
+    auto *baas_config = new BAASConfig(it->second->get_config()->get_config(), baas->get_logger());
+    baas_config->update(&patch);
+
+    BaseProcedure *p = create_procedure(baas_config);
+
+    p->implement(baas, output);
+    p->clear_resource();
+
+    delete baas_config;
+    delete p;
+}
+
+BaseProcedure *BAASProcedure::create_procedure(BAASConfig *config) {
+    assert(config != nullptr);
+    BaseProcedure *p = nullptr;
+    int tp = config->getInt("procedure_type", -1);
+    switch (tp) {
+        case -1:
+            p = new BaseProcedure(config);
+            break;
+        case BAAS_PROCEDURE_TYPE_APPEAR_THEN_CLICK:
+            p = new AppearThenClickProcedure(config);
+            break;
+        case BAAS_PROCEDURE_TYPE_APPEAR_THEN_DO:
+            p = new AppearThenDoProcedure(config);
+            break;
+        default:
+            BAASGlobalLogger->BAASError("Procedure Type [ " + to_string(tp) + " ] not found");
+            break;
+    }
+    return p;
 }
 
 

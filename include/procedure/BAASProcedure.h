@@ -11,6 +11,8 @@ class BAASProcedure {
 public:
     static void implement(BAAS *baas,const std::string& procedure_name, BAASConfig& output);
 
+    static void implement(BAAS *baas,const std::string& procedure_name,const BAASConfig& patch, BAASConfig& output);
+
     static BAASProcedure* get_instance();
 private:
 
@@ -19,6 +21,8 @@ private:
     static void load();
 
     static int load_from_json(const std::string& path);
+
+    static BaseProcedure* create_procedure(BAASConfig* config);
 
     BAASProcedure();
 

@@ -53,9 +53,7 @@
     "feature_type": -1,
     "and_features": [
       "competition_menu_appear",
-      "common_tip_appear",
-      "common_home_appear",
-      "common_back_appear"
+      "common_navigation-bar_appear"
     ]
   },
   "UI-AT_competition_start_battle": {

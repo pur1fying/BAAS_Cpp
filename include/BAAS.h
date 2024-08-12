@@ -23,6 +23,8 @@
 
 class BAAS{
 public:
+    bool solve(const std::string& task);
+
     explicit BAAS(std::string& config_name);
 
     void update_screenshot_array();
@@ -33,9 +35,11 @@ public:
 
     void solve_procedure(const std::string &name, BAASConfig& output);
 
+    void solve_procedure(const std::string &name, BAASConfig& output, const bool skip_first_screenshot);
+
     ~BAAS() = default;
 
-    inline bool is_run() const {
+    [[nodiscard]] inline bool is_run() const {
         return flag_run;
     }
 
@@ -59,47 +63,51 @@ public:
         return control;
     }
 
-    inline double get_screen_ratio() const {
+    [[nodiscard]] inline double get_screen_ratio() const {
         return screen_ratio;
     }
 
     inline void click(BAASPoint point, uint8_t type = 1, int offset = 5, const std::string &description = "") {
-        if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+        if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->click(point, type, offset, description);
     }
 
     inline void click(BAASPoint point, int count, uint8_t type = 1, int offset = 5, double interval = 0.0, double pre_wait = 0.0, double post_wait = 0.0, const std::string &description = "") {
-        if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+        if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->click(point, count, type, offset, interval, pre_wait, post_wait, description);
     }
 
     inline void click(int x, int y, int count, uint8_t type = 1, int offset = 5, double interval = 0.0, double pre_wait = 0.0 , double post_wait = 0.0, const std::string &description = "") {
-        if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+        if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->click(x, y, count, type, offset, interval, pre_wait, post_wait, description);
     }
 
     void long_click(BAASPoint point, double duration, uint8_t type = 1, int offset = 5){
-        if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+        if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->long_click(point, duration, type, offset);
     }
 
     void long_click(int x, int y, double duration, uint8_t type = 1, int offset = 5) {
-        if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+        if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->long_click(x, y, duration, type, offset);
     }
     void swipe(BAASPoint start, BAASPoint end, double duration) {
-        if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+        if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->swipe(start, end, duration);
     }
 
     void swipe(int x1, int y1, int x2, int y2, double duration) {
-        if(!flag_run) throw HumanTakeOverError("Flag Run turn to false manually");
+        if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->swipe(x1, y1, x2, y2, duration);
     }
 
-
+    static void init_implement_funcs();
 
 private:
+    static int a;
+
+    static std::map<int,int> b;
+
     bool flag_run;
 
     cv::Mat latest_screenshot;
@@ -115,6 +123,8 @@ private:
     BAASScreenshot* screenshot;
 
     BAASControl* control;
+
+    static std::map<std::string, std::function<bool (BAAS*)>> implement_funcs;
 
     friend class AppearThenDoProcedure;
     friend class AppearThenClickProcedure;

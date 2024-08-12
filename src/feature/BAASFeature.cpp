@@ -103,7 +103,6 @@ bool BAASFeature::appear(const string &server, const string &language, const str
         if(show_log) BAASGlobalLogger->BAASError("Feature [ " + name + " ] not found");
         return false;
     }
-
     if(!it->second->get_enabled()) {
         if(show_log) BAASGlobalLogger->BAASInfo("Feature [ " + name + " ] is disabled");
         return false;

@@ -1,0 +1,16 @@
+{
+  "UI-GO-TO_work_menu": {
+    "procedure_type": 0,
+    "max_stuck_time": 20,
+    "ends": "UI-AT_work_selection",
+    "possibles": [
+      ["main_page_home-checked_appear", 68, 688],
+      ["UI-AT_main_page", 357, 1161, 2.0],
+      ["UI-AT_work-finished", 353, 1163],
+      ["UI-AT_work_person_select", 303, 1219],
+      ["UI-AT_work_person_decide", 303, 1219],
+      ["UI-AT_work_start_work_confirm", 223, 1158],
+      ["common_navigation-bar_appear", 306, 1220, 2.0]
+    ]
+  }
+}

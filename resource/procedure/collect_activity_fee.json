@@ -1,0 +1,23 @@
+{
+  "COLLECT_ACTIVITY_FEE": {
+    "procedure_type": 0,
+    "max_stuck_time": 20,
+    "ends": [
+      "UI-AT_activity_fee",
+      "activity_fee_unable-to-collect_appear"
+    ],
+    "possibles": [
+      ["main_page_home-checked_appear", 76, 572],
+      ["UI-AT_main_page", 357, 1161, 2.0],
+      ["common_navigation-bar_appear", 306, 1220, 2.0]
+    ]
+  },
+  "UI-FROM_activity_fee_TO_main_page": {
+    "procedure_type": 0,
+    "max_stuck_time": 20,
+    "ends": "UI-AT_main_page",
+    "possibles": [
+      ["UI-AT_activity_fee", 369, 1159]
+    ]
+  }
+}
