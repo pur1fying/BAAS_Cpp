@@ -9,7 +9,14 @@
     "login-bonus": {
         "direction": 1,
         "region": [71, 60, 646, 210]
+    },
+    "login-account-connection": {
+        "direction": 1,
+        "region": [41, 106, 153, 136]
+    },
+    "login-BANDAI-NAMCO-icon": {
+        "direction": 1,
+        "region": [583, 36, 681, 79]
     }
   }
-
 }

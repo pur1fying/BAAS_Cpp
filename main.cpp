@@ -23,11 +23,11 @@ int main() {
         BAAS baas(config_name);
         BAASConfig config;
         BAASConnection* conn = baas.get_connection();
-        conn->start_self();
         baas.update_screenshot_array();
         baas.get_latest_screenshot(img);
+        baas.solve("restart");
         baas.solve("collect_activity_fee");
-//        baas.solve("work");
+        baas.solve("work");
 //        baas.get_latest_screenshot(img);
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
@@ -42,9 +42,9 @@ int main() {
 //        config_name = "resource\\module_usage\\main_page.json";
 //        BAASConfig procedure(config_name, baas.get_logger());
 //        BAASConfig c = BAASConfig(procedure.get<json>("UI-GO-TO_main_page_home"), baas.get_logger());
-//        string name = "work-position2-unoccupied";
-//        BAASRectangle region = {458, 412, 609, 510};
-//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {127, 127, 127});
+//        string name = "login-BANDAI-NAMCO-icon";
+//        BAASRectangle region = {583, 36, 681, 79};
+//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {255, 255, 255});
         baas.get_logger()->BAASInfo("ISA Exit.");
         }
 //        resource->get(connection.get_server(), connection.get_language(), "common", "back", img);

@@ -3,7 +3,6 @@
 //
 
 #include "feature/MatchTemplateFeature.h"
-#include "feature/BAASFeature.h"
 
 using namespace std;
 using namespace cv;
@@ -26,7 +25,7 @@ using namespace nlohmann;
  */
 
 MatchTemplateFeature::MatchTemplateFeature(BAASConfig *config) : BaseFeature(config) {
-
+    self_average_cost_map.clear();
 }
 
 bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, BAASConfig &output) {
@@ -102,7 +101,10 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
 
 
 
-double MatchTemplateFeature::self_average_cost(const Mat &image, const string& server, const string& language) const {
+double MatchTemplateFeature::self_average_cost(const Mat &image, const string& server, const string& language) {
+    string server_language = server + "_" + language;
+    auto it = self_average_cost_map.find(server_language);
+    if(it != self_average_cost_map.end()) if(it->second.has_value()) return it->second.value();
     string group = config->getString("group");
     assert(!group.empty());
     string name = config->getString("name");
@@ -110,7 +112,10 @@ double MatchTemplateFeature::self_average_cost(const Mat &image, const string& s
 
     BAASImage template_image;
     resource->get(server, language, group, name, template_image);
-    return template_image.image.rows * template_image.image.cols;
+
+    double average_cost = template_image.image.rows * template_image.image.cols;
+    self_average_cost_map[server_language] = average_cost;
+    return average_cost;
 }
 
 

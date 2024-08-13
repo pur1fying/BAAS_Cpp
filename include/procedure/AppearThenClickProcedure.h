@@ -40,6 +40,8 @@ private:
 
     long long max_stuck_time;
 
+    long long max_execute_time;
+
     long long start_time;
 
     int max_click;

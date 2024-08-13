@@ -4,11 +4,12 @@
     "ends": "UI-AT_main_page",
     "max_stuck_time": 30,
     "max_click_times": 30,
+    "max_execute_time": 60,
     "possibles": [
       ["UI-AT_restart_login-bonus", 360, 720],
       ["UI-AT_activity_fee", 364, 1164],
-      ["common_home_appear", 83, 1216],
-      ["common_back_appear", 299, 1219]
+      ["common_navigation-bar_appear", 83, 1216],
+      ["UI-AT_restart_login", 360, 640, 5.0]
     ]
   },
   "UI-GO-TO_main_page_competition": {

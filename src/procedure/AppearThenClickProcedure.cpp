@@ -52,18 +52,32 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
 
     max_stuck_time = possible_feature->getInt("max_stuck_time", 20);
     max_click = possible_feature->getInt("max_click_times", 20);
+    max_execute_time = possible_feature->getLLong("max_execute_time", LLONG_MAX);
 
     bool skip_first_screenshot = possible_feature->getBool("skip_first_screenshot", false);
 
     output.clear();
 
     start_time = BAASUtil::getCurrentTimeStamp();
+    last_appeared_time = start_time;
+
+    long long this_round_start_time;
     while (baas->is_run()) {
-        if (BAASUtil::getCurrentTimeStamp() - start_time  >= max_stuck_time) {
+        this_round_start_time = BAASUtil::getCurrentTimeStamp();
+        if (this_round_start_time - start_time >= max_execute_time) {
+            logger->hr("Max execute time " + to_string(max_execute_time) + "s reached.");
+            logger->BAASError("Looking for End features : ");
+            logger->BAASError(end_feature_names);
+            logger->BAASError("Looking for Possible features : ");
+            logger->BAASError(possibles_feature_names);
+            throw GameStuckError("Max execute time reached.");
+        }
+
+        if (this_round_start_time - last_appeared_time  >= max_stuck_time) {
             logger->hr(to_string(max_stuck_time) + "s didn't find any feature, assume game stuck.");
             logger->BAASError("Looking for End features : ");
             logger->BAASError(end_feature_names);
-            logger->BAASError("Possible features : ");
+            logger->BAASError("Looking for Possible features : ");
             logger->BAASError(possibles_feature_names);
             throw GameStuckError("Game stuck.");
         }
@@ -89,7 +103,6 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
                 logger->BAASInfo("Feature [ " + possibles_feature_names[i] + " ] appeared. ");
                 last_appeared_feature_name = possibles_feature_names[i];
                 last_appeared_time = BAASUtil::getCurrentTimeStamp();
-                start_time = last_appeared_time;
                 solve_feature_action_click(possibles[i]);
                 break;
             }

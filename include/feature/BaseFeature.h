@@ -25,7 +25,7 @@ public:
     }
 
     // used to judge the compare order of feature
-    virtual double self_average_cost(const cv::Mat &image, const std::string& server, const std::string& language) const;
+    virtual double self_average_cost(const cv::Mat &image, const std::string& server, const std::string& language);
 
     std::vector<std::string> get_and_features();
 
@@ -35,7 +35,7 @@ public:
 
     bool has_or_feature();
 
-    [[nodiscard]] double all_average_cost(const cv::Mat &image, const std::string& server, const std::string& language) const;
+    [[nodiscard]] double all_average_cost(const cv::Mat &image, const std::string& server, const std::string& language);
 
     [[nodiscard]] inline BAASConfig* get_config() {
         return config;

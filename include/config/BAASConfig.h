@@ -59,6 +59,18 @@ public:
         return get<int>(key, default_value);
     }
 
+    inline long getLong(const std::string &key, long default_value=0) {
+        return get<long>(key, default_value);
+    }
+
+    inline unsigned long getULong(const std::string &key, unsigned long default_value=0) {
+        return get<unsigned long>(key, default_value);
+    }
+
+    inline long long getLLong(const std::string &key, long long default_value=0) {
+        return get<long long>(key, default_value);
+    }
+
     inline float getFloat(const std::string &key, float default_value = 0.0f) {
         return get<float>(key, default_value);
     }

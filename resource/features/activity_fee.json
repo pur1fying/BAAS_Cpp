@@ -7,7 +7,8 @@
   "activity_fee_unable-to-collect_appear":{
     "feature_type": 1,
     "group": "activity_fee",
-    "name": "unable-to-collect"
+    "name": "unable-to-collect",
+    "and_features": ["main_page_home-checked_appear"]
   },
   "UI-AT_activity_fee": {
     "feature_type": -1,

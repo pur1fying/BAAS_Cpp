@@ -255,13 +255,40 @@ bool BAASImageUtil::judgeRGBRange(const Mat &target,const BAASPoint& position,co
     return false;
 }
 
+// any pixel in the region satisfy the condition will return true
 bool BAASImageUtil::judgeRGBRange(const Mat &target,const BAASPoint& position,const Vec3b& min,const Vec3b& max, bool checkAround, int aroundRange) {
-    if(judgeRGBRange(target, position, min, max))return true;
-    if (checkAround)
+    if (checkAround){
         for (int i = -aroundRange; i <= aroundRange; i++)
             for (int j = -aroundRange; j <= aroundRange; j++)
                 if (judgeRGBRange(target, {position.x + i, position.y + j}, min, max))
                     return true;
+        return false;
+    }
+    if(judgeRGBRange(target, position, min, max)) return true;
+    return false;
+}
+
+bool BAASImageUtil::judgeRGBRange(const Mat &target, const pair<int, int> &position, const vector<uint8_t> &range, bool checkAround, int aroundRange) {
+    Vec3b pixel = target.at<Vec3b>(position.second, position.first);
+    if(range.size() != 6) throw ValueError("judgeRGBRange Invalid range size");
+    Vec3b min_ = {range[0], range[2], range[4]};
+    Vec3b max_ = {range[1], range[3], range[5]};
+    cout << "pixel: " << pixel << " min: " << min_ << " max: " << max_ << endl;
+    if (checkAround) {
+        int x_min = max(0, position.first - aroundRange);
+        int x_max = min(target.cols, position.first + aroundRange);
+        int y_min = max(0, position.second - aroundRange);
+        int y_max = min(target.rows, position.second + aroundRange);
+        for (int i = x_min; i <= x_max; i++)
+            for (int j = y_min; j <= y_max; j++){
+                pixel = target.at<Vec3b>(j, i);
+                if (judgeRGBRange(pixel, min_, max_))
+                    return true;
+            }
+        return false;
+    }
+
+    if(judgeRGBRange(target, {position.first, position.second}, min_, max_)) return true;
     return false;
 }
 
@@ -360,7 +387,10 @@ void BAASImageUtil::gen_not_black_region_mask(const Mat &src, Mat &mask) {
     bitwise_not(mask, mask);
 }
 
-
+// [ r, g, b ]
+void BAASImageUtil::pixel2string(const Vec3b &pixel, string &str) {
+    str = "[ " + to_string(pixel[2]) + ", " + to_string(pixel[1]) + ", " + to_string(pixel[0]) + " ]";
+}
 
 BAASPoint::BAASPoint(int xx, int yy) {
     x = xx;

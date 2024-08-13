@@ -10,11 +10,9 @@
 #define BAAS_FEATURE_BAASFEATURE_H_
 
 #include <functional>
-
 #include "config/BAASConfig.h"
-#include "feature/MatchTemplateFeature.h"
-#include "feature/FilterRGBMatchTemplateFeature.h"
 #include "device/BAASConnection.h"
+#include "feature/BaseFeature.h"
 
 class BAASFeature {
 public:
@@ -28,7 +26,7 @@ public:
 
     static void reset_feature(const std::string& name);
 
-    static const BaseFeature* get_feature(const std::string& name);
+    static BaseFeature* get_feature(const std::string& name);
 
 private:
 

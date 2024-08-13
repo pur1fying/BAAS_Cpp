@@ -49,11 +49,21 @@
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
   },
+  "navigation-bar_not-white-place": {
+    "feature_type": 2,
+    "rgb_range": {
+      "JP_ja-jp": {
+        "positions": [[53, 1220], [150, 1187], [332, 1210]],
+        "range": [[0, 180, 0, 180, 0, 180],[0, 180, 0, 180, 0, 180],[0, 180, 0, 180, 0, 180]]
+      }
+    }
+  },
   "common_navigation-bar_appear": {
     "and_features": [
       "common_home_appear",
       "common_tip_appear",
-      "common_back_appear"
+      "common_back_appear",
+      "navigation-bar_not-white-place"
     ]
   }
 }

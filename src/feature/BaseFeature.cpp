@@ -17,7 +17,7 @@ BaseFeature::BaseFeature(BAASConfig* config) {
     is_enabled = this->config->getBool("enabled", true);
 }
 
-double BaseFeature::self_average_cost(const cv::Mat &image, const string& server, const string& language) const {
+double BaseFeature::self_average_cost(const cv::Mat &image, const string& server, const string& language) {
     throw std::runtime_error("Base Feature class average_cost should not be called.");
 }
 
@@ -37,7 +37,7 @@ bool BaseFeature::has_or_feature() {
     return or_features.empty();
 }
 
-double BaseFeature::all_average_cost(const cv::Mat &image, const std::string& server, const std::string& language) const{
+double BaseFeature::all_average_cost(const cv::Mat &image, const std::string& server, const std::string& language) {
     vector<double> all_costs;
     // self cost
     if(config->getInt("feature_type", -1) != -1) all_costs.push_back(self_average_cost(image, server, language));

@@ -2,6 +2,10 @@
 // Created by pc on 2024/8/6.
 //
 #include "feature/BAASFeature.h"
+#include "feature/MatchTemplateFeature.h"
+#include "feature/FilterRGBMatchTemplateFeature.h"
+#include "feature/JudgePointRGBRangeFeature.h"
+
 using namespace std;
 using namespace nlohmann;
 
@@ -23,7 +27,7 @@ BAASFeature *BAASFeature::get_instance() {
 void BAASFeature::init_funcs() {
     compare_functions.emplace_back(MatchTemplateFeature::compare);
     compare_functions.emplace_back(FilterRGBMatchTemplateFeature::compare);
-
+    compare_functions.emplace_back(JudgePointRGBRangeFeature::compare);
 }
 
 void BAASFeature::load() {
@@ -73,6 +77,9 @@ int BAASFeature::load_from_json(const string &path) {
                 break;
             case BAAS_FILTER_RGB_MATCH_TEMPLATE_FEATURE:
                 f = new FilterRGBMatchTemplateFeature(temp);
+                break;
+            case BAAS_JUDGE_POINT_RGB_RANGE_FEATURE:
+                f = new JudgePointRGBRangeFeature(temp);
                 break;
             default:
                 BAASGlobalLogger->BAASError("Feature Type [ " + to_string(tp) + " ] not found");
@@ -166,7 +173,7 @@ bool BAASFeature::appear(const string &server, const string &language, const str
     return it->second->set_checked_this_round(false);           // or feature didn't appear
 }
 
-const BaseFeature* BAASFeature::get_feature(const string &name){
+BaseFeature* BAASFeature::get_feature(const string &name){
     auto it = features.find(name);
     if(it == features.end()) throw BAASFeatureError("Feature [ " + name + " ] not found");
     return it->second;

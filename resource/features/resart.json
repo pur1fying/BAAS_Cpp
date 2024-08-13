@@ -1,11 +1,30 @@
 {
-  "UI-AT_restart_login-bonus": {
-    "feature_type": 1,
-
+  "restart_login-bonus_appear": {
+    "feature_type": 0,
     "group": "restart",
-    "name": "login-bonus",
-    "check_mean_rgb": true,
-    "mean_rgb_diff": [10, 10, 10],
-    "threshold": 0.8
+    "name": "login-bonus"
+  },
+  "UI-AT_restart_login-bonus": {
+    "feature_type": -1,
+    "and_features": [
+      "restart_login-bonus_appear"
+    ]
+  },
+  "restart_login-account-connection_appear": {
+    "feature_type": 0,
+    "group": "restart",
+    "name": "login-account-connection"
+  },
+  "restart_login-BANDAI-NAMCO-icon_appear": {
+    "feature_type": 0,
+    "group": "restart",
+    "name": "login-BANDAI-NAMCO-icon"
+  },
+  "UI-AT_restart_login": {
+    "feature_type": -1,
+    "and_features": [
+      "restart_login-account-connection_appear",
+      "restart_login-BANDAI-NAMCO-icon_appear"
+    ]
   }
 }

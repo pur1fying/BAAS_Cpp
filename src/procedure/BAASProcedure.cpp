@@ -83,10 +83,17 @@ void BAASProcedure::implement(BAAS *baas, const string &procedure_name,const BAA
     baas_config->update(&patch);
 
     BaseProcedure *p = create_procedure(baas_config);
+    try{
+        p->implement(baas, output);
+    }
+    catch (exception &e) {
+        p->clear_resource();
+        delete baas_config;
+        delete p;
+        throw e;
+    }
 
-    p->implement(baas, output);
     p->clear_resource();
-
     delete baas_config;
     delete p;
 }

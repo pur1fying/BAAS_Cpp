@@ -16,9 +16,10 @@ public:
 
     static bool compare(BAASConfig* parameter, const cv::Mat& image, BAASConfig& output);
 
-    [[nodiscard]] double self_average_cost(const cv::Mat &image, const std::string& server, const std::string& language) const override;
+    [[nodiscard]] double self_average_cost(const cv::Mat &image, const std::string& server, const std::string& language) override;
 private:
 
+    std::map<std::string, std::optional<double>> self_average_cost_map;
 };
 
 #endif //BAAS_FEATURE_MATCHTEMPLATEFEATURE_H_

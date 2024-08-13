@@ -21,7 +21,7 @@ using namespace nlohmann;
  * }
  */
 FilterRGBMatchTemplateFeature::FilterRGBMatchTemplateFeature(BAASConfig *config) : BaseFeature(config) {
-
+    self_average_cost_map.clear();
 }
 
 bool FilterRGBMatchTemplateFeature::compare(BAASConfig *parameter, const cv::Mat &image, BAASConfig &output) {
@@ -98,7 +98,11 @@ bool FilterRGBMatchTemplateFeature::compare(BAASConfig *parameter, const cv::Mat
     return true;
 }
 
-double FilterRGBMatchTemplateFeature::self_average_cost(const cv::Mat &image, const std::string &server,const std::string &language) const {
+double FilterRGBMatchTemplateFeature::self_average_cost(const cv::Mat &image, const std::string &server,const std::string &language) {
+    string server_language = server + "_" + language;
+    auto it = self_average_cost_map.find(server_language);
+    if(it != self_average_cost_map.end()) if(it->second.has_value()) return it->second.value();
+
     string group = config->getString("group");
     assert(!group.empty());
     string name = config->getString("name");
@@ -106,5 +110,8 @@ double FilterRGBMatchTemplateFeature::self_average_cost(const cv::Mat &image, co
 
     BAASImage template_image;
     resource->get(server, language, group, name, template_image);
-    return template_image.image.rows * template_image.image.cols;
+
+    double average_cost = template_image.image.rows * template_image.image.cols;
+    self_average_cost_map[server_language] = average_cost;
+    return average_cost;
 }

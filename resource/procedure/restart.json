@@ -1,0 +1,8 @@
+{
+  "UI-GO-TO_restart_login": {
+    "procedure_type": 0,
+    "ends": "UI-AT_restart_login",
+    "max_stuck_time": 60,
+    "max_click_times": 30
+  }
+}

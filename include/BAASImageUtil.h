@@ -131,6 +131,8 @@ public:
 
     static void gen_not_black_region_mask(const cv::Mat &src, cv::Mat &mask, const cv::Rect &region);
 
+    static void pixel2string(const cv::Vec3b &pixel, std::string &str);
+
     static BAASPoint imageSearch(const cv::Mat& screenshot, const cv::Mat& templateImage, BAASRectangle region={-1,-1,-1,-1}, double threshold=0.7, bool toGrey=false);
 
     static int pointDistance(const BAASPoint &p1, const BAASPoint &p2);
@@ -140,6 +142,8 @@ public:
     static bool judgeRGBRange(const cv::Mat &target,const BAASPoint& position,const cv::Vec3b& min,const cv::Vec3b& max);
 
     static bool judgeRGBRange(const cv::Mat &target,const BAASPoint& position,const cv::Vec3b& min,const cv::Vec3b& max,bool checkAround,int aroundRange=1);
+
+    static bool judgeRGBRange(const cv::Mat &target,const std::pair<int,int>& position,const std::vector<uint8_t>& range, bool checkAround, int aroundRange=1);
 
     static cv::Vec3b getRegionMeanRGB(const cv::Mat &target,const BAASRectangle& region);
 

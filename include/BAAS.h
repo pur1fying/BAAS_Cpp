@@ -37,6 +37,10 @@ public:
 
     void solve_procedure(const std::string &name, BAASConfig& output, const bool skip_first_screenshot);
 
+    inline bool has_screenshot() {
+        return !latest_screenshot.empty();
+    }
+
     ~BAAS() = default;
 
     [[nodiscard]] inline bool is_run() const {

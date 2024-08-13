@@ -1,11 +1,13 @@
 //
 // Created by pc on 2024/8/9.
 //
+
 #include "BAAS.h"
 #include "procedure/BAASProcedure.h"
 #include "module/competition/Competition.h"
 #include "module/work/Work.h"
 #include "module/collect_activity_fee/CollectActivityFee.h"
+#include "module/restart/Restart.h"
 
 using namespace std;
 
@@ -41,8 +43,6 @@ BAAS::BAAS(std::string &config_name) {
     logger = config->get_logger();
 
     connection = new BAASConnection(config);
-
-    connection->clear_cache(static_config->getString("google_store_package_name"));
 
     screenshot = new BAASScreenshot(config->screenshot_method(), connection, config->screenshot_interval());
 
@@ -84,7 +84,9 @@ void BAAS::init_implement_funcs() {
     implement_funcs["competition"] = ISA::Competition::implement;
     implement_funcs["work"] = ISA::Work::implement;
     implement_funcs["collect_activity_fee"] = ISA::CollectActivityFee::implement;
+    implement_funcs["restart"] = ISA::Restart::implement;
 }
+
 
 
 
