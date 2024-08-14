@@ -70,7 +70,6 @@ void BAAS::solve_procedure(const string &name, BAASConfig &output, const bool sk
     if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
     json j;
     j["skip_first_screenshot"] = skip_first_screenshot;
-    j["show_log"] = true;
     BAASConfig patch(j, logger);
     BAASProcedure::implement(this, name, patch, output);
 }

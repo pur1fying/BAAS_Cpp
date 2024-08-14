@@ -28,7 +28,7 @@
   "activity_name": {
     "com.bandainamcoent.idolmaster_gakuen" : "com.google.firebase.MessagingUnityPlayerActivity"
   },
-  "available_screenshot_methods": ["adb", "scrcpy", "ascreencap", "nemu"],
+  "available_screenshot_methods": ["adb", "scrcpy", "ascreencap", "nemu", "ldopengl"],
   "available_control_methods": ["adb", "scrcpy", "nemu"],
   "google_store_package_name": "com.android.vending",
   "available_task_list": [

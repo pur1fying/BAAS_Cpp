@@ -2,7 +2,7 @@
 // Created by pc on 2024/4/12.
 //
 #include "BAASUtil.h"
-
+#include "device/BAASConnection.h"
 #include "BAASGlobals.h"
 
 using namespace std::chrono;
@@ -275,6 +275,12 @@ int BAASUtil::MuMu_serial2instance_id(const std::string &serial) {
     return -1;
 }
 
+int BAASUtil::LDPlayer_serial2instance_id(const string &serial) {
+    pair<string,string> pair_serial = BAASConnection::port_emu_pair_serial(serial);
+    int port = serial2port(pair_serial.first);
+    if(5555 <= port && port <= 5555 + 32) return int((port - 5555) / 2);
+    return -1;
+}
 void BAASUtil::stringJoin(const vector<std::string> &src, const string &joiner, string &dst) {
     dst.clear();
     for(int i = 0; i < src.size(); i++) {
@@ -454,6 +460,8 @@ void BAASUtil::calc_swipe_params(int x1, int y1, int x2, int y2, double duration
         }
     }
 }
+
+
 
 
 

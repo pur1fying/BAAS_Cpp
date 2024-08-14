@@ -9,10 +9,8 @@ using namespace std;
 using json = nlohmann::json;
 
 
-optional<int> func(int c) {
-    if(c == 0) return 0;
-    return nullopt;
-}
+#include "device/screenshot/LDOpenGLScreenshot.h"
+
 
 int main() {
     system("chcp 65001");
@@ -20,19 +18,21 @@ int main() {
         init_globals();
         string config_name = "default_config";
         cv::Mat img;
+
         BAAS baas(config_name);
         BAASConfig config;
         BAASConnection* conn = baas.get_connection();
         baas.update_screenshot_array();
         baas.get_latest_screenshot(img);
+
         baas.solve("restart");
-        baas.solve("collect_activity_fee");
-        baas.solve("work");
+//        baas.solve("collect_activity_fee");
+//        baas.solve("work");
 //        baas.get_latest_screenshot(img);
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
 //        return 0;
-        baas.solve("competition");
+//        baas.solve("competition");
 
 //        BAASConnection* connection = baas.get_connection();
 //        connection->start_self();
@@ -45,7 +45,7 @@ int main() {
 //        string name = "login-BANDAI-NAMCO-icon";
 //        BAASRectangle region = {583, 36, 681, 79};
 //        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {255, 255, 255});
-        baas.get_logger()->BAASInfo("ISA Exit.");
+//        baas.get_logger()->BAASInfo("ISA Exit.");
         }
 //        resource->get(connection.get_server(), connection.get_language(), "common", "back", img);
 //        cv::Mat mast;

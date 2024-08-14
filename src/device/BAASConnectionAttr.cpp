@@ -17,7 +17,8 @@ BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg) {
 
 BAASConnectionAttr::BAASConnectionAttr(const std::string &cfg_path) {
     config = new BAASUserConfig(cfg_path);
-
+    logger = config->get_logger();
+    serial = config->serial();
 }
 
 BAASConnectionAttr::~BAASConnectionAttr() {

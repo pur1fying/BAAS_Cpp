@@ -21,7 +21,16 @@ BAASConnection::BAASConnection(BAASUserConfig *cfg) : BAASConnectionAttr(cfg) {
 }
 
 BAASConnection::BAASConnection(const std::string &cfg_path) : BAASConnectionAttr(cfg_path) {
+    detect_device();
+    adb_connect();
+    detect_package();
+    set_server();
+    set_activity();
+    set_language();
 
+    resource->load(server, language);
+
+    check_mumu_app_keep_alive();
 }
 
 void BAASConnection::detect_device() {

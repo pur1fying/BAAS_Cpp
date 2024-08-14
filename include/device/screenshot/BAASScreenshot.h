@@ -4,10 +4,7 @@
 
 #ifndef BAAS_DEVICE_SCREENSHOT_BAASSCREENSHOT_H_
 #define BAAS_DEVICE_SCREENSHOT_BAASSCREENSHOT_H_
-#include <device/screenshot/AscreenCap.h>
-#include <device/screenshot/AdbScreenshot.h>
-#include <device/screenshot/ScrcpyScreenshot.h>
-#include <device/screenshot/NemuScreenshot.h>
+#include "device/screenshot/BaseScreenshot.h"
 
 class BAASScreenshot {
 public:

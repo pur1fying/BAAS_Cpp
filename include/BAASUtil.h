@@ -98,6 +98,8 @@ public:
 
       static int MuMu_serial2instance_id(const std::string &serial);
 
+      static int LDPlayer_serial2instance_id(const std::string &serial);
+
       static std::pair<std::string, std::string> serialToHostPort(const std::string &serial);
 
       static inline void sleepMS(int ms) {

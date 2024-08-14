@@ -10,6 +10,15 @@
       "restart_login-bonus_appear"
     ]
   },
+  "restart_login-bonus_not-white-place" : {
+    "feature_type": 2,
+    "rgb_range": {
+      "JP_ja-jp": {
+        "positions": [[154, 130], [157, 160]],
+        "range": [[245, 255, 150, 180, 70, 110], [245, 255, 150, 180, 70, 110]]
+      }
+    }
+  },
   "restart_login-account-connection_appear": {
     "feature_type": 0,
     "group": "restart",

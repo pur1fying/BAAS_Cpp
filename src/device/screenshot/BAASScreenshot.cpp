@@ -2,6 +2,11 @@
 // Created by pc on 2024/8/9.
 //
 #include "device/screenshot/BAASScreenshot.h"
+#include <device/screenshot/AscreenCap.h>
+#include <device/screenshot/AdbScreenshot.h>
+#include <device/screenshot/ScrcpyScreenshot.h>
+#include <device/screenshot/NemuScreenshot.h>
+#include <device/screenshot/LdopenglScreenshot.h>
 
 using namespace std;
 
@@ -85,6 +90,8 @@ void BAASScreenshot::set_screenshot_method(const std::string &method, bool exit)
         screenshot_instance = new AdbScreenshot(connection);
     } else if (method == "ascreencap") {
         screenshot_instance = new AScreenCap(connection);
+    } else if (method == "ldopengl") {
+        screenshot_instance = new LDOpenGLScreenshot(connection);
     }
     init();
 }

@@ -5,26 +5,6 @@
 #include "device/BAASNemu.h"
 using namespace std;
 
-bool BAASNemu::dllLoaded = false;
-
-nemuConnect BAASNemu::nemu_connect = nullptr;
-
-nemuDisconnect BAASNemu::nemu_disconnect = nullptr;
-
-nemuCaptureDisplay BAASNemu::nemu_capture_display = nullptr;
-
-nemuInputText BAASNemu::nemu_input_text = nullptr;
-
-nemuInputEventTouchDown BAASNemu::nemu_input_event_touch_down = nullptr;
-
-nemuInputEventTouchUp BAASNemu::nemu_input_event_touch_up = nullptr;
-
-nemuInputEventKeyDown BAASNemu::nemu_input_event_key_down = nullptr;
-
-nemuInputEventKeyUp BAASNemu::nemu_input_event_key_up = nullptr;
-
-HINSTANCE BAASNemu::hDllInst = nullptr;
-
 std::map<int, BAASNemu*> BAASNemu::connections;
 
 BAASNemu *BAASNemu::get_instance(BAASConnection *connection) {
@@ -98,6 +78,7 @@ void BAASNemu::disconnect() {
 void BAASNemu::screenshot(cv::Mat &image) {
     if(nemu_capture_display(connection_id, 0, int(pixels.size()), &resolution.first, &resolution.second, pixels.data()) != 0)
         throw NemuIpcError("Nemu capture display failed");
+
     imageOpMutex.lock();
     image = cv::Mat(resolution.second, resolution.first, CV_8UC4, pixels.data());
     cv::cvtColor(image, image, cv::COLOR_BGRA2RGB);
@@ -202,7 +183,6 @@ void BAASNemu::init_dll() {
     nemu_input_event_key_down = (nemuInputEventKeyDown)GetProcAddress(hDllInst, "nemu_input_event_key_down");
     nemu_input_event_key_up = (nemuInputEventKeyUp)GetProcAddress(hDllInst, "nemu_input_event_key_up");
 
-    dllLoaded = true;
 }
 
 void BAASNemu::up() const {
@@ -226,6 +206,16 @@ void BAASNemu::update_resolution() {
         logger->BAASInfo("Resolution changed : " + to_string(resolution.first) + "x" + to_string(resolution.second) + " -> " + to_string(new_resolution.first) + "x" + to_string(new_resolution.second));
         resolution = new_resolution;
     }
+}
+
+void BAASNemu::release(int connectionId) {
+    auto it = connections.find(connectionId);
+    if(it == connections.end()) {
+        BAASGlobalLogger->BAASError("Invalid connection_id : " + to_string(connectionId));
+    }
+    it->second->disconnect();
+    delete it->second;
+    connections.erase(connectionId);
 }
 
 

@@ -30,6 +30,8 @@ class BAASNemu {
 public:
     static BAASNemu* get_instance(BAASConnection* connection);
 
+    static void release(int connectionId);
+
     explicit BAASNemu(BAASConnection* connection);
 
     explicit BAASNemu(std::string& installPath);
@@ -42,7 +44,7 @@ public:
 
     void screenshot(cv::Mat &image);
 
-    static int get_resolution(int connectionId, int displayId, std::pair<int, int> &resolution);
+    int get_resolution(int connectionId, int displayId, std::pair<int, int> &resolution);
 
     void click(int x, int y);
 
@@ -89,25 +91,23 @@ private:
 
     static std::map<int, BAASNemu*> connections;
 
-    static HINSTANCE hDllInst;
+    HINSTANCE hDllInst;
 
-    static bool dllLoaded;
+    nemuConnect nemu_connect;
 
-    static nemuConnect nemu_connect;
+    nemuDisconnect nemu_disconnect;
 
-    static nemuDisconnect nemu_disconnect;
+    nemuCaptureDisplay nemu_capture_display;
 
-    static nemuCaptureDisplay nemu_capture_display;
+    nemuInputText nemu_input_text;
 
-    static nemuInputText nemu_input_text;
+    nemuInputEventTouchDown nemu_input_event_touch_down;
 
-    static nemuInputEventTouchDown nemu_input_event_touch_down;
+    nemuInputEventTouchUp nemu_input_event_touch_up;
 
-    static nemuInputEventTouchUp nemu_input_event_touch_up;
+    nemuInputEventKeyDown nemu_input_event_key_down;
 
-    static nemuInputEventKeyDown nemu_input_event_key_down;
-
-    static nemuInputEventKeyUp nemu_input_event_key_up;
+    nemuInputEventKeyUp nemu_input_event_key_up;
 //
 //    auto connection = nemu_connect(L"H:\\MuMuPlayer-12.0", 0);
 //        if (nemu_input_event_touch_down(connection, displayId, 500, 500) != 0) {

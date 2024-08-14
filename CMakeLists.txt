@@ -74,7 +74,7 @@ add_executable(
 
 target_link_libraries(
         BAAS
-        opencv_world490.lib
+        opencv_world490d.lib
         avcodec.lib
         avdevice.lib
         avfilter.lib
