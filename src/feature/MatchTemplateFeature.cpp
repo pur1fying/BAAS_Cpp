@@ -35,6 +35,11 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
 
     BAASImage template_image;
     get_image(parameter, template_image);
+    if(template_image.image.empty()) {
+        log.emplace_back("Template Image is empty, Quit.");
+        output.insert("log", log);
+        return false;
+    }
     log.emplace_back("Template Image Info : ");
     log.push_back(template_image.gen_info());
 
@@ -109,6 +114,8 @@ double MatchTemplateFeature::self_average_cost(const Mat &image, const string& s
     assert(!group.empty());
     string name = config->getString("name");
     assert(!name.empty());
+
+    if(!resource->is_loaded(server, language, group, name)) return 0;
 
     BAASImage template_image;
     resource->get(server, language, group, name, template_image);

@@ -9,7 +9,8 @@
       ["UI-AT_restart_login-bonus", 360, 720],
       ["UI-AT_activity_fee", 364, 1164],
       ["common_navigation-bar_appear", 83, 1216],
-      ["UI-AT_restart_login", 360, 640, 5.0]
+      ["UI-AT_restart_login", 360, 640, 5.0],
+      ["UI-AT_common_reward_acquired", 359, 1184]
     ]
   },
   "UI-GO-TO_main_page_competition": {

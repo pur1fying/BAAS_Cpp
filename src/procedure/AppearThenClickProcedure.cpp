@@ -62,7 +62,7 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
     last_appeared_time = start_time;
 
     long long this_round_start_time;
-    while (baas->is_run()) {
+    while (baas->is_running()) {
         this_round_start_time = BAASUtil::getCurrentTimeStamp();
         if (this_round_start_time - start_time >= max_execute_time) {
             logger->hr("Max execute time " + to_string(max_execute_time) + "s reached.");
@@ -81,10 +81,8 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
             logger->BAASError(possibles_feature_names);
             throw GameStuckError("Game stuck.");
         }
-
         for (auto &i: end_feature_names) BAASFeature::reset_feature(i);
         for (auto &i: possibles_feature_names) BAASFeature::reset_feature(i);
-
         if(!skip_first_screenshot)wait_loading();
         else skip_first_screenshot = false;
 

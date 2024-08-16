@@ -84,6 +84,10 @@ struct BAASRectangle {
     [[nodiscard]] bool contains(BAASPoint p) const;
 
     [[nodiscard]] bool empty() const;
+
+    [[nodiscard]] int width() const;
+
+    [[nodiscard]] int height() const;
 };
 
 bool operator==(const BAASRectangle &r1, const BAASRectangle &r2);      // same rect
@@ -136,14 +140,17 @@ public:
     static BAASPoint imageSearch(const cv::Mat& screenshot, const cv::Mat& templateImage, BAASRectangle region={-1,-1,-1,-1}, double threshold=0.7, bool toGrey=false);
 
     static int pointDistance(const BAASPoint &p1, const BAASPoint &p2);
-    
-    static bool judgeRGBRange(const cv::Vec3b& target,const cv::Vec3b& min,const cv::Vec3b& max);
-    
-    static bool judgeRGBRange(const cv::Mat &target,const BAASPoint& position,const cv::Vec3b& min,const cv::Vec3b& max);
 
-    static bool judgeRGBRange(const cv::Mat &target,const BAASPoint& position,const cv::Vec3b& min,const cv::Vec3b& max,bool checkAround,int aroundRange=1);
 
-    static bool judgeRGBRange(const cv::Mat &target,const std::pair<int,int>& position,const std::vector<uint8_t>& range, bool checkAround, int aroundRange=1);
+    static bool judge_rgb_range(const cv::Vec3b& target, const cv::Vec3b& min, const cv::Vec3b& max);
+    
+    static bool judge_rgb_range(const cv::Mat &target, const BAASPoint& position, const cv::Vec3b& min, const cv::Vec3b& max);
+
+    static bool judge_rgb_range(const cv::Mat &target, const BAASPoint& position, const cv::Vec3b& min, const cv::Vec3b& max, double ratio);
+
+    static bool judge_rgb_range(const cv::Mat &target, const BAASPoint& position, const cv::Vec3b& min, const cv::Vec3b& max, bool checkAround, int aroundRange=1);
+
+    static bool judge_rgb_range(const cv::Mat &target, const std::pair<int,int>& position, const std::vector<uint8_t>& range, bool checkAround, int aroundRange=1);
 
     static cv::Vec3b getRegionMeanRGB(const cv::Mat &target,const BAASRectangle& region);
 

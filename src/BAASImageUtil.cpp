@@ -242,38 +242,42 @@ int BAASImageUtil::pointDistance(const BAASPoint &p1, const BAASPoint &p2) {
     return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y);
 }
 
-bool BAASImageUtil::judgeRGBRange(const Vec3b& target,const Vec3b& min,const Vec3b& max) {
-    if(target[0] >= min[0] && target[0] <= max[0] && target[1] >= min[1] && target[1] <= max[1] && target[2] >= min[2] && target[2] <= max[2])
+bool BAASImageUtil::judge_rgb_range(const Vec3b& target, const Vec3b& min, const Vec3b& max) {
+    if(target[0] >= min[2] && target[0] <= max[2] && target[1] >= min[1] && target[1] <= max[1] && target[2] >= min[0] && target[2] <= max[0])
         return true;
     return false;
 }
 
-bool BAASImageUtil::judgeRGBRange(const Mat &target,const BAASPoint& position,const Vec3b& min,const Vec3b& max) {
+bool BAASImageUtil::judge_rgb_range(const Mat &target, const BAASPoint& position, const Vec3b& min, const Vec3b& max) {
     Vec3b pixel = target.at<Vec3b>(position.y, position.x);
-    if(pixel[0] >= min[0] && pixel[0] <= max[0] && pixel[1] >= min[1] && pixel[1] <= max[1] && pixel[2] >= min[2] && pixel[2] <= max[2])
+    if(pixel[0] >= min[2] && pixel[0] <= max[2] && pixel[1] >= min[1] && pixel[1] <= max[1] && pixel[2] >= min[0] && pixel[2] <= max[0])
         return true;
     return false;
+}
+
+bool BAASImageUtil::judge_rgb_range(const Mat &target, const BAASPoint &position, const Vec3b &min, const Vec3b &max, double ratio) {
+    BAASPoint temp = {int(position.x * ratio), int(position.y * ratio)};
+    return judge_rgb_range(target, temp, min, max);
 }
 
 // any pixel in the region satisfy the condition will return true
-bool BAASImageUtil::judgeRGBRange(const Mat &target,const BAASPoint& position,const Vec3b& min,const Vec3b& max, bool checkAround, int aroundRange) {
+bool BAASImageUtil::judge_rgb_range(const Mat &target, const BAASPoint& position, const Vec3b& min, const Vec3b& max, bool checkAround, int aroundRange) {
     if (checkAround){
         for (int i = -aroundRange; i <= aroundRange; i++)
             for (int j = -aroundRange; j <= aroundRange; j++)
-                if (judgeRGBRange(target, {position.x + i, position.y + j}, min, max))
+                if (judge_rgb_range(target, {position.x + i, position.y + j}, min, max))
                     return true;
         return false;
     }
-    if(judgeRGBRange(target, position, min, max)) return true;
+    if(judge_rgb_range(target, position, min, max)) return true;
     return false;
 }
 
-bool BAASImageUtil::judgeRGBRange(const Mat &target, const pair<int, int> &position, const vector<uint8_t> &range, bool checkAround, int aroundRange) {
+bool BAASImageUtil::judge_rgb_range(const Mat &target, const pair<int, int> &position, const vector<uint8_t> &range, bool checkAround, int aroundRange) {
     Vec3b pixel = target.at<Vec3b>(position.second, position.first);
     if(range.size() != 6) throw ValueError("judgeRGBRange Invalid range size");
     Vec3b min_ = {range[0], range[2], range[4]};
     Vec3b max_ = {range[1], range[3], range[5]};
-    cout << "pixel: " << pixel << " min: " << min_ << " max: " << max_ << endl;
     if (checkAround) {
         int x_min = max(0, position.first - aroundRange);
         int x_max = min(target.cols, position.first + aroundRange);
@@ -282,13 +286,13 @@ bool BAASImageUtil::judgeRGBRange(const Mat &target, const pair<int, int> &posit
         for (int i = x_min; i <= x_max; i++)
             for (int j = y_min; j <= y_max; j++){
                 pixel = target.at<Vec3b>(j, i);
-                if (judgeRGBRange(pixel, min_, max_))
+                if (judge_rgb_range(pixel, min_, max_))
                     return true;
             }
         return false;
     }
 
-    if(judgeRGBRange(target, {position.first, position.second}, min_, max_)) return true;
+    if(judge_rgb_range(target, {position.first, position.second}, min_, max_)) return true;
     return false;
 }
 
@@ -392,6 +396,7 @@ void BAASImageUtil::pixel2string(const Vec3b &pixel, string &str) {
     str = "[ " + to_string(pixel[2]) + ", " + to_string(pixel[1]) + ", " + to_string(pixel[0]) + " ]";
 }
 
+
 BAASPoint::BAASPoint(int xx, int yy) {
     x = xx;
     y = yy;
@@ -427,5 +432,13 @@ inline bool BAASRectangle::contains(BAASPoint p) const {
 
 bool BAASRectangle::empty() const {
     return ul.x >= lr.x || ul.y >= lr.y;
+}
+
+int BAASRectangle::width() const {
+    return lr.x - ul.x;
+}
+
+int BAASRectangle::height() const {
+    return lr.y - ul.y;
 }
 

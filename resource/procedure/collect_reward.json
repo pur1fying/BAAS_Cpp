@@ -1,0 +1,66 @@
+{
+  "UI-GO-TO_collect_reward_menu": {
+    "procedure_type": 0,
+    "ends": "UI-AT_collect_reward_menu",
+    "possibles": [
+      ["UI-AT_main_page", 652, 568, 2.0],
+      ["common_navigation-bar_appear", 306, 1220, 2.0]
+    ]
+  },
+  "UI-GO-TO_collect_reward_menu-daily-reward": {
+    "procedure_type": 0,
+    "ends": "collect_reward_daily-reward-chosen_appear",
+    "possibles": [
+      ["UI-AT_collect_reward_menu", 107, 986, 1.0],
+      ["common_navigation-bar_appear", 306, 1220, 2.0]
+    ]
+  },
+  "UI-GO-TO_collect_reward_menu-weekly-reward": {
+    "procedure_type": 0,
+    "ends": "collect_reward_weekly-reward-chosen_appear",
+    "possibles": [
+      ["UI-AT_collect_reward_menu", 265, 986, 1.0],
+      ["common_navigation-bar_appear", 306, 1220, 2.0]
+    ]
+  },
+  "UI-GO-TO_collect_reward_menu-achievement-reward": {
+    "procedure_type": 0,
+    "ends": "collect_reward_achievement-reward-chosen_appear",
+    "possibles": [
+      ["UI-AT_collect_reward_menu", 443, 986, 1.0],
+      ["common_navigation-bar_appear", 306, 1220, 2.0]
+    ]
+  },
+  "UI-GO-TO_collect_reward_menu-limited-reward": {
+    "procedure_type": 0,
+    "ends": "collect_reward_limited-reward-chosen_appear",
+    "possibles": [
+      ["UI-AT_collect_reward_menu", 613, 986, 1.0],
+      ["common_navigation-bar_appear", 306, 1220, 2.0]
+    ]
+  },
+  "COLLECT_REWARD": {
+    "procedure_type": 0,
+    "ends": "collect_reward_collect-reward-grey_appear",
+    "possibles": [
+      ["collect_reward_collect-reward-bright_appear", 365, 1085, 1.0],
+      ["common_close-notice-button_appear", 368, 1168],
+      ["UI-AT_common_reward_acquired", 359, 1184]
+    ]
+  },
+  "UI-GO-TO_collect-reward-pass": {
+    "procedure_type": 0,
+    "ends": "UI-AT_collect_reward_pass",
+    "possibles": [
+      ["UI-AT_collect_reward_menu", 605, 1087, 1.0],
+      ["common_close-notice-button_appear", 368, 1168]
+    ]
+  },
+  "COLLECT_PASS_REWARD": {
+    "procedure_type": 0,
+    "ends": "common_close-notice-button_appear",
+    "possibles": [
+      ["UI-AT_collect_reward_pass", 79, -1, 1.0]
+    ]
+  }
+}

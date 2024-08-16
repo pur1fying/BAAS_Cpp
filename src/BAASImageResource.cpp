@@ -21,6 +21,10 @@ BAASImage::BAASImage(vector<int> &rg, uint8_t dir) {
     direction = dir;
 }
 
+bool BAASImage::empty() const {
+    return image.empty();
+}
+
 std::string BAASImage::get_size() const {
     return to_string(region.lr.x - region.ul.x) + "x" + to_string(region.lr.y - region.ul.y);
 }
@@ -31,6 +35,8 @@ std::string BAASImage::gen_info() const {
     info += " Resolution : " + get_size();
     return info;
 }
+
+
 
 BAASImageResource *BAASImageResource::get_instance() {
     if(instance == nullptr) {

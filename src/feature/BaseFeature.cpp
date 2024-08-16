@@ -62,6 +62,10 @@ void BaseFeature::get_image(BAASConfig* parameter, BAASImage &image) {
     assert(!group.empty());
     string name = parameter->getString("name");
     assert(!name.empty());
+    if(!resource->is_loaded(server, language, group, name)) {
+        image = BAASImage();
+        return;
+    }
     resource->get(server, language, group, name, image);
 }
 

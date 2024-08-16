@@ -1,13 +1,14 @@
 {
   "restart_login-bonus_appear": {
-    "feature_type": 0,
+    "feature_type": 1,
     "group": "restart",
     "name": "login-bonus"
   },
   "UI-AT_restart_login-bonus": {
     "feature_type": -1,
     "and_features": [
-      "restart_login-bonus_appear"
+      "restart_login-bonus_appear",
+      "restart_login-bonus_not-white-place"
     ]
   },
   "restart_login-bonus_not-white-place" : {

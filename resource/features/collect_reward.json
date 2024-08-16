@@ -1,0 +1,62 @@
+{
+  "collect_reward_menu_appear":{
+    "feature_type": 0,
+    "group": "collect_reward",
+    "name": "menu"
+  },
+  "collect_reward_daily-reward-chosen_appear":{
+    "feature_type": 0,
+    "group": "collect_reward",
+    "name": "daily-reward-chosen"
+  },
+  "collect_reward_weekly-reward-chosen_appear":{
+    "feature_type": 0,
+    "group": "collect_reward",
+    "name": "weekly-reward-chosen"
+  },
+  "collect_reward_achievement-reward-chosen_appear":{
+    "feature_type": 0,
+    "group": "collect_reward",
+    "name": "achievement-reward-chosen"
+  },
+  "collect_reward_limited-reward-chosen_appear":{
+    "feature_type": 0,
+    "group": "collect_reward",
+    "name": "limited-reward-chosen"
+  },
+  "collect_reward_collect-reward-bright_appear":{
+    "feature_type": 0,
+    "group": "collect_reward",
+    "name": "collect-reward-bright"
+  },
+  "collect_reward_collect-reward-grey_appear":{
+    "feature_type": 0,
+    "group": "collect_reward",
+    "name": "collect-reward-grey"
+  },
+  "collect_reward_pass-reward-menu_appear":{
+    "feature_type": 0,
+    "group": "collect_reward",
+    "name": "pass-reward-menu"
+  },
+  "UI-AT_collect_reward_pass": {
+    "feature_type": -1,
+    "and_features": [
+      "collect_reward_pass-reward-menu_appear",
+      "common_navigation-bar_appear"
+    ]
+  },
+  "UI-AT_collect_reward_menu": {
+    "feature_type": -1,
+    "and_features": [
+      "collect_reward_menu_appear",
+      "common_navigation-bar_appear"
+    ],
+    "or_features": [
+      "collect_reward_daily-reward-chosen_appear",
+      "collect_reward_weekly-reward-chosen_appear",
+      "collect_reward_achievement-reward-chosen_appear",
+      "collect_reward_limited-reward-chosen_appear"
+    ]
+  }
+}

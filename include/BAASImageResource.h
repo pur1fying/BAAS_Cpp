@@ -17,7 +17,7 @@ struct BAASImage{
     explicit BAASImage(int ulx, int uly, int lrx, int lry, uint8_t dir);
     explicit BAASImage(std::vector<int> &rg, uint8_t dir);
     BAASImage() = default;
-
+    [[nodiscard]] bool empty() const;
     [[nodiscard]] std::string get_size() const;
     [[nodiscard]] std::string gen_info() const;
 };

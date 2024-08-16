@@ -108,6 +108,12 @@ public:
         }
     }
 
+    inline void sub_title(const std::string& message) {
+        std::string msg = "<<< " + message + " >>>";
+        if(enable & 0b1) consoleLogger->info(msg);
+        if(enable & 0b10) fileLogger->info(msg);
+    }
+
     inline void set_enable(uint8_t enable) {
         this->enable = enable;
     }

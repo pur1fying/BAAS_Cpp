@@ -49,7 +49,7 @@ void AppearThenDoProcedure::implement(BAAS *baas, BAASConfig& output) {
     temp_output.clear();
 
     start_time = BAASUtil::getCurrentTimeStamp();
-    while(baas->is_run()) {
+    while(baas->is_running()) {
         if(last_appeared_time - BAASUtil::getCurrentTimeStamp() >= max_stuck_time) {
             logger->hr(to_string(max_stuck_time) + "s didn't find any feature, assume game stuck.");
             logger->BAASError("Looking for End features : ");

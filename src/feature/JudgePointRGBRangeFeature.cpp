@@ -83,7 +83,7 @@ bool JudgePointRGBRangeFeature::compare(BAASConfig *parameter, const cv::Mat &im
     for(int i = 0; i < positions.size(); i++) {
         positions[i].first = int(positions[i].first * ratio);
         positions[i].second = int(positions[i].second * ratio);
-        if(!BAASImageUtil::judgeRGBRange(image, positions[i], ranges[i], check_around, around_range)) {
+        if(!BAASImageUtil::judge_rgb_range(image, positions[i], ranges[i], check_around, around_range)) {
             log.emplace_back("Position " + to_string(i) + " not match, Quit.");
             output.insert("log", log);
             return false;
@@ -98,7 +98,7 @@ double JudgePointRGBRangeFeature::self_average_cost(const cv::Mat &image, const 
     string server_language = server + "_" + language;
     auto it = self_average_cost_map.find(server_language);
     if(it == self_average_cost_map.end()) {
-        throw JudgePointRGBRangeFeatureError("Feature not found");
+        return 0;
     }
     return it->second.value();
 }

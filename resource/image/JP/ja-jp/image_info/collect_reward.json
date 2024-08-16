@@ -1,0 +1,38 @@
+{
+  "group": "collect_reward",
+  "path": "collect_reward",
+  "image": {
+    "menu": {
+      "direction": 1,
+      "region": [17, 38, 202, 79]
+    },
+    "daily-reward-chosen": {
+      "direction": 1,
+      "region": [52, 970, 165, 1000]
+    },
+    "weekly-reward-chosen": {
+      "direction": 1,
+      "region": [205, 970, 347, 1000]
+    },
+    "achievement-reward-chosen": {
+      "direction": 1,
+      "region": [395, 970, 494, 1000]
+    },
+    "limited-reward-chosen": {
+      "direction": 1,
+      "region": [562, 970, 667, 1000]
+    },
+    "collect-reward-bright": {
+      "direction": 1,
+      "region": [257, 1066, 446, 1102]
+    },
+    "collect-reward-grey": {
+      "direction": 1,
+      "region": [257, 1066, 446, 1102]
+    },
+    "pass-reward-menu": {
+        "direction": 1,
+        "region": [8, 36, 260, 76]
+    }
+  }
+}

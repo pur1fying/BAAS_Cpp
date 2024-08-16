@@ -31,11 +31,33 @@ public:
 
     void get_latest_screenshot(cv::Mat& img);
 
-    void feature_appear(const std::string& feature_name, BAASConfig &output, bool show_log = false);
+    void get_latest_screenshot(cv::Mat& img, const BAASRectangle &region);
+
+    bool feature_appear(const std::string& feature_name, BAASConfig &output, bool show_log = false);
+
+    bool feature_appear(const std::string& feature_name);
+
+    void solve_procedure(const std::string &name);
 
     void solve_procedure(const std::string &name, BAASConfig& output);
 
-    void solve_procedure(const std::string &name, BAASConfig& output, const bool skip_first_screenshot);
+    void solve_procedure(const std::string &name, bool skip_first_screenshot);
+
+    void solve_procedure(const std::string &name, BAASConfig& output, bool skip_first_screenshot);
+
+    void solve_procedure(const std::string &name, nlohmann::json& patch);
+
+    void solve_procedure(const std::string &name, BAASConfig& output, nlohmann::json& patch);
+
+    void solve_procedure(const std::string &name, nlohmann::json& patch, bool skip_first_screenshot);
+
+    void solve_procedure(const std::string &name, BAASConfig& output, nlohmann::json& patch, bool skip_first_screenshot);
+
+    void solve_procedure(const std::string &name, BAASConfig& output, BAASConfig& patch);
+
+    void solve_procedure(const std::string &name, BAASConfig& output, BAASConfig& patch, bool skip_first_screenshot);
+
+    bool judge_rgb_range(const BAASPoint& point, const cv::Vec3b &min, const cv::Vec3b &max);
 
     inline bool has_screenshot() {
         return !latest_screenshot.empty();
@@ -43,7 +65,7 @@ public:
 
     ~BAAS() = default;
 
-    [[nodiscard]] inline bool is_run() const {
+    [[nodiscard]] inline bool is_running() const {
         return flag_run;
     }
 
@@ -104,6 +126,8 @@ public:
         if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->swipe(x1, y1, x2, y2, duration);
     }
+
+    void wait_region_static(const BAASRectangle& region,double frame_diff_ratio = 0.8 ,double min_static_time = 2, int min_frame_cnt = 5, double max_execute_time = 60);
 
     static void init_implement_funcs();
 

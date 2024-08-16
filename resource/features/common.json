@@ -1,51 +1,37 @@
 {
   "common_close-notice-button_appear":{
     "feature_type": 0,
-
     "group": "common",
     "name": "close-notice-button",
-
-    "check_mean_rgb": true,
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
   },
   "common_back_appear": {
     "feature_type": 1,
-
     "group": "common",
     "name": "back",
-
-    "check_mean_rgb": true,
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
   },
   "common_home_appear": {
     "feature_type": 1,
-
     "group": "common",
     "name": "home",
-
     "check_mean_rgb": true,
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
   },
   "common_tip_appear": {
     "feature_type": 1,
-
     "group": "common",
     "name": "tip",
-
-    "check_mean_rgb": true,
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
   },
   "common_game-recover-notice_appear": {
     "feature_type": 1,
-
     "group": "common",
     "name": "game-recover-notice",
-
-    "check_mean_rgb": true,
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
   },
@@ -64,6 +50,23 @@
       "common_tip_appear",
       "common_back_appear",
       "navigation-bar_not-white-place"
+    ]
+  },
+  "common_reward-acquired-notice_appear": {
+    "feature_type": 1,
+    "group": "common",
+    "name": "reward-acquired-notice"
+  },
+  "common_reward-acquired-cross_appear": {
+    "feature_type": 0,
+    "group": "common",
+    "name": "reward-acquired-cross"
+  },
+  "UI-AT_common_reward_acquired": {
+    "feature_type": -1,
+    "and_features": [
+      "common_reward-acquired-notice_appear",
+      "common_reward-acquired-cross_appear"
     ]
   }
 }

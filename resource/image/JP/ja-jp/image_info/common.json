@@ -19,8 +19,16 @@
       "region": [254, 1136, 452, 1189]
     },
     "game-recover-notice": {
-        "direction": 1,
-        "region": [265, 628, 454, 652]
+      "direction": 1,
+      "region": [265, 628, 454, 652]
+    },
+    "reward-acquired-notice": {
+      "direction": 1,
+      "region": [97, 296, 624, 359]
+    },
+    "reward-acquired-cross": {
+      "direction": 1,
+      "region": [331, 1162, 388, 1210]
     }
   }
 }
