@@ -3,7 +3,8 @@
     "procedure_type": 0,
     "ends": "UI-AT_collect_reward_menu",
     "possibles": [
-      ["UI-AT_main_page", 652, 568, 2.0],
+      ["main_page_home-checked_appear", 652, 568, 2.0],
+      ["UI-AT_main_page", 357, 1160],
       ["common_navigation-bar_appear", 306, 1220, 2.0]
     ]
   },
