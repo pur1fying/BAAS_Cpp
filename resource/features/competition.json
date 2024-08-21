@@ -44,6 +44,11 @@
     "group": "competition",
     "name": "start-competition"
   },
+  "competition_start-rehearsal_appear":{
+    "feature_type": 0,
+    "group": "competition",
+    "name": "start-rehearsal"
+  },
   "competition_menu_appear":{
     "feature_type": 1,
     "group": "competition",

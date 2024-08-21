@@ -110,6 +110,7 @@ bool BAASFeature::appear(const string &server, const string &language, const str
         if(show_log) BAASGlobalLogger->BAASError("Feature [ " + name + " ] not found");
         return false;
     }
+
     if(!it->second->get_enabled()) {
         if(show_log) BAASGlobalLogger->BAASInfo("Feature [ " + name + " ] is disabled");
         return false;
@@ -134,7 +135,7 @@ bool BAASFeature::appear(const string &server, const string &language, const str
             result = compare_functions[type](temp, image, output);
             delete temp;
             if(show_log) {
-                auto log = output.template get<vector<string>>("log");
+                auto log = output.template get<vector<string>>("log", {});
                 BAASGlobalLogger->BAASInfo(log);
             }
             if(!result) return it->second->set_checked_this_round(false);
@@ -157,7 +158,8 @@ bool BAASFeature::appear(const string &server, const string &language, const str
         for(const auto &i: bundle)
             feature_queue.emplace_back(BAASFeature::get_feature(i)->all_average_cost(image, server, language), make_pair(i, false));
 
-    sort(feature_queue.begin(), feature_queue.end());
+    sort(feature_queue.begin(), feature_queue.end());   // sort by cost
+
     for(const auto &i: feature_queue) {
         if(i.second.second) {   // or feature appear
             if(appear(server, language, i.second.first, image, output, show_log)) return it->second->set_checked_this_round(true);

@@ -1,0 +1,18 @@
+{
+  "UI-GO-TO_mail_general": {
+    "procedure_type": 0,
+    "ends": "UI-AT_mail_general",
+    "possibles": [
+      ["main_page_home-checked_appear", 655, 448],
+      ["UI-AT_mail_collect-history", 205, 991]
+    ]
+  },
+  "COLLECT_MAIL_REWARD": {
+    "procedure_type": 0,
+    "ends": "mail_collect-button-grey_appear",
+    "possibles": [
+      ["mail_collect-button-bright_appear", 373, 1093],
+      ["common_close-notice-button_appear", 368, 1164]
+    ]
+  }
+}

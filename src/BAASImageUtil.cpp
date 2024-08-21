@@ -112,9 +112,12 @@ Mat BAASImageUtil::crop(const Mat &src, int x1, int y1, int x2, int y2) {
     return src(Range(y1, y2), Range(x1, x2));
 }
 
-bool BAASImageUtil::resize(const Mat& src, Mat &dst, const double ratio) {
+void BAASImageUtil::resize(const Mat& src, Mat &dst, const double ratio) {
 	cv::resize(src, dst, Size(), ratio, ratio, INTER_CUBIC);
-    return true;
+}
+
+void BAASImageUtil::resize(const Mat &src, Mat &dst, int width, int height) {
+    cv::resize(src, dst, Size(width, height), 0, 0, INTER_CUBIC);
 }
 
 void BAASImageUtil::filter_rgb(Mat &src,const cv::Scalar& min_scalar,const cv::Scalar& max_scalar) {
@@ -395,6 +398,8 @@ void BAASImageUtil::gen_not_black_region_mask(const Mat &src, Mat &mask) {
 void BAASImageUtil::pixel2string(const Vec3b &pixel, string &str) {
     str = "[ " + to_string(pixel[2]) + ", " + to_string(pixel[1]) + ", " + to_string(pixel[0]) + " ]";
 }
+
+
 
 
 BAASPoint::BAASPoint(int xx, int yy) {

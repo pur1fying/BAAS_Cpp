@@ -17,35 +17,40 @@
     "procedure_type": 0,
     "ends": "main_page_competition-checked_appear",
     "possibles": [
-      ["UI-AT_main_page", 491, 1145]
+      ["UI-AT_main_page", 491, 1145],
+      ["common_navigation-bar_appear", 83, 1216]
     ]
   },
   "UI-GO-TO_main_page_home": {
     "procedure_type": 0,
     "ends": "main_page_home-checked_appear",
     "possibles": [
-      ["UI-AT_main_page", 357, 1160]
+      ["UI-AT_main_page", 357, 1160],
+      ["common_navigation-bar_appear", 83, 1216]
     ]
   },
   "UI-GO-TO_main_page_idol": {
     "procedure_type": 0,
     "ends": "main_page_idol-checked_appear",
     "possibles": [
-      ["UI-AT_main_page", 235, 1153]
+      ["UI-AT_main_page", 235, 1153],
+      ["common_navigation-bar_appear", 83, 1216]
     ]
   },
   "UI-GO-TO_main_page_chat": {
     "procedure_type": 0,
     "ends": "main_page_chat-checked_appear",
     "possibles": [
-      ["UI-AT_main_page", 106, 1160]
+      ["UI-AT_main_page", 106, 1160],
+      ["common_navigation-bar_appear", 83, 1216]
     ]
   },
   "UI-GO-TO_main_page_draw-card": {
     "procedure_type": 0,
     "ends": "main_page_draw-card-checked_appear",
     "possibles": [
-      ["UI-AT_main_page", 491, 1145]
+      ["UI-AT_main_page", 491, 1145],
+      ["common_navigation-bar_appear", 83, 1216]
     ]
   }
 }

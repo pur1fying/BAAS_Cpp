@@ -2,14 +2,33 @@
   "group": "mail",
   "path": "mail",
   "image": {
-    "date-changed": {
+    "menu": {
       "direction": 1,
-      "region": [42, 950, 205, 1000]
+      "region": [15, 32, 214, 76]
     },
-    "login-bonus": {
+    "collect-button-bright": {
       "direction": 1,
-      "region": [71, 60, 646, 210]
+      "region": [253, 1055, 457, 1112]
+    },
+    "collect-button-grey": {
+      "direction": 1,
+      "region": [253, 1055, 457, 1112]
+    },
+    "general-bright": {
+        "direction": 1,
+        "region": [157, 961, 228, 1006]
+    },
+    "general-grey": {
+        "direction": 1,
+        "region": [157, 961, 228, 1006]
+    },
+    "collect-history-bright": {
+        "direction": 1,
+        "region": [472, 961, 583, 1006]
+    },
+    "collect-history-grey": {
+        "direction": 1,
+        "region": [472, 961, 583, 1006]
     }
   }
-
 }

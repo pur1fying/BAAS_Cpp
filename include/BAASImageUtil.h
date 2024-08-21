@@ -110,7 +110,9 @@ public:
 
     static cv::Mat crop(const cv::Mat& src, int x1, int y1, int x2, int y2);
 
-    static bool resize(const cv::Mat& src, cv::Mat& dst, double ratio = 1.0);
+    static void resize(const cv::Mat& src, cv::Mat& dst, double ratio = 1.0);
+
+    static void resize(const cv::Mat& src, cv::Mat& dst, int width, int height);
 
     static void filter_region_rgb(cv::Mat &src, BAASRectangle region, const cv::Scalar& min_scalar, const cv::Scalar& max_scalar);
 

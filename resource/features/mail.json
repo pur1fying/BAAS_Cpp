@@ -1,0 +1,53 @@
+{
+  "mail_menu_appear": {
+    "feature_type": 0,
+    "group": "mail",
+    "name": "menu"
+  },
+  "mail_collect-button-bright_appear": {
+    "feature_type": 0,
+    "group": "mail",
+    "name": "collect-button-bright"
+  },
+  "mail_collect-button-grey_appear": {
+    "feature_type": 0,
+    "group": "mail",
+    "name": "collect-button-grey"
+  },
+  "mail_general-bright_appear": {
+    "feature_type": 0,
+    "group": "mail",
+    "name": "general-bright"
+  },
+  "mail_general-grey_appear": {
+    "feature_type": 0,
+    "group": "mail",
+    "name": "general-grey"
+  },
+  "mail_collect-history-bright_appear": {
+    "feature_type": 0,
+    "group": "mail",
+    "name": "collect-history-bright"
+  },
+  "mail_collect-history-grey_appear": {
+    "feature_type": 0,
+    "group": "mail",
+    "name": "collect-history-grey"
+  },
+  "UI-AT_mail_general": {
+    "feature_type": -1,
+    "and_features": [
+      "mail_menu_appear",
+      "common_navigation-bar_appear",
+      "mail_general-bright_appear"
+    ]
+  },
+  "UI-AT_mail_collect-history": {
+    "feature_type": -1,
+    "and_features": [
+      "mail_menu_appear",
+      "common_navigation-bar_appear",
+      "mail_collect-history-bright_appear"
+    ]
+  }
+}

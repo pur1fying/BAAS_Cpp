@@ -9,6 +9,7 @@
 #include "module/collect_activity_fee/CollectActivityFee.h"
 #include "module/restart/Restart.h"
 #include "module/collect_reward/CollectReward.h"
+#include "module/mail/Mail.h"
 
 using namespace std;
 using namespace cv;
@@ -147,6 +148,7 @@ void BAAS::init_implement_funcs() {
     implement_funcs["collect_activity_fee"] = ISA::CollectActivityFee::implement;
     implement_funcs["restart"] = ISA::Restart::implement;
     implement_funcs["collect_reward"] = ISA::CollectReward::implement;
+    implement_funcs["mail"] = ISA::Mail::implement;
 }
 
 void BAAS::wait_region_static(const BAASRectangle &region, double frame_diff_ratio, double min_static_time, int min_frame_cnt, double max_execute_time) {

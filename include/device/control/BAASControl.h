@@ -42,6 +42,10 @@ public:
 
     void set_x_y_offset(int& x, int& y, uint8_t type, int size);
 
+    void gen_click_log(int x, int y, int count=1,const std::string &description="");
+
+    void gen_swipe_log(int x1, int y1, int x2, int y2, double duration);
+
 private:
     BAASLogger* logger;
 

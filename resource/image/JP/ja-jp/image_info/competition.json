@@ -41,6 +41,10 @@
     "daily-chance-all-used": {
       "direction": 1,
       "region": [217, 867, 501, 902]
+    },
+    "start-rehearsal": {
+      "direction": 1,
+      "region": [256, 1054, 473, 1114]
     }
   }
 }

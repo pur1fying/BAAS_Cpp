@@ -55,8 +55,17 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
         return false;
     }
 
+    Mat temp = image;
+
+    int longer_edge = max(template_image.image.cols, template_image.image.rows);
+    if(longer_edge != 1280) {
+        temp = image.clone();
+        if(dir == 0) BAASImageUtil::resize(temp, temp, 1280, 720);
+        else BAASImageUtil::resize(temp, temp, 720, 1280);
+    }
+
     if (parameter->getBool("check_mean_rgb", true)) {
-        Vec3b cropped_diff = BAASImageUtil::getRegionMeanRGB(image, template_image.region);
+        Vec3b cropped_diff = BAASImageUtil::getRegionMeanRGB(temp, template_image.region);
         Vec3b template_diff = BAASImageUtil::getRegionMeanRGB(template_image.image);
         log.push_back("Screenshot Mean RGB  : [\t" + to_string(cropped_diff[0]) + " ,\t" + to_string(cropped_diff[1]) + " ,\t" + to_string(cropped_diff[2]) + " ]");
         log.push_back("Template   Mean RGB  : [\t" + to_string(template_diff[0]) + " ,\t" + to_string(template_diff[1]) + " ,\t" + to_string(template_diff[2]) + " ]");
@@ -69,7 +78,7 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
         }
     }
 
-    Mat cropped = BAASImageUtil::crop(image, template_image.region);
+    Mat cropped = BAASImageUtil::crop(temp, template_image.region);
     Mat result;
 
     matchTemplate(cropped, template_image.image, result, TM_CCOEFF_NORMED);
@@ -99,7 +108,7 @@ bool MatchTemplateFeature::compare(BAASConfig* parameter, const cv::Mat &image, 
     output.insert("log", log);
     output.insert("max_similarity", maxVal);
     j.push_back(template_image.region.ul.x + cropped.cols/2);
-    j.push_back(template_image.region.ul.x + cropped.rows/2);
+    j.push_back(template_image.region.ul.y + cropped.rows/2);
     output.insert("center", j);
     return true;
 }

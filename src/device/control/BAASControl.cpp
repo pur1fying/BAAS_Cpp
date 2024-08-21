@@ -34,9 +34,7 @@ void BAASControl::click(int x, int y, uint8_t type, int offset,const std::string
     set_x_y_offset(x, y, type, offset);
     x = int(double(x) * 1.0 * ratio);
     y = int(double(y) * 1.0 * ratio);
-    string msg = "Click (" + to_string(x) + "\t, " + to_string(y) + "\t) ";
-    if(!description.empty())msg += description;
-    logger->BAASInfo(msg);
+    gen_click_log(x, y, 1, description);
     control->click(x, y);
 }
 
@@ -45,12 +43,11 @@ void BAASControl::click(BAASPoint point, int count, uint8_t type, int offset, do
 }
 
 void BAASControl::click(int x, int y, int count, uint8_t type, int offset, double interval, double pre_wait,double post_wait, const string &description) {
-    string msg = "Click (\t" + to_string(x) + ",\t" + to_string(y) + " ) ";
+    gen_click_log(x, y, count, description);
+
     set_x_y_offset(x, y, type, offset);
     x = int(double(x) * 1.0 * ratio);
     y = int(double(y) * 1.0 * ratio);
-    if(count > 1)msg += " " + to_string(count) + " times ";
-    if(!description.empty())msg += description;
     if(pre_wait > 0) BAASUtil::sleepMS(int(pre_wait * 1000));
 
     int itv = int(interval * 1000);
@@ -59,7 +56,6 @@ void BAASControl::click(int x, int y, int count, uint8_t type, int offset, doubl
         if(i < count - 1) BAASUtil::sleepMS(itv);
     }
     if(post_wait > 0) BAASUtil::sleepMS(int(post_wait * 1000));
-    logger->BAASInfo(msg);
 }
 
 void BAASControl::long_click(BAASPoint point, double duration, uint8_t type, int offset) {
@@ -70,7 +66,7 @@ void BAASControl::long_click(int x, int y, double duration, uint8_t type, int of
     set_x_y_offset(x, y, type, offset);
     x = int(double(x) * 1.0 * ratio);
     y = int(double(y) * 1.0 * ratio);
-    string msg = "Long Click (" + to_string(x) + "\t, " + to_string(y) + "\t) ";
+    string msg = "Long Click (\t" + to_string(x) + ",\t" + to_string(y) + "\t) ";
     logger->BAASInfo(msg);
     control->long_click(x, y, duration);
 }
@@ -80,12 +76,11 @@ void BAASControl::swipe(BAASPoint start, BAASPoint end, double duration) {
 }
 
 void BAASControl::swipe(int x1, int y1, int x2, int y2, double duration) {
+    gen_swipe_log(x1, y1, x2, y2, duration);
     x1 = int(double(x1) * 1.0 * ratio);
     y1 = int(double(y1) * 1.0 * ratio);
     x2 = int(double(x2) * 1.0 * ratio);
     y2 = int(double(y2) * 1.0 * ratio);
-    string msg = "Swipe from (" + to_string(x1) + "\t, " + to_string(y1) + "\t) --> (" + to_string(x2) + "\t, " + to_string(y2) + "\t), duration : " + to_string(duration);
-    logger->BAASInfo(msg);
     control->swipe(x1, y1, x2, y2, duration);
 }
 
@@ -142,6 +137,37 @@ void BAASControl::set_x_y_offset(int &x, int &y, uint8_t type, int size) {
 
 void BAASControl::exit() {
     control->exit();
+}
+
+void BAASControl::gen_click_log(int x, int y,int count, const string &description) {
+    string t = to_string(x);
+    string msg = "Click ( ";
+    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    msg += t + ", ";
+    t = to_string(y);
+    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    msg += t + ")";
+    if(!description.empty())msg += " @ " + description;
+    if(count > 1)msg += " " + to_string(count) + " times ";
+    logger->BAASInfo(msg);
+}
+
+void BAASControl::gen_swipe_log(int x1, int y1, int x2, int y2, double duration) {
+    string msg = "Swipe From ( ";
+    string t = to_string(x1);
+    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    msg += t + ", ";
+    t = to_string(y1);
+    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    msg += t + " ) --> ( ";
+    t = to_string(x2);
+    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    msg += t + ", ";
+    t = to_string(y2);
+    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    msg += t + " ) ";
+    msg += " Duration : " + to_string(duration) + " s";
+    logger->BAASInfo(msg);
 }
 
 

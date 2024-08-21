@@ -1,4 +1,14 @@
 {
+  "UI-GO-TO_competition_menu": {
+    "procedure_type": 0,
+    "ends": [
+      "competition_fight-history-button_appear",
+      "competition_start-rehearsal_appear"
+    ],
+    "possibles": [
+      ["main_page_competition-checked_appear", 475, 893]
+    ]
+  },
   "COMPETITION_SOLVE": {
     "procedure_type": 0,
     "ends": "competition_daily-chance-all-used_appear",

@@ -24,12 +24,22 @@ int main() {
         BAASConnection* conn = baas.get_connection();
         baas.update_screenshot_array();
         baas.get_latest_screenshot(img);
+
+//        while(true){
+//            try{
+//                baas.solve_procedure("COMPETITION_SOLVE", true);
+//            }
+//            catch (const std::exception& e){
+//                BAASGlobalLogger->BAASInfo(e.what());
+//            }
+//        }
         baas.solve("restart");
         baas.solve("collect_activity_fee");
+        baas.solve("mail");
         baas.solve("work");
         baas.solve("competition");
         baas.solve("collect_reward");
-
+//
 //        BAASConnection* connection = baas.get_connection();
 //        connection->start_self();
 //        resource->show();
@@ -38,8 +48,8 @@ int main() {
 //        config_name = "resource\\module_usage\\main_page.json";
 //        BAASConfig procedure(config_name, baas.get_logger());
 //        BAASConfig c = BAASConfig(procedure.get<json>("UI-GO-TO_main_page_home"), baas.get_logger());
-//        string name = "pass-reward-menu";
-//        BAASRectangle region = {8, 36, 260, 76};
+//        string name = "collect-button-grey";
+//        BAASRectangle region = {253, 1055, 457, 1112};
 //        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {255, 255, 255});
         baas.get_logger()->hr("ISA Exited");
         }
