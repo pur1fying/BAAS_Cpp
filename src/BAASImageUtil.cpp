@@ -1,96 +1,11 @@
+#include <numbers>
+
 #include "BAASImageUtil.h"
+
 
 using namespace std;
 using namespace cv;
 
-inline BAASPoint operator*(const BAASPoint &p, int i) {
-    return {p.x * i, p.y * i};
-}
-
-inline BAASPoint operator*(int i, const BAASPoint &p) {
-    return {p.x * i, p.y * i};
-}
-
-inline BAASPoint operator*(const BAASPoint &p, float i) {
-    return {int(p.x * i), int(p.y * i)};
-}
-
-inline bool operator!=(const BAASPoint &p1, const BAASPoint &p2) {
-    return p1.x != p2.x || p1.y != p2.y;
-}
-
-inline bool operator==(const BAASPoint &p1, const BAASPoint &p2) {
-    return p1.x == p2.x && p1.y == p2.y;
-}
-
-inline bool operator<(const BAASPoint &p1, const BAASPoint &p2) {
-    return p1.x < p2.x && p1.y < p2.y;
-}
-
-inline bool operator<=(const BAASPoint &p1, const BAASPoint &p2) {
-    return p1.x <= p2.x && p1.y <= p2.y;
-}
-
-inline bool operator>(const BAASPoint &p1, const BAASPoint &p2) {
-    return p1.x > p2.x && p1.y > p2.y;
-}
-
-inline bool operator>=(const BAASPoint &p1, const BAASPoint &p2) {
-    return p1.x >= p2.x && p1.y >= p2.y;
-}
-
-inline BAASPoint operator-(const BAASPoint &p1,const BAASPoint &p2) {
-    return {p1.x - p2.x, p1.y - p2.y};
-}
-
-inline BAASPoint &operator-=(BAASPoint &p1,const BAASPoint &p2) {
-    p1.x -= p2.x;
-    p1.y -= p2.y;
-    return p1;
-}
-
-inline BAASPoint operator+(const BAASPoint &p1,const BAASPoint &p2) {
-    return {p1.x + p2.x, p1.y + p2.y};
-}
-
-inline BAASPoint &operator+=(BAASPoint &p1,const BAASPoint &p2) {
-    p1.x += p2.x;
-    p1.y += p2.y;
-    return p1;
-}
-
-inline ostream &operator<<(ostream &os, const BAASPoint &point) {
-    os << "(" << setw(4) << setfill(' ') << point.x << ", " << setw(4) << setfill(' ') << point.y << ")";
-    return os;
-}
-
-inline istream &operator>>(istream &is, BAASPoint &point) {
-    is >> point.x >> point.y;
-    return is;
-}
-
-
-inline bool operator<= (const BAASPoint &point, const BAASRectangle &rect) {
-    return (point.x >= rect.ul.x && point.x <= rect.lr.x) && (point.y >= rect.ul.y && point.y <= rect.lr.y);
-}
-
-inline bool operator< (const BAASRectangle &r1, const BAASRectangle &r2){
-    return r2.contains(r1.ul) && r2.contains(r1.lr);
-}
-
-inline bool operator==(const BAASRectangle &r1, const BAASRectangle &r2) {
-    return r1.ul == r2.ul && r1.lr == r2.lr;
-}
-
-inline ostream &operator<<(ostream &os, const BAASRectangle &rect) {
-    os << "[" << rect.ul << ", \t" << rect.lr << ")";
-    return os;
-}
-
-inline istream &operator >> (istream &is, BAASRectangle &rect) {
-    is >> rect.ul >> rect.lr;
-    return is;
-}
 
 bool BAASImageUtil::load(const std::string &path, cv::Mat &dst) {
     if(!filesystem::exists(path)) return false;
@@ -400,8 +315,6 @@ void BAASImageUtil::pixel2string(const Vec3b &pixel, string &str) {
 }
 
 
-
-
 BAASPoint::BAASPoint(int xx, int yy) {
     x = xx;
     y = yy;
@@ -410,6 +323,11 @@ BAASPoint::BAASPoint(int xx, int yy) {
 BAASPoint::BAASPoint() {
     x = 0;
     y = 0;
+}
+
+BAASPoint BAASPoint::rotate(int r, int angle) const {
+    double radian = angle * numbers::pi / 180;
+    return {int(x - r * sin(radian)), int(y - r * cos(radian))};
 }
 
 BAASRectangle::BAASRectangle() {

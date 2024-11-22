@@ -4,6 +4,24 @@
     "group": "competition",
     "name": "lose-one-competition"
   },
+  "competition_season-record_appear": {
+    "feature_type": 1,
+    "group": "competition",
+    "name": "season-record",
+    "mean_rgb_diff": [5, 5, 5]
+  },
+  "competition_rank-up_appear": {
+    "feature_type": 1,
+    "group": "competition",
+    "name": "rank-up",
+    "mean_rgb_diff": [5, 5, 5]
+  },
+  "competition_rank-down_appear": {
+    "feature_type": 1,
+    "group": "competition",
+    "name": "rank-down",
+    "mean_rgb_diff": [5, 5, 5]
+  },
   "competition_next_appear": {
     "feature_type": 0,
     "group": "competition",
@@ -35,7 +53,7 @@
     "name": "start-battle"
   },
   "competition_skip_appear":{
-    "feature_type": 0,
+    "feature_type": 1,
     "group": "competition",
     "name": "skip"
   },

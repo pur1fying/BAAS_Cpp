@@ -74,7 +74,6 @@ public:
         return is_bluestacks4_hyperv() || is_bluestacks5_hyperv();
     }
 
-
     ~BAASConnectionAttr();
 
     [[nodiscard]] inline BAASLogger* get_logger() const {

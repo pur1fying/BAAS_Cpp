@@ -1,6 +1,6 @@
 {
   "mail_menu_appear": {
-    "feature_type": 0,
+    "feature_type": 1,
     "group": "mail",
     "name": "menu"
   },

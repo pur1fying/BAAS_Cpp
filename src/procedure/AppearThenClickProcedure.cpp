@@ -18,7 +18,8 @@ using namespace nlohmann;
         "possibles": [              // array  list all features to click
                ["UI-AT_restart_login-bonus", 360, 720, 1.0,      5,     1,    5,      0,              0.0,      0.0]
             // [feature_name ,               x,   y  , interval, count, type, offset, click_interval, pre_wait, post_wait]
-        ]
+        ],
+        "tentative_click": [true, 640, 360, 10]  // click (640, 360) when 10s didn't find any feature
      }
   }
  *
@@ -53,6 +54,12 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
     max_stuck_time = possible_feature->getInt("max_stuck_time", 20);
     max_click = possible_feature->getInt("max_click_times", 20);
     max_execute_time = possible_feature->getLLong("max_execute_time", LLONG_MAX);
+    enable_tentative_click = possible_feature->getBool("tentative_click/0", false);
+    if(enable_tentative_click) {
+        tentative_click_x = possible_feature->getInt("tentative_click/1", 640);
+        tentative_click_y = possible_feature->getInt("tentative_click/2", 360);
+        tentative_click_stuck_time = possible_feature->getLLong("tentative_click/3", 10);
+    }
 
     bool skip_first_screenshot = possible_feature->getBool("skip_first_screenshot", false);
 
@@ -60,8 +67,8 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
 
     start_time = BAASUtil::getCurrentTimeStamp();
     last_appeared_time = start_time;
+    last_tentative_click_time = start_time;
 
-    long long this_round_start_time;
     while (baas->is_running()) {
         this_round_start_time = BAASUtil::getCurrentTimeStamp();
         if (this_round_start_time - start_time >= max_execute_time) {
@@ -81,10 +88,18 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
             logger->BAASError(possibles_feature_names);
             throw GameStuckError("Game stuck.");
         }
-        for (auto &i: end_feature_names) BAASFeature::reset_feature(i);
-        for (auto &i: possibles_feature_names) BAASFeature::reset_feature(i);
+
+        if (enable_tentative_click && this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time) {
+            baas->click(tentative_click_x, tentative_click_y, 1, 1, 5, 0.0, 0.0, 0.0, "Tentative Click");
+            last_tentative_click_time = BAASUtil::getCurrentTimeStamp();
+        }
+
         if(!skip_first_screenshot)wait_loading();
         else skip_first_screenshot = false;
+
+        for (auto &i: end_feature_names) BAASFeature::reset_feature(i);
+        for (auto &i: possibles_feature_names) BAASFeature::reset_feature(i);
+
 
         for (int i = 0; i < end_feature_names.size(); ++i) {
             current_comparing_feature_name = end_feature_names[i];
@@ -102,6 +117,7 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
                 last_appeared_feature_name = possibles_feature_names[i];
                 last_appeared_time = BAASUtil::getCurrentTimeStamp();
                 solve_feature_action_click(possibles[i]);
+                last_tentative_click_time = last_appeared_time;
                 break;
             }
         }
@@ -111,7 +127,26 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
 
 
 void AppearThenClickProcedure::wait_loading() {
+    long long t_loading;
     baas->update_screenshot_array();
+    long long start = BAASUtil::getCurrentTimeMS();
+    string zero, ld;
+    while(baas->is_running()) {
+        if(baas->reset_then_feature_appear("common_loading_appear")) {
+            t_loading = BAASUtil::getCurrentTimeMS() - start;
+             ld = to_string(t_loading);
+             zero = string(6 - ld.length(), ' ');
+            if(ld.length() <= 6)
+                zero += ld;
+            logger->BAASInfo("Loading :" + zero + "ms");
+            if(t_loading >= 20000) {
+                logger->BAASInfo("Loading too long, add screenshot interval to 1s.");
+                baas->get_screenshot()->set_interval(1);
+            }
+            baas->update_screenshot_array();
+        }
+        else break;
+    }
 }
 
 void AppearThenClickProcedure::clear_possibles() {

@@ -32,7 +32,7 @@
     },
     "pass-reward-menu": {
         "direction": 1,
-        "region": [8, 36, 260, 76]
+        "region": [18, 43, 256, 71]
     }
   }
 }

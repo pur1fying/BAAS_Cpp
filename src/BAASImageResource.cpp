@@ -156,21 +156,15 @@ int BAASImageResource::load_from_json(const string &server, const string &langua
     BAASConfig info(json_path, (BAASLogger*)BAASGlobalLogger);
     string group = info.getString("group");
     string path = info.getString("path");
-    json j = info.get<json>("image");
+    std::string json_ptr = "/image";
+    json j = info.get(json_ptr, json());
     string group_path;
     string image_path;
     resource_path(server, language, group, group_path);
     for(auto &it: j.items()){
         const string& name = it.key();
-        json image_info = it.value();
-        vector<int> region = image_info["region"];
-        if (region.size()!= 4) {
-            BAASGlobalLogger->BAASError("Image [ " + resource_pointer(server, language, group, name) + " ] region cnt not equal to 4");
-            continue;
-        }
-        uint8_t d = 0;
-        if(image_info.contains("direction"))
-            d = image_info["direction"];
+        vector<int> region = info.get(json_ptr + "/" + name + "/region", vector<int>{-1, -1, -1, -1});
+        uint8_t d = info.get(json_ptr + "/" + name + "/direction", uint8_t(0));
         BAASImage image(region, d);
         image_path = group_path;
         image_path += "\\";
@@ -195,6 +189,7 @@ std::string BAASImageResource::resource_pointer(const string &server, const stri
 }
 
 inline bool BAASImageResource::check_shape(const BAASImage &image, const string& server, const string& language, const string& group, const string& name) {
+    if(image.region == BAASRectangle(-1, -1, -1, -1)) return true;
     int h_record = image.region.lr.y - image.region.ul.y;
     int w_record = image.region.lr.x - image.region.ul.x;
     int h_true = image.image.rows;

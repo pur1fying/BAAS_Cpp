@@ -8,6 +8,7 @@
 #include "config/BAASConfig.h"
 #include "config/BAASUserConfig.h"
 #include "config/BAASStaticConfig.h"
+#include "config/BAASGlobalSetting.h"
 #include "config/Server.h"
 
 #endif //BAAS_CONFIG_H_

@@ -17,6 +17,7 @@ public:
     void implement(BAAS* baas, BAASConfig& output) override;
 
     void clear_resource() override;
+
 private:
     void wait_loading();
 
@@ -36,15 +37,27 @@ private:
 
     std::string last_clicked_feature_name;
 
-    long long last_clicked_time;
+    long long last_clicked_time;    // feature appear --> click, record the click time
 
-    long long max_stuck_time;
+    long long max_stuck_time;       // max stuck time no feature appear throw error
 
-    long long max_execute_time;
+    long long max_execute_time;     // implement function max execute time
 
-    long long start_time;
+    long long start_time;           // implement function start time
+
+    long long last_tentative_click_time;
+
+    long long tentative_click_stuck_time;   // this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time --> tentative click
+
+    long long this_round_start_time;
+
+    long long last_appeared_time;
 
     int max_click;
+
+    bool enable_tentative_click;
+
+    int tentative_click_x, tentative_click_y;
 
     std::queue<std::string> last_clicked;
 
@@ -52,7 +65,6 @@ private:
 
     std::string last_appeared_feature_name;
 
-    long long last_appeared_time = 0;
 
     std::pair<std::pair<std::string, int>,std::pair<std::string, int>> last_clicked_pair_counter; // too many clicked between two features
 

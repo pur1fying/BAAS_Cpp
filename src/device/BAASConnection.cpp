@@ -14,7 +14,6 @@ BAASConnection::BAASConnection(BAASUserConfig *cfg) : BAASConnectionAttr(cfg) {
     set_server();
     set_activity();
     set_language();
-
     resource->load(server, language);
 
     check_mumu_app_keep_alive();
@@ -206,6 +205,7 @@ void BAASConnection::adb_connect() {
         switch (i.second) {
             case 0:
                 logger->BAASWarn("Device [ " + i.first + " ] is offline, disconnect it before connecting.");
+                adb.disconnect(i.first);
                 break;
             case 1:
                 logger->BAASInfo("Find Device [ " + i.first + " ] online.");
@@ -304,10 +304,7 @@ void BAASConnection::check_mumu_app_keep_alive() {
         logger->BAASCritical("Please close the [ MuMu app_keep_alive ] option in the MuMu settings.");
         throw RequestHumanTakeOver("MuMu app_keep_alive is enabled.");
     }
-    else {
-        logger->BAASWarn("Unknown nemud.app_keep_alive value : " + res);
-        return;
-    }
+    logger->BAASWarn("Unknown nemud.app_keep_alive value : " + res);
 }
 
 std::string BAASConnection::nemud_app_keep_alive() {

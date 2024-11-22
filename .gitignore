@@ -11,3 +11,5 @@ cmake-build-release-visual-studio
 cmake-build-release
 *.7z
 dll/opencv_world490d.dll
+dll/onnxruntime_providers_shared.dll
+dll/onnxruntime_providers_cuda.dll

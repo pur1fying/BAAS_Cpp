@@ -14,23 +14,83 @@
     "JP": "SummerSpecialOperationsRABBITPlatoonAndTheMysteryOfTheMissingShrimp"
   },
   "valid_packages": [
-    "com.bandainamcoent.idolmaster_gakuen"
+    "com.bandainamcoent.idolmaster_gakuen",
+    "com.RoamingStar.BlueArchive",
+    "com.RoamingStar.BlueArchive.bilibili",
+    "com.nexon.bluearchive",
+    "com.nexon.bluearchiveteen",
+    "com.nexon.bluearchiveone",
+    "com.YostarJP.BlueArchive"
   ],
   "package2server": {
-    "com.bandainamcoent.idolmaster_gakuen": "JP"
+    "com.bandainamcoent.idolmaster_gakuen": "JP",
+    "com.RoamingStar.BlueArchive": "CN",
+    "com.RoamingStar.BlueArchive.bilibili": "CN",
+    "com.nexon.bluearchive": "Global",
+    "com.nexon.bluearchiveteen": "Global",
+    "com.nexon.bluearchiveone": "Global",
+    "com.YostarJP.BlueArchive": "JP"
   },
   "servers": [
-    "JP"
+    "JP",
+    "CN",
+    "Global"
   ],
   "server_language_choice": {
-    "JP": ["ja-jp"]
+    "JP": ["ja-jp"],
+    "CN": ["zh-cn"],
+    "Global": ["en-us", "ko-kr", "ru-ru", "zh-tw"]
   },
   "activity_name": {
-    "com.bandainamcoent.idolmaster_gakuen" : "com.google.firebase.MessagingUnityPlayerActivity"
+    "com.bandainamcoent.idolmaster_gakuen" : "com.google.firebase.MessagingUnityPlayerActivity",
+    "com.RoamingStar.BlueArchive" : "com.yostar.sdk.bridge.YoStarUnityPlayerActivity",
+    "com.RoamingStar.BlueArchive.bilibili" : "com.yostar.sdk.bridge.YoStarUnityPlayerActivity",
+    "com.nexon.bluearchive" : ".MxUnityPlayerActivity",
+    "com.nexon.bluearchiveteen" : ".MxUnityPlayerActivity",
+    "com.nexon.bluearchiveone" : ".MxUnityPlayerActivity",
+    "com.YostarJP.BlueArchive" : "com.yostarjp.bluearchive.MxUnityPlayerActivity"
   },
   "available_screenshot_methods": ["adb", "scrcpy", "ascreencap", "nemu", "ldopengl"],
   "available_control_methods": ["adb", "scrcpy", "nemu"],
   "google_store_package_name": "com.android.vending",
+  "ocr_model_name": {
+    "zh-cn": {
+      "det": "ch_PP-OCRv4_det_infer.onnx",
+      "cls": "ch_ppocr_mobile_v2.0_cls_infer.onnx",
+      "rec": "rec_ch_PP-OCRv4_infer.onnx",
+      "dict": "dict_chinese.txt"
+    },
+    "zh-tw": {
+      "det": "ch_PP-OCRv3_det_infer.onnx",
+      "cls": "ch_ppocr_mobile_v2.0_cls_infer.onnx",
+      "rec": "rec_chinese_cht_PP-OCRv3_infer.onnx",
+      "dict": "dict_chinese_cht.txt"
+    },
+    "ja-jp": {
+      "det": "ch_PP-OCRv3_det_infer.onnx",
+      "cls": "ch_ppocr_mobile_v2.0_cls_infer.onnx",
+      "rec": "rec_japan_PP-OCRv3_infer.onnx",
+      "dict": "dict_japan.txt"
+    },
+    "en-us": {
+      "det": "ch_PP-OCRv3_det_infer.onnx",
+      "cls": "ch_ppocr_mobile_v2.0_cls_infer.onnx",
+      "rec": "rec_en_PP-OCRv3_infer.onnx",
+      "dict": "dict_en.txt"
+    },
+    "ko-kr": {
+      "det": "ch_PP-OCRv3_det_infer.onnx",
+      "cls": "ch_ppocr_mobile_v2.0_cls_infer.onnx",
+      "rec": "rec_korean_PP-OCRv3_infer.onnx",
+      "dict": "dict_korean.txt"
+    },
+    "ru-ru": {
+      "det": "ch_PP-OCRv3_det_infer.onnx",
+      "cls": "ch_ppocr_mobile_v2.0_cls_infer.onnx",
+      "rec": "rec_cyrillic_PP-OCRv3_infer.onnx",
+      "dict": "dict_cyrillic.txt"
+    }
+  },
   "available_task_list": [
     "competition",
     "collect_activity_fee",

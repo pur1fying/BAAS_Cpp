@@ -8,7 +8,6 @@ BAASStaticConfig *static_config = nullptr;
 
 BAASStaticConfig* BAASStaticConfig::staticConfig = nullptr;
 
-
 BAASStaticConfig *BAASStaticConfig::getStaticConfig() {
     if (staticConfig == nullptr) {
         staticConfig = new BAASStaticConfig();

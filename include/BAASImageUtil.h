@@ -19,55 +19,111 @@ struct BAASPoint {
 
     BAASPoint(int xx, int yy);
 
+    // circle point with center : point , radius : r
+    [[nodiscard]] BAASPoint rotate(int r, int angle) const;
 };
 
-BAASPoint operator*(const BAASPoint &p, int i);
+inline BAASPoint operator*(const BAASPoint &p, int i) {
+    return {p.x * i, p.y * i};
+}
 
-BAASPoint operator*(int i, const BAASPoint &p);
+inline BAASPoint operator*(int i, const BAASPoint &p) {
+    return {p.x * i, p.y * i};
+}
 
-BAASPoint operator*(const BAASPoint &p, float i);
+inline BAASPoint operator*(const BAASPoint &p, float i) {
+    return {int(float(p.x)* 1.0 * i), int(float(p.y)* 1.0 * i)};
+}
 
-BAASPoint operator*(float i, const BAASPoint &p);
+inline BAASPoint operator*(float i, const BAASPoint &p) {
+    return {int(float(p.x)* 1.0 * i), int(float(p.y)* 1.0 * i)};
+}
 
-BAASPoint operator*(double i, const BAASPoint &p);
+inline BAASPoint operator*(double i, const BAASPoint &p) {
+    return {int(double(p.x)* 1.0 * i), int(double(p.y)* 1.0 * i)};
+}
 
-BAASPoint operator*(const BAASPoint &p, double i);
+inline BAASPoint operator*(const BAASPoint &p, double i) {
+    return {int(double(p.x)* 1.0 * i), int(double(p.y)* 1.0 * i)};
+}
 
-BAASPoint &operator*=(BAASPoint &p1, int i);
+inline BAASPoint &operator*=(BAASPoint &p1, int i) {
+    p1.x *= i;
+    p1.y *= i;
+    return p1;
+}
 
-BAASPoint operator/(const BAASPoint &p1, int i);
+inline BAASPoint operator/(const BAASPoint &p1, int i) {
+    return {p1.x / i, p1.y / i};
+}
 
-BAASPoint operator/(const BAASPoint &p1, float i);
+inline BAASPoint operator/(const BAASPoint &p1, float i) {
+    return {int(float(p1.x) / i), int(float(p1.y) / i)};
+}
 
-BAASPoint operator/(const BAASPoint &p1, double i);
+inline BAASPoint operator/(const BAASPoint &p1, double i) {
+    return {int(double(p1.x) / i), int(double(p1.y) / i)};
+}
 
-BAASPoint &operator/=(BAASPoint &p1, int i);
+inline BAASPoint &operator/=(BAASPoint &p1, int i) {
+    p1.x /= i;
+    p1.y /= i;
+    return p1;
+}
 
-BAASPoint operator+(const BAASPoint &p1, const BAASPoint &p2);
+inline BAASPoint operator+(const BAASPoint &p1,const BAASPoint &p2) {
+    return {p1.x + p2.x, p1.y + p2.y};
+}
 
-bool operator!=(const BAASPoint &p1, const BAASPoint &p2);
+inline bool operator!=(const BAASPoint &p1, const BAASPoint &p2) {
+    return p1.x != p2.x || p1.y != p2.y;
+}
 
-bool operator==(const BAASPoint &p1, const BAASPoint &p2);
+inline bool operator==(const BAASPoint &p1, const BAASPoint &p2) {
+    return p1.x == p2.x && p1.y == p2.y;
+}
 
-bool operator<(const BAASPoint &p1, const BAASPoint &p2);
+inline bool operator<(const BAASPoint &p1, const BAASPoint &p2) {
+    return p1.x < p2.x && p1.y < p2.y;
+}
 
-bool operator<=(const BAASPoint &p1, const BAASPoint &p2);
+inline bool operator<=(const BAASPoint &p1, const BAASPoint &p2) {
+    return p1.x <= p2.x && p1.y <= p2.y;
+}
 
-bool operator>(const BAASPoint &p1, const BAASPoint &p2);
+inline bool operator>(const BAASPoint &p1, const BAASPoint &p2) {
+    return p1.x > p2.x && p1.y > p2.y;
+}
 
-bool operator>=(const BAASPoint &p1, const BAASPoint &p2);
+inline bool operator>=(const BAASPoint &p1, const BAASPoint &p2) {
+    return p1.x >= p2.x && p1.y >= p2.y;
+}
 
-BAASPoint operator-(const BAASPoint &p1,const BAASPoint &P2);
+inline BAASPoint operator-(const BAASPoint &p1,const BAASPoint &p2) {
+    return {p1.x - p2.x, p1.y - p2.y};
+}
 
-BAASPoint &operator-=(BAASPoint &p1,const BAASPoint &P2);
+inline BAASPoint &operator-=(BAASPoint &p1,const BAASPoint &p2) {
+    p1.x -= p2.x;
+    p1.y -= p2.y;
+    return p1;
+}
 
-BAASPoint operator+(const BAASPoint &p1,const BAASPoint &P2);
+inline BAASPoint &operator+=(BAASPoint &p1,const BAASPoint &p2) {
+    p1.x += p2.x;
+    p1.y += p2.y;
+    return p1;
+}
 
-BAASPoint &operator+=(BAASPoint &p1,const BAASPoint &P2);
+inline std::ostream &operator<<(std::ostream &os, const BAASPoint &point) {
+    os << "(" << std::setw(4) << std::setfill(' ') << point.x << ", " << std::setw(4) << std::setfill(' ') << point.y << ")";
+    return os;
+}
 
-std::ostream &operator<<(std::ostream &os, const BAASPoint &point);
-
-std::istream &operator>>(std::istream &is, BAASPoint &point);
+inline std::istream &operator>>(std::istream &is, BAASPoint &point) {
+    is >> point.x >> point.y;
+    return is;
+}
 
 
 struct BAASRectangle {
@@ -90,15 +146,27 @@ struct BAASRectangle {
     [[nodiscard]] int height() const;
 };
 
-bool operator==(const BAASRectangle &r1, const BAASRectangle &r2);      // same rect
+inline bool operator<= (const BAASPoint &point, const BAASRectangle &rect) {
+    return (point.x >= rect.ul.x && point.x <= rect.lr.x) && (point.y >= rect.ul.y && point.y <= rect.lr.y);
+}
 
-bool operator<= (const BAASPoint &point, const BAASRectangle &rect);    // point in rect or on the edge
+inline bool operator< (const BAASRectangle &r1, const BAASRectangle &r2){
+    return r2.contains(r1.ul) && r2.contains(r1.lr);
+}
 
-bool operator< (const BAASRectangle &r1, const BAASRectangle &r2);      // r1 in r2
+inline bool operator==(const BAASRectangle &r1, const BAASRectangle &r2) {
+    return r1.ul == r2.ul && r1.lr == r2.lr;
+}
 
-std::ostream &operator<<(std::ostream &os, const BAASRectangle &rect);
+inline std::ostream &operator<<(std::ostream &os, const BAASRectangle &rect) {
+    os << "[" << rect.ul << ", \t" << rect.lr << ")";
+    return os;
+}
 
-std::istream &operator>>(std::istream &is, BAASRectangle &rect);
+inline std::istream &operator >> (std::istream &is, BAASRectangle &rect) {
+    is >> rect.ul >> rect.lr;
+    return is;
+}
 
 class BAASImageUtil {
 public:

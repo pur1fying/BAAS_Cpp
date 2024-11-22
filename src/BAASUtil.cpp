@@ -440,9 +440,12 @@ void BAASUtil::re_find_all(const string &src, const string &pattern, vector<std:
     }
 }
 
-void BAASUtil::re_find(const string &src, const string &pattern, smatch &dst) {
+void BAASUtil::re_find(const string &src, const string &pattern, string &dst) {
     std::regex regex_pattern(pattern);
-    std::regex_search(src, dst, regex_pattern);
+    std::smatch match;
+    std::regex_search(src, match, regex_pattern);
+    if(match.size() > 1) dst = match[1].str();
+    else dst = "";
 }
 
 void BAASUtil::calc_swipe_params(int x1, int y1, int x2, int y2, double duration, int &step_len, double &sleep_delay) {

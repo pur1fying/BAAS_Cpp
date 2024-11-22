@@ -35,7 +35,7 @@
     "name": "collect-reward-grey"
   },
   "collect_reward_pass-reward-menu_appear":{
-    "feature_type": 0,
+    "feature_type": 1,
     "group": "collect_reward",
     "name": "pass-reward-menu"
   },

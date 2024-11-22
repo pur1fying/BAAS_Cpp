@@ -20,6 +20,7 @@
 #include "BAASImageUtil.h"
 #include "BAASDevelopUtils.h"
 #include "BAASImageResource.h"
+#include "ocr/BAASOCR.h"
 
 class BAAS{
 public:
@@ -32,6 +33,8 @@ public:
     void get_latest_screenshot(cv::Mat& img);
 
     void get_latest_screenshot(cv::Mat& img, const BAASRectangle &region);
+
+    bool reset_then_feature_appear(const std::string& feature_name);
 
     bool feature_appear(const std::string& feature_name, BAASConfig &output, bool show_log = false);
 
@@ -56,6 +59,10 @@ public:
     void solve_procedure(const std::string &name, BAASConfig& output, BAASConfig& patch);
 
     void solve_procedure(const std::string &name, BAASConfig& output, BAASConfig& patch, bool skip_first_screenshot);
+
+    void get_each_round_type(std::vector<int>& round_type);
+
+    std::optional<int> point2type(const BAASPoint& point);
 
     bool judge_rgb_range(const BAASPoint& point, const cv::Vec3b &min, const cv::Vec3b &max);
 
@@ -132,9 +139,6 @@ public:
     static void init_implement_funcs();
 
 private:
-    static int a;
-
-    static std::map<int,int> b;
 
     bool flag_run;
 

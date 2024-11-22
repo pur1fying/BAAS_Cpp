@@ -68,6 +68,11 @@ void BAAS::get_latest_screenshot(Mat &img, const BAASRectangle &region) {
     img = BAASImageUtil::crop(latest_screenshot, region);
 }
 
+bool BAAS::reset_then_feature_appear(const string &feature_name) {
+    BAASFeature::reset_feature(feature_name);
+    return feature_appear(feature_name);
+}
+
 bool BAAS::feature_appear(const string &feature_name,BAASConfig &output, bool show_log) {
     if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
     return BAASFeature::appear(connection, feature_name, latest_screenshot, output, show_log);
@@ -189,9 +194,61 @@ void BAAS::wait_region_static(const BAASRectangle &region, double frame_diff_rat
     }
 }
 
+void BAAS::get_each_round_type(vector<int> &round_type) {
+    round_type.clear();
+    BAASPoint center(62, 89);
+    int r = 40;
+    optional <int> type;
+    int last_type = -1, pixel_cnt = 0;
+    for(int i = 0; i <= 359; i++){
+        BAASPoint p = center.rotate(r, i);
+        type = point2type(p);
+        if(type.has_value()) {
+            if(type == 0) {     // meet background
+                last_type = 0;
+                continue;
+            }
+            else {
+                if(last_type == type) {
+                    pixel_cnt++;
+                    if(pixel_cnt == 4) round_type.push_back(type.value());
+                }
+                else {
+                    last_type = type.value();
+                    pixel_cnt = 1;
+                }
+            }
+        }
+        latest_screenshot.at<cv::Vec3b>(p.y, p.x) = {0, 0, 255};
+    }
+}
+
+std::optional<int> BAAS::point2type(const BAASPoint &point) {
+    if(judge_rgb_range(point, {26, 30, 59}, {66, 70, 99})) {        // background
+        return 0;
+    }
+    if(judge_rgb_range(point, {222, 33, 112}, {255, 73, 152})) {    // red
+        return 1;
+    }
+    if(judge_rgb_range(point, {0, 113, 200}, {50, 153, 255})) {     // blue
+        return 2;
+    }
+    if(judge_rgb_range(point, {235, 147, 26}, {255, 187, 66})) {    // yellow
+        return 3;
+    }
+
+    return std::nullopt;
+}
+
 bool BAAS::judge_rgb_range(const BAASPoint &point, const Vec3b &min, const Vec3b &max) {
     return BAASImageUtil::judge_rgb_range(latest_screenshot, point, min, max, screen_ratio);
 }
+
+
+
+
+
+
 
 
 

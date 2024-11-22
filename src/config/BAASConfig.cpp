@@ -48,6 +48,9 @@ BAASConfig::BAASConfig(const int config_type) {
         case CONFIG_TYPE_CONFIG_NAME_CHANGE:
             path += "\\config_name_change.json";
             break;
+        case CONFIG_TYPE_DEFAULT_GLOBAL_SETTING:
+            path += "\\global_setting.json";
+            break;
         default:
             throw ValueError("Invalid config type : [ " + to_string(config_type) + " ].");
     }
@@ -323,3 +326,4 @@ void BAASConfig::unflatten(json &value) {
 
 BAASConfig *config_name_change = nullptr;
 
+BAASConfig *default_global_setting = nullptr;

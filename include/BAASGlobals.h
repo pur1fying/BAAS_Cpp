@@ -19,6 +19,8 @@ extern std::string BAAS_FEATURE_DIR;
 
 extern std::string BAAS_PROCEDURE_DIR;
 
+extern std::string BAAS_OCR_MODEL_DIR;
+
 extern std::string scrcpyJarPath;
 
 extern std::string scrcpyJarName;

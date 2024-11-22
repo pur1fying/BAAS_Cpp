@@ -12,7 +12,7 @@ BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg) {
     config = cfg;
     logger->BAASInfo("Adb Binary : " + adb_binary());
     serial = cfg->serial();
-
+    serial_check();
 }
 
 BAASConnectionAttr::BAASConnectionAttr(const std::string &cfg_path) {
@@ -58,7 +58,9 @@ void BAASConnectionAttr::revise_serial() {
         if(port > 1000 && port < 65536) serial = "127.0.0.1" + std::to_string(port);
     }catch(std::exception &e) {}
     if(serial.find("模拟") != std::string::npos) {
-
+        string m;
+        BAASUtil::re_find(serial, R"(\d+\.\d+\.\d+\.\d+)", m);
+        if(!m.empty()) serial = m;
     }
     BAASUtil::stringReplace("12127.0.0.1", "127.0.0.1", serial);
     BAASUtil::stringReplace("auto127.0.0.1", "127.0.0.1", serial);

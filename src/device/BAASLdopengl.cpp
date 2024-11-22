@@ -117,4 +117,5 @@ void BAASLdopengl::screenshot(cv::Mat &image) {
     }
 
     image = cv::Mat(resolution.first, resolution.second, CV_8UC3, (unsigned char *)ptr);
+    cv::flip(image, image, 0);
 }

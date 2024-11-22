@@ -2,13 +2,25 @@
   "group": "competition",
   "path": "competition",
   "image": {
+    "rank-up": {
+      "direction": 1,
+      "region": [141, 291, 563, 363]
+    },
+    "rank-down": {
+      "direction": 1,
+      "region": [109, 297, 611, 357]
+    },
+    "season-record": {
+      "direction": 1,
+      "region": [155, 569, 564, 608]
+    },
     "menu": {
       "direction": 1,
       "region": [68, 46, 200, 69]
     },
     "skip": {
       "direction": 1,
-      "region": [594, 1149, 681, 1176]
+      "region": [481, 1022, 688, 1082]
     },
     "start-competition": {
       "direction": 1,

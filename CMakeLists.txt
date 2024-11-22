@@ -9,10 +9,12 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options(/W0)
 endif()
 
+
 include_directories(
         ${CMAKE_CURRENT_LIST_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}/external
 )
+
 
 link_directories(
         ${CMAKE_CURRENT_LIST_DIR}/lib
@@ -49,7 +51,14 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/resource/config_name_change.json
         ${CMAKE_CURRENT_LIST_DIR}/resource/default_config.json
         ${CMAKE_CURRENT_LIST_DIR}/resource/static.json
+        ${CMAKE_CURRENT_LIST_DIR}/resource/global_setting.json
+)
 
+file (
+        GLOB
+        OCR_MODELS
+        ${CMAKE_CURRENT_LIST_DIR}/resource/ocr_models/*.onnx
+        ${CMAKE_CURRENT_LIST_DIR}/resource/ocr_models/*.txt
 )
 
 
@@ -72,6 +81,8 @@ add_executable(
         ${SOURCES}
 )
 
+target_compile_definitions(BAAS PRIVATE __CUDA__)
+
 target_link_libraries(
         BAAS
         opencv_world490.lib
@@ -84,6 +95,9 @@ target_link_libraries(
         swresample.lib
         swscale.lib
         liblz4.lib
+        onnxruntime.lib
+        onnxruntime_providers_cuda.lib
+        onnxruntime_providers_shared.lib
 )
 
 file(
@@ -127,6 +141,12 @@ file(
 file(
         COPY
         ${CMAKE_CURRENT_LIST_DIR}/resource/procedure
+        DESTINATION ${CMAKE_BINARY_DIR}/resource
+)
+
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/ocr_models
         DESTINATION ${CMAKE_BINARY_DIR}/resource
 )
 

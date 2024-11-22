@@ -29,6 +29,10 @@
     "reward-acquired-cross": {
       "direction": 1,
       "region": [331, 1162, 388, 1210]
+    },
+    "loading": {
+      "direction": 1,
+      "region": [549, 1224, 690, 1236]
     }
   }
 }

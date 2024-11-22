@@ -8,6 +8,7 @@
 #define CONFIG_TYPE_STATIC_CONFIG 0
 #define CONFIG_TYPE_DEFAULT_CONFIG 1
 #define CONFIG_TYPE_CONFIG_NAME_CHANGE 2
+#define CONFIG_TYPE_DEFAULT_GLOBAL_SETTING 3
 
 #include <filesystem>
 #include <vector>
@@ -28,7 +29,7 @@ public:
 
     explicit BAASConfig(const nlohmann::json &j, BAASLogger *logger);
 
-    //  create a simple json read and write config with json path and logger
+    // create a simple json read and write config with json path and logger
     explicit BAASConfig(const std::string &path, BAASLogger *logger);
 
     /* special config files which are read only
@@ -302,7 +303,7 @@ protected:
     }
 
     inline void save_modify_history() {
-        if (modified.empty()) return;
+        if (modified.empty() || modify_history_path.empty()) return;
         std::ifstream in(modify_history_path);
         nlohmann::json j = nlohmann::json::parse(in);
         in.close();
@@ -328,5 +329,6 @@ protected:
 
 extern BAASConfig* config_name_change;
 
+extern BAASConfig* default_global_setting;
 
 #endif //BAAS_CONFIG_BAASCONFIG_H_

@@ -70,11 +70,11 @@ void ISA::CollectReward::collect_pass_reward(BAAS *baas) {
 
 void ISA::CollectReward::collect(BAAS *baas) {
     BAASLogger* logger = baas->get_config()->get_logger();
-    if(baas->feature_appear("collect_reward_collect-reward-bright_appear")) {
+    if(baas->reset_then_feature_appear("collect_reward_collect-reward-bright_appear")) {
         logger->BAASInfo("Collect Reward [ Bright ]");
         baas->solve_procedure("COLLECT_REWARD", true);
     }
-    else if(baas->feature_appear("collect_reward_collect-reward-grey_appear")) {
+    else if(baas->reset_then_feature_appear("collect_reward_collect-reward-grey_appear")) {
         logger->BAASInfo("Collect Reward [ Grey ]");
     }
     else {

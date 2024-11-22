@@ -1,0 +1,6 @@
+{
+  "ocr": {
+    "flagGpu": -1,
+    "numThread": 4
+  }
+}

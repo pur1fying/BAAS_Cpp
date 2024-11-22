@@ -10,7 +10,7 @@
 
 class LDOpenGLScreenshot : public BaseScreenshot {
 public:
-    LDOpenGLScreenshot(BAASConnection *connection);
+    explicit LDOpenGLScreenshot(BAASConnection *connection);
 
     void init() override;
 
@@ -21,7 +21,6 @@ public:
     bool is_lossy() override;
 
 private:
-
     BAASLdopengl *ldopengl_connection;
 
     int instance_id;

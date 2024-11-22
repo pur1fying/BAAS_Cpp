@@ -4,7 +4,7 @@
   "image": {
     "menu": {
       "direction": 1,
-      "region": [15, 32, 214, 76]
+      "region": [21, 37, 200, 75]
     },
     "collect-button-bright": {
       "direction": 1,

@@ -124,7 +124,7 @@ public:
 
       static void re_find_all(const std::string &src, const std::string &pattern, std::vector<std::string> &dst);
 
-      static void re_find(const std::string &src, const std::string &pattern, std::smatch &dst);
+      static void re_find(const std::string &src, const std::string &pattern, std::string &dst);
 
       static bool re_match(const std::string &src, const std::string &pattern);
 

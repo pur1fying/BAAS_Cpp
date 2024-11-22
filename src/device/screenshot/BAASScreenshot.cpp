@@ -21,6 +21,7 @@ BAASScreenshot::BAASScreenshot(const std::string& method, BAASConnection *connec
     logger->BAASInfo("Available screenshot methods : ");
     logger->BAASInfo(available_methods);
 
+    last_screenshot_time = BAASUtil::getCurrentTimeMS();
     screenshot_instance = nullptr;
     set_screenshot_method(method);
     set_interval(interval);
