@@ -25,7 +25,14 @@ public:
 
     std::vector<TextLine> getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName);
 
+    std::vector<TextLine> getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName,
+                                       const std::string& candidates);
+
     TextLine getTextLine(const cv::Mat &src);
+
+    TextLine getTextLine(const cv::Mat &src,const std::vector<size_t> &enabledIndexes);
+
+    void getTextIndexes(const std::string &text, std::vector<size_t> &enabledIndexes);
 
 private:
     void initModel(const std::string &pathStr, const std::string &keysPath);
@@ -49,7 +56,13 @@ private:
 
     std::vector<std::string> keys;
 
+    std::map<std::string, size_t> character2Index;
+
     TextLine scoreToTextLine(const std::vector<float> &outputData, size_t h, size_t w);
+
+    TextLine scoreToTextLine(const std::vector<float> &outputData, size_t h, size_t w,
+                             const std::vector <size_t> &enabledIndexes);
+    static std::string REGEX_UTF8PATTERN;
 
 };
 

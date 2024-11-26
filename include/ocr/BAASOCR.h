@@ -24,10 +24,12 @@ public:
     void test_ocr();
 
     void ocr(const std::string& language, const cv::Mat& img, OcrResult& result,
-                    const std::string& log_content = "",BAASLogger* logger = nullptr);
+                    const std::string& log_content = "",BAASLogger* logger = nullptr,
+                    const std::string& candidates = std::string());
 
     void ocr_for_single_line(const std::string& language, const cv::Mat& img, TextLine& result,
-                                    const std::string& log_content = "", BAASLogger* logger = nullptr);
+                                    const std::string& log_content = "", BAASLogger* logger = nullptr,
+                                    const std::string& candidates = std::string());
 
 
 private:

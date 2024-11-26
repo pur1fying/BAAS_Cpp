@@ -30,13 +30,13 @@ public:
 
     OcrResult detect(const char *path, const char *imgName,
                      int padding, int maxSideLen,
-                     float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle);
+                     float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle, const std::string& candidates=std::string());
 
     OcrResult detect(const cv::Mat &mat,
                      int padding, int maxSideLen,
-                     float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle);
+                     float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle, const std::string& candidates=std::string());
 
-    void ocr_for_single_line(const cv::Mat &img, TextLine &text);
+    void ocr_for_single_line(const cv::Mat &img, TextLine &text, const std::string& candidates=std::string());
 
     OcrResult detectImageBytes(const uint8_t *data, long dataLength, int grey, int padding, int maxSideLen,
                                float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle);
@@ -69,7 +69,8 @@ private:
     OcrResult detect(const char *path, const char *imgName,
                      cv::Mat &src, cv::Rect &originRect, ScaleParam &scale,
                      float boxScoreThresh = 0.6f, float boxThresh = 0.3f,
-                     float unClipRatio = 2.0f, bool doAngle = true, bool mostAngle = true);
+                     float unClipRatio = 2.0f, bool doAngle = true, bool mostAngle = true,
+                     const std::string& candidates=std::string());
 
 
 };

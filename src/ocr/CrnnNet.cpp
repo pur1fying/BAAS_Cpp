@@ -9,6 +9,8 @@
 #include <onnxruntime/core/providers/dml/dml_provider_factory.h>
 #endif
 
+std::string CrnnNet::REGEX_UTF8PATTERN =  R"(([\x00-\x7F]|[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}))";
+
 void CrnnNet::setGpuIndex(int gpuIndex) {
 #ifdef __CUDA__
     if (gpuIndex >= 0) {
@@ -86,6 +88,11 @@ void CrnnNet::initModel(const std::string &pathStr, const std::string &keysPath)
     if (in) {
         while (getline(in, line)) {// line中不包括每行的换行符
             keys.push_back(line);
+            if (character2Index.find(line) != character2Index.end()) {
+                printf("The keys.txt file has duplicate characters\n");
+                return;
+            }
+            character2Index[line] = keys.size();
         }
     } else {
         printf("The keys.txt file was not found\n");
@@ -101,7 +108,11 @@ inline static size_t argmax(ForwardIterator first, ForwardIterator last) {
     return std::distance(first, std::max_element(first, last));
 }
 
+
 TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h, size_t w) {
+    /*
+     *  w : size of key dict
+     */
     auto keySize = keys.size();
     auto dataSize = outputData.size();
     std::string strRes;
@@ -119,9 +130,48 @@ TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h
         maxIndex = int(argmax(&outputData[start], &outputData[stop]));
         maxValue = float(*std::max_element(&outputData[start], &outputData[stop]));
 
-        if (maxIndex > 0 && maxIndex < keySize && (!(i > 0 && maxIndex == lastIndex))) {
+        if (maxIndex > 0 && maxIndex < keySize && (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by " "
             scores.emplace_back(maxValue);
             strRes.append(keys[maxIndex]);
+        }
+        lastIndex = maxIndex;
+    }
+    return {strRes, scores};
+}
+
+TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h, size_t w,
+                                  const std::vector<size_t> &enabledIndexes) {
+    /*
+    *  w : size of key dict
+    */
+    auto keySize = keys.size();
+    size_t dataSize;
+    std::string strRes;
+    std::vector<float> scores;
+    size_t lastIndex = 0;
+    size_t maxIndex;
+    float maxValue;
+
+    std::vector<float> enabledScores;
+    size_t i,j;
+    for (i = 0; i < h; i++)
+        for (j = 0; j <= enabledIndexes.size()-1; j++)
+            enabledScores.push_back(outputData[i * w + enabledIndexes[j]]);
+
+    w = enabledIndexes.size();
+    dataSize = enabledScores.size();
+    for (i = 0; i < h; i++) {
+        size_t start = i * w;
+        size_t stop = (i + 1) * w;
+        if (stop > dataSize - 1) {
+            stop = (i + 1) * w - 1;
+        }
+        maxIndex = int(argmax(&enabledScores[start], &enabledScores[stop]));
+        maxValue = float(*std::max_element(&enabledScores[start], &enabledScores[stop]));
+
+        if (maxIndex > 0 && maxIndex < keySize && (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by "#"
+            scores.emplace_back(maxValue);
+            strRes.append(keys[enabledIndexes[maxIndex]]);
         }
         lastIndex = maxIndex;
     }
@@ -153,9 +203,36 @@ TextLine CrnnNet::getTextLine(const cv::Mat &src) {
     return scoreToTextLine(outputData, outputShape[1], outputShape[2]);
 }
 
+TextLine CrnnNet::getTextLine(const cv::Mat &src, const std::vector<size_t> &enabledIndexes) {
+    float scale = (float) dstHeight / (float) src.rows;
+    int dstWidth = int((float) src.cols * scale);
+    cv::Mat srcResize;
+    resize(src, srcResize, cv::Size(dstWidth, dstHeight));
+    std::vector<float> inputTensorValues = substractMeanNormalize(srcResize, meanValues, normValues);
+    std::array<int64_t, 4> inputShape{1, srcResize.channels(), srcResize.rows, srcResize.cols};
+    auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(memoryInfo, inputTensorValues.data(),
+                                                             inputTensorValues.size(), inputShape.data(),
+                                                             inputShape.size());
+    assert(inputTensor.IsTensor());
+    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
+    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
+    auto outputTensor = session->Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
+                                     inputNames.size(), outputNames.data(), outputNames.size());
+    assert(outputTensor.size() == 1 && outputTensor.front().IsTensor());
+    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
+    int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1,
+                                          std::multiplies<int64_t>());
+    float *floatArray = outputTensor.front().GetTensorMutableData<float>();
+    std::vector<float> outputData(floatArray, floatArray + outputCount);
+    return scoreToTextLine(outputData, outputShape[1], outputShape[2], enabledIndexes);
+}
+
+
 std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName) {
     int size = int(partImg.size());
     std::vector<TextLine> textLines(size);
+    std::vector<size_t> enabledIndexes;
     for (int i = 0; i < size; ++i) {
         //OutPut DebugImg
         if (isOutputDebugImg) {
@@ -168,6 +245,30 @@ std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const
         cv::flip(partImg[i], partImg[i], 1);
         double startCrnnTime = getCurrentTime();
         TextLine textLine = getTextLine(partImg[i]);
+        double endCrnnTime = getCurrentTime();
+        textLine.time = endCrnnTime - startCrnnTime;
+        textLines[i] = textLine;
+    }
+    return textLines;
+}
+std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName,
+                                            const std::string& candidates) {
+    int size = int(partImg.size());
+    std::vector<TextLine> textLines(size);
+    std::vector<size_t> enabledIndexes;
+    getTextIndexes(candidates, enabledIndexes);
+    for (int i = 0; i < size; ++i) {
+        //OutPut DebugImg
+        if (isOutputDebugImg) {
+            std::string debugImgFile = getDebugImgFilePath(path, imgName, i, "-debug-");
+            saveImg(partImg[i], debugImgFile.c_str());
+        }
+
+        //getTextLine
+        cv::flip(partImg[i], partImg[i], 1);
+        cv::flip(partImg[i], partImg[i], 1);
+        double startCrnnTime = getCurrentTime();
+        TextLine textLine = getTextLine(partImg[i], enabledIndexes);
         double endCrnnTime = getCurrentTime();
         textLine.time = endCrnnTime - startCrnnTime;
         textLines[i] = textLine;
@@ -209,28 +310,30 @@ std::string CrnnNet::model_key_joined_path(const std::string &model_path, const 
 }
 
 void CrnnNet::initModel() {
-#ifdef _WIN32
-    std::wstring crnnPath = strToWstr(modelPath);
-    session = new Ort::Session(env, crnnPath.c_str(), sessionOptions);
-#else
-    session = new Ort::Session(env, pathStr.c_str(), sessionOptions);
-#endif
-    inputNamesPtr = getInputNames(session);
-    outputNamesPtr = getOutputNames(session);
-
-    //load keys
-    std::ifstream in(keyDictPath.c_str());
-    std::string line;
-    if (in) {
-        while (getline(in, line)) {// line中不包括每行的换行符
-            keys.push_back(line);
-        }
-    } else {
-        printf("The keys.txt file was not found\n");
-        return;
-    }
-    keys.insert(keys.begin(), "#");
-    keys.emplace_back(" ");
-    printf("total keys size(%lu)\n", keys.size());
+    initModel(modelPath, keyDictPath);
 }
+
+void CrnnNet::getTextIndexes(const std::string &text,std::vector<size_t> &enabledIndexes) {
+    enabledIndexes.clear();
+    enabledIndexes.push_back(0);
+
+    std::vector<std::smatch> matches;
+    BAASUtil::re_find_all(text, REGEX_UTF8PATTERN, matches);
+    std::string t;
+    for (size_t i = 0; i < matches.size(); i++) {
+        t = matches[i].str();
+        auto it = character2Index.find(t);
+        if (it != character2Index.end()) {
+            enabledIndexes.push_back(it->second);
+        }
+    }
+}
+
+
+
+
+
+
+
+
 

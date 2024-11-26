@@ -65,7 +65,8 @@ cv::Mat makePadding(cv::Mat &src, const int padding) {
 
 OcrResult OcrLite::detect(const char *path, const char *imgName,
                           const int padding, const int maxSideLen,
-                          float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle) {
+                          float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle,
+                          const std::string &candidates) {
     std::string imgFile = getSrcImgFilePath(path, imgName);
     cv::Mat originSrc = imread(imgFile, cv::IMREAD_COLOR);//default : BGR
     int originMaxSide = (std::max)(originSrc.cols, originSrc.rows);
@@ -81,7 +82,7 @@ OcrResult OcrLite::detect(const char *path, const char *imgName,
     ScaleParam scale = getScaleParam(paddingSrc, resize);
     OcrResult result;
     result = detect(path, imgName, paddingSrc, paddingRect, scale,
-                    boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle);
+                    boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle, candidates);
     return result;
 }
 
@@ -117,7 +118,7 @@ OcrResult OcrLite::detectBitmap(uint8_t *bitmapData, int width, int height, int 
 
 
 OcrResult OcrLite::detect(const cv::Mat &mat, int padding, int maxSideLen, float boxScoreThresh, float boxThresh,
-                          float unClipRatio, bool doAngle, bool mostAngle) {
+                          float unClipRatio, bool doAngle, bool mostAngle, const std::string &candidates) {
     cv::Mat originSrc = mat;
     int originMaxSide = (std::max)(originSrc.cols, originSrc.rows);
     int resize;
@@ -132,13 +133,15 @@ OcrResult OcrLite::detect(const cv::Mat &mat, int padding, int maxSideLen, float
     ScaleParam scale = getScaleParam(paddingSrc, resize);
     OcrResult result;
     result = detect(NULL, NULL, paddingSrc, paddingRect, scale,
-                    boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle);
+                    boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle, candidates);
     return result;
 }
 
-void OcrLite::ocr_for_single_line(const cv::Mat &img, TextLine &text) {
+void OcrLite::ocr_for_single_line(const cv::Mat &img, TextLine &text, const std::string &candidates) {
     double startCrnnTime = getCurrentTime();
-    text = crnnNet->getTextLine(img);
+    std::vector<size_t> enabledIndexes;
+    crnnNet->getTextIndexes(candidates, enabledIndexes);
+    text = crnnNet->getTextLine(img, enabledIndexes);
     double endCrnnNetTime = getCurrentTime();
     text.time = endCrnnNetTime - startCrnnTime;
 }
@@ -160,7 +163,8 @@ std::vector<cv::Mat> OcrLite::getPartImages(cv::Mat &src, std::vector<TextBox> &
 
 OcrResult OcrLite::detect(const char *path, const char *imgName,
                           cv::Mat &src, cv::Rect &originRect, ScaleParam &scale,
-                          float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle) {
+                          float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle,
+                          const std::string&candidates) {
 
     cv::Mat textBoxPaddingImg = src.clone();
     int thickness = getThickness(src);
@@ -211,7 +215,8 @@ OcrResult OcrLite::detect(const char *path, const char *imgName,
     Logger("---------- step: crnnNet getTextLine ----------\n");
     std::vector<TextLine> textLines;
 
-    textLines = crnnNet->getTextLines(partImages, path, imgName);
+    if (!candidates.empty()) textLines = crnnNet->getTextLines(partImages, path, imgName, candidates);
+    else textLines = crnnNet->getTextLines(partImages, path, imgName);
 
     //Log TextLines
     for (size_t i = 0; i < textLines.size(); ++i) {

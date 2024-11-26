@@ -178,14 +178,7 @@ bool AngleNet::release_net(const std::string &model_path) {
 }
 
 void AngleNet::initModel() {
-#ifdef _WIN32
-    std::wstring clsPath = strToWstr(modelPath);
-    session = new Ort::Session(env, clsPath.c_str(), sessionOptions);
-#else
-    session = new Ort::Session(env, pathStr.c_str(), sessionOptions);
-#endif
-    inputNamesPtr = getInputNames(session);
-    outputNamesPtr = getOutputNames(session);
+    initModel(modelPath);
 }
 
 void AngleNet::release_all() {

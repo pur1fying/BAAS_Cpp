@@ -14,6 +14,7 @@ using json = nlohmann::json;
 
 
 int main(int argc, char **argv) {
+    system("chcp 65001");
     string config_name = "default_config";
     cv::Mat img;
     try{
@@ -44,23 +45,25 @@ int main(int argc, char **argv) {
 //        baas.solve("collect_reward");
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
-//        baas_ocr->init("zh-cn");
+        baas_ocr->init("zh-cn");
 //        baas_ocr->init("zh-tw");
-        baas_ocr->init("en-us");
+//        baas_ocr->init("en-us");
 //        baas_ocr->init("ja-jp");
 //        baas_ocr->init("ko-kr");
 //        baas_ocr->init("ru-ru");
 //        baas_ocr->test_ocr();
         OcrResult result;
         TextLine result2;
+        std::string a = "UOOC";
         for (int i = 1; i <= 100; ++i) {
             baas.update_screenshot_array();
             baas.get_latest_screenshot(img);
-            BAASRectangle region = {568, 45, 749, 57};
+            BAASRectangle region = {0, 0, 1280, 720};
             img = BAASImageUtil::crop(img, region);
-            baas_ocr->ocr_for_single_line("en-us", img, result2, "xueliang", (BAASLogger*)(BAASGlobalLogger));
-            BAASUtil::stringReplace("/", "_", result2.text);
-            cv::imwrite(result2.text + ".png", img);
+            baas_ocr->ocr("zh-cn", img, result, "xueliang", (BAASLogger*)(BAASGlobalLogger));
+            baas_ocr->ocr("zh-cn", img, result, "xueliang", (BAASLogger*)(BAASGlobalLogger), a);
+//            BAASUtil::stringReplace("/", "_", result2.text);
+//            cv::imwrite(result2.text + ".png", img);
         }
 //        for(int i = 1; i <= 10; ++i) {
             cout << result2.text << endl;

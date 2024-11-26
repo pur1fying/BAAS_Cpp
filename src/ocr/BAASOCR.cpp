@@ -45,7 +45,7 @@ bool BAASOCR::init(const std::string &language) {
 }
 
 void BAASOCR::ocr(const std::string &language, const cv::Mat &img, OcrResult &result,
-                  const std::string &log_content, BAASLogger *logger) {
+                  const std::string &log_content, BAASLogger *logger, const std::string &candidates) {
     auto res = ocr_map.find(language);
     if (res == ocr_map.end()) {
         if(logger != nullptr) logger->BAASError("OCR for" + language + " not init");
@@ -53,11 +53,11 @@ void BAASOCR::ocr(const std::string &language, const cv::Mat &img, OcrResult &re
     }
     result = res->second->detect(img, res->second->padding, res->second->maxSideLen,
                                  res->second->boxScoreThresh, res->second->boxThresh, res->second->unClipRatio,
-                                 res->second->doAngle, res->second->mostAngle);
+                                 res->second->doAngle, res->second->mostAngle, candidates);
 }
 
 void BAASOCR::ocr_for_single_line(const std::string &language, const cv::Mat &img, TextLine &result,
-                                const std::string& log_content, BAASLogger *logger) {
+                                const std::string& log_content, BAASLogger *logger, const std::string &candidates) {
     auto res = ocr_map.find(language);
     if (res == ocr_map.end()) {
         if(logger != nullptr) logger->BAASError("OCR for" + language + " not init");

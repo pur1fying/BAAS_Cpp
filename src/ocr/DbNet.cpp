@@ -187,14 +187,7 @@ DbNet *DbNet::get_net(const std::string &model_path) {
 }
 
 void DbNet::initModel() {
-#ifdef _WIN32
-    std::wstring detPath = strToWstr(modelPath);
-    session = new Ort::Session(env, detPath.c_str(), sessionOptions);
-#else
-    session = new Ort::Session(env, pathStr.c_str(), sessionOptions);
-#endif
-    inputNamesPtr = getInputNames(session);
-    outputNamesPtr = getOutputNames(session);
+    initModel(modelPath);
 }
 
 

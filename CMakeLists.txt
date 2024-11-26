@@ -85,7 +85,7 @@ target_compile_definitions(BAAS PRIVATE __CUDA__)
 
 target_link_libraries(
         BAAS
-        opencv_world490.lib
+        opencv_world490d.lib
         avcodec.lib
         avdevice.lib
         avfilter.lib
