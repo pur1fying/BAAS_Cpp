@@ -96,7 +96,7 @@ void BAASImageUtil::crop_edge(Mat &src, uint8_t enable, vector<int>& cnt, const 
         }
     }
 
-    dst = crop(src, cnt[2], cnt[0], src.cols - cnt[3], src.rows - cnt[1]);
+    crop(src, cnt[2], cnt[0], src.cols - cnt[3], src.rows - cnt[1]).copyTo(dst);
 }
 
 void BAASImageUtil::crop_edge(Mat &src, uint8_t enable, vector<int> &cnt, const Scalar &color, Mat &dst) {

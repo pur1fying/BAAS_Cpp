@@ -244,6 +244,31 @@ bool BAAS::judge_rgb_range(const BAASPoint &point, const Vec3b &min, const Vec3b
     return BAASImageUtil::judge_rgb_range(latest_screenshot, point, min, max, screen_ratio);
 }
 
+void BAAS::ocr_for_single_line(const string &language, TextLine &result, const BAASRectangle &region,
+                               const std::string &log_content, const string &candidates) {
+    if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+    cv::Mat roi_img;
+    screenshot_cut(region, roi_img);
+
+    baas_ocr->ocr_for_single_line(language, roi_img, result, log_content, logger, candidates);
+}
+
+void BAAS::screenshot_cut(const BAASRectangle &region, Mat &output) {
+    // crop an screenshot, region resized by screen_ratio
+    int x1 = int(region.ul.x * screen_ratio);
+    int y1 = int(region.ul.y * screen_ratio);
+    int x2 = int(region.lr.x * screen_ratio);
+    int y2 = int(region.lr.y * screen_ratio);
+    BAASImageUtil::crop(latest_screenshot, x1, y1, x2, y2).copyTo(output);
+}
+
+void BAAS::ocr(const string &language, OcrResult &result, const BAASRectangle &region, const string &candidates) {
+    if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+    cv::Mat roi_img;
+    screenshot_cut(region, roi_img);
+    baas_ocr->ocr(language, roi_img, result, logger, candidates);
+}
+
 
 
 

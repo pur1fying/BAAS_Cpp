@@ -379,12 +379,13 @@ void BAASUtil::insert_swipe(vector<std::pair<int, int>> &output, int start_x, in
 
     output.clear();
     output.emplace_back(start_x, start_y);
-    if(squared_distance(start_x, start_y, end_x, end_y) < step_len * step_len) {
+    int dis = squared_distance(start_x, start_y, end_x, end_y);
+    if(dis < step_len * step_len) {
         output.emplace_back(end_x, end_y);
         return;
     }
 
-    double total_len = sqrt(squared_distance(start_x, start_y, end_x, end_y));
+    double total_len = sqrt(dis);
     int step_num = ceil(total_len / step_len);
     double dx = double((end_x - start_x)*1.0) / step_num;
     double dy = double((end_y - start_y)*1.0) / step_num;

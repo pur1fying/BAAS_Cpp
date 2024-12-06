@@ -39,10 +39,12 @@ struct TextBlock {
     std::string text;
     std::vector<float> charScores;
     double crnnTime;
-    double blockTime;
 };
 
 struct OcrResult {
+    /*
+     * strRes : pure text result, every single block separated by '\n'
+     */
     double dbNetTime;
     std::vector<TextBlock> textBlocks;
     cv::Mat boxImg;

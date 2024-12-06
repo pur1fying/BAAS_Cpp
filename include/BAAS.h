@@ -138,6 +138,14 @@ public:
 
     static void init_implement_funcs();
 
+    void screenshot_cut(const BAASRectangle &region,cv::Mat &output);
+
+    void ocr_for_single_line(const std::string &language, TextLine &result,const BAASRectangle &region={0, 0, 1280, 720},
+                             const std::string &log_content=std::string(),const std::string& candidates=std::string());
+
+    void ocr(const std::string &language, OcrResult &result, const BAASRectangle &region={0, 0, 1280, 720},
+             const std::string& candidates=std::string());
+
 private:
 
     bool flag_run;

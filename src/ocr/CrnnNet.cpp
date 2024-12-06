@@ -9,7 +9,6 @@
 #include <onnxruntime/core/providers/dml/dml_provider_factory.h>
 #endif
 
-std::string CrnnNet::REGEX_UTF8PATTERN =  R"(([\x00-\x7F]|[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}))";
 
 void CrnnNet::setGpuIndex(int gpuIndex) {
 #ifdef __CUDA__
@@ -85,22 +84,23 @@ void CrnnNet::initModel(const std::string &pathStr, const std::string &keysPath)
     //load keys
     std::ifstream in(keysPath.c_str());
     std::string line;
+    keys.clear();
+    keys.emplace_back("#");
     if (in) {
         while (getline(in, line)) {// line中不包括每行的换行符
             keys.push_back(line);
             if (character2Index.find(line) != character2Index.end()) {
-                printf("The keys.txt file has duplicate characters\n");
+                BAASGlobalLogger->BAASError("keys.txt has duplicate keys");
                 return;
             }
-            character2Index[line] = keys.size();
+            character2Index[line] = keys.size() - 1;
         }
     } else {
-        printf("The keys.txt file was not found\n");
+        BAASGlobalLogger->BAASError("keys.txt not found");
         return;
     }
-    keys.insert(keys.begin(), "#");
     keys.emplace_back(" ");
-    printf("total keys size(%lu)\n", keys.size());
+    BAASGlobalLogger->BAASInfo("keys size : " + std::to_string(keys.size()));
 }
 
 template<class ForwardIterator>
@@ -252,7 +252,7 @@ std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const
     return textLines;
 }
 std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName,
-                                            const std::string& candidates) {
+                                            const std::vector<std::string> &candidates) {
     int size = int(partImg.size());
     std::vector<TextLine> textLines(size);
     std::vector<size_t> enabledIndexes;
@@ -313,19 +313,12 @@ void CrnnNet::initModel() {
     initModel(modelPath, keyDictPath);
 }
 
-void CrnnNet::getTextIndexes(const std::string &text,std::vector<size_t> &enabledIndexes) {
+void CrnnNet::getTextIndexes(const std::vector<std::string> &characters,std::vector<size_t> &enabledIndexes) {
     enabledIndexes.clear();
     enabledIndexes.push_back(0);
-
-    std::vector<std::smatch> matches;
-    BAASUtil::re_find_all(text, REGEX_UTF8PATTERN, matches);
-    std::string t;
-    for (size_t i = 0; i < matches.size(); i++) {
-        t = matches[i].str();
-        auto it = character2Index.find(t);
-        if (it != character2Index.end()) {
-            enabledIndexes.push_back(it->second);
-        }
+    for (size_t i = 0; i < characters.size(); i++) {
+        auto it = character2Index.find(characters[i]);
+        if (it != character2Index.end()) enabledIndexes.push_back(it->second);
     }
 }
 

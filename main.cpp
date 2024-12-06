@@ -24,8 +24,8 @@ int main(int argc, char **argv) {
 //        img = cv::imread("1.png");
         global_setting->show();
 //        BAASConnection* conn = baas.get_connection();
-        baas.update_screenshot_array();
-        baas.get_latest_screenshot(img);
+//        baas.update_screenshot_array();
+//        baas.get_latest_screenshot(img);
 
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
@@ -37,12 +37,12 @@ int main(int argc, char **argv) {
 //        string name = "rank-down";
 //        BAASRectangle region = {100, 291, 650, 363};
 //        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {200, 200, 200}, {255, 255, 255});
-//        baas.solve("restart");
-//        baas.solve("collect_activity_fee");
-//        baas.solve("mail");
-//        baas.solve("work");
-//        baas.solve("competition");
-//        baas.solve("collect_reward");
+        baas.solve("restart");
+        baas.solve("collect_activity_fee");
+        baas.solve("mail");
+        baas.solve("work");
+        baas.solve("competition");
+        baas.solve("collect_reward");
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
         baas_ocr->init("zh-cn");
@@ -54,19 +54,21 @@ int main(int argc, char **argv) {
 //        baas_ocr->test_ocr();
         OcrResult result;
         TextLine result2;
-        std::string a = "UOOC";
-        for (int i = 1; i <= 100; ++i) {
-            baas.update_screenshot_array();
-            baas.get_latest_screenshot(img);
-            BAASRectangle region = {0, 0, 1280, 720};
-            img = BAASImageUtil::crop(img, region);
-            baas_ocr->ocr("zh-cn", img, result, "xueliang", (BAASLogger*)(BAASGlobalLogger));
-            baas_ocr->ocr("zh-cn", img, result, "xueliang", (BAASLogger*)(BAASGlobalLogger), a);
+        std::string a = "1234567890/";
+        baas.update_screenshot_array();
+        BAASRectangle region_ap = {345, 32, 452, 53};
+        baas.ocr_for_single_line("zh-cn", result2, region_ap, "AP", a);
+        BAASRectangle region_diamond = {549, 30, 663, 63};
+        baas.ocr_for_single_line("zh-cn", result2, region_diamond, "Diamond", "1234567890,");
+        json j;
+//        BAASOCR::ocrResult2json(result, j);
+//        cout << j.dump(4) << endl;
+//        cv::imshow("img", result.boxImg);
+        cv::waitKey(0);
 //            BAASUtil::stringReplace("/", "_", result2.text);
 //            cv::imwrite(result2.text + ".png", img);
         }
 //        for(int i = 1; i <= 10; ++i) {
-            cout << result2.text << endl;
 //        }
 
 //        for (int i = 1; i<=10; ++i) {
@@ -81,7 +83,6 @@ int main(int argc, char **argv) {
 //
 //
 //        }
-    }
     catch (const std::exception& e){
         BAASGlobalLogger->BAASInfo(e.what());
     }

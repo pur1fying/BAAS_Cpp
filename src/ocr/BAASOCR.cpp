@@ -10,6 +10,8 @@
 
 BAASOCR* BAASOCR::instance = nullptr;
 
+std::string BAASOCR::REGEX_UTF8PATTERN =  R"(([\x00-\x7F]|[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}))";
+
 BAASOCR* baas_ocr = nullptr;
 
 BAASOCR *BAASOCR::get_instance() {
@@ -32,7 +34,7 @@ bool BAASOCR::init(const std::string &language) {
     std::string keys = static_config->get(key + "dict", std::string());
 
     auto ocr = new OcrLite();
-    ocr->initLogger(true, false, false);
+    ocr->initLogger(false, false, false);
     BAASGlobalLogger->BAASInfo("Ocr init lan [ " + language + " ]");
     BAASGlobalLogger->BAASInfo("Det : " + det);
     BAASGlobalLogger->BAASInfo("Cls : " + cls);
@@ -44,16 +46,26 @@ bool BAASOCR::init(const std::string &language) {
     return true;
 }
 
-void BAASOCR::ocr(const std::string &language, const cv::Mat &img, OcrResult &result,
-                  const std::string &log_content, BAASLogger *logger, const std::string &candidates) {
+void BAASOCR::ocr(const std::string &language, const cv::Mat &img, OcrResult &result, BAASLogger *logger,
+                    const std::string &candidates) {
     auto res = ocr_map.find(language);
     if (res == ocr_map.end()) {
         if(logger != nullptr) logger->BAASError("OCR for" + language + " not init");
         return;
     }
+    std::string candidates_cpy = candidates;
+    std::vector<std::string> unique_candidates;
+    string_unique_utf8_characters(candidates_cpy, unique_candidates);
+
+    if(logger != nullptr and !candidates.empty()) {
+        std::string temp;
+        BAASUtil::stringJoin(unique_candidates, "", temp);
+        logger->BAASInfo("Ocr Candidates [ " + temp + " ]");
+    }
     result = res->second->detect(img, res->second->padding, res->second->maxSideLen,
                                  res->second->boxScoreThresh, res->second->boxThresh, res->second->unClipRatio,
-                                 res->second->doAngle, res->second->mostAngle, candidates);
+                                 res->second->doAngle, res->second->mostAngle, unique_candidates);
+
 }
 
 void BAASOCR::ocr_for_single_line(const std::string &language, const cv::Mat &img, TextLine &result,
@@ -63,9 +75,21 @@ void BAASOCR::ocr_for_single_line(const std::string &language, const cv::Mat &im
         if(logger != nullptr) logger->BAASError("OCR for" + language + " not init");
         return;
     }
-    res->second->ocr_for_single_line(img, result);
+    std::string candidates_cpy = candidates;
+    std::vector<std::string> unique_candidates;
+    string_unique_utf8_characters(candidates_cpy, unique_candidates);
+    if(logger != nullptr and !candidates.empty()) {
+        std::string temp;
+        BAASUtil::stringJoin(unique_candidates, "", temp);
+        logger->BAASInfo("Ocr Candidates [ " + temp + " ]");
+    }
+
+    res->second->ocr_for_single_line(img, result, unique_candidates);
     if(logger != nullptr) {
-        logger->BAASInfo("Ocr [ " + log_content + " ] : " + result.text);
+        std::string log = "Ocr ";
+        if (!log_content.empty()) log += "[ " + log_content + " ] ";
+        log += " : " + result.text;
+        logger->BAASInfo(log);
         logger->BAASInfo("Time : " + std::to_string(int(result.time)) + "ms");
     }
 }
@@ -92,6 +116,50 @@ void BAASOCR::test_ocr() {
         cv::Mat img = cv::imread(temp);
         ocr_for_single_line(i.first, img, result, i.first, (BAASLogger*)(BAASGlobalLogger));
     }
+}
+
+void BAASOCR::ocrResult2json(OcrResult &result, nlohmann::json &output) {
+    output.clear();
+    output["dbNet_time"] = result.dbNetTime;
+    output["full_detection_time"] = result.detectTime;
+    output["str_res"] = result.strRes;
+    output["text_list"] = nlohmann::json::array();
+    nlohmann::json text;
+    int min_x, min_y, max_x, max_y;
+    for (auto &textBlock: result.textBlocks) {
+        if (textBlock.text.empty()) continue;
+        text["text"] = textBlock.text;
+        text["position"] = nlohmann::json::array();
+        min_x = result.boxImg.cols;
+        min_y = result.boxImg.rows;
+        max_x = 0;
+        max_y = 0;
+        for (auto &point: textBlock.boxPoint) {
+            min_x = std::min(min_x, point.x);
+            min_y = std::min(min_y, point.y);
+            max_x = std::max(max_x, point.x);
+            max_y = std::max(max_y, point.y);
+        }
+        text["position"].push_back({min_x, min_y});
+        text["position"].push_back({max_x, max_y});
+        text["/angle_net/index"_json_pointer] = textBlock.angleIndex;
+        text["/angle_net/score"_json_pointer] = textBlock.angleScore;
+        text["/angle_net/time"_json_pointer] = textBlock.angleTime;
+        text["char_scores"] = textBlock.charScores;
+        text["crnn_time"] = textBlock.crnnTime;
+        output["text_list"].push_back(text);
+    }
+}
+
+void BAASOCR::string_unique_utf8_characters(const std::string &text, std::vector<std::string> &output) {
+    if (text.empty()) return;
+    output.clear();
+    std::vector<std::string> matches;
+    BAASUtil::re_find_all(text, REGEX_UTF8PATTERN, matches);
+    for (auto &i: matches) output.push_back(i);
+    sort(output.begin(), output.end());
+    std::set<std::string> unique(output.begin(), output.end());
+    output.assign(unique.begin(), unique.end());
 }
 
 
