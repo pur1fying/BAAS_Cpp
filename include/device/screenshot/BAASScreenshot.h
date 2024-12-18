@@ -26,6 +26,10 @@ public:
 
     double get_screen_ratio();
 
+    [[nodiscard]] inline int get_interval() const {
+        return interval;
+    }
+
 private:
     BaseScreenshot* screenshot_instance;
 

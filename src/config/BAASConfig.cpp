@@ -243,9 +243,9 @@ void BAASConfig::remove(const string &key) {
     modified.push_back({{"op", "remove"}, {"path", key}});
 }
 
-void BAASConfig::show() {
+void BAASConfig::show(int indent, bool ensure_ascii) {
     std::lock_guard<std::mutex> lock(mtx);
-    cout << config.dump(4) << endl;
+    cout << config.dump(indent, ' ', ensure_ascii) << endl;
 }
 
 void BAASConfig::show_modify_history() {

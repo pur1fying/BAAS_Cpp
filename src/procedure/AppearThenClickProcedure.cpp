@@ -139,7 +139,7 @@ void AppearThenClickProcedure::wait_loading() {
             if(ld.length() <= 6)
                 zero += ld;
             logger->BAASInfo("Loading :" + zero + "ms");
-            if(t_loading >= 20000) {
+            if(t_loading >= 20000 && baas->get_screenshot()->get_interval() < 1) {
                 logger->BAASInfo("Loading too long, add screenshot interval to 1s.");
                 baas->get_screenshot()->set_interval(1);
             }

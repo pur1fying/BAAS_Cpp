@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.25)
-project(BAAS)
+
+project(BAAS VERSION 1.0.0)
+
+configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/version.h.in
+        ${CMAKE_BINARY_DIR}/version.h
+)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -9,10 +15,13 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options(/W0)
 endif()
 
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 include_directories(
+        BAAS PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}/external
+        ${CMAKE_BINARY_DIR}
 )
 
 
@@ -29,12 +38,6 @@ file(
         GLOB_RECURSE
         SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
-)
-
-file(
-        GLOB_RECURSE
-        IMAGE_RESOURCE
-        ${CMAKE_CURRENT_LIST_DIR}/resource/image/*.png
 )
 
 file(
@@ -70,6 +73,8 @@ foreach (source ${SOURCES})
     message(STATUS "Found source: ${source}")
 endforeach ()
 
+add_library(lib_BAAS SHARED src/BAASExternalIPC.cpp)
+
 file(
         GLOB DLL
         "dll/*.dll"
@@ -81,23 +86,28 @@ add_executable(
         ${SOURCES}
 )
 
-target_compile_definitions(BAAS PRIVATE __CUDA__)
+target_compile_definitions(
+        BAAS PRIVATE
+        __CUDA__
+        BAAS_BUILD_DLL
+)
 
 target_link_libraries(
         BAAS
-        opencv_world490d.lib
-        avcodec.lib
-        avdevice.lib
-        avfilter.lib
-        avformat.lib
-        avutil.lib
-        postproc.lib
-        swresample.lib
-        swscale.lib
-        liblz4.lib
-        onnxruntime.lib
-        onnxruntime_providers_cuda.lib
-        onnxruntime_providers_shared.lib
+        opencv_world490d
+        avcodec
+        avdevice
+        avfilter
+        avformat
+        avutil
+        postproc
+        swresample
+        swscale
+        liblz4
+        onnxruntime
+        onnxruntime_providers_cuda
+        onnxruntime_providers_shared
+        lib_BAAS
 )
 
 file(

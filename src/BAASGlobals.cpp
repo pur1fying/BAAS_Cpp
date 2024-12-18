@@ -7,6 +7,7 @@
 #include "procedure/BAASProcedure.h"
 #include "config.h"
 #include "BAASImageResource.h"
+#include "version.h"
 
 using namespace std::filesystem;
 using namespace std;
@@ -57,6 +58,8 @@ void init_globals() {
     BAAS_OCR_MODEL_DIR = BAAS_PROJECT_DIR + R"(\resource\ocr_models)";
 
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
+    BAASGlobalLogger->BAASInfo("BAAS VERSION : " + string(BAAS_VERSION));
+    BAASGlobalLogger->BAASInfo(BAAS_PROJECT_DIR);
 
     scrcpyJarName = "scrcpy-server.jar";
     scrcpyJarPath = BAAS_PROJECT_DIR + R"(\resource\bin\scrcpy\scrcpy-server.jar)";
@@ -67,7 +70,7 @@ void init_globals() {
     nemuDllPath = BAAS_PROJECT_DIR + R"(\resource\nemu_dll\external_renderer_ipc.dll)";
 
     baas_ocr = BAASOCR::get_instance();
-    BAASGlobalLogger->BAASInfo(BAAS_PROJECT_DIR);
+
 
     DEVELOPER_PROJECT_DIR = curr.parent_path().parent_path().string();
 

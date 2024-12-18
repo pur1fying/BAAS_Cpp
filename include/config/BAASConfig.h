@@ -101,7 +101,11 @@ public:
             if(it == config.end()) {
                 return default_value;
             }
-            return *it;
+            try{
+                return *it;
+            } catch (std::exception &e) {
+                return default_value;
+            }
         }
         try {
             return config.at(nlohmann::json::json_pointer(key));
@@ -113,12 +117,17 @@ public:
 
     template <typename T>
     inline T get(const std::string &key) {
+        T default_value;
         assert(!key.empty());
         std::lock_guard<std::mutex> lock(mtx);
         if(key[0] != '/') {
             auto it = config.find(key);
             if(it == config.end()) throwKeyError("Key [ " + key + " ] not found.");
-            return *it;
+            try{
+                return *it;
+            } catch (std::exception &e) {
+                throwKeyError("Value With Key [ " + key + " ] Type Error. Real : " + std::string(it->type_name()) + " Expected : " + typeid(default_value).name());
+            }
         }
         try {
             return config.at(nlohmann::json::json_pointer(key));
@@ -231,7 +240,7 @@ public:
 
     void unflatten(nlohmann::json &value);
 
-    void show();
+    void show(int indent, bool ensure_ascii);
 
     void show_modify_history();
 

@@ -9,15 +9,32 @@ using namespace std;
 using json = nlohmann::json;
 #include <device/BAASLdopengl.h>
 
-#include "BAASExternalIPC.h"
-
-
-
 int main(int argc, char **argv) {
     system("chcp 65001");
     string config_name = "default_config";
     cv::Mat img;
     try{
+        cout <<shared_memory_exists("test") << endl;
+//        img = cv::imread("game_update.png");
+        auto sm = (Shared_Memory*)get_shared_memory("test", 1280*720*3, img.data);
+        auto t1 = std::chrono::high_resolution_clock::now();
+        img = cv::Mat(720, 1280, CV_8UC3, sm->get_data());
+//        cv::imshow("img", img);
+//        cv::waitKey(0);
+////        Shared_Memory* sm = new Shared_Memory("test", 1280*720*3);
+//        auto t1 = std::chrono::high_resolution_clock::now();
+//        img = cv::Mat(720, 1280, CV_8UC3, sm->get_data());
+//
+//        cout << "time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - t1).count() << "us" << endl;
+//        cv::imshow("img", img);
+//        cv::waitKey(0);
+//        system("pause");
+//        img = cv::Mat(720, 1280, CV_8UC3, get_shared_memory_data(sm));
+//        cout << "time: " << BAASUtil::getCurrentTimeMS() - t1 << endl;
+//        cv::imshow("img", img);
+//        cv::waitKey(0);
+//        return 0;
+//        system("pause");
         init_globals();
         BAAS baas(config_name);
         BAASConfig config;
