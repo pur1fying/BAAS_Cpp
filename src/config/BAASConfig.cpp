@@ -7,6 +7,7 @@
 
 #include "BAASExceptions.h"
 #include "BAASGlobals.h"
+
 using namespace std;
 using json = nlohmann::json;
 

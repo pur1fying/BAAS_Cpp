@@ -6,10 +6,12 @@
  *  This class is bound to define any feature you want, use json as in/out to ensure flexibility.
  *  this feature can be image, ocr result, or deep learning model.
  */
+
 #ifndef BAAS_FEATURE_BAASFEATURE_H_
 #define BAAS_FEATURE_BAASFEATURE_H_
 
 #include <functional>
+
 #include "config/BAASConfig.h"
 #include "device/BAASConnection.h"
 #include "feature/BaseFeature.h"

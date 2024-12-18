@@ -1,7 +1,7 @@
 本篇用于学习google C++代码规范，同时也将作为BAAS（CPP） 所遵循的规范
 https://google.github.io/styleguide/cppguide.html
 
-C++标准：20
+C++标准：20    /std:c++20
 
 1.Inline Functions(内联函数)  
 inline 与 __inline 作用相同

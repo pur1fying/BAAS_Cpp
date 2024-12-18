@@ -240,7 +240,7 @@ public:
 
     void unflatten(nlohmann::json &value);
 
-    void show(int indent, bool ensure_ascii);
+    void show(int indent=4, bool ensure_ascii=false);
 
     void show_modify_history();
 

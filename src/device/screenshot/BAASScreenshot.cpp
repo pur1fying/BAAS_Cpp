@@ -2,11 +2,12 @@
 // Created by pc on 2024/8/9.
 //
 #include "device/screenshot/BAASScreenshot.h"
-#include <device/screenshot/AscreenCap.h>
-#include <device/screenshot/AdbScreenshot.h>
-#include <device/screenshot/ScrcpyScreenshot.h>
-#include <device/screenshot/NemuScreenshot.h>
-#include <device/screenshot/LdopenglScreenshot.h>
+
+#include "device/screenshot/AscreenCap.h"
+#include "device/screenshot/AdbScreenshot.h"
+#include "device/screenshot/ScrcpyScreenshot.h"
+#include "device/screenshot/NemuScreenshot.h"
+#include "device/screenshot/LdopenglScreenshot.h"
 
 using namespace std;
 

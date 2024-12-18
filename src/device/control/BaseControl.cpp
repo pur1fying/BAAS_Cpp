@@ -2,7 +2,6 @@
 // Created by pc on 2024/7/27.
 //
 
-#include "device/control/AdbControl.h"
 #include "device/control/BaseControl.h"
 
 

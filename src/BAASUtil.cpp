@@ -269,7 +269,7 @@ int BAASUtil::MuMu_serial2instance_id(const std::string &serial) {
     int port = serial2port(serial);
     port -= 16384;
     int index = port / 32, offset = port % 32;
-    if ((offset == 0 or offset == 1 or offset == 2) && index >= 0 && index <= 31) {
+    if ((offset == 0 || offset == 1 || offset == 2) && index >= 0 && index <= 31) {
         return index;
     }
     return -1;

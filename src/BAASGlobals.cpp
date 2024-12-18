@@ -3,11 +3,12 @@
 //
 
 #include "BAASGlobals.h"
+
+#include "config.h"
+#include "version.h"
+#include "BAASImageResource.h"
 #include "feature/BAASFeature.h"
 #include "procedure/BAASProcedure.h"
-#include "config.h"
-#include "BAASImageResource.h"
-#include "version.h"
 
 using namespace std::filesystem;
 using namespace std;

@@ -33,7 +33,7 @@ public:
 
     inline bool is_mumu_family() {
         int p = port();
-        return p == 7555 or is_mumu12_family();
+        return (p == 7555 || is_mumu12_family());
     }
 
     inline bool is_nox_family() {

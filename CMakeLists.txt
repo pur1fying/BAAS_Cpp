@@ -2,12 +2,13 @@ cmake_minimum_required(VERSION 3.25)
 
 project(BAAS VERSION 1.0.0)
 
+set(CMAKE_CXX_STANDARD 20)
+
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/version.h.in
         ${CMAKE_BINARY_DIR}/version.h
 )
 
-set(CMAKE_CXX_STANDARD 20)
 
 if (MSVC)
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")

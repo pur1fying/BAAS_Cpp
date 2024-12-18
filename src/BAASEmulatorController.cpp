@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+
 using namespace std;
 using namespace cv;
 BAASEmulatorController* BAASEmulatorController::instance = nullptr;

@@ -1,7 +1,6 @@
-#include <numbers>
-
 #include "BAASImageUtil.h"
 
+#include <numbers>
 
 using namespace std;
 using namespace cv;

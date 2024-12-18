@@ -3,7 +3,6 @@
 //
 #include "config/BAASStaticConfig.h"
 
-
 BAASStaticConfig *static_config = nullptr;
 
 BAASStaticConfig* BAASStaticConfig::staticConfig = nullptr;

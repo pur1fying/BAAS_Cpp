@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <opencv2/opencv.hpp>
+#include <optional>
 
 #include "config/BAASConfig.h"
 #include "BAASImageResource.h"

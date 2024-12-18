@@ -3,6 +3,7 @@
 //
 
 #include <stdexcept>
+
 #include "feature/BaseFeature.h"
 #include "feature/BAASFeature.h"
 

@@ -1,7 +1,7 @@
 //
 // Created by pc on 2024/4/30.
 //
-#include "ocr/Network.h"
+#include "Network.h"
 using namespace std;
 
 const string Network::TCP = "tcp";

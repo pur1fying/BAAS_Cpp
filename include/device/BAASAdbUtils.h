@@ -14,7 +14,7 @@
 #include "BAASExceptions.h"
 #include "BAASGlobals.h"
 #include "BAASUtil.h"
-#include "ocr/Network.h"
+#include "Network.h"
 
 #define _OKAY "OKAY"
 #define _FAIL "FAIL"
