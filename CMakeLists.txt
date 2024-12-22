@@ -95,7 +95,7 @@ target_compile_definitions(
 
 target_link_libraries(
         BAAS
-        opencv_world490d
+        opencv_world490
         avcodec
         avdevice
         avfilter

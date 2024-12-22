@@ -13,6 +13,7 @@
       "emulator_folder_path": ""
     },
     "script": {
-      "screenshot_interval": 0.3
+      "screenshot_interval": 0.3,
+      "show_image_compare_log": false
     }
 }

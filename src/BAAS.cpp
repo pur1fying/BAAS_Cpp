@@ -41,9 +41,14 @@ BAAS::BAAS(std::string &config_name) {
     config->config_update();
     config->save();
 
+
     flag_run = true;
 
     logger = config->get_logger();
+
+    script_show_image_compare_log = config->script_show_image_compare_log();
+
+    logger->BAASInfo("Show compare image log: " + to_string(script_show_image_compare_log));
 
     connection = new BAASConnection(config);
 
@@ -82,7 +87,7 @@ bool BAAS::feature_appear(const string &feature_name,BAASConfig &output, bool sh
 bool BAAS::feature_appear(const string &feature_name) {
     if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
     BAASConfig output;
-    return BAASFeature::appear(connection, feature_name, latest_screenshot, output);
+    return BAASFeature::appear(connection, feature_name, latest_screenshot, output, script_show_image_compare_log);
 }
 void BAAS::solve_procedure(const string &name) {
     if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");

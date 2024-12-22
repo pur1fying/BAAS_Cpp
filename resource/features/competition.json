@@ -67,10 +67,22 @@
     "group": "competition",
     "name": "start-rehearsal"
   },
-  "competition_menu_appear":{
+  "competition_menu1_appear":{
     "feature_type": 1,
     "group": "competition",
-    "name": "menu"
+    "name": "menu1"
+  },
+  "competition_menu2_appear":{
+    "feature_type": 1,
+    "group": "competition",
+    "name": "menu2"
+  },
+  "competition_menu_appear":{
+    "feature_type": -1,
+    "or_features": [
+      "competition_menu1_appear",
+      "competition_menu2_appear"
+    ]
   },
   "UI-AT_competition_menu": {
     "feature_type": -1,

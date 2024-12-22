@@ -14,9 +14,13 @@
       "direction": 1,
       "region": [155, 569, 564, 608]
     },
-    "menu": {
+    "menu1": {
       "direction": 1,
       "region": [68, 46, 200, 69]
+    },
+    "menu2": {
+      "direction": 1,
+      "region": [64, 46, 196, 69]
     },
     "skip": {
       "direction": 1,

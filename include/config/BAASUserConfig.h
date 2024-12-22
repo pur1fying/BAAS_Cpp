@@ -39,6 +39,10 @@ public:
     inline const double screenshot_interval() {
         return getDouble("/script/screenshot_interval");
     }
+
+    inline bool script_show_image_compare_log() {
+        return getBool("/script/show_image_compare_log");
+    }
 };
 
 extern BAASUserConfig* config_template;

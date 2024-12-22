@@ -147,6 +147,7 @@ public:
              const std::string& candidates=std::string());
 
 private:
+    bool script_show_image_compare_log;
 
     bool flag_run;
 

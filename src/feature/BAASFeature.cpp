@@ -102,6 +102,7 @@ void BAASFeature::show() {
 }
 
 bool BAASFeature::appear(BAASConnection *connection,const string& name, const cv::Mat &image, BAASConfig &output, bool show_log) {
+
     return appear(connection->get_server(), connection->get_language(), name, image, output, show_log);
 }
 

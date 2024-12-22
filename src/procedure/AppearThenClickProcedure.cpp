@@ -38,7 +38,7 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
     json end = possible_feature->get<json>("ends");
     vector<string> end_feature_names;
 
-    bool show_log = possible_feature->getBool("show_log", false);
+    bool show_log = baas->script_show_image_compare_log;
 
     if (end.is_array() or end.is_object()) { for (auto &i: end)if (i.is_string())end_feature_names.push_back(i); }
     else if (end.is_string()) { end_feature_names.push_back(end); }
