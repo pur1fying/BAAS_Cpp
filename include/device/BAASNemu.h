@@ -68,6 +68,10 @@ public:
 
     void update_resolution();
 
+    inline std::pair<int, int> get_screen_resolution() const {
+        return resolution;
+    }
+
 private:
     void init_dll();
 

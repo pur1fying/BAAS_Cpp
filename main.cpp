@@ -8,6 +8,7 @@ using namespace cv;
 using namespace std;
 using json = nlohmann::json;
 #include <device/BAASLdopengl.h>
+#include <benchmark/benchmark.h>
 
 int main(int argc, char **argv) {
     system("chcp 65001");
@@ -84,7 +85,7 @@ int main(int argc, char **argv) {
         cv::waitKey(0);
 //            BAASUtil::stringReplace("/", "_", result2.text);
 //            cv::imwrite(result2.text + ".png", img);
-        }
+            }
 //        for(int i = 1; i <= 10; ++i) {
 //        }
 
@@ -100,12 +101,12 @@ int main(int argc, char **argv) {
 //
 //
 //        }
-    catch (const std::exception& e){
-        BAASGlobalLogger->BAASInfo(e.what());
-    }
+            catch (const std::exception& e){
+                BAASGlobalLogger->BAASInfo(e.what());
+            }
 
-    return 0;
-}
+            return 0;
+        }
 
 
 //

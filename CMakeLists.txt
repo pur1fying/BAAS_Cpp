@@ -1,6 +1,9 @@
+message(STATUS "BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 cmake_minimum_required(VERSION 3.25)
 
 project(BAAS VERSION 1.0.0)
+
+get_filename_component(PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -14,6 +17,8 @@ if (MSVC)
 add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 add_compile_options(/W0)
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
+
 endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -76,10 +81,93 @@ endforeach ()
 
 add_library(lib_BAAS SHARED src/BAASExternalIPC.cpp)
 
-file(
-        GLOB DLL
-        "dll/*.dll"
+SET(
+        LIB_COMMON
+        avcodec
+        avdevice
+        avfilter
+        avformat
+        avutil
+        liblz4
+        onnxruntime
+        onnxruntime_providers_cuda
+        onnxruntime_providers_shared
+        postproc
+        swresample
+        swscale
+        ws2_32
+        shlwapi
 )
+
+SET(
+        DLL_COMMON
+        avcodec-60
+        avdevice-60
+        avfilter-9
+        avformat-60
+        avutil-58
+        liblz4
+        onnxruntime
+        onnxruntime_providers_cuda
+        postproc-57
+        swresample-4
+        swscale-7
+)
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    SET(
+            LIB_DEBUG
+            opencv_world490d
+            benchmark_d
+            benchmark_main_d
+    )
+    SET(
+            DLL_DEBUG
+            opencv_world490d
+    )
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+    SET(
+            LIB_RELEASE
+            opencv_world490
+            benchmark
+            benchmark_main
+    )
+    SET(
+            DLL_RELEASE
+            opencv_world490
+    )
+endif ()
+
+set(
+        LIB_RAW
+        ${LIB_COMMON}
+        ${LIB_DEBUG}
+        ${LIB_RELEASE}
+)
+
+set(
+        DLL_RAW
+        ${DLL_COMMON}
+        ${DLL_DEBUG}
+        ${DLL_RELEASE}
+)
+
+# log found dll name
+message(STATUS "LIB RAW :")
+foreach (LIB ${LIB_RAW})
+    message(STATUS "${LIB}")
+endforeach ()
+message(STATUS "---------------------------------")
+message(STATUS "DLL RAW :")
+foreach (DLL ${DLL_RAW})
+    message(STATUS "${DLL}")
+endforeach ()
+
+# get dll full path and copy to binary dir
+foreach (dll ${DLL_RAW})
+    set(FULL_PATH ${CMAKE_CURRENT_LIST_DIR}/dll/${dll}.dll)
+    file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR})
+endforeach ()
 
 add_executable(
         BAAS
@@ -91,24 +179,12 @@ target_compile_definitions(
         BAAS PRIVATE
         __CUDA__
         BAAS_BUILD_DLL
+        BENCHMARK_STATIC_DEFINE
 )
 
 target_link_libraries(
         BAAS
-        opencv_world490
-        avcodec
-        avdevice
-        avfilter
-        avformat
-        avutil
-        postproc
-        swresample
-        swscale
-        liblz4
-        onnxruntime
-        onnxruntime_providers_cuda
-        onnxruntime_providers_shared
-        lib_BAAS
+        ${LIB_RAW}
 )
 
 file(
@@ -161,4 +237,3 @@ file(
         DESTINATION ${CMAKE_BINARY_DIR}/resource
 )
 
-file(COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR})

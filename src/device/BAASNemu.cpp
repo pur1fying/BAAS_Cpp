@@ -79,8 +79,8 @@ void BAASNemu::screenshot(cv::Mat &image) {
     if(nemu_capture_display(connection_id, 0, int(pixels.size()), &resolution.first, &resolution.second, pixels.data()) != 0)
         throw NemuIpcError("Nemu capture display failed");
     imageOpMutex.lock();
-    image = cv::Mat(resolution.second, resolution.first, CV_8UC4, pixels.data());
-    cv::cvtColor(image, image, cv::COLOR_BGRA2RGB);
+    cv::Mat temp = cv::Mat(resolution.second, resolution.first, CV_8UC4, pixels.data());
+    cv::cvtColor(temp, image, cv::COLOR_BGRA2RGB);
     cv::flip(image, image, 0);
     imageOpMutex.unlock();
 }
