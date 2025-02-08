@@ -34,7 +34,6 @@ AppearThenClickProcedure::AppearThenClickProcedure(BAASConfig* possible_features
 void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
     this->baas = baas;
     this->logger = baas->get_logger();
-
     json end = possible_feature->get<json>("ends");
     vector<string> end_feature_names;
 
@@ -54,15 +53,14 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
     max_stuck_time = possible_feature->getInt("max_stuck_time", 20);
     max_click = possible_feature->getInt("max_click_times", 20);
     max_execute_time = possible_feature->getLLong("max_execute_time", LLONG_MAX);
-    enable_tentative_click = possible_feature->getBool("tentative_click/0", false);
+    enable_tentative_click = possible_feature->getBool("/tentative_click/0", false);
     if(enable_tentative_click) {
-        tentative_click_x = possible_feature->getInt("tentative_click/1", 640);
-        tentative_click_y = possible_feature->getInt("tentative_click/2", 360);
-        tentative_click_stuck_time = possible_feature->getLLong("tentative_click/3", 10);
+        tentative_click_x = possible_feature->getInt("/tentative_click/1", 640);
+        tentative_click_y = possible_feature->getInt("/tentative_click/2", 360);
+        tentative_click_stuck_time = possible_feature->getLLong("/tentative_click/3", 10);
     }
 
     bool skip_first_screenshot = possible_feature->getBool("skip_first_screenshot", false);
-
     output.clear();
 
     start_time = BAASUtil::getCurrentTimeStamp();
@@ -88,7 +86,6 @@ void AppearThenClickProcedure::implement(BAAS* baas, BAASConfig& output) {
             logger->BAASError(possibles_feature_names);
             throw GameStuckError("Game stuck.");
         }
-
         if (enable_tentative_click && this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time) {
             baas->click(tentative_click_x, tentative_click_y, 1, 1, 5, 0.0, 0.0, 0.0, "Tentative Click");
             last_tentative_click_time = BAASUtil::getCurrentTimeStamp();

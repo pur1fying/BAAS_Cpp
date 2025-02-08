@@ -1,77 +1,30 @@
 {
-  "common_close-notice-button_appear":{
+  "common_notice-title_appear":{
     "feature_type": 0,
     "group": "common",
-    "name": "close-notice-button",
+    "name": "notice-title",
     "mean_rgb_diff": [5, 5, 5],
     "threshold": 0.9
   },
-  "common_back_appear": {
-    "feature_type": 1,
-    "group": "common",
-    "name": "back",
-    "mean_rgb_diff": [5, 5, 5],
-    "threshold": 0.9
-  },
-  "common_home_appear": {
-    "feature_type": 1,
-    "group": "common",
-    "name": "home",
-    "check_mean_rgb": true,
-    "mean_rgb_diff": [5, 5, 5],
-    "threshold": 0.9
-  },
-  "common_tip_appear": {
-    "feature_type": 1,
-    "group": "common",
-    "name": "tip",
-    "mean_rgb_diff": [5, 5, 5],
-    "threshold": 0.9
-  },
-  "common_game-recover-notice_appear": {
-    "feature_type": 1,
-    "group": "common",
-    "name": "game-recover-notice",
-    "mean_rgb_diff": [5, 5, 5],
-    "threshold": 0.9
-  },
-  "navigation-bar_not-white-place": {
-    "feature_type": 2,
-    "rgb_range": {
-      "JP_ja-jp": {
-        "positions": [[53, 1220], [150, 1187], [332, 1210]],
-        "range": [[0, 180, 0, 180, 0, 180],[0, 180, 0, 180, 0, 180],[0, 180, 0, 180, 0, 180]]
-      }
-    }
-  },
-  "common_navigation-bar_appear": {
-    "and_features": [
-      "common_home_appear",
-      "common_tip_appear",
-      "common_back_appear",
-      "navigation-bar_not-white-place"
-    ]
-  },
-  "common_reward-acquired-notice_appear": {
-    "feature_type": 1,
-    "group": "common",
-    "name": "reward-acquired-notice"
-  },
-  "common_reward-acquired-cross_appear": {
+  "common_fight-skill-1-chosen_appear":{
     "feature_type": 0,
     "group": "common",
-    "name": "reward-acquired-cross"
+    "name": "fight-skill-1-chosen",
+    "mean_rgb_diff": [10, 10, 10],
+    "threshold": 0.9
   },
-  "common_loading_appear": {
-    "feature_type": 1,
+  "common_fight-skill-2-chosen_appear":{
+    "feature_type": 0,
     "group": "common",
-    "name": "loading"
+    "name": "fight-skill-2-chosen",
+    "mean_rgb_diff": [10, 10, 10],
+    "threshold": 0.9
   },
-  "UI-AT_common_reward_acquired": {
-    "feature_type": -1,
-    "and_features": [
-      "common_reward-acquired-notice_appear",
-      "common_reward-acquired-cross_appear"
-    ]
+  "common_fight-skill-3-chosen_appear":{
+    "feature_type": 0,
+    "group": "common",
+    "name": "fight-skill-3-chosen",
+    "mean_rgb_diff": [10, 10, 10],
+    "threshold": 0.9
   }
 }

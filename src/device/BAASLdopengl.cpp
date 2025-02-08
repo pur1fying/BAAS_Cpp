@@ -115,7 +115,6 @@ void BAASLdopengl::screenshot(cv::Mat &image) {
         logger->BAASError("LDOpenGL screenshot failed");
         throw LDOpenGLError("screenshot failed");
     }
-
     image = cv::Mat(resolution.first, resolution.second, CV_8UC3, (unsigned char *)ptr);
     cv::flip(image, image, 0);
 }

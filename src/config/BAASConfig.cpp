@@ -328,3 +328,11 @@ void BAASConfig::unflatten(json &value) {
 BAASConfig *config_name_change = nullptr;
 
 BAASConfig *default_global_setting = nullptr;
+
+void BAASConfig::check_config_dir()
+{
+    if (!std::filesystem::exists(BAAS_CONFIG_DIR)) {
+        BAASGlobalLogger->BAASInfo("Create config dir : [ " + BAAS_CONFIG_DIR + " ].");
+        std::filesystem::create_directory(BAAS_CONFIG_DIR);
+    }
+}

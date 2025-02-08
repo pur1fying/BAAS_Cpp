@@ -11,6 +11,7 @@
 #include "module/restart/Restart.h"
 #include "module/collect_reward/CollectReward.h"
 #include "module/mail/Mail.h"
+#include "module/total_assault/TotalAssault.h"
 
 using namespace std;
 using namespace cv;
@@ -62,6 +63,11 @@ BAAS::BAAS(std::string &config_name) {
 void BAAS::update_screenshot_array() {
     if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
     screenshot->screenshot(latest_screenshot);
+}
+
+void BAAS::immediate_update_screenshot_array() {
+    if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+    screenshot->immediate_screenshot(latest_screenshot);
 }
 
 void BAAS::get_latest_screenshot(cv::Mat &img) {
@@ -160,6 +166,7 @@ void BAAS::init_implement_funcs() {
     implement_funcs["restart"] = ISA::Restart::implement;
     implement_funcs["collect_reward"] = ISA::CollectReward::implement;
     implement_funcs["mail"] = ISA::Mail::implement;
+    implement_funcs["total_assault"] = baas::TotalAssault::implement;
 }
 
 void BAAS::wait_region_static(const BAASRectangle &region, double frame_diff_ratio, double min_static_time, int min_frame_cnt, double max_execute_time) {
@@ -274,6 +281,55 @@ void BAAS::ocr(const string &language, OcrResult &result, const BAASRectangle &r
     screenshot_cut(region, roi_img);
     baas_ocr->ocr(language, roi_img, result, logger, candidates);
 }
+
+void BAAS::ocr_get_boss_health(
+        optional<int> &ret,
+        int max_health,
+        const BAASRectangle &region,
+        const string &candidates
+)
+{
+    TextLine result;
+    ocr_for_single_line("zh-cn", result, region, "boss_health", candidates);
+    BAASUtil::str2boss_health(result.text, ret);
+    if (ret.has_value() && ret.value() > max_health) {
+        ret = nullopt;
+    }
+}
+
+void BAAS::click_until_disappear(
+        const string &feature_name,
+        BAASPoint p,
+        bool skip_first_screenshot,
+        int time_out
+)
+{
+    long long start_time = BAASUtil::getCurrentTimeMS();
+    while (flag_run) {
+        if (BAASUtil::getCurrentTimeMS() - start_time > time_out) {
+            break;
+        }
+        if (skip_first_screenshot)  skip_first_screenshot = false;
+        else {
+            update_screenshot_array();
+            BAASFeature::reset_feature(feature_name);
+        }
+        if (feature_appear(feature_name)) {
+            click(p.x, p.y, 1, 1, 5, 0.0, 0.0, 0.0);
+        } else {
+            break;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
 
 
 

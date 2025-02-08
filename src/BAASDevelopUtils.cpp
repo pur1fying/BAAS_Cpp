@@ -6,24 +6,59 @@
 using namespace std;
 using namespace cv;
 
-void BAASDevelopUtils::shotStudentSkill(const string &name, const BAASRectangle &r, const int type) {
-    string MuMuPlayerPath = "H:\\MuMuPlayer-12.0";
-    auto* nemu = new BAASNemu(MuMuPlayerPath);
-    string temp = BAAS_PROJECT_DIR + R"(\resource\image\CN\)";
+void BAASDevelopUtils::shotStudentSkill
+(
+        const cv::Mat& image,
+        const string &name1,
+        const string &name2,
+        const string &name3,
+        const int type
+)
+{
+    BAASRectangle r;
+    Mat img;
     if(type == SKILL_FULL) {
-        temp = temp + "skill_icon_bright";
+        if (!name1.empty()) {
+            img = BAASImageUtil::crop(image, SKILL1_FULL);
+            BAASImageUtil::save(img, name1, string(), true);
+        }
+        if (!name2.empty()) {
+            img = BAASImageUtil::crop(image, SKILL2_FULL);
+            BAASImageUtil::save(img, name2, string(), true);
+        }
+        if (!name3.empty()) {
+            img = BAASImageUtil::crop(image, SKILL3_FULL);
+            BAASImageUtil::save(img, name3, string(), true);
+        }
     }
     else if(type == SKILL_LEFT) {
-        temp = temp + "skill_icon_left_black";
+        if(!name1.empty()) {
+            img = BAASImageUtil::crop(image, SKILL1_LEFT);
+            BAASImageUtil::save(img, name1, string(), true);
+        }
+        if(!name2.empty()) {
+            img = BAASImageUtil::crop(image, SKILL2_LEFT);
+            BAASImageUtil::save(img, name2, string(), true);
+        }
+        if(!name3.empty()) {
+            img = BAASImageUtil::crop(image, SKILL3_LEFT);
+            BAASImageUtil::save(img, name3, string(), true);
+        }
     }
     else if(type == SKILL_RIGHT) {
-        temp = temp + "skill_icon_right_grey";
+        if(!name1.empty()) {
+            img = BAASImageUtil::crop(image, SKILL1_RIGHT);
+            BAASImageUtil::save(img, name1, string(), true);
+        }
+        if(!name2.empty()) {
+            img = BAASImageUtil::crop(image, SKILL2_RIGHT);
+            BAASImageUtil::save(img, name2, string(), true);
+        }
+        if(!name3.empty()) {
+            img = BAASImageUtil::crop(image, SKILL3_RIGHT);
+            BAASImageUtil::save(img, name3, string(), true);
+        }
     }
-    Mat image;
-    nemu->screenshot(image);
-    Mat im = BAASImageUtil::crop(image, r);
-    BAASImageUtil::save(im, name, temp, true);
-    delete nemu;
 }
 
 void BAASDevelopUtils::extract_image_rgb_range(const cv::Mat& img, const string &name, const BAASRectangle &r,const Scalar &min_, const Scalar &max_, const uint8_t cut_edge) {

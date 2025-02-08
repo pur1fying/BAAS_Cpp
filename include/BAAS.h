@@ -16,7 +16,6 @@
 #include "feature/BAASFeature.h"
 #include "BAASGlobals.h"
 
-#include "BAASAutoFight.h"
 #include "BAASImageUtil.h"
 #include "BAASDevelopUtils.h"
 #include "BAASImageResource.h"
@@ -30,7 +29,13 @@ public:
 
     void update_screenshot_array();
 
+    void immediate_update_screenshot_array();
+
     void get_latest_screenshot(cv::Mat& img);
+
+    const inline cv::Mat &get_latest_screenshot() {
+        return latest_screenshot;
+    }
 
     void get_latest_screenshot(cv::Mat& img, const BAASRectangle &region);
 
@@ -110,7 +115,19 @@ public:
         control->click(point, count, type, offset, interval, pre_wait, post_wait, description);
     }
 
-    inline void click(int x, int y, int count, uint8_t type = 1, int offset = 5, double interval = 0.0, double pre_wait = 0.0 , double post_wait = 0.0, const std::string &description = "") {
+    inline void click
+    (
+            int x,
+            int y,
+            int count,
+            uint8_t type = 1,
+            int offset = 5,
+            double interval = 0.0,
+            double pre_wait = 0.0 ,
+            double post_wait = 0.0,
+            const std::string &description = ""
+    )
+    {
         if(!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
         control->click(x, y, count, type, offset, interval, pre_wait, post_wait, description);
     }
@@ -146,6 +163,11 @@ public:
     void ocr(const std::string &language, OcrResult &result, const BAASRectangle &region={0, 0, 1280, 720},
              const std::string& candidates=std::string());
 
+    void ocr_get_boss_health(std::optional<int> &ret, int max_health,const BAASRectangle &region={558, 43, 657, 60},
+                             const std::string &candidates="0123456789,，.");
+
+    void click_until_disappear(const std::string& feature_name, BAASPoint p,bool skip_first_screenshot=false, int time_out=2000);
+
 private:
     bool script_show_image_compare_log;
 
@@ -169,6 +191,8 @@ private:
 
     friend class AppearThenDoProcedure;
     friend class AppearThenClickProcedure;
+
+
 };
 
 

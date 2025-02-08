@@ -1,0 +1,23 @@
+{
+  "UI-GO-TO_common_fight-skill-1-chosen": {
+    "procedure_type": 0,
+    "ends": "common_fight-skill-1-chosen_appear",
+    "possibles": [
+      ["UI-AT_total_assault_fight-page",883,  621, 0.3]
+    ]
+  },
+  "UI-GO-TO_common_fight-skill-2-chosen": {
+    "procedure_type": 0,
+    "ends": "common_fight-skill-2-chosen_appear",
+    "possibles": [
+      ["UI-AT_total_assault_fight-page",985,  621, 0.3]
+    ]
+  },
+  "UI-GO-TO_common_fight-skill-3-chosen": {
+    "procedure_type": 0,
+    "ends": "common_fight-skill-3-chosen_appear",
+    "possibles": [
+      ["UI-AT_total_assault_fight-page",1087,  621, 0.3]
+    ]
+  }
+}

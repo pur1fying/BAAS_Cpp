@@ -16,6 +16,8 @@ public:
 
     void screenshot(cv::Mat &img);
 
+    void immediate_screenshot(cv::Mat &img);
+
     void ensure_interval() const;
 
     void exit();

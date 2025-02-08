@@ -1,0 +1,18 @@
+{
+  "group": "common",
+  "path": "common",
+  "image": {
+    "notice-title": {
+      "region": [603, 139, 678, 178]
+    },
+    "fight-skill-1-chosen": {
+      "region": [860, 646, 898, 663]
+    },
+    "fight-skill-2-chosen": {
+      "region": [963, 646, 1000, 663]
+    },
+    "fight-skill-3-chosen": {
+      "region": [1062, 646, 1103, 663]
+    }
+  }
+}

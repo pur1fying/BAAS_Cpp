@@ -1,6 +1,7 @@
-#include "BAASImageUtil.h"
-
 #include <numbers>
+
+#include "BAASImageUtil.h"
+#include "BAASUtil.h"
 
 using namespace std;
 using namespace cv;
@@ -103,13 +104,15 @@ void BAASImageUtil::crop_edge(Mat &src, uint8_t enable, vector<int> &cnt, const 
 }
 
 bool BAASImageUtil::save(const Mat& image, const string& imageName, const string& path, const bool& check) {
-    if (!filesystem::exists(path)) {
+    if (!path.empty() && !filesystem::exists(path)) {
         filesystem::create_directories(path);
     }
-    string savePath = path + "/" + imageName + ".png";
+    string savePath;
+    if (path.empty())   savePath = imageName + ".png";
+    else                savePath = path + "/" + imageName + ".png";
     imwrite(savePath, image);
     if (check) {
-        if(!filesystem::exists(path)) {
+        if(!BAASUtil::checkImageBroken(savePath)) {
             BAASGlobalLogger->BAASError("FAIL Save image : [ " + savePath + " ]");
             return false;
         }

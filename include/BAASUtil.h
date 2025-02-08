@@ -128,6 +128,8 @@ public:
 
       static bool re_match(const std::string &src, const std::string &pattern);
 
+      static inline void re_replace(const std::string &src, const std::string &pattern, const std::string &replace, std::string &dst);
+
       static uint32_t st2u32(const std::string &src);
 
       static void insert_swipe(std::vector<std::pair<int, int>> &output, int start_x, int start_y, int end_x, int end_y, int step_len = 5);
@@ -157,6 +159,8 @@ public:
     static std::istream &safeGetLine(std::istream &is, std::string &t);
 
     static void calc_swipe_params(int x1, int y1, int x2, int y2, double duration,int &step_len, double &sleep_delay);
+
+    static void str2boss_health(std::string &src, std::optional<int> &ret);
 
 };
 #endif //BAAS_UTIL_H_

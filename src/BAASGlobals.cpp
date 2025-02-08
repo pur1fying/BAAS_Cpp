@@ -61,6 +61,7 @@ void init_globals() {
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
     BAASGlobalLogger->BAASInfo("BAAS VERSION : " + string(BAAS_VERSION));
     BAASGlobalLogger->BAASInfo(BAAS_PROJECT_DIR);
+    BAASConfig::check_config_dir();
 
     scrcpyJarName = "scrcpy-server.jar";
     scrcpyJarPath = BAAS_PROJECT_DIR + R"(\resource\bin\scrcpy\scrcpy-server.jar)";
@@ -87,6 +88,7 @@ void init_globals() {
     config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);
     config_template = new BAASUserConfig(CONFIG_TYPE_DEFAULT_CONFIG);
     default_global_setting = new BAASConfig(CONFIG_TYPE_DEFAULT_GLOBAL_SETTING);
+
     BAASGlobalSetting::check_global_setting_exist();
     global_setting = BAASGlobalSetting::getGlobalSetting();
 }

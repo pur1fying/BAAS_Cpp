@@ -45,7 +45,15 @@ BAASImageResource *BAASImageResource::get_instance() {
     return instance;
 }
 
-void BAASImageResource::get(const string &server, const string &language, const string &task, const string &name, cv::Mat &out) {
+void BAASImageResource::get
+(
+        const string &server,
+        const string &language,
+        const string &task,
+        const string &name,
+        cv::Mat &out
+)
+{
     if(!is_loaded(server, language, task, name))throw GetResourceError("Image Resource [ " + resource_pointer(server, language, task, name) + " ] not loaded");
     lock_guard<mutex> lock(resource_mutex);
     out = images[server][language][task][name].image;

@@ -1,25 +1,38 @@
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
 #include <iostream>
 #include "BAAS.h"
 #include "httplib.h"
 #pragma comment(lib, "ws2_32.lib")
-#include <BAASExternalIPC.h>
+#include "BAASExternalIPC.h"
 using namespace cv;
 using namespace std;
 using json = nlohmann::json;
-#include <device/BAASLdopengl.h>
-#include <benchmark/benchmark.h>
+#include "device/BAASLdopengl.h"
+#include "benchmark/benchmark.h"
 
+//std::string benchmark_baas_instance_name = "default_config";
+//std::unique_ptr<BAAS> baas_ins= nullptr;
+//bool BENCHMARK_INITED = false;
+//static void BM_BAAS_SCREENSHOT(benchmark::State& state) {
+//    for (auto _ : state) {
+//        baas_ins->immediate_update_screenshot_array();
+//    }
+//}
+//
+//static void DoSetup(const benchmark::State& state) {
+//    init_globals();
+//    BENCHMARK_INITED = true;
+//    baas_ins = std::make_unique<BAAS>(benchmark_baas_instance_name);
+//};
+//
+//BENCHMARK(BM_BAAS_SCREENSHOT)->Unit(benchmark::kMicrosecond)->Setup(DoSetup)->Iterations(100000);
+//BENCHMARK_MAIN();
+//
 int main(int argc, char **argv) {
     system("chcp 65001");
     string config_name = "default_config";
     cv::Mat img;
     try{
-        cout <<shared_memory_exists("test") << endl;
-//        img = cv::imread("game_update.png");
-        auto sm = (Shared_Memory*)get_shared_memory("test", 1280*720*3, img.data);
-        auto t1 = std::chrono::high_resolution_clock::now();
-        img = cv::Mat(720, 1280, CV_8UC3, sm->get_data());
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
 ////        Shared_Memory* sm = new Shared_Memory("test", 1280*720*3);
@@ -36,25 +49,23 @@ int main(int argc, char **argv) {
 //        cv::waitKey(0);
 //        return 0;
 //        system("pause");
+        std::string path = "H:\\MuMuPlayer-12.0\\中文路径\\shell\\sdk\\external_renderer_ipc.dll";
+        cout << path << endl;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+        std::wstring wpath = converter.from_bytes(path);
+        std::filesystem::path p(wpath);
+        cout << filesystem::exists(p) << endl;
         init_globals();
+        baas_ocr->init("zh-cn");
         BAAS baas(config_name);
-        BAASConfig config;
-//        img = cv::imread("1.png");
-        global_setting->show();
-//        BAASConnection* conn = baas.get_connection();
-//        baas.update_screenshot_array();
-//        baas.get_latest_screenshot(img);
-
-//        cv::imshow("img", img);
-//        cv::waitKey(0);
-
-//        cv::imwrite("1.png", img);
-//        cv::imshow("img", img);
-//          img = cv::imread("NUM.png");
-//        cv::waitKey(0);
-//        string name = "rank-down";
-//        BAASRectangle region = {100, 291, 650, 363};
-//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {200, 200, 200}, {255, 255, 255});
+//        baas.solve("total_assault");
+        baas.update_screenshot_array();
+        baas.get_latest_screenshot(img);
+//        BAASDevelopUtils::shotStudentSkill(img, "Himari", "", "", SKILL_LEFT);
+//        return 0;
+        string name = "fight-pause";
+//        BAASRectangle region = {601, 136, 677, 175};
+//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {255, 255, 255});
         baas.solve("restart");
         baas.solve("collect_activity_fee");
         baas.solve("mail");
@@ -63,26 +74,18 @@ int main(int argc, char **argv) {
         baas.solve("collect_reward");
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
-        baas_ocr->init("zh-cn");
+          std::optional<int> ret;
+          baas.ocr_get_boss_health(ret, 7e6);
+
 //        baas_ocr->init("zh-tw");
 //        baas_ocr->init("en-us");
 //        baas_ocr->init("ja-jp");
 //        baas_ocr->init("ko-kr");
 //        baas_ocr->init("ru-ru");
 //        baas_ocr->test_ocr();
-        OcrResult result;
-        TextLine result2;
-        std::string a = "1234567890/";
-        baas.update_screenshot_array();
-        BAASRectangle region_ap = {345, 32, 452, 53};
-        baas.ocr_for_single_line("zh-cn", result2, region_ap, "AP", a);
-        BAASRectangle region_diamond = {549, 30, 663, 63};
-        baas.ocr_for_single_line("zh-cn", result2, region_diamond, "Diamond", "1234567890,");
-        json j;
 //        BAASOCR::ocrResult2json(result, j);
 //        cout << j.dump(4) << endl;
 //        cv::imshow("img", result.boxImg);
-        cv::waitKey(0);
 //            BAASUtil::stringReplace("/", "_", result2.text);
 //            cv::imwrite(result2.text + ".png", img);
             }

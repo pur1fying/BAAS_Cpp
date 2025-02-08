@@ -1,0 +1,62 @@
+{
+  "total_assault_skip-notice_appear":{
+    "feature_type": 0,
+    "group": "total_assault",
+    "name": "skip-notice",
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
+  },
+  "total_assault_fight-clock_appear":{
+    "feature_type": 1,
+    "group": "total_assault",
+    "name": "fight-clock",
+    "mean_rgb_diff": [20, 20, 20],
+    "threshold": 0.8
+  },
+  "total_assault_fight-stop-button_appear":{
+    "feature_type": 0,
+    "group": "total_assault",
+    "name": "fight-stop-button",
+    "mean_rgb_diff": [20, 20, 20],
+    "threshold": 0.8
+  },
+  "total_assault_restart-fight-notice_appear":{
+    "feature_type": 0,
+    "group": "total_assault",
+    "name": "restart-fight-notice",
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
+  },
+  "total_assault_formation-edit_appear": {
+    "feature_type": 0,
+    "group": "total_assault",
+    "name": "formation-edit",
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
+  },
+  "total_assault_fight-pause_appear": {
+    "feature_type": 0,
+    "group": "total_assault",
+    "name": "fight-pause",
+    "mean_rgb_diff": [5, 5, 5],
+    "threshold": 0.9
+  },
+  "UI-AT_total_assault_skip-notice":{
+    "and_features": [
+        "total_assault_skip-notice_appear",
+        "common_notice-title_appear"
+    ]
+  },
+  "UI-AT_total_assault_fight-page": {
+    "or_features": [
+      "total_assault_fight-clock_appear",
+      "total_assault_fight-stop-button_appear"
+    ]
+  },
+  "UI-AT_total_assault_restart-fight-notice": {
+    "and_features": [
+      "total_assault_restart-fight-notice_appear",
+      "common_notice-title_appear"
+    ]
+  }
+}

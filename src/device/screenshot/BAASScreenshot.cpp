@@ -38,6 +38,11 @@ void BAASScreenshot::screenshot(cv::Mat &img) {
     last_screenshot_time = BAASUtil::getCurrentTimeMS();
 }
 
+void BAASScreenshot::immediate_screenshot(cv::Mat &img) {
+    screenshot_instance->screenshot(img);
+    last_screenshot_time = BAASUtil::getCurrentTimeMS();
+}
+
 void BAASScreenshot::ensure_interval() const {
     long long current_time = BAASUtil::getCurrentTimeMS();
     int difference = interval - int(current_time - last_screenshot_time);
@@ -114,5 +119,7 @@ double BAASScreenshot::get_screen_ratio() {
     logger->BAASInfo("Screen ratio : " + std::to_string(ratio));
     return ratio;
 }
+
+
 
 

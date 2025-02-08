@@ -3,7 +3,12 @@ cmake_minimum_required(VERSION 3.25)
 
 project(BAAS VERSION 1.0.0)
 
-get_filename_component(PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
+#set(PROJECT_ROOT_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE PATH)
+#set(SRC_DIR ${PROJECT_ROOT_DIR}/src CACHE PATH)
+#set(INCLUDE_DIR ${PROJECT_ROOT_DIR}/include CACHE PATH)
+#set(LIB_DIR ${PROJECT_ROOT_DIR}/lib CACHE PATH)
+#set(DLL_DIR ${PROJECT_ROOT_DIR}/dll CACHE PATH)
+#set(RESOURCE_DIR ${PROJECT_ROOT_DIR}/resource CACHE PATH)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -12,24 +17,20 @@ configure_file(
         ${CMAKE_BINARY_DIR}/version.h
 )
 
-
 if (MSVC)
-add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options(/W0)
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
-
+    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options(/W0)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
 endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
 include_directories(
-        BAAS PRIVATE
+        BAAS
         ${CMAKE_CURRENT_LIST_DIR}/include
         ${CMAKE_CURRENT_LIST_DIR}/external
         ${CMAKE_BINARY_DIR}
 )
-
 
 link_directories(
         ${CMAKE_CURRENT_LIST_DIR}/lib
@@ -71,9 +72,7 @@ file (
 )
 
 
-foreach (header ${HEADERS})
-    message(STATUS "Found header: ${header}")
-endforeach ()
+
 
 foreach (source ${SOURCES})
     message(STATUS "Found source: ${source}")
@@ -109,6 +108,7 @@ SET(
         liblz4
         onnxruntime
         onnxruntime_providers_cuda
+        onnxruntime_providers_shared
         postproc-57
         swresample-4
         swscale-7

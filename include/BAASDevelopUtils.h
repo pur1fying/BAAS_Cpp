@@ -23,7 +23,14 @@ enum {
 };
 class BAASDevelopUtils {
 public:
-    static void shotStudentSkill(const std::string &name = "student", const BAASRectangle &r = SKILL1_FULL, const int type = SKILL_FULL);
+    static void shotStudentSkill
+    (
+            const cv::Mat &image,
+            const std::string &name1 = "student1",
+            const std::string &name2 = "student2",
+            const std::string &name3 = "student3",
+            const int type = SKILL_FULL
+    );
 
     static void extract_image_rgb_range(const cv::Mat& img, const std::string &name, const BAASRectangle &r, const cv::Scalar &min_ , const cv::Scalar &max_, const uint8_t cut_edge = true);
 };

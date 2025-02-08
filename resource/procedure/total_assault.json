@@ -1,0 +1,28 @@
+{
+  "UI-GO-TO_total_assault_fight-page": {
+    "procedure_type": 0,
+    "ends": "UI-AT_total_assault_fight-page",
+    "possibles": [
+      ["total_assault_formation-edit_appear",1153, 656, 0.3],
+      ["UI-AT_total_assault_skip-notice", 764, 499, 1.0]
+    ],
+    "tentative_click": [true, 640, 360, 1]
+  },
+  "UI-GO-TO_total_assault_fight-pause": {
+    "procedure_type": 0,
+    "ends": "total_assault_fight-pause_appear",
+    "possibles": [
+      ["UI-AT_total_assault_fight-page", 1237, 51, 1.0]
+    ]
+  },
+  "restart_total_assault": {
+    "procedure_type": 0,
+    "ends": "UI-AT_total_assault_fight-page",
+    "possibles": [
+      ["total_assault_fight-pause_appear", 547, 510],
+      ["UI-AT_total_assault_restart-fight-notice", 772, 504, 1.0],
+      ["UI-AT_total_assault_skip-notice", 764, 499, 1.0]
+    ],
+    "tentative_click": [true, 640, 360, 2.0]
+  }
+}

@@ -251,6 +251,8 @@ public:
 
     void replace_all(nlohmann::json& new_config);
 
+    static void check_config_dir();
+
     static inline void parent_pointer(std::string &ptr) {
         if(!ptr.empty()) ptr = ptr.substr(0, ptr.find_last_of('/'));
     }

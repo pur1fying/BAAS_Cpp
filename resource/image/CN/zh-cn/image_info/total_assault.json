@@ -1,0 +1,24 @@
+{
+  "group": "total_assault",
+  "path": "total_assault",
+  "image": {
+    "skip-notice": {
+        "region": [568, 314, 696, 348]
+    },
+    "fight-clock": {
+        "region": [1071, 26, 1088, 45]
+    },
+    "fight-stop-button": {
+      "region": [1219, 30, 1249, 64]
+    },
+    "restart-fight-notice": {
+      "region": [395, 293, 886, 365]
+    },
+    "formation-edit": {
+      "region": [101, 9, 285, 40]
+    },
+    "fight-pause":{
+      "region": [601, 136, 677, 175]
+    }
+  }
+}

@@ -30,6 +30,7 @@ BAASGlobalSetting::BAASGlobalSetting() : BAASConfig(BAAS_CONFIG_DIR + "/global_s
 
 void BAASGlobalSetting::check_global_setting_exist() {
     if (!std::filesystem::exists(BAAS_CONFIG_DIR + "/global_setting.json")) {
+        BAASGlobalLogger->BAASInfo("Create global setting file");
         std::ofstream ofs(BAAS_CONFIG_DIR + "/global_setting.json");
         ofs << default_global_setting->get_config().dump(4);
         ofs.close();

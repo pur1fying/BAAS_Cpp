@@ -34,7 +34,7 @@ bool BAASOCR::init(const std::string &language) {
     std::string keys = static_config->get(key + "dict", std::string());
 
     auto ocr = new OcrLite();
-    ocr->initLogger(false, false, false);
+    ocr->initLogger(true, false, false);
     BAASGlobalLogger->BAASInfo("Ocr init lan [ " + language + " ]");
     BAASGlobalLogger->BAASInfo("Det : " + det);
     BAASGlobalLogger->BAASInfo("Cls : " + cls);
@@ -50,7 +50,7 @@ void BAASOCR::ocr(const std::string &language, const cv::Mat &img, OcrResult &re
                     const std::string &candidates) {
     auto res = ocr_map.find(language);
     if (res == ocr_map.end()) {
-        if(logger != nullptr) logger->BAASError("OCR for" + language + " not init");
+        if(logger != nullptr) logger->BAASError("OCR for " + language + " not init");
         return;
     }
     std::string candidates_cpy = candidates;
@@ -72,7 +72,7 @@ void BAASOCR::ocr_for_single_line(const std::string &language, const cv::Mat &im
                                 const std::string& log_content, BAASLogger *logger, const std::string &candidates) {
     auto res = ocr_map.find(language);
     if (res == ocr_map.end()) {
-        if(logger != nullptr) logger->BAASError("OCR for" + language + " not init");
+        if(logger != nullptr) logger->BAASError("OCR for " + language + " not init");
         return;
     }
     std::string candidates_cpy = candidates;

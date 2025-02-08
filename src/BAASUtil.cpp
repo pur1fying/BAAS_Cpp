@@ -465,6 +465,35 @@ void BAASUtil::calc_swipe_params(int x1, int y1, int x2, int y2, double duration
     }
 }
 
+void BAASUtil::str2boss_health(
+        string &src,
+        optional<int> &ret
+)
+{
+    std::string text;
+    stringReplace(",", "", src, text);
+    stringReplace("，", "", text, text);
+    stringReplace(".", "", text, text);
+    try{
+        ret = std::stoi(text);
+    }
+    catch (std::invalid_argument &e) {
+        ret = std::nullopt;
+    }
+}
+
+void BAASUtil::re_replace(
+        const string &src,
+        const string &pattern,
+        const string &replace,
+        string &dst
+)
+{
+    std::regex regex_pattern(pattern);
+    dst = std::regex_replace(src, regex_pattern, replace);
+}
+
+
 
 
 

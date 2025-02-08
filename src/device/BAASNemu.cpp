@@ -162,13 +162,15 @@ void BAASNemu::convertXY(BAASPoint &point) const {
 }
 
 void BAASNemu::init_dll() {
-    string dll_path = mumu_install_path + "./shell/sdk/external_renderer_ipc.dll";
+    string dll_path = mumu_install_path + "/shell/sdk/external_renderer_ipc.dll";
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::wstring wpath = converter.from_bytes(dll_path);
     logger->BAASInfo("dll_path : " + dll_path);
-    if(!filesystem::exists(dll_path)) {
+    if(!filesystem::exists(wpath)) {
         logger->BAASError("Nemu dll not found : [ " + dll_path + " ]");
         throw PathError("Nemu dll not found");
     }
-    hDllInst = LoadLibrary(dll_path.c_str());
+    hDllInst = LoadLibraryW(wpath.c_str());
     if (hDllInst == nullptr) {
         logger->BAASError("LoadLibrary : [ " + dll_path + " ] failed");
         throw NemuIpcError("Load Dynamic Library failed");

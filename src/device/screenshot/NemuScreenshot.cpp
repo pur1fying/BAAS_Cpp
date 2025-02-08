@@ -11,6 +11,8 @@ NemuScreenshot::NemuScreenshot(BAASConnection *connection) : BaseScreenshot(conn
 void NemuScreenshot::init() {
     logger->hr("Screenshot Method NemuScreenshot init");
     nemu_connection = BAASNemu::get_instance(connection);
+    std::pair<int, int> resolution = nemu_connection->get_screen_resolution();
+    image = cv::Mat(resolution.second, resolution.first, CV_8UC4);
 }
 
 void NemuScreenshot::screenshot(cv::Mat &output) {
