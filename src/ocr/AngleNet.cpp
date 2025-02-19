@@ -9,9 +9,12 @@
 #include <onnxruntime/core/providers/dml/dml_provider_factory.h>
 #endif
 
+BAAS_NAMESPACE_BEGIN
+
 std::map<std::string, AngleNet *> AngleNet::nets;
 
-void AngleNet::setGpuIndex(int gpuIndex) {
+void AngleNet::setGpuIndex(int gpuIndex)
+{
 #ifdef __CUDA__
     if (gpuIndex >= 0) {
         OrtCUDAProviderOptions cuda_options;
@@ -23,8 +26,7 @@ void AngleNet::setGpuIndex(int gpuIndex) {
 
         sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
         printf("cls try to use GPU%d\n", gpuIndex);
-    }
-    else {
+    } else {
         printf("cls use CPU\n");
     }
 #endif
@@ -40,13 +42,15 @@ void AngleNet::setGpuIndex(int gpuIndex) {
 #endif
 }
 
-AngleNet::~AngleNet() {
+AngleNet::~AngleNet()
+{
     delete session;
     inputNamesPtr.clear();
     outputNamesPtr.clear();
 }
 
-void AngleNet::setNumThread(int numOfThread) {
+void AngleNet::setNumThread(int numOfThread)
+{
     numThread = numOfThread;
     //===session options===
     // Sets the number of threads used to parallelize the execution within nodes
@@ -68,7 +72,8 @@ void AngleNet::setNumThread(int numOfThread) {
     sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 }
 
-void AngleNet::initModel(const std::string &pathStr) {
+void AngleNet::initModel(const std::string &pathStr)
+{
 #ifdef _WIN32
     std::wstring clsPath = strToWstr(pathStr);
     session = new Ort::Session(env, clsPath.c_str(), sessionOptions);
@@ -81,7 +86,8 @@ void AngleNet::initModel(const std::string &pathStr) {
     outputNamesPtr = getOutputNames(session);
 }
 
-Angle scoreToAngle(const std::vector<float> &outputData) {
+Angle scoreToAngle(const std::vector<float> &outputData)
+{
     int maxIndex = 0;
     float maxScore = 0;
     for (size_t i = 0; i < outputData.size(); i++) {
@@ -93,29 +99,42 @@ Angle scoreToAngle(const std::vector<float> &outputData) {
     return {maxIndex, maxScore};
 }
 
-Angle AngleNet::getAngle(cv::Mat &src) {
+Angle AngleNet::getAngle(cv::Mat &src)
+{
     std::vector<float> inputTensorValues = substractMeanNormalize(src, meanValues, normValues);
     std::array<int64_t, 4> inputShape{1, src.channels(), src.rows, src.cols};
     auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(memoryInfo, inputTensorValues.data(),
-                                                             inputTensorValues.size(), inputShape.data(),
-                                                             inputShape.size());
+    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+            memoryInfo, inputTensorValues.data(),
+            inputTensorValues.size(), inputShape.data(),
+            inputShape.size());
     assert(inputTensor.IsTensor());
     std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
     std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
-    auto outputTensor = session->Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
-                                     inputNames.size(), outputNames.data(), outputNames.size());
-    assert(outputTensor.size() == 1 && outputTensor.front().IsTensor());
-    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
-    int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1,
-                                          std::multiplies<int64_t>());
-    float *floatArray = outputTensor.front().GetTensorMutableData<float>();
+    auto outputTensor = session->Run(
+            Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
+            inputNames.size(), outputNames.data(), outputNames.size());
+    assert(outputTensor.size() == 1 && outputTensor.front()
+                                                   .IsTensor());
+    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo()
+                                                      .GetShape();
+    int64_t outputCount = std::accumulate(
+            outputShape.begin(), outputShape.end(), 1,
+            std::multiplies<int64_t>());
+    float *floatArray = outputTensor.front()
+                                    .GetTensorMutableData<float>();
     std::vector<float> outputData(floatArray, floatArray + outputCount);
     return scoreToAngle(outputData);
 }
 
-std::vector<Angle> AngleNet::getAngles(std::vector<cv::Mat> &partImgs, const char *path,
-                                       const char *imgName, bool doAngle, bool mostAngle) {
+std::vector<Angle> AngleNet::getAngles(
+        std::vector<cv::Mat> &partImgs,
+        const char *path,
+        const char *imgName,
+        bool doAngle,
+        bool mostAngle
+)
+{
     size_t size = partImgs.size();
     std::vector<Angle> angles(size);
     if (doAngle) {
@@ -162,27 +181,32 @@ std::vector<Angle> AngleNet::getAngles(std::vector<cv::Mat> &partImgs, const cha
     return angles;
 }
 
-AngleNet *AngleNet::get_net(const std::string &model_path) {
+AngleNet *AngleNet::get_net(const std::string &model_path)
+{
     auto it = nets.find(model_path);
     if (it != nets.end()) return it->second;
     auto *net = new AngleNet();
     net->modelPath = BAAS_OCR_MODEL_DIR + "\\" + model_path;
-    net->setGpuIndex(global_setting->ocr_flagGpu());
-    net->setNumThread(global_setting->ocr_numThread());
+    net->setGpuIndex(global_setting->ocr_gpu_id());
+    net->setNumThread(global_setting->ocr_num_thread());
     nets[model_path] = net;
     return net;
 }
 
-bool AngleNet::release_net(const std::string &model_path) {
+bool AngleNet::release_net(const std::string &model_path)
+{
     return false;
 }
 
-void AngleNet::initModel() {
+void AngleNet::initModel()
+{
     initModel(modelPath);
 }
 
-void AngleNet::release_all() {
+void AngleNet::release_all()
+{
 
 }
 
+BAAS_NAMESPACE_END
 

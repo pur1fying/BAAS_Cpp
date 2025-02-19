@@ -5,9 +5,10 @@
 #ifndef BAAS_DEVICE_SCREENSHOT_NEMUSCREENSHOT_H_
 #define BAAS_DEVICE_SCREENSHOT_NEMUSCREENSHOT_H_
 
-#include "device/screenshot/BaseScreenshot.h"
 #include "device/BAASNemu.h"
+#include "device/screenshot/BaseScreenshot.h"
 
+BAAS_NAMESPACE_BEGIN
 class NemuScreenshot : public BaseScreenshot {
 public:
     NemuScreenshot(BAASConnection *connection);
@@ -24,4 +25,7 @@ private:
     BAASNemu *nemu_connection;
 
 };
+
+BAAS_NAMESPACE_END
+
 #endif //BAAS_DEVICE_SCREENSHOT_NEMUSCREENSHOT_H_

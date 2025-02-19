@@ -4,9 +4,15 @@
 
 using namespace std;
 
-vector<string> BAASControl::available_methods;
+BAAS_NAMESPACE_BEGIN
+vector <string> BAASControl::available_methods;
 
-BAASControl::BAASControl(const std::string& method, double screen_ratio, BAASConnection *connection) {
+BAASControl::BAASControl(
+        const std::string &method,
+        double screen_ratio,
+        BAASConnection *connection
+)
+{
     assert(connection != nullptr);
     this->connection = connection;
     logger = connection->get_logger();
@@ -22,15 +28,29 @@ BAASControl::BAASControl(const std::string& method, double screen_ratio, BAASCon
     set_control_method(method);
 }
 
-void BAASControl::init() {
+void BAASControl::init()
+{
     control->init();
 }
 
-void BAASControl::click(BAASPoint point, uint8_t type, int offset, const string &description) {
+void BAASControl::click(
+        BAASPoint point,
+        uint8_t type,
+        int offset,
+        const string &description
+)
+{
     click(point.x, point.y, type, offset, description);
 }
 
-void BAASControl::click(int x, int y, uint8_t type, int offset,const std::string &description) {
+void BAASControl::click(
+        int x,
+        int y,
+        uint8_t type,
+        int offset,
+        const std::string &description
+)
+{
     set_x_y_offset(x, y, type, offset);
     x = int(double(x) * 1.0 * ratio);
     y = int(double(y) * 1.0 * ratio);
@@ -38,31 +58,65 @@ void BAASControl::click(int x, int y, uint8_t type, int offset,const std::string
     control->click(x, y);
 }
 
-void BAASControl::click(BAASPoint point, int count, uint8_t type, int offset, double interval, double pre_wait, double post_wait, const string &description) {
+void BAASControl::click(
+        BAASPoint point,
+        int count,
+        uint8_t type,
+        int offset,
+        double interval,
+        double pre_wait,
+        double post_wait,
+        const string &description
+)
+{
     click(point.x, point.y, count, type, offset, interval, pre_wait, post_wait, description);
 }
 
-void BAASControl::click(int x, int y, int count, uint8_t type, int offset, double interval, double pre_wait,double post_wait, const string &description) {
+void BAASControl::click(
+        int x,
+        int y,
+        int count,
+        uint8_t type,
+        int offset,
+        double interval,
+        double pre_wait,
+        double post_wait,
+        const string &description
+)
+{
     gen_click_log(x, y, count, description);
 
     set_x_y_offset(x, y, type, offset);
     x = int(double(x) * 1.0 * ratio);
     y = int(double(y) * 1.0 * ratio);
-    if(pre_wait > 0) BAASUtil::sleepMS(int(pre_wait * 1000));
+    if (pre_wait > 0) BAASUtil::sleepMS(int(pre_wait * 1000));
 
     int itv = int(interval * 1000);
-    for(int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) {
         control->click(x, y);
-        if(i < count - 1) BAASUtil::sleepMS(itv);
+        if (i < count - 1) BAASUtil::sleepMS(itv);
     }
-    if(post_wait > 0) BAASUtil::sleepMS(int(post_wait * 1000));
+    if (post_wait > 0) BAASUtil::sleepMS(int(post_wait * 1000));
 }
 
-void BAASControl::long_click(BAASPoint point, double duration, uint8_t type, int offset) {
+void BAASControl::long_click(
+        BAASPoint point,
+        double duration,
+        uint8_t type,
+        int offset
+)
+{
     long_click(point.x, point.y, duration, type, offset);
 }
 
-void BAASControl::long_click(int x, int y, double duration, uint8_t type, int offset) {
+void BAASControl::long_click(
+        int x,
+        int y,
+        double duration,
+        uint8_t type,
+        int offset
+)
+{
     set_x_y_offset(x, y, type, offset);
     x = int(double(x) * 1.0 * ratio);
     y = int(double(y) * 1.0 * ratio);
@@ -71,11 +125,23 @@ void BAASControl::long_click(int x, int y, double duration, uint8_t type, int of
     control->long_click(x, y, duration);
 }
 
-void BAASControl::swipe(BAASPoint start, BAASPoint end, double duration) {
+void BAASControl::swipe(
+        BAASPoint start,
+        BAASPoint end,
+        double duration
+)
+{
     swipe(start.x, start.y, end.x, end.y, duration);
 }
 
-void BAASControl::swipe(int x1, int y1, int x2, int y2, double duration) {
+void BAASControl::swipe(
+        int x1,
+        int y1,
+        int x2,
+        int y2,
+        double duration
+)
+{
     gen_swipe_log(x1, y1, x2, y2, duration);
     x1 = int(double(x1) * 1.0 * ratio);
     y1 = int(double(y1) * 1.0 * ratio);
@@ -84,19 +150,23 @@ void BAASControl::swipe(int x1, int y1, int x2, int y2, double duration) {
     control->swipe(x1, y1, x2, y2, duration);
 }
 
-void BAASControl::set_control_method(const std::string& method, bool exit) {
-    if(std::find(available_methods.begin(), available_methods.end(), method) == available_methods.end()) {
+void BAASControl::set_control_method(
+        const std::string &method,
+        bool exit
+)
+{
+    if (std::find(available_methods.begin(), available_methods.end(), method) == available_methods.end()) {
         logger->BAASCritical("Unsupported control method : [ " + method + " ]");
         throw RequestHumanTakeOver("Unsupported control method: " + method);
     }
 
-    if(method == control_method) {
+    if (method == control_method) {
         logger->BAASInfo("Control method is already set to " + method);
         return;
     }
 
-    if(control != nullptr) {
-        if(exit) {
+    if (control != nullptr) {
+        if (exit) {
             logger->BAASInfo("Exiting current control method : [ " + control_method + " ]");
             control->exit();
         }
@@ -104,26 +174,32 @@ void BAASControl::set_control_method(const std::string& method, bool exit) {
     }
 
     control_method = method;
-    if(control_method == "adb") {
+    if (control_method == "adb") {
         control = new AdbControl(connection);
-    } else if(control_method == "scrcpy") {
+    } else if (control_method == "scrcpy") {
         control = new ScrcpyControl(connection);
-    } else if(control_method == "nemu") {
+    } else if (control_method == "nemu") {
         control = new NemuControl(connection);
     }
     init();
 }
 
-void BAASControl::set_x_y_offset(int &x, int &y, uint8_t type, int size) {
+void BAASControl::set_x_y_offset(
+        int &x,
+        int &y,
+        uint8_t type,
+        int size
+)
+{
     switch (type) {
         case OFFSET_TYPE_NOCHANGE:
             break;
-        case OFFSET_TYPE_RECTANGLE:{
+        case OFFSET_TYPE_RECTANGLE: {
             x += BAASUtil::genRandInt(-size, size);
             y += BAASUtil::genRandInt(-size, size);
             break;
         }
-        case OFFSET_TYPE_CIRCLE:{
+        case OFFSET_TYPE_CIRCLE: {
             double angle = BAASUtil::genRandDouble(0, 2 * M_PI);
             x += int(size * cos(angle));
             y += int(size * sin(angle));
@@ -135,50 +211,53 @@ void BAASControl::set_x_y_offset(int &x, int &y, uint8_t type, int size) {
     }
 }
 
-void BAASControl::exit() {
+void BAASControl::exit()
+{
     control->exit();
 }
 
-void BAASControl::gen_click_log(int x, int y,int count, const string &description) {
+void BAASControl::gen_click_log(
+        int x,
+        int y,
+        int count,
+        const string &description
+)
+{
     string t = to_string(x);
     string msg = "Click ( ";
-    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    for (int i = 0; i < 4 - int(t.size()); i++)msg += " ";
     msg += t + ", ";
     t = to_string(y);
-    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    for (int i = 0; i < 4 - int(t.size()); i++)msg += " ";
     msg += t + ")";
-    if(!description.empty())msg += " @ " + description;
-    if(count > 1)msg += " " + to_string(count) + " times ";
+    if (!description.empty())msg += " @ " + description;
+    if (count > 1)msg += " " + to_string(count) + " times ";
     logger->BAASInfo(msg);
 }
 
-void BAASControl::gen_swipe_log(int x1, int y1, int x2, int y2, double duration) {
+void BAASControl::gen_swipe_log(
+        int x1,
+        int y1,
+        int x2,
+        int y2,
+        double duration
+)
+{
     string msg = "Swipe From ( ";
     string t = to_string(x1);
-    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    for (int i = 0; i < 4 - int(t.size()); i++)msg += " ";
     msg += t + ", ";
     t = to_string(y1);
-    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    for (int i = 0; i < 4 - int(t.size()); i++)msg += " ";
     msg += t + " ) --> ( ";
     t = to_string(x2);
-    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    for (int i = 0; i < 4 - int(t.size()); i++)msg += " ";
     msg += t + ", ";
     t = to_string(y2);
-    for(int i = 0; i < 4 - int(t.size()); i++)msg += " ";
+    for (int i = 0; i < 4 - int(t.size()); i++)msg += " ";
     msg += t + " ) ";
     msg += " Duration : " + to_string(duration) + " s";
     logger->BAASInfo(msg);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
+BAAS_NAMESPACE_END

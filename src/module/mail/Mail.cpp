@@ -5,14 +5,15 @@
 #include "module/mail/Mail.h"
 
 using namespace std;
-bool ISA::Mail::implement(BAAS *baas) {
-    BAASLogger* logger = baas->get_logger();
+
+bool ISA::Mail::implement(baas::BAAS *baas)
+{
+    baas::BAASLogger *logger = baas->get_logger();
     baas->solve_procedure("UI-GO-TO_mail_general", true);
-    if(baas->feature_appear("mail_collect-button-bright_appear")){
+    if (baas->feature_appear("mail_collect-button-bright_appear")) {
         logger->sub_title("Collect Mail Reward.");
         baas->solve_procedure("COLLECT_MAIL_REWARD", true);
-    }
-    else {
+    } else {
         logger->BAASInfo("Mail Reward No Need to Collect.");
     }
     return true;

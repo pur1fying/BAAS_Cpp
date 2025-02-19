@@ -9,6 +9,6 @@
 #include "config/BAASUserConfig.h"
 #include "config/BAASStaticConfig.h"
 #include "config/BAASGlobalSetting.h"
-#include "config/Server.h"
+#include "config/GameServer.h"
 
 #endif //BAAS_CONFIG_H_

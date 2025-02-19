@@ -9,8 +9,10 @@
 #include <onnxruntime/core/providers/dml/dml_provider_factory.h>
 #endif
 
+BAAS_NAMESPACE_BEGIN
 
-void CrnnNet::setGpuIndex(int gpuIndex) {
+void CrnnNet::setGpuIndex(int gpuIndex)
+{
 #ifdef __CUDA__
     if (gpuIndex >= 0) {
         OrtCUDAProviderOptions cuda_options;
@@ -22,8 +24,7 @@ void CrnnNet::setGpuIndex(int gpuIndex) {
 
         sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
         printf("rec try to use GPU%d\n", gpuIndex);
-}
-    else {
+    } else {
         printf("rec use CPU\n");
     }
 #endif
@@ -41,13 +42,15 @@ void CrnnNet::setGpuIndex(int gpuIndex) {
 
 std::map<std::string, CrnnNet *> CrnnNet::nets;
 
-CrnnNet::~CrnnNet() {
+CrnnNet::~CrnnNet()
+{
     delete session;
     inputNamesPtr.clear();
     outputNamesPtr.clear();
 }
 
-void CrnnNet::setNumThread(int numOfThread) {
+void CrnnNet::setNumThread(int numOfThread)
+{
     numThread = numOfThread;
     //===session options===
     // Sets the number of threads used to parallelize the execution within nodes
@@ -69,7 +72,11 @@ void CrnnNet::setNumThread(int numOfThread) {
     sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 }
 
-void CrnnNet::initModel(const std::string &pathStr, const std::string &keysPath) {
+void CrnnNet::initModel(
+        const std::string &pathStr,
+        const std::string &keysPath
+)
+{
 #ifdef _WIN32
     std::wstring crnnPath = strToWstr(pathStr);
     session = new Ort::Session(env, crnnPath.c_str(), sessionOptions);
@@ -104,12 +111,21 @@ void CrnnNet::initModel(const std::string &pathStr, const std::string &keysPath)
 }
 
 template<class ForwardIterator>
-inline static size_t argmax(ForwardIterator first, ForwardIterator last) {
+inline static size_t argmax(
+        ForwardIterator first,
+        ForwardIterator last
+)
+{
     return std::distance(first, std::max_element(first, last));
 }
 
 
-TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h, size_t w) {
+TextLine CrnnNet::scoreToTextLine(
+        const std::vector<float> &outputData,
+        size_t h,
+        size_t w
+)
+{
     /*
      *  w : size of key dict
      */
@@ -130,7 +146,8 @@ TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h
         maxIndex = int(argmax(&outputData[start], &outputData[stop]));
         maxValue = float(*std::max_element(&outputData[start], &outputData[stop]));
 
-        if (maxIndex > 0 && maxIndex < keySize && (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by " "
+        if (maxIndex > 0 && maxIndex < keySize &&
+            (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by " "
             scores.emplace_back(maxValue);
             strRes.append(keys[maxIndex]);
         }
@@ -139,8 +156,13 @@ TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h
     return {strRes, scores};
 }
 
-TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h, size_t w,
-                                  const std::vector<size_t> &enabledIndexes) {
+TextLine CrnnNet::scoreToTextLine(
+        const std::vector<float> &outputData,
+        size_t h,
+        size_t w,
+        const std::vector<size_t> &enabledIndexes
+)
+{
     /*
     *  w : size of key dict
     */
@@ -153,9 +175,9 @@ TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h
     float maxValue;
 
     std::vector<float> enabledScores;
-    size_t i,j;
+    size_t i, j;
     for (i = 0; i < h; i++)
-        for (j = 0; j <= enabledIndexes.size()-1; j++)
+        for (j = 0; j <= enabledIndexes.size() - 1; j++)
             enabledScores.push_back(outputData[i * w + enabledIndexes[j]]);
 
     w = enabledIndexes.size();
@@ -169,7 +191,8 @@ TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h
         maxIndex = int(argmax(&enabledScores[start], &enabledScores[stop]));
         maxValue = float(*std::max_element(&enabledScores[start], &enabledScores[stop]));
 
-        if (maxIndex > 0 && maxIndex < keySize && (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by "#"
+        if (maxIndex > 0 && maxIndex < keySize &&
+            (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by "#"
             scores.emplace_back(maxValue);
             strRes.append(keys[enabledIndexes[maxIndex]]);
         }
@@ -178,7 +201,8 @@ TextLine CrnnNet::scoreToTextLine(const std::vector<float> &outputData, size_t h
     return {strRes, scores};
 }
 
-TextLine CrnnNet::getTextLine(const cv::Mat &src) {
+TextLine CrnnNet::getTextLine(const cv::Mat &src)
+{
     float scale = (float) dstHeight / (float) src.rows;
     int dstWidth = int((float) src.cols * scale);
     cv::Mat srcResize;
@@ -186,24 +210,36 @@ TextLine CrnnNet::getTextLine(const cv::Mat &src) {
     std::vector<float> inputTensorValues = substractMeanNormalize(srcResize, meanValues, normValues);
     std::array<int64_t, 4> inputShape{1, srcResize.channels(), srcResize.rows, srcResize.cols};
     auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(memoryInfo, inputTensorValues.data(),
-                                                             inputTensorValues.size(), inputShape.data(),
-                                                             inputShape.size());
+    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+            memoryInfo, inputTensorValues.data(),
+            inputTensorValues.size(), inputShape.data(),
+            inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
-    auto outputTensor = session->Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
-                                     inputNames.size(), outputNames.data(), outputNames.size());
-    assert(outputTensor.size() == 1 && outputTensor.front().IsTensor());
-    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
-    int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1,
-                                          std::multiplies<int64_t>());
-    float *floatArray = outputTensor.front().GetTensorMutableData<float>();
+    std::vector<const char *> inputNames = {inputNamesPtr.data()
+                                                         ->get()};
+    std::vector<const char *> outputNames = {outputNamesPtr.data()
+                                                           ->get()};
+    auto outputTensor = session->Run(
+            Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
+            inputNames.size(), outputNames.data(), outputNames.size());
+    assert(outputTensor.size() == 1 && outputTensor.front()
+                                                   .IsTensor());
+    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo()
+                                                      .GetShape();
+    int64_t outputCount = std::accumulate(
+            outputShape.begin(), outputShape.end(), 1,
+            std::multiplies<int64_t>());
+    float *floatArray = outputTensor.front()
+                                    .GetTensorMutableData<float>();
     std::vector<float> outputData(floatArray, floatArray + outputCount);
     return scoreToTextLine(outputData, outputShape[1], outputShape[2]);
 }
 
-TextLine CrnnNet::getTextLine(const cv::Mat &src, const std::vector<size_t> &enabledIndexes) {
+TextLine CrnnNet::getTextLine(
+        const cv::Mat &src,
+        const std::vector<size_t> &enabledIndexes
+)
+{
     float scale = (float) dstHeight / (float) src.rows;
     int dstWidth = int((float) src.cols * scale);
     cv::Mat srcResize;
@@ -211,25 +247,38 @@ TextLine CrnnNet::getTextLine(const cv::Mat &src, const std::vector<size_t> &ena
     std::vector<float> inputTensorValues = substractMeanNormalize(srcResize, meanValues, normValues);
     std::array<int64_t, 4> inputShape{1, srcResize.channels(), srcResize.rows, srcResize.cols};
     auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(memoryInfo, inputTensorValues.data(),
-                                                             inputTensorValues.size(), inputShape.data(),
-                                                             inputShape.size());
+    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+            memoryInfo, inputTensorValues.data(),
+            inputTensorValues.size(), inputShape.data(),
+            inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
-    auto outputTensor = session->Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
-                                     inputNames.size(), outputNames.data(), outputNames.size());
-    assert(outputTensor.size() == 1 && outputTensor.front().IsTensor());
-    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
-    int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1,
-                                          std::multiplies<int64_t>());
-    float *floatArray = outputTensor.front().GetTensorMutableData<float>();
+    std::vector<const char *> inputNames = {inputNamesPtr.data()
+                                                         ->get()};
+    std::vector<const char *> outputNames = {outputNamesPtr.data()
+                                                           ->get()};
+    auto outputTensor = session->Run(
+            Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
+            inputNames.size(), outputNames.data(), outputNames.size());
+    assert(outputTensor.size() == 1 && outputTensor.front()
+                                                   .IsTensor());
+    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo()
+                                                      .GetShape();
+    int64_t outputCount = std::accumulate(
+            outputShape.begin(), outputShape.end(), 1,
+            std::multiplies<int64_t>());
+    float *floatArray = outputTensor.front()
+                                    .GetTensorMutableData<float>();
     std::vector<float> outputData(floatArray, floatArray + outputCount);
     return scoreToTextLine(outputData, outputShape[1], outputShape[2], enabledIndexes);
 }
 
 
-std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName) {
+std::vector<TextLine> CrnnNet::getTextLines(
+        std::vector<cv::Mat> &partImg,
+        const char *path,
+        const char *imgName
+)
+{
     int size = int(partImg.size());
     std::vector<TextLine> textLines(size);
     std::vector<size_t> enabledIndexes;
@@ -251,8 +300,14 @@ std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const
     }
     return textLines;
 }
-std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName,
-                                            const std::vector<std::string> &candidates) {
+
+std::vector<TextLine> CrnnNet::getTextLines(
+        std::vector<cv::Mat> &partImg,
+        const char *path,
+        const char *imgName,
+        const std::vector<std::string> &candidates
+)
+{
     int size = int(partImg.size());
     std::vector<TextLine> textLines(size);
     std::vector<size_t> enabledIndexes;
@@ -276,7 +331,11 @@ std::vector<TextLine> CrnnNet::getTextLines(std::vector<cv::Mat> &partImg, const
     return textLines;
 }
 
-CrnnNet *CrnnNet::get_net(const std::string &model_path, const std::string &keys_path) {
+CrnnNet *CrnnNet::get_net(
+        const std::string &model_path,
+        const std::string &keys_path
+)
+{
     std::string joined_path = model_key_joined_path(model_path, keys_path);
     auto it = nets.find(joined_path);
     if (it != nets.end()) return it->second;
@@ -285,13 +344,17 @@ CrnnNet *CrnnNet::get_net(const std::string &model_path, const std::string &keys
 
     net->modelPath = BAAS_OCR_MODEL_DIR + "\\" + model_path;
     net->keyDictPath = BAAS_OCR_MODEL_DIR + "\\" + keys_path;
-    net->setGpuIndex(global_setting->ocr_flagGpu());
-    net->setNumThread(global_setting->ocr_numThread());
+    net->setGpuIndex(global_setting->ocr_gpu_id());
+    net->setNumThread(global_setting->ocr_num_thread());
     nets[joined_path] = net;
     return net;
 }
 
-bool CrnnNet::release_net(const std::string &model_path, const std::string &keys_path) {
+bool CrnnNet::release_net(
+        const std::string &model_path,
+        const std::string &keys_path
+)
+{
     std::string joined_path = model_key_joined_path(model_path, keys_path);
     auto it = nets.find(joined_path);
     if (it == nets.end()) return false;
@@ -300,20 +363,30 @@ bool CrnnNet::release_net(const std::string &model_path, const std::string &keys
     return true;
 }
 
-void CrnnNet::release_all() {
-    for (auto &it : nets) delete it.second;
+void CrnnNet::release_all()
+{
+    for (auto &it: nets) delete it.second;
     nets.clear();
 }
 
-std::string CrnnNet::model_key_joined_path(const std::string &model_path, const std::string &keys_path) {
+std::string CrnnNet::model_key_joined_path(
+        const std::string &model_path,
+        const std::string &keys_path
+)
+{
     return model_path + " | " + keys_path;
 }
 
-void CrnnNet::initModel() {
+void CrnnNet::initModel()
+{
     initModel(modelPath, keyDictPath);
 }
 
-void CrnnNet::getTextIndexes(const std::vector<std::string> &characters,std::vector<size_t> &enabledIndexes) {
+void CrnnNet::getTextIndexes(
+        const std::vector<std::string> &characters,
+        std::vector<size_t> &enabledIndexes
+)
+{
     enabledIndexes.clear();
     enabledIndexes.push_back(0);
     for (size_t i = 0; i < characters.size(); i++) {
@@ -323,10 +396,5 @@ void CrnnNet::getTextIndexes(const std::vector<std::string> &characters,std::vec
 }
 
 
-
-
-
-
-
-
+BAAS_NAMESPACE_END
 

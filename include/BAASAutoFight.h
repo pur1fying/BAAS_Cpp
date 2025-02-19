@@ -12,6 +12,7 @@
 
 #define EVENT_RELEASE_SKILL 0
 #define BOSS_POSITION BAASPoint(1106, 365)
+
 class BAASAutoFight {
 //public:
 //    struct SimpleTrigger{
@@ -115,4 +116,5 @@ class BAASAutoFight {
 //
 //    static const double costLineDeltaX;
 };
+
 #endif //BAAS_BAASAUTOFIGHT_H_

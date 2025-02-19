@@ -4,11 +4,18 @@
 
 #ifndef BAAS_DEVICE_SCREENSHOT_BAASSCREENSHOT_H_
 #define BAAS_DEVICE_SCREENSHOT_BAASSCREENSHOT_H_
+
 #include "device/screenshot/BaseScreenshot.h"
+
+BAAS_NAMESPACE_BEGIN
 
 class BAASScreenshot {
 public:
-    BAASScreenshot(const std::string &method, BAASConnection *connection, const double interval = 0.3);
+    BAASScreenshot(
+            const std::string &method,
+            BAASConnection *connection,
+            const double interval = 0.3
+    );
 
     void init();
 
@@ -22,22 +29,26 @@ public:
 
     bool is_lossy();
 
-    void set_screenshot_method(const std::string& method, bool exit = true);
+    void set_screenshot_method(
+            const std::string &method,
+            bool exit = true
+    );
 
     double get_screen_ratio();
 
-    [[nodiscard]] inline int get_interval() const {
+    [[nodiscard]] inline int get_interval() const
+    {
         return interval;
     }
 
 private:
-    BaseScreenshot* screenshot_instance;
+    BaseScreenshot *screenshot_instance;
 
     std::string screenshot_method;
 
-    BAASConnection* connection;
+    BAASConnection *connection;
 
-    BAASLogger* logger;
+    BAASLogger *logger;
 
     int interval;
 
@@ -46,4 +57,5 @@ private:
     static std::vector<std::string> available_methods;
 };
 
+BAAS_NAMESPACE_END
 #endif //BAAS_DEVICE_SCREENSHOT_BAASSCREENSHOT_H_

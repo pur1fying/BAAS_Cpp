@@ -5,13 +5,24 @@
 #include "onnxruntime/onnxruntime_cxx_api.h"
 #include "opencv2/opencv.hpp"
 
+BAAS_NAMESPACE_BEGIN
+
 class CrnnNet {
 public:
-    static CrnnNet* get_net(const std::string& model_path, const std::string& keys_path);
+    static CrnnNet *get_net(
+            const std::string &model_path,
+            const std::string &keys_path
+    );
 
-    static bool release_net(const std::string& model_path, const std::string& keys_path);
+    static bool release_net(
+            const std::string &model_path,
+            const std::string &keys_path
+    );
 
-    static inline std::string model_key_joined_path(const std::string& model_path, const std::string& keys_path);
+    static inline std::string model_key_joined_path(
+            const std::string &model_path,
+            const std::string &keys_path
+    );
 
     static void release_all();
 
@@ -23,23 +34,40 @@ public:
 
     void initModel();
 
-    std::vector<TextLine> getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName);
+    std::vector<TextLine> getTextLines(
+            std::vector<cv::Mat> &partImg,
+            const char *path,
+            const char *imgName
+    );
 
-    std::vector<TextLine> getTextLines(std::vector<cv::Mat> &partImg, const char *path, const char *imgName,
-                                       const std::vector<std::string> &candidates);
+    std::vector<TextLine> getTextLines(
+            std::vector<cv::Mat> &partImg,
+            const char *path,
+            const char *imgName,
+            const std::vector<std::string> &candidates
+    );
 
     TextLine getTextLine(const cv::Mat &src);
 
-    TextLine getTextLine(const cv::Mat &src,const std::vector<size_t> &enabledIndexes);
+    TextLine getTextLine(
+            const cv::Mat &src,
+            const std::vector<size_t> &enabledIndexes
+    );
 
-    void getTextIndexes(const std::vector<std::string> &characters, std::vector<size_t> &enabledIndexes);
+    void getTextIndexes(
+            const std::vector<std::string> &characters,
+            std::vector<size_t> &enabledIndexes
+    );
 
 private:
-    void initModel(const std::string &pathStr, const std::string &keysPath);
+    void initModel(
+            const std::string &pathStr,
+            const std::string &keysPath
+    );
 
     std::string modelPath, keyDictPath;
 
-    static std::map <std::string, CrnnNet*> nets;
+    static std::map<std::string, CrnnNet *> nets;
 
     bool isOutputDebugImg = false;
     Ort::Session *session;
@@ -58,12 +86,22 @@ private:
 
     std::map<std::string, size_t> character2Index;
 
-    TextLine scoreToTextLine(const std::vector<float> &outputData, size_t h, size_t w);
+    TextLine scoreToTextLine(
+            const std::vector<float> &outputData,
+            size_t h,
+            size_t w
+    );
 
-    TextLine scoreToTextLine(const std::vector<float> &outputData, size_t h, size_t w,
-                             const std::vector <size_t> &enabledIndexes);
+    TextLine scoreToTextLine(
+            const std::vector<float> &outputData,
+            size_t h,
+            size_t w,
+            const std::vector<size_t> &enabledIndexes
+    );
 
 };
+
+BAAS_NAMESPACE_END
 
 
 #endif //__OCR_CRNNNET_H__

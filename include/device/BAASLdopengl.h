@@ -8,12 +8,16 @@
 #include "BAASConnection.h"
 #include "dnopengl32.h"
 
+BAAS_NAMESPACE_BEGIN
 
-typedef void* (*CreateShotInstance)(unsigned int player_index, unsigned int player_pid);
+typedef void *(*CreateShotInstance)(
+        unsigned int player_index,
+        unsigned int player_pid
+);
 
 class BAASLdopengl {
 public:
-    struct LDPlayerInfo{
+    struct LDPlayerInfo {
         unsigned int index;     // Emulator instance index, start from 0
         char name[64];          // Instance name
         HWND topWnd;            // Handle of top window
@@ -28,19 +32,20 @@ public:
         LDPlayerInfo() = default;
     };
 
-    static BAASLdopengl* get_instance(BAASConnection* connection);
+    static BAASLdopengl *get_instance(BAASConnection *connection);
 
     static void release(int instance_Id);
 
-    explicit BAASLdopengl(BAASConnection* connection);
+    explicit BAASLdopengl(BAASConnection *connection);
 
-    explicit BAASLdopengl(std::string& installPath);
+    explicit BAASLdopengl(std::string &installPath);
 
     void screenshot(cv::Mat &image);
 
     void detect_ldplayer_instance();
 
-    int get_instance_id() const {
+    int get_instance_id() const
+    {
         return instance_id;
     }
 
@@ -49,7 +54,7 @@ private:
 
     void init_dll();
 
-    BAASLogger* logger;
+    BAASLogger *logger;
 
     std::string ldplayer_install_path;
 
@@ -57,7 +62,7 @@ private:
 
     std::pair<int, int> resolution;
 
-    static std::map<int, BAASLdopengl*> connections;
+    static std::map<int, BAASLdopengl *> connections;
 
     HINSTANCE hDllInst;
 
@@ -65,20 +70,23 @@ private:
 
     std::string serial;
 
-    IScreenShotClass* shot_instance = nullptr;
+    IScreenShotClass *shot_instance = nullptr;
 };
 
 class LDOpenGLError : public std::exception {
 public:
-    explicit LDOpenGLError(const std::string& msg) : message(msg) {}
+    explicit LDOpenGLError(const std::string &msg) : message(msg) {}
 
-    [[nodiscard]] const char* what() const noexcept override {
+    [[nodiscard]] const char *what() const noexcept override
+    {
         return message.c_str();
     }
 
 private:
     std::string message;
 };
+
+BAAS_NAMESPACE_END
 
 #endif //BAAS_DEVICE_BAASLDOPENGL_H_
 //

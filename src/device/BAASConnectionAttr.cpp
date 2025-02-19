@@ -7,7 +7,11 @@
 #include "device/BAASConnectionAttr.h"
 
 using namespace std;
-BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg) {
+
+BAAS_NAMESPACE_BEGIN
+
+BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg)
+{
     logger = cfg->get_logger();
     config = cfg;
     logger->BAASInfo("Adb Binary : " + adb_binary());
@@ -15,17 +19,20 @@ BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg) {
     serial_check();
 }
 
-BAASConnectionAttr::BAASConnectionAttr(const std::string &cfg_path) {
+BAASConnectionAttr::BAASConnectionAttr(const std::string &cfg_path)
+{
     config = new BAASUserConfig(cfg_path);
     logger = config->get_logger();
     serial = config->serial();
 }
 
-BAASConnectionAttr::~BAASConnectionAttr() {
+BAASConnectionAttr::~BAASConnectionAttr()
+{
 
 }
 
-std::string BAASConnectionAttr::adb_binary(){
+std::string BAASConnectionAttr::adb_binary()
+{
     // try existing adb.exe
     for (auto t: static_config->adb_binary_dirs()) {
         if (filesystem::exists(t)) {
@@ -36,10 +43,11 @@ std::string BAASConnectionAttr::adb_binary(){
     return "adb";
 }
 
-void BAASConnectionAttr::serial_check() {
+void BAASConnectionAttr::serial_check()
+{
     string old = serial;
     revise_serial();
-    if(old != serial) {
+    if (old != serial) {
         logger->BAASWarn("Serial [ " + old + " ] is revised to [ " + serial + " ]");
         config->update("/emulator/serial", serial);
     }
@@ -47,21 +55,24 @@ void BAASConnectionAttr::serial_check() {
 
 }
 
-void BAASConnectionAttr::revise_serial() {
+void BAASConnectionAttr::revise_serial()
+{
     BAASUtil::stringReplace(" ", "", serial);
     BAASUtil::stringReplace("。", ".", serial);
     BAASUtil::stringReplace("，", ".", serial);
     BAASUtil::stringReplace(",", ".", serial);
     BAASUtil::stringReplace("：", ":", serial);
-    try{
+    try {
         int port = std::stoi(serial);
-        if(port > 1000 && port < 65536) serial = "127.0.0.1" + std::to_string(port);
-    }catch(std::exception &e) {}
-    if(serial.find("模拟") != std::string::npos) {
+        if (port > 1000 && port < 65536) serial = "127.0.0.1" + std::to_string(port);
+    } catch (std::exception &e) {}
+    if (serial.find("模拟") != std::string::npos) {
         string m;
         BAASUtil::re_find(serial, R"(\d+\.\d+\.\d+\.\d+)", m);
-        if(!m.empty()) serial = m;
+        if (!m.empty()) serial = m;
     }
     BAASUtil::stringReplace("12127.0.0.1", "127.0.0.1", serial);
     BAASUtil::stringReplace("auto127.0.0.1", "127.0.0.1", serial);
 }
+
+BAAS_NAMESPACE_END

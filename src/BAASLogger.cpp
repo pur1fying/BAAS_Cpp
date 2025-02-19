@@ -3,12 +3,14 @@
 //
 #include "BAASLogger.h"
 
-#include <iostream>
+#include <fstream>
 
 #include "BAASUtil.h"
 #include "BAASGlobals.h"
 
 using namespace std;
+
+BAAS_NAMESPACE_BEGIN
 
 string GlobalLogger::folder_path;
 
@@ -16,14 +18,19 @@ GlobalLogger *GlobalLogger::global_logger = nullptr;
 
 string BAAS_LOGGER_HR_LINE = std::string(80, '-');
 
-void gen_hr_msg(const string &msg, string &out) {
+void gen_hr_msg(
+        const string &msg,
+        string &out
+)
+{
     int msg_len = int(msg.length());
-    int left_space_len = (80 - 2 - msg_len) / 2 ;    // space len / 2
+    int left_space_len = (80 - 2 - msg_len) / 2;    // space len / 2
     int right_space_len = 80 - msg_len - left_space_len - 2;
     out = "|" + std::string(left_space_len, ' ') + msg + std::string(right_space_len, ' ') + "|";
 }
 
-GlobalLogger *GlobalLogger::getGlobalLogger() {
+GlobalLogger *GlobalLogger::getGlobalLogger()
+{
     if (global_logger == nullptr) {
         mutex m;
         m.lock();
@@ -35,11 +42,12 @@ GlobalLogger *GlobalLogger::getGlobalLogger() {
     return global_logger;
 }
 
-GlobalLogger::GlobalLogger() {
-    try{
+GlobalLogger::GlobalLogger()
+{
+    try {
         enable = 0b11;
         consoleLogger = spdlog::stdout_color_mt("console");
-        if(!filesystem::exists("output")) {
+        if (!filesystem::exists("output")) {
             filesystem::create_directory("output");
         }
 
@@ -50,7 +58,7 @@ GlobalLogger::GlobalLogger() {
         file.close();
         fileLogger = spdlog::basic_logger_mt("file_logger", folder_path + "\\global_log.txt");
     }
-    catch (const spdlog::spdlog_ex& ex) {
+    catch (const spdlog::spdlog_ex &ex) {
         cout << "Log init failed: " << ex.what() << endl;
     }
     spdlog::set_default_logger(consoleLogger);
@@ -60,36 +68,43 @@ GlobalLogger::GlobalLogger() {
 }
 
 
-
-void GlobalLogger::clearLogData() {
-    for(filesystem::directory_iterator itr(BAAS_OUTPUT_DIR); itr != filesystem::directory_iterator(); ++itr) {
-        if((itr->path().string() != folder_path) && filesystem::is_directory(itr->path())) {
-            BAASGlobalLogger->BAASInfo("Remove folder : [ " + itr->path().string() + " ]." );
+void GlobalLogger::clearLogData()
+{
+    for (filesystem::directory_iterator itr(BAAS_OUTPUT_DIR); itr != filesystem::directory_iterator(); ++itr) {
+        if ((itr->path()
+                .string() != folder_path) && filesystem::is_directory(itr->path())) {
+            BAASGlobalLogger->BAASInfo(
+                    "Remove folder : [ " + itr->path()
+                                              .string() + " ]."
+            );
             filesystem::remove_all(itr->path());
         }
     }
 }
 
-GlobalLogger::GlobalLogger(const int) {
+GlobalLogger::GlobalLogger(const int)
+{
 
 }
 
 GlobalLogger *BAASGlobalLogger = nullptr;
 
-map<string, BAASLogger*> BAASLogger::instances;
+map<string, BAASLogger *> BAASLogger::instances;
 
-BAASLogger *BAASLogger::get(const std::string& name) {
+BAASLogger *BAASLogger::get(const std::string &name)
+{
     auto it = instances.find(name);
-    if(it != instances.end()) return it->second;
+    if (it != instances.end()) return it->second;
 
     instances[name] = new BAASLogger(name);
     return instances[name];
 }
 
-BAASLogger::BAASLogger(const string& name) : GlobalLogger(1) {
+BAASLogger::BAASLogger(const string &name) : GlobalLogger(1)
+{
     enable = 0b11;
     consoleLogger = spdlog::stdout_color_mt(name + "_console");
-    if(!filesystem::exists("output")) {
+    if (!filesystem::exists("output")) {
         filesystem::create_directory("output");
     }
     string currTime = BAASUtil::current_time_string();
@@ -100,5 +115,6 @@ BAASLogger::BAASLogger(const string& name) : GlobalLogger(1) {
 }
 
 
-
 BAASLogger::~BAASLogger() = default;
+
+BAAS_NAMESPACE_END

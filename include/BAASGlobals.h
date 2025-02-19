@@ -4,10 +4,11 @@
 
 #ifndef BAAS_BAASGLOBALS_H_
 #define BAAS_BAASGLOBALS_H_
-#include <filesystem>
 
+#include "core_defines.h"
 #include "BAASLogger.h"
-#include "device/BAASAdbUtils.h"
+
+BAAS_NAMESPACE_BEGIN
 
 extern std::string BAAS_PROJECT_DIR;
 
@@ -34,6 +35,9 @@ extern std::string CURRENT_TIME_STRING;
 extern std::string ASCREENCAP_BIN_DIR;
 
 extern std::string ASCREENCAP_REMOTE_DIR;
+
+extern std::string DEVELOPER_PROJECT_DIR;
+
 /*
  *  BAAS_CPP --
  *           -- cmake-build-debug (this is BAAS_PROJECT_DIR)
@@ -41,13 +45,11 @@ extern std::string ASCREENCAP_REMOTE_DIR;
  *           -- resource (developer need to modify resource in this directory)
  *
  */
-extern std::string DEVELOPER_PROJECT_DIR;
-
-
-static bool inited = false;
 
 void init_globals();
 
+static bool inited = false;
 
+BAAS_NAMESPACE_END
 
 #endif //BAAS_BAASGLOBALS_H_

@@ -7,26 +7,28 @@
 
 #include "BAAS.h"
 
-namespace ISA{
-    class CollectReward {
-    public:
-        static bool implement(BAAS* baas);
+namespace ISA {
+class CollectReward {
+public:
+    static bool implement(baas::BAAS *baas);
 
-        static void collect_daily_reward(BAAS* baas);
+    static void collect_daily_reward(baas::BAAS *baas);
 
-        static void collect_weekly_reward(BAAS* baas);
+    static void collect_weekly_reward(baas::BAAS *baas);
 
-        static void collect_achievement_reward(BAAS* baas);
+    static void collect_achievement_reward(baas::BAAS *baas);
 
-        static void collect_pass_reward(BAAS* baas);
+    static void collect_pass_reward(baas::BAAS *baas);
 
-        static void get_pass_reward_position(BAAS* baas, std::vector<BAASPoint> &points);
+    static void get_pass_reward_position(
+            baas::BAAS *baas,
+            std::vector<baas::BAASPoint> &points
+    );
 
-        static void collect(BAAS* baas);
-    };
+    static void collect(baas::BAAS *baas);
+};
 
 }
-
 
 
 #endif //BAAS_MODULE_COLLECT_REWARD_COLLECT_REWARD_H_

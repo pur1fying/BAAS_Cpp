@@ -4,6 +4,10 @@
 #include "opencv2/core.hpp"
 #include <vector>
 
+#include "core_defines.h"
+
+BAAS_NAMESPACE_BEGIN
+
 struct ScaleParam {
     int srcWidth;
     int srcHeight;
@@ -51,5 +55,7 @@ struct OcrResult {
     double detectTime;
     std::string strRes;
 };
+
+BAAS_NAMESPACE_END
 
 #endif //__OCR_STRUCT_H__

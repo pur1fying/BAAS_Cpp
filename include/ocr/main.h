@@ -34,7 +34,7 @@ const char *requiredMsg = "-d --models: models directory.\n" \
                           "-1 --det: model file name of det.\n" \
                           "-2 --cls: model file name of cls.\n" \
                           "-3 --rec: model file name of rec.\n" \
-						  "-4 --keys: keys file name.\n" \
+                          "-4 --keys: keys file name.\n" \
                           "-i --image: path of target image.\n\n";
 
 const char *optionalMsg = "-t --numThread: value of numThread(int), default: 4\n" \

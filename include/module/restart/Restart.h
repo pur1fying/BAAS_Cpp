@@ -7,12 +7,12 @@
 
 #include "BAAS.h"
 
-namespace ISA{
-    class Restart {
-    public:
-        static bool implement(BAAS* baas);
+namespace ISA {
+class Restart {
+public:
+    static bool implement(baas::BAAS *baas);
 
-    };
+};
 
 }
 #endif //BAAS_MODULE_RESTART_RESTART_H_

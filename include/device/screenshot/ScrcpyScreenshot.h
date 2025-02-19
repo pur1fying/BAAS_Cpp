@@ -7,7 +7,9 @@
 
 #include "device/screenshot/BaseScreenshot.h"
 #include "device/BAASScrcpyClient.h"
+#include "BaseScreenshot.h"
 
+BAAS_NAMESPACE_BEGIN
 class ScrcpyScreenshot : public BaseScreenshot {
 public:
     explicit ScrcpyScreenshot(BAASConnection *connection);
@@ -19,6 +21,7 @@ public:
     void exit() override;
 
     bool is_lossy() override;
+
 private:
 
     BAASConnection *connection;
@@ -27,6 +30,7 @@ private:
 
 };
 
+BAAS_NAMESPACE_END
 
 
 #endif //CONFIG_JSON_SCRCPYSCREENSHOT_H

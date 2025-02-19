@@ -4,23 +4,34 @@
 
 #include "device/screenshot/LDOpenGLScreenshot.h"
 
-LDOpenGLScreenshot::LDOpenGLScreenshot(BAASConnection *connection) : BaseScreenshot(connection) {
+BAAS_NAMESPACE_BEGIN
+
+LDOpenGLScreenshot::LDOpenGLScreenshot(BAASConnection *connection) : BaseScreenshot(connection)
+{
 
 }
 
-void LDOpenGLScreenshot::init() {
+void LDOpenGLScreenshot::init()
+{
     ldopengl_connection = BAASLdopengl::get_instance(connection);
     instance_id = ldopengl_connection->get_instance_id();
 }
 
-void LDOpenGLScreenshot::screenshot(cv::Mat &output) {
+void LDOpenGLScreenshot::screenshot(cv::Mat &output)
+{
     ldopengl_connection->screenshot(output);
 }
 
-void LDOpenGLScreenshot::exit() {
+void LDOpenGLScreenshot::exit()
+{
     BAASLdopengl::release(instance_id);
 }
 
-bool LDOpenGLScreenshot::is_lossy() {
+bool LDOpenGLScreenshot::is_lossy()
+{
     return false;
 }
+
+BAAS_NAMESPACE_END
+
+

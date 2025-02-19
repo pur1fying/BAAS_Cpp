@@ -6,8 +6,9 @@
 #define BAAS_DEVICE_SCREENSHOT_BASESCREENSHOT_H_
 
 #include "opencv2/opencv.hpp"
-
 #include "device/BAASConnection.h"
+
+BAAS_NAMESPACE_BEGIN
 
 class BaseScreenshot {
 public:
@@ -22,6 +23,7 @@ public:
 
     // return true if the screenshot method returns a lossy image
     virtual bool is_lossy();
+
 protected:
     BAASConnection *connection;
 
@@ -29,8 +31,9 @@ protected:
 
     std::mutex screenshot_mtx;
 
-    BAASLogger* logger;
+    BAASLogger *logger;
 };
 
+BAAS_NAMESPACE_END
 
 #endif //BAAS_DEVICE_SCREENSHOT_BASESCREENSHOT_H_

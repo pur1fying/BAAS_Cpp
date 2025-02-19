@@ -1,7 +1,9 @@
 #ifdef __cplusplus
 #ifndef __OCR_LITE_C_API_H__
 #define __OCR_LITE_C_API_H__
+
 #include "stdint.h"
+
 extern "C"
 {
 
@@ -46,7 +48,7 @@ typedef struct {
     long dataLength;
 } OCR_INPUT;
 typedef struct {
-    OCR_POINT* boxPoint;
+    OCR_POINT *boxPoint;
     float boxScore;
     int angleIndex;
     float angleScore;
@@ -70,17 +72,37 @@ typedef struct {
 By default, nThreads should be the number of threads
 */
 _QM_OCR_API OCR_HANDLE
-OcrInit(const char *szDetModel, const char *szClsModel, const char *szRecModel, const char *szKeyPath, int nThreads);
+OcrInit(
+        const char *szDetModel,
+        const char *szClsModel,
+        const char *szRecModel,
+        const char *szKeyPath,
+        int nThreads
+);
 
 _QM_OCR_API OCR_BOOL
-OcrDetect(OCR_HANDLE handle, const char *imgPath, const char *imgName, OCR_PARAM *pParam);
+OcrDetect(
+        OCR_HANDLE handle,
+        const char *imgPath,
+        const char *imgName,
+        OCR_PARAM *pParam
+);
 
 _QM_OCR_API OCR_BOOL
-OcrDetectInput(OCR_HANDLE handle, OCR_INPUT *input, OCR_PARAM *pParam, OCR_RESULT *ocrResult);
+OcrDetectInput(
+        OCR_HANDLE handle,
+        OCR_INPUT *input,
+        OCR_PARAM *pParam,
+        OCR_RESULT *ocrResult
+);
 
 _QM_OCR_API int OcrGetLen(OCR_HANDLE handle);
 
-_QM_OCR_API OCR_BOOL OcrGetResult(OCR_HANDLE handle, char *szBuf, int nLen);
+_QM_OCR_API OCR_BOOL OcrGetResult(
+        OCR_HANDLE handle,
+        char *szBuf,
+        int nLen
+);
 
 _QM_OCR_API void OcrDestroy(OCR_HANDLE handle);
 

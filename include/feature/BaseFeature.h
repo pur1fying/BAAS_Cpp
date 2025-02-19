@@ -15,18 +15,25 @@
 
 // used to create different feature and combine them
 
+BAAS_NAMESPACE_BEGIN
+
 class BaseFeature {
 public:
     explicit BaseFeature() = default;
 
-    explicit BaseFeature(BAASConfig* config);
+    explicit BaseFeature(BAASConfig *config);
 
-    inline bool is_primitive() {
+    inline bool is_primitive()
+    {
         return and_features.empty() && or_features.empty();
     }
 
     // used to judge the compare order of feature
-    virtual double self_average_cost(const cv::Mat &image, const std::string& server, const std::string& language);
+    virtual double self_average_cost(
+            const cv::Mat &image,
+            const std::string &server,
+            const std::string &language
+    );
 
     std::vector<std::string> get_and_features();
 
@@ -36,53 +43,70 @@ public:
 
     bool has_or_feature();
 
-    [[nodiscard]] double all_average_cost(const cv::Mat &image, const std::string& server, const std::string& language);
+    [[nodiscard]] double all_average_cost(
+            const cv::Mat &image,
+            const std::string &server,
+            const std::string &language
+    );
 
-    [[nodiscard]] inline BAASConfig* get_config() {
+    [[nodiscard]] inline BAASConfig *get_config()
+    {
         return config;
     }
 
-    static void get_image(BAASConfig* parameter, BAASImage& image);
+    static void get_image(
+            BAASConfig *parameter,
+            BAASImage &image
+    );
 
-    inline bool get_this_round_result() {
+    inline bool get_this_round_result()
+    {
         assert(this_round_result.has_value());
         return this_round_result.value();
     }
 
-    inline bool is_checked_this_round() {
+    inline bool is_checked_this_round()
+    {
         return this_round_result.has_value();
     }
 
-    inline bool set_checked_this_round(bool result) {
+    inline bool set_checked_this_round(bool result)
+    {
         this_round_result = result;
         return result;
     }
 
-    inline void reset_checked() {
+    inline void reset_checked()
+    {
         this_round_result.reset();
     }
 
-    inline void set_path(const std::string& path) {
+    inline void set_path(const std::string &path)
+    {
         this->path = path;
     }
 
-    inline const std::string& get_path() {
+    inline const std::string &get_path()
+    {
         return path;
     }
 
-    inline void set_enabled(const bool enabled) {
+    inline void set_enabled(const bool enabled)
+    {
         is_enabled = enabled;
     }
 
-    inline bool get_enabled() {
+    inline bool get_enabled()
+    {
         return is_enabled;
     }
+
 protected:
     std::vector<std::string> or_features;
 
     std::vector<std::string> and_features;
 
-    BAASConfig* config;
+    BAASConfig *config;
 
     std::optional<bool> this_round_result;
 
@@ -91,6 +115,6 @@ protected:
     bool is_enabled;
 };
 
-
+BAAS_NAMESPACE_END
 
 #endif //BAAS_FEATURE_BASEFEATURE_H_

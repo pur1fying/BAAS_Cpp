@@ -5,11 +5,13 @@
 #include "onnxruntime/onnxruntime_cxx_api.h"
 #include "opencv2/opencv.hpp"
 
+BAAS_NAMESPACE_BEGIN
+
 class AngleNet {
 public:
-    static AngleNet* get_net(const std::string& model_path);
+    static AngleNet *get_net(const std::string &model_path);
 
-    static bool release_net(const std::string& model_path);
+    static bool release_net(const std::string &model_path);
 
     static void release_all();
 
@@ -21,13 +23,18 @@ public:
 
     void setGpuIndex(int gpuIndex);
 
-    std::vector<Angle> getAngles(std::vector<cv::Mat> &partImgs, const char *path,
-                                 const char *imgName, bool doAngle, bool mostAngle);
+    std::vector<Angle> getAngles(
+            std::vector<cv::Mat> &partImgs,
+            const char *path,
+            const char *imgName,
+            bool doAngle,
+            bool mostAngle
+    );
 
 private:
     void initModel(const std::string &pathStr);
 
-    static std::map <std::string, AngleNet*> nets;
+    static std::map<std::string, AngleNet *> nets;
 
     std::string modelPath;
 
@@ -49,5 +56,6 @@ private:
     Angle getAngle(cv::Mat &src);
 };
 
+BAAS_NAMESPACE_END
 
 #endif //__OCR_ANGLENET_H__

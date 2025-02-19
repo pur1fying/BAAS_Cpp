@@ -10,16 +10,29 @@
 
 #define BAAS_MATCH_TEMPLATE_FEATURE 0
 
+BAAS_NAMESPACE_BEGIN
+
 class MatchTemplateFeature : public BaseFeature {
 public:
-    explicit MatchTemplateFeature(BAASConfig* config);
+    explicit MatchTemplateFeature(BAASConfig *config);
 
-    static bool compare(BAASConfig* parameter, const cv::Mat& image, BAASConfig& output);
+    static bool compare(
+            BAASConfig *parameter,
+            const cv::Mat &image,
+            BAASConfig &output
+    );
 
-    [[nodiscard]] double self_average_cost(const cv::Mat &image, const std::string& server, const std::string& language) override;
+    [[nodiscard]] double self_average_cost(
+            const cv::Mat &image,
+            const std::string &server,
+            const std::string &language
+    ) override;
+
 private:
 
     std::map<std::string, std::optional<double>> self_average_cost_map;
 };
+
+BAAS_NAMESPACE_END
 
 #endif //BAAS_FEATURE_MATCHTEMPLATEFEATURE_H_

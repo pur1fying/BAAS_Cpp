@@ -9,6 +9,9 @@
 #include "CrnnNet.h"
 
 #include "nlohmann/json.hpp"
+
+BAAS_NAMESPACE_BEGIN
+
 class OcrLite {
 public:
     OcrLite();
@@ -17,32 +20,87 @@ public:
 
     void setNumThread(int numOfThread);
 
-    void initLogger(bool isConsole, bool isPartImg, bool isResultImg);
+    void initLogger(
+            bool isConsole,
+            bool isPartImg,
+            bool isResultImg
+    );
 
-    void enableResultTxt(const char *path, const char *imgName);
+    void enableResultTxt(
+            const char *path,
+            const char *imgName
+    );
 
-    void setGpuIndex(int gpuIndex);
+    void set_gpu_id(int gpu_id);
 
-    void get_net(const std::string& detPath, const std::string& clsPath, const std::string& recPath, const std::string& keysPath);
+    void get_net(
+            const std::string &detPath,
+            const std::string &clsPath,
+            const std::string &recPath,
+            const std::string &keysPath
+    );
 
     bool initModels();
 
-    void Logger(const char *format, ...);
+    void Logger(
+            const char *format,
+            ...
+    );
 
-    OcrResult detect(const char *path, const char *imgName,
-                     int padding, int maxSideLen,
-                     float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle, const std::vector<std::string> &candidates = std::vector<std::string>());
+    OcrResult detect(
+            const char *path,
+            const char *imgName,
+            int padding,
+            int maxSideLen,
+            float boxScoreThresh,
+            float boxThresh,
+            float unClipRatio,
+            bool doAngle,
+            bool mostAngle,
+            const std::vector<std::string> &candidates = std::vector<std::string>());
 
-    OcrResult detect(const cv::Mat &mat,
-                     int padding, int maxSideLen,
-                     float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle, const std::vector<std::string> &candidates=std::vector<std::string>());
+    OcrResult detect(
+            const cv::Mat &mat,
+            int padding,
+            int maxSideLen,
+            float boxScoreThresh,
+            float boxThresh,
+            float unClipRatio,
+            bool doAngle,
+            bool mostAngle,
+            const std::vector<std::string> &candidates = std::vector<std::string>());
 
-    void ocr_for_single_line(const cv::Mat &img, TextLine &text, const std::vector<std::string> &candidates=std::vector<std::string>());
+    void ocr_for_single_line(
+            const cv::Mat &img,
+            TextLine &text,
+            const std::vector<std::string> &candidates = std::vector<std::string>());
 
-    OcrResult detectImageBytes(const uint8_t *data, long dataLength, int grey, int padding, int maxSideLen,
-                               float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle);
-    OcrResult detectBitmap(uint8_t *bitmapData, int width, int height,int channels, int padding, int maxSideLen,
-                           float boxScoreThresh, float boxThresh, float unClipRatio, bool doAngle, bool mostAngle);
+    OcrResult detectImageBytes(
+            const uint8_t *data,
+            long dataLength,
+            int grey,
+            int padding,
+            int maxSideLen,
+            float boxScoreThresh,
+            float boxThresh,
+            float unClipRatio,
+            bool doAngle,
+            bool mostAngle
+    );
+
+    OcrResult detectBitmap(
+            uint8_t *bitmapData,
+            int width,
+            int height,
+            int channels,
+            int padding,
+            int maxSideLen,
+            float boxScoreThresh,
+            float boxThresh,
+            float unClipRatio,
+            bool doAngle,
+            bool mostAngle
+    );
 
 
     int numThread = 4;
@@ -62,20 +120,33 @@ private:
     bool isOutputResultTxt = false;
     bool isOutputResultImg = false;
     FILE *resultTxt;
-    DbNet* dbNet;                // det
-    AngleNet* angleNet;          // cls
-    CrnnNet* crnnNet;            // rec
+    DbNet *dbNet;                // det
+    AngleNet *angleNet;          // cls
+    CrnnNet *crnnNet;            // rec
 
-    std::vector<cv::Mat> getPartImages(cv::Mat &src, std::vector<TextBox> &textBoxes,
-                                       const char *path, const char *imgName);
+    std::vector<cv::Mat> getPartImages(
+            cv::Mat &src,
+            std::vector<TextBox> &textBoxes,
+            const char *path,
+            const char *imgName
+    );
 
-    OcrResult detect(const char *path, const char *imgName,
-                     cv::Mat &src, cv::Rect &originRect, ScaleParam &scale,
-                     float boxScoreThresh = 0.6f, float boxThresh = 0.3f,
-                     float unClipRatio = 2.0f, bool doAngle = true, bool mostAngle = true,
-                     const std::vector<std::string> &candidates = std::vector<std::string>());
+    OcrResult detect(
+            const char *path,
+            const char *imgName,
+            cv::Mat &src,
+            cv::Rect &originRect,
+            ScaleParam &scale,
+            float boxScoreThresh = 0.6f,
+            float boxThresh = 0.3f,
+            float unClipRatio = 2.0f,
+            bool doAngle = true,
+            bool mostAngle = true,
+            const std::vector<std::string> &candidates = std::vector<std::string>());
 
 
 };
+
+BAAS_NAMESPACE_END
 
 #endif //__OCR_LITE_H__

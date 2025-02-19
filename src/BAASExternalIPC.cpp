@@ -8,29 +8,42 @@
 
 #include <windows.h>
 
-std::map<std::string, Shared_Memory*> shared_memory_map;
+BAAS_NAMESPACE_BEGIN
 
-int Shared_Memory::put_data(const unsigned char *data, size_t sz){
+
+int Shared_Memory::put_data(
+        const unsigned char *data,
+        size_t sz
+)
+{
     if (sz > size) return -1;
     auto t1 = std::chrono::high_resolution_clock::now();
     memcpy(pBuf, data, size);
-    std::cout << "put data time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - t1).count() << "us" << std::endl;
+    std::cout << "put data time: " << std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now() - t1
+    ).count() << "us" << std::endl;
     return 0;
 }
 
-Shared_Memory::~Shared_Memory() {
-    if (shared_memory_map.find(name) != shared_memory_map.end())  {
+Shared_Memory::~Shared_Memory()
+{
+    if (shared_memory_map.find(name) != shared_memory_map.end()) {
         std::cout << "erase shared memory: " << name << std::endl;
         shared_memory_map.erase(name);
     }
-    try{
+    try {
         UnmapViewOfFile(pBuf);
         CloseHandle(hMapFile);
     }
-    catch (const std::exception& e) {}
+    catch (const std::exception &e) {}
 }
 
-Shared_Memory::Shared_Memory(const std::string &name, size_t size,const unsigned char *data) {
+Shared_Memory::Shared_Memory(
+        const std::string &name,
+        size_t size,
+        const unsigned char *data
+)
+{
     shared_memory_map[name] = this;
     this->name = name;
     bool exists = shared_memory_exists(name.c_str());
@@ -86,57 +99,86 @@ Shared_Memory::Shared_Memory(const std::string &name, size_t size,const unsigned
     if (data != nullptr) put_data(data, size);
 }
 
-unsigned char *Shared_Memory::get_data() {
-    return (unsigned char*)pBuf;
+unsigned char *Shared_Memory::get_data()
+{
+    return (unsigned char *) pBuf;
 }
 
-void Shared_Memory::release() {
+void Shared_Memory::release()
+{
     UnmapViewOfFile(pBuf);
     CloseHandle(hMapFile);
 }
 
-size_t Shared_Memory::query_size(void *p_buf_ptr) {
+
+size_t Shared_Memory::query_size(void *p_buf_ptr)
+{
     MEMORY_BASIC_INFORMATION mbi;
     VirtualQuery(p_buf_ptr, &mbi, sizeof(mbi));
     return mbi.RegionSize;
 }
 
+BAAS_NAMESPACE_END
 
-void *get_shared_memory(const char *name, size_t size, const unsigned char *data) {
+
+void *get_shared_memory(
+        const char *name,
+        size_t size,
+        const unsigned char *data
+)
+{
     try {
         auto it = shared_memory_map.find(name);
         if (it != shared_memory_map.end()) {
-            if (size != 0) it->second->put_data(data, size);
+            if (size != 0)
+                it->second
+                  ->put_data(data, size);
             return it->second;
         }
-        auto shared_memory = new Shared_Memory(name, size, data);
+        auto shared_memory = new baas::Shared_Memory(name, size, data);
         return shared_memory;
-    } catch (Shared_Memory_Error& e) {
+    } catch (baas::Shared_Memory_Error &e) {
         std::cerr << e.what() << std::endl;
         return nullptr;
     }
 }
 
-int set_shared_memory_data(const char* name, size_t size, const unsigned char* data) {
+
+
+int set_shared_memory_data(
+        const char *name,
+        size_t size,
+        const unsigned char *data
+)
+{
     auto it = shared_memory_map.find(name);
     if (it == shared_memory_map.end()) return SHARED_MEMORY_NOT_EXISTS;
-    return it->second->put_data(data, size);
+    return it->second
+             ->put_data(data, size);
 }
 
-int release_shared_memory(const char* name) {
+int release_shared_memory(const char *name)
+{
     std::cout << "map size: " << shared_memory_map.size() << std::endl;
     auto it = shared_memory_map.find(name);
     if (it == shared_memory_map.end()) return 1;
-    it->second->release();
+    it->second
+      ->release();
     delete it->second;
     return 0;
 }
 
-int set_shared_memory_data(void *shared_memory, const unsigned char *data, size_t size) {
-    return ((Shared_Memory*)shared_memory)->put_data(data, size);
+int set_shared_memory_data(
+        void *shared_memory,
+        const unsigned char *data,
+        size_t size
+)
+{
+    return ((baas::Shared_Memory *) shared_memory)->put_data(data, size);
 }
 
-int shared_memory_exists(const char* name) {
+int shared_memory_exists(const char *name)
+{
     HANDLE hFileMapping = OpenFileMapping(
             FILE_MAP_READ,
             FALSE,
@@ -147,7 +189,8 @@ int shared_memory_exists(const char* name) {
     return SHARED_MEMORY_EXISTS;
 }
 
-size_t get_shared_memory_size(const char* name) {
+size_t get_shared_memory_size(const char *name)
+{
     HANDLE hFileMapping = OpenFileMapping(
             FILE_MAP_READ,
             FALSE,
@@ -155,7 +198,7 @@ size_t get_shared_memory_size(const char* name) {
     );
     if (hFileMapping == nullptr) return 0;
 
-    void* pBuf = MapViewOfFile(
+    void *pBuf = MapViewOfFile(
             hFileMapping,
             FILE_MAP_READ,
             0,
@@ -168,15 +211,21 @@ size_t get_shared_memory_size(const char* name) {
     return mbi.RegionSize;
 }
 
-int get_shared_memory_data(const char* name,unsigned char * put_date_ptr,size_t size) {
-    try{
-        auto shared_memory = Shared_Memory(name, size);
+int get_shared_memory_data(
+        const char *name,
+        unsigned char *put_date_ptr,
+        size_t size
+)
+{
+    try {
+        auto shared_memory = baas::Shared_Memory(name, size);
         memcpy(put_date_ptr, shared_memory.get_data(), shared_memory.get_size());
         return 0;
     }
-    catch (const std::exception& e) {
+    catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;
         return 1;
     }
 }
 
+std::map<std::string, baas::Shared_Memory *> shared_memory_map;

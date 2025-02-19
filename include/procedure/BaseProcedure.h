@@ -4,6 +4,7 @@
 
 #ifndef BAAS_PROCEDURE_BASEPROCEDURE_H_
 #define BAAS_PROCEDURE_BASEPROCEDURE_H_
+
 #include "feature/BAASFeature.h"
 #include "device/screenshot/BAASScreenshot.h"
 #include "device/control/BAASControl.h"
@@ -14,24 +15,32 @@
 #define BAAS_ACTION_TYPE_LONG_CLICK 2
 #define BAAS_ACTION_TYPE_SWIPE 3
 
+BAAS_NAMESPACE_BEGIN
+
 class BaseProcedure {
 public:
-    explicit BaseProcedure(BAASConfig* possible_feature);
+    explicit BaseProcedure(BAASConfig *possible_feature);
 
-    virtual void implement(BAAS* baas, BAASConfig& output);
+    virtual void implement(
+            BAAS *baas,
+            BAASConfig &output
+    );
 
     virtual void clear_resource();
 
-    inline BAASConfig* get_config() {
+    inline BAASConfig *get_config()
+    {
         return possible_feature;
     }
+
 protected:
-    BAASConfig* possible_feature;
+    BAASConfig *possible_feature;
 
-    BAASLogger* logger;
+    BAASLogger *logger;
 
-    BAAS* baas;
+    BAAS *baas;
 };
 
+BAAS_NAMESPACE_END
 
 #endif //BAAS_PROCEDURE_BASEPROCEDURE_H_

@@ -4,8 +4,14 @@
 
 #ifndef BAAS_NETWORK_H_
 #define BAAS_NETWORK_H_
+
 #include <string>
-class Network{
+
+#include "core_defines.h"
+
+BAAS_NAMESPACE_BEGIN
+
+class Network {
 public:
     static const std::string TCP;
     static const std::string UNIX;
@@ -15,4 +21,7 @@ public:
     static const std::string LOCAL_FILESYSTEM;
     static const std::string LOCAL_ABSTRACT;
 };
+
+BAAS_NAMESPACE_END
+
 #endif //BAAS_NETWORK_H_

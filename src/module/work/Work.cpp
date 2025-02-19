@@ -4,8 +4,9 @@
 
 #include "module/work/Work.h"
 
-bool ISA::Work::implement(BAAS *baas) {
-    BAASConfig config;
+bool ISA::Work::implement(baas::BAAS *baas)
+{
+    baas::BAASConfig config;
     baas->solve_procedure("UI-GO-TO_work_menu", config, true);
 
     return true;

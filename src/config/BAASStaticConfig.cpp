@@ -3,17 +3,23 @@
 //
 #include "config/BAASStaticConfig.h"
 
+BAAS_NAMESPACE_BEGIN
 BAASStaticConfig *static_config = nullptr;
 
-BAASStaticConfig* BAASStaticConfig::staticConfig = nullptr;
+BAASStaticConfig *BAASStaticConfig::staticConfig = nullptr;
 
-BAASStaticConfig *BAASStaticConfig::getStaticConfig() {
+BAASStaticConfig *BAASStaticConfig::getStaticConfig()
+{
     if (staticConfig == nullptr) {
         staticConfig = new BAASStaticConfig();
     }
     return staticConfig;
 }
 
-BAASStaticConfig::BAASStaticConfig() : BAASConfig(CONFIG_TYPE_STATIC_CONFIG) {
+BAASStaticConfig::BAASStaticConfig() : BAASConfig(CONFIG_TYPE_STATIC_CONFIG)
+{
 
 }
+
+BAAS_NAMESPACE_END
+

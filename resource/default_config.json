@@ -15,5 +15,6 @@
     "script": {
       "screenshot_interval": 0.3,
       "show_image_compare_log": false
-    }
+    },
+    "test": "中文Chinese, En，あいうえお"
 }

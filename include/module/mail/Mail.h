@@ -7,12 +7,12 @@
 
 #include "BAAS.h"
 
-namespace ISA{
-    class Mail {
-    public:
-        static bool implement(BAAS* baas);
+namespace ISA {
+class Mail {
+public:
+    static bool implement(baas::BAAS *baas);
 
-    };
+};
 }
 
 #endif //BAAS_MODULE_MAIL_MAIL_H_

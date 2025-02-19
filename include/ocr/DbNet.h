@@ -4,14 +4,15 @@
 #include "OcrStruct.h"
 #include "onnxruntime/onnxruntime_cxx_api.h"
 #include "opencv2/opencv.hpp"
+BAAS_NAMESPACE_BEGIN
 
 class DbNet {
 public:
-    static DbNet* get_net(const std::string& model_path);
+    static DbNet *get_net(const std::string &model_path);
 
     void initModel();
 
-    static bool release_net(const std::string& model_path);
+    static bool release_net(const std::string &model_path);
 
     static void release_all();
 
@@ -21,14 +22,19 @@ public:
 
     void setGpuIndex(int gpuIndex);
 
-    std::vector<TextBox> getTextBoxes(cv::Mat &src, ScaleParam &s, float boxScoreThresh,
-                                      float boxThresh, float unClipRatio);
+    std::vector<TextBox> getTextBoxes(
+            cv::Mat &src,
+            ScaleParam &s,
+            float boxScoreThresh,
+            float boxThresh,
+            float unClipRatio
+    );
 
 
 private:
     void initModel(const std::string &pathStr);
 
-    static std::map <std::string, DbNet*> nets;
+    static std::map<std::string, DbNet *> nets;
 
     std::string modelPath;
 
@@ -44,5 +50,5 @@ private:
     const float normValues[3] = {1.0 / 0.229 / 255.0, 1.0 / 0.224 / 255.0, 1.0 / 0.225 / 255.0};
 };
 
-
+BAAS_NAMESPACE_END
 #endif //__OCR_DBNET_H__

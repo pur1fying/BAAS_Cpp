@@ -16,6 +16,9 @@ extern "C" {
 }
 
 #include "BAASConnection.h"
+#include "BAASAdbUtils.h"
+
+BAAS_NAMESPACE_BEGIN
 
 enum ScrcpyConst {
     ACTION_DOWN = 0,
@@ -336,37 +339,57 @@ public:
 
     bool screenshot(cv::Mat &output);
 
-    inline long long get_last_frame_arrive_time() {
+    inline long long get_last_frame_arrive_time()
+    {
         std::lock_guard<std::mutex> lock(time_mutex);
         return last_frame_arrive_time;
     }
 
-    inline void set_last_frame_arrive_time() {
+    inline void set_last_frame_arrive_time()
+    {
         std::lock_guard<std::mutex> lock(time_mutex);
         last_frame_arrive_time = BAASUtil::getCurrentTimeMS();
     }
 
-    inline std::pair<uint16_t, uint16_t> get_resolution() {
+    inline std::pair<uint16_t, uint16_t> get_resolution()
+    {
         std::lock_guard<std::mutex> lock(resolution_mutex);
         return resolution;
     }
 
-    inline uint16_t get_resolution_x() {
+    inline uint16_t get_resolution_x()
+    {
         std::lock_guard<std::mutex> lock(resolution_mutex);
         return resolution.first;
     }
 
-    inline uint16_t get_resolution_y(){
+    inline uint16_t get_resolution_y()
+    {
         std::lock_guard<std::mutex> lock(resolution_mutex);
         return resolution.second;
     }
-    void keycode(int keycode, uint8_t action = ScrcpyConst::ACTION_DOWN, int repeat = 0) ;
 
-    void text(const std::string &text) ;
+    void keycode(
+            int keycode,
+            uint8_t action = ScrcpyConst::ACTION_DOWN,
+            int repeat = 0
+    );
 
-    void touch(int x, int y, uint8_t action = ScrcpyConst::ACTION_DOWN, unsigned long long touch_id = -1) ;
+    void text(const std::string &text);
 
-    void scroll(int x, int y, int h ,int v) ;
+    void touch(
+            int x,
+            int y,
+            uint8_t action = ScrcpyConst::ACTION_DOWN,
+            unsigned long long touch_id = -1
+    );
+
+    void scroll(
+            int x,
+            int y,
+            int h,
+            int v
+    );
 
     void back_or_turn_screen_on(uint8_t action = ScrcpyConst::ACTION_DOWN);
 
@@ -378,15 +401,27 @@ public:
 
     std::string get_clipboard();
 
-    void set_clipboard(const std::string &text, bool paste = false);
+    void set_clipboard(
+            const std::string &text,
+            bool paste = false
+    );
 
     void set_screen_power_mode(int8_t mode);
 
     void rotate_device();
 
-    void swipe(int start_x, int start_y, int end_x, int end_y, int step_len = 5, double step_delay = 0.005);
+    void swipe(
+            int start_x,
+            int start_y,
+            int end_x,
+            int end_y,
+            int step_len = 5,
+            double step_delay = 0.005
+    );
+
 private:
-    inline bool ffmpeg_init() {
+    inline bool ffmpeg_init()
+    {
         codec = avcodec_find_decoder(AV_CODEC_ID_H264);
         parser = av_parser_init(codec->id);
         codecContext = avcodec_alloc_context3(codec);
@@ -396,7 +431,8 @@ private:
         return true;
     }
 
-    inline bool ffmpeg_release_resource() {
+    inline bool ffmpeg_release_resource()
+    {
         av_parser_close(parser);
         avcodec_free_context(&codecContext);
         av_packet_free(&packet);
@@ -404,34 +440,42 @@ private:
         return true;
     }
 
-    inline void set_alive(bool state) {
+    inline void set_alive(bool state)
+    {
         std::lock_guard<std::mutex> lock(alive_mutex);
         alive = state;
     }
 
-    inline bool get_alive() {
+    inline bool get_alive()
+    {
         std::lock_guard<std::mutex> lock(alive_mutex);
         return alive;
     }
 
-    inline void set_resolution(uint16_t width, uint16_t height) {
+    inline void set_resolution(
+            uint16_t width,
+            uint16_t height
+    )
+    {
         std::lock_guard<std::mutex> lock(resolution_mutex);
         resolution = std::make_pair(width, height);
     }
 
-    inline void set_resolution_x(uint16_t width) {
+    inline void set_resolution_x(uint16_t width)
+    {
         std::lock_guard<std::mutex> lock(resolution_mutex);
         resolution.first = width;
     }
 
-    inline void set_resolution_y(uint16_t height) {
+    inline void set_resolution_y(uint16_t height)
+    {
         std::lock_guard<std::mutex> lock(resolution_mutex);
         resolution.second = height;
     }
 
     explicit BAASScrcpyClient(BAASConnection *connection);
 
-    static std::map<BAASConnection* , BAASScrcpyClient*> clients;
+    static std::map<BAASConnection *, BAASScrcpyClient *> clients;
 
     BAASLogger *logger;
 
@@ -469,7 +513,7 @@ private:
 
     BAASConnection *connection;
 
-    BAASAdbConnection* serverStream;
+    BAASAdbConnection *serverStream;
 
     bool deploy_server();
 
@@ -479,9 +523,9 @@ private:
 
     char ret_buffer[1 << 16];
 
-    BAASAdbDevice* device = nullptr;
+    BAASAdbDevice *device = nullptr;
 
-    char* rawH264;
+    char *rawH264;
 
     std::thread screenshotThread;
 
@@ -495,7 +539,8 @@ private:
 
     AVFrame *frame;
 
-    inline void control_socket_send(std::string &msg) {
+    inline void control_socket_send(std::string &msg)
+    {
         std::lock_guard<std::mutex> lock(control_socket_mutex);
         send(controlSocket, msg.c_str(), int(msg.size()), 0);
     }
@@ -506,11 +551,13 @@ class ScrcpyError : public std::exception {
 public:
     ScrcpyError() = default;
 
-    explicit ScrcpyError(const char *msg) {
+    explicit ScrcpyError(const char *msg)
+    {
         message = msg;
     }
 
-    [[nodiscard]] const char *what() const noexcept override {
+    [[nodiscard]] const char *what() const noexcept override
+    {
         if (message.empty()) return "Scrcpy Error";
         return message.c_str();
     }
@@ -518,5 +565,7 @@ public:
 private:
     std::string message;
 };
+
+BAAS_NAMESPACE_END
 
 #endif //BAAS_DEVICE_BAASSCRCPYCLIENT_H_

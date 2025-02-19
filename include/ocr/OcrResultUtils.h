@@ -4,6 +4,8 @@
 #include <jni.h>
 #include "OcrStruct.h"
 
+BAAS_NAMESPACE_BEGIN
+
 class OcrResultUtils {
 public:
     OcrResultUtils(JNIEnv *env, OcrResult &ocrResult);
@@ -31,5 +33,8 @@ private:
     jfloatArray newJScoreArray(std::vector<float> &scores);
 
 };
+
+BAAS_NAMESPACE_END
+
 #endif //__OCR_RESULT_UTILS_H__
 #endif

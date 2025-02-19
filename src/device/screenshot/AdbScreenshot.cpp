@@ -7,29 +7,38 @@
 
 using namespace std;
 
-AdbScreenshot::AdbScreenshot(BAASConnection *connection) : BaseScreenshot(connection) {
+BAAS_NAMESPACE_BEGIN
+AdbScreenshot::AdbScreenshot(BAASConnection *connection) : BaseScreenshot(connection)
+{
 
 }
 
-void AdbScreenshot::init() {
+void AdbScreenshot::init()
+{
     logger->hr("Screenshot Method AdbScreenshot");
     string ret = connection->adb_shell_bytes("echo 000");
     assert(ret == "000");
 }
 
-void AdbScreenshot::screenshot(cv::Mat &img) {
+void AdbScreenshot::screenshot(cv::Mat &img)
+{
     string ret = connection->adb_shell_bytes("screencap -p");
-    if(ret.size() < 500)
+    if (ret.size() < 500)
         logger->BAASWarn("Unexpected screenshot size : " + to_string(ret.size()));
     vector<uchar> data(ret.begin(), ret.end());
     img = cv::imdecode(data, cv::IMREAD_COLOR);
 }
 
-void AdbScreenshot::exit() {
+void AdbScreenshot::exit()
+{
     logger->BAASInfo("Screenshot Method AdbScreenshot Exit");
 
 }
 
-bool AdbScreenshot::is_lossy() {
+bool AdbScreenshot::is_lossy()
+{
     return false;
 }
+
+BAAS_NAMESPACE_END
+

@@ -7,15 +7,13 @@
 
 #include "BAAS.h"
 
-namespace ISA{
-    class Competition {
-    public:
-        static bool implement(BAAS* baas);
+namespace ISA {
+class Competition {
+public:
+    static bool implement(baas::BAAS *baas);
 
-    };
+};
 }
-
-
 
 
 #endif //BAAS_MODULE_COMPETITION_COMPETITION_H_

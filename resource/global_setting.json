@@ -1,6 +1,6 @@
 {
   "ocr": {
-    "flagGpu": -1,
-    "numThread": 4
+    "gpu_id": -1,
+    "num_thread": 4
   }
 }

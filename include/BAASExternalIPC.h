@@ -13,28 +13,40 @@
 #include <map>
 #include <string>
 
+#include "core_defines.h"
+
+BAAS_NAMESPACE_BEGIN
+
 class Shared_Memory {
 public:
-    explicit Shared_Memory(const std::string &name, size_t size=0, const unsigned char *data=nullptr);
+    explicit Shared_Memory(
+            const std::string &name,
+            size_t size = 0,
+            const unsigned char *data = nullptr
+    );
 
-    inline int put_data(const unsigned char *data, size_t size);
+    inline int put_data(
+            const unsigned char *data,
+            size_t size
+    );
 
     inline void release();
 
-    inline unsigned char* get_data();
+    inline unsigned char *get_data();
 
-    inline size_t get_size() const {
+    inline size_t get_size() const
+    {
         return size;
     }
 
-    static size_t query_size(void* p_buf_ptr);
+    static size_t query_size(void *p_buf_ptr);
 
     ~Shared_Memory();
 
 private:
-    void* hMapFile;
+    void *hMapFile;
 
-    void* pBuf;     // virtual address of the shared memory, assigned by kernel
+    void *pBuf;     // virtual address of the shared memory, assigned by kernel
 
     std::string name;
 
@@ -43,15 +55,18 @@ private:
 
 class Shared_Memory_Error : public std::exception {
 public:
-    explicit Shared_Memory_Error(const char* message) : message(message) {}
+    explicit Shared_Memory_Error(const char *message) : message(message) {}
 
-    const char* what() const noexcept override {
+    const char *what() const noexcept override
+    {
         return message;
     }
 
 private:
-    const char* message;
+    const char *message;
 };
+
+BAAS_NAMESPACE_END
 
 #ifdef BAAS_BUILD_DLL
 #define BAAS_API __declspec(dllexport)
@@ -62,19 +77,31 @@ private:
 #ifdef __cplusplus
 extern "C" {
 #endif
-    BAAS_API void* get_shared_memory(const char* name, size_t size=0, const unsigned char* data=nullptr);
+BAAS_API void *get_shared_memory(
+        const char *name,
+        size_t size = 0,
+        const unsigned char *data = nullptr
+);
 
-    BAAS_API int set_shared_memory_data(const char* name, size_t size, const unsigned char* data);
+BAAS_API int set_shared_memory_data(
+        const char *name,
+        size_t size,
+        const unsigned char *data
+);
 
-    BAAS_API int release_shared_memory(const char* name);
+BAAS_API int release_shared_memory(const char *name);
 
-    BAAS_API int shared_memory_exists(const char* name);
+BAAS_API int shared_memory_exists(const char *name);
 
-    BAAS_API size_t get_shared_memory_size(const char* name);
+BAAS_API size_t get_shared_memory_size(const char *name);
 
-    BAAS_API int get_shared_memory_data(const char* name, unsigned char *data, size_t size=0);
+BAAS_API int get_shared_memory_data(
+        const char *name,
+        unsigned char *data,
+        size_t size = 0
+);
 
-    BAAS_API extern std::map<std::string, Shared_Memory*> shared_memory_map;
+BAAS_API extern std::map<std::string, baas::Shared_Memory *> shared_memory_map;
 
 #ifdef __cplusplus
 }

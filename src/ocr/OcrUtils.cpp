@@ -4,12 +4,16 @@
 #include "ocr/OcrUtils.h"
 #include "ocr/clipper.hpp"
 
-double getCurrentTime() {
+BAAS_NAMESPACE_BEGIN
+
+double getCurrentTime()
+{
     return (static_cast<double>(cv::getTickCount())) / cv::getTickFrequency() * 1000;//单位毫秒
 }
 
 //onnxruntime init windows
-std::wstring strToWstr(std::string str) {
+std::wstring strToWstr(std::string str)
+{
     if (str.length() == 0)
         return L"";
     std::wstring wstr;
@@ -17,7 +21,11 @@ std::wstring strToWstr(std::string str) {
     return wstr;
 }
 
-ScaleParam getScaleParam(cv::Mat &src, const float scale) {
+ScaleParam getScaleParam(
+        cv::Mat &src,
+        const float scale
+)
+{
     int srcWidth = src.cols;
     int srcHeight = src.rows;
     int dstWidth = int((float) srcWidth * scale);
@@ -35,7 +43,11 @@ ScaleParam getScaleParam(cv::Mat &src, const float scale) {
     return {srcWidth, srcHeight, dstWidth, dstHeight, scaleWidth, scaleHeight};
 }
 
-ScaleParam getScaleParam(cv::Mat &src, const int targetSize) {
+ScaleParam getScaleParam(
+        cv::Mat &src,
+        const int targetSize
+)
+{
     int srcWidth, srcHeight, dstWidth, dstHeight;
     srcWidth = dstWidth = src.cols;
     srcHeight = dstHeight = src.rows;
@@ -61,7 +73,8 @@ ScaleParam getScaleParam(cv::Mat &src, const int targetSize) {
     return {srcWidth, srcHeight, dstWidth, dstHeight, ratioWidth, ratioHeight};
 }
 
-std::vector<cv::Point2f> getBox(const cv::RotatedRect &rect) {
+std::vector<cv::Point2f> getBox(const cv::RotatedRect &rect)
+{
     cv::Point2f vertices[4];
     rect.points(vertices);
     //std::vector<cv::Point2f> ret(4);
@@ -70,13 +83,19 @@ std::vector<cv::Point2f> getBox(const cv::RotatedRect &rect) {
     return ret2;
 }
 
-int getThickness(cv::Mat &boxImg) {
+int getThickness(cv::Mat &boxImg)
+{
     int minSize = boxImg.cols > boxImg.rows ? boxImg.rows : boxImg.cols;
     int thickness = minSize / 1000 + 2;
     return thickness;
 }
 
-void drawTextBox(cv::Mat &boxImg, cv::RotatedRect &rect, int thickness) {
+void drawTextBox(
+        cv::Mat &boxImg,
+        cv::RotatedRect &rect,
+        int thickness
+)
+{
     cv::Point2f vertices[4];
     rect.points(vertices);
     for (int i = 0; i < 4; i++)
@@ -84,7 +103,12 @@ void drawTextBox(cv::Mat &boxImg, cv::RotatedRect &rect, int thickness) {
     //cv::polylines(srcmat, textpoint, true, cv::Scalar(0, 255, 0), 2);
 }
 
-void drawTextBox(cv::Mat &boxImg, const std::vector<cv::Point> &box, int thickness) {
+void drawTextBox(
+        cv::Mat &boxImg,
+        const std::vector<cv::Point> &box,
+        int thickness
+)
+{
     auto color = cv::Scalar(0, 0, 255);// B(0) G(0) R(255)
     cv::line(boxImg, box[0], box[1], color, thickness);
     cv::line(boxImg, box[1], box[2], color, thickness);
@@ -92,25 +116,36 @@ void drawTextBox(cv::Mat &boxImg, const std::vector<cv::Point> &box, int thickne
     cv::line(boxImg, box[3], box[0], color, thickness);
 }
 
-void drawTextBoxes(cv::Mat &boxImg, std::vector<TextBox> &textBoxes, int thickness) {
-    for (auto & textBox : textBoxes) {
+void drawTextBoxes(
+        cv::Mat &boxImg,
+        std::vector<TextBox> &textBoxes,
+        int thickness
+)
+{
+    for (auto &textBox: textBoxes) {
         drawTextBox(boxImg, textBox.boxPoint, thickness);
     }
 }
 
-cv::Mat matRotateClockWise180(cv::Mat src) {
+cv::Mat matRotateClockWise180(cv::Mat src)
+{
     flip(src, src, 0);
     flip(src, src, 1);
     return src;
 }
 
-cv::Mat matRotateClockWise90(cv::Mat src) {
+cv::Mat matRotateClockWise90(cv::Mat src)
+{
     transpose(src, src);
     flip(src, src, 1);
     return src;
 }
 
-cv::Mat getRotateCropImage(const cv::Mat &src, std::vector<cv::Point> box) {
+cv::Mat getRotateCropImage(
+        const cv::Mat &src,
+        std::vector<cv::Point> box
+)
+{
     cv::Mat image;
     src.copyTo(image);
     std::vector<cv::Point> points = box;
@@ -130,10 +165,14 @@ cv::Mat getRotateCropImage(const cv::Mat &src, std::vector<cv::Point> box) {
         point.y -= top;
     }
 
-    int imgCropWidth = int(sqrt(pow(points[0].x - points[1].x, 2) +
-                                pow(points[0].y - points[1].y, 2)));
-    int imgCropHeight = int(sqrt(pow(points[0].x - points[3].x, 2) +
-                                 pow(points[0].y - points[3].y, 2)));
+    int imgCropWidth = int(
+            sqrt(
+                    pow(points[0].x - points[1].x, 2) +
+                    pow(points[0].y - points[1].y, 2)));
+    int imgCropHeight = int(
+            sqrt(
+                    pow(points[0].x - points[3].x, 2) +
+                    pow(points[0].y - points[3].y, 2)));
 
     cv::Point2f ptsDst[4];
     ptsDst[0] = cv::Point2f(0., 0.);
@@ -150,9 +189,11 @@ cv::Mat getRotateCropImage(const cv::Mat &src, std::vector<cv::Point> box) {
     cv::Mat M = cv::getPerspectiveTransform(ptsSrc, ptsDst);
 
     cv::Mat partImg;
-    cv::warpPerspective(imgCrop, partImg, M,
-                        cv::Size(imgCropWidth, imgCropHeight),
-                        cv::BORDER_REPLICATE);
+    cv::warpPerspective(
+            imgCrop, partImg, M,
+            cv::Size(imgCropWidth, imgCropHeight),
+            cv::BORDER_REPLICATE
+    );
 
     if (float(partImg.rows) >= float(partImg.cols) * 1.5) {
         cv::Mat srcCopy = cv::Mat(partImg.rows, partImg.cols, partImg.depth());
@@ -164,7 +205,12 @@ cv::Mat getRotateCropImage(const cv::Mat &src, std::vector<cv::Point> box) {
     }
 }
 
-cv::Mat adjustTargetImg(cv::Mat &src, int dstWidth, int dstHeight) {
+cv::Mat adjustTargetImg(
+        cv::Mat &src,
+        int dstWidth,
+        int dstHeight
+)
+{
     cv::Mat srcResize;
     float scale = (float) dstHeight / (float) src.rows;
     int angleWidth = int((float) src.cols * scale);
@@ -180,12 +226,24 @@ cv::Mat adjustTargetImg(cv::Mat &src, int dstWidth, int dstHeight) {
     return srcFit;
 }
 
-bool cvPointCompare(const cv::Point &a, const cv::Point &b) {
+bool cvPointCompare(
+        const cv::Point &a,
+        const cv::Point &b
+)
+{
     return a.x < b.x;
 }
 
-std::vector<cv::Point2f> getMinBoxes(const cv::RotatedRect &boxRect, float &maxSideLen) {
-    maxSideLen = std::max(boxRect.size.width, boxRect.size.height);
+std::vector<cv::Point2f> getMinBoxes(
+        const cv::RotatedRect &boxRect,
+        float &maxSideLen
+)
+{
+    maxSideLen = std::max(
+            boxRect.size
+                   .width, boxRect.size
+                                  .height
+    );
     std::vector<cv::Point2f> boxPoint = getBox(boxRect);
     std::sort(boxPoint.begin(), boxPoint.end(), cvPointCompare);
     int index1, index2, index3, index4;
@@ -211,7 +269,11 @@ std::vector<cv::Point2f> getMinBoxes(const cv::RotatedRect &boxRect, float &maxS
     return minBox;
 }
 
-float boxScoreFast(const std::vector<cv::Point2f> &boxes, const cv::Mat &pred) {
+float boxScoreFast(
+        const std::vector<cv::Point2f> &boxes,
+        const cv::Mat &pred
+)
+{
     int width = pred.cols;
     int height = pred.rows;
 
@@ -242,7 +304,11 @@ float boxScoreFast(const std::vector<cv::Point2f> &boxes, const cv::Mat &pred) {
     return score;
 }
 
-float getContourArea(const std::vector<cv::Point2f> &box, float unClipRatio) {
+float getContourArea(
+        const std::vector<cv::Point2f> &box,
+        float unClipRatio
+)
+{
     size_t size = box.size();
     float area = 0.0f;
     float dist = 0.0f;
@@ -259,7 +325,11 @@ float getContourArea(const std::vector<cv::Point2f> &box, float unClipRatio) {
     return area * unClipRatio / dist;
 }
 
-cv::RotatedRect unClip(std::vector<cv::Point2f> box, float unClipRatio) {
+cv::RotatedRect unClip(
+        std::vector<cv::Point2f> box,
+        float unClipRatio
+)
+{
     float distance = getContourArea(box, unClipRatio);
 
     ClipperLib::ClipperOffset offset;
@@ -288,7 +358,12 @@ cv::RotatedRect unClip(std::vector<cv::Point2f> box, float unClipRatio) {
     return res;
 }
 
-std::vector<float> substractMeanNormalize(cv::Mat &src, const float *meanVals, const float *normVals) {
+std::vector<float> substractMeanNormalize(
+        cv::Mat &src,
+        const float *meanVals,
+        const float *normVals
+)
+{
     auto inputTensorSize = src.cols * src.rows * src.channels();
     std::vector<float> inputTensorValues(inputTensorSize);
     size_t numChannels = src.channels();
@@ -303,7 +378,8 @@ std::vector<float> substractMeanNormalize(cv::Mat &src, const float *meanVals, c
     return inputTensorValues;
 }
 
-std::vector<int> getAngleIndexes(std::vector<Angle> &angles) {
+std::vector<int> getAngleIndexes(std::vector<Angle> &angles)
+{
     std::vector<int> angleIndexes;
     angleIndexes.reserve(angles.size());
     for (auto &angle: angles) {
@@ -312,7 +388,8 @@ std::vector<int> getAngleIndexes(std::vector<Angle> &angles) {
     return angleIndexes;
 }
 
-std::vector<Ort::AllocatedStringPtr> getInputNames(Ort::Session *session) {
+std::vector<Ort::AllocatedStringPtr> getInputNames(Ort::Session *session)
+{
     Ort::AllocatorWithDefaultOptions allocator;
     const size_t numInputNodes = session->GetInputCount();
 
@@ -343,7 +420,8 @@ std::vector<Ort::AllocatedStringPtr> getInputNames(Ort::Session *session) {
     return inputNamesPtr;
 }
 
-std::vector<Ort::AllocatedStringPtr> getOutputNames(Ort::Session *session) {
+std::vector<Ort::AllocatedStringPtr> getOutputNames(Ort::Session *session)
+{
     Ort::AllocatorWithDefaultOptions allocator;
     const size_t numOutputNodes = session->GetOutputCount();
 
@@ -373,30 +451,63 @@ std::vector<Ort::AllocatedStringPtr> getOutputNames(Ort::Session *session) {
     return outputNamesPtr;
 }
 
-void saveImg(cv::Mat &img, const char *imgPath) {
+void saveImg(
+        cv::Mat &img,
+        const char *imgPath
+)
+{
     cv::imwrite(imgPath, img);
 }
 
-std::string getSrcImgFilePath(const char *path, const char *imgName) {
+std::string getSrcImgFilePath(
+        const char *path,
+        const char *imgName
+)
+{
     std::string filePath;
-    filePath.append(path).append(imgName);
+    filePath.append(path)
+            .append(imgName);
     return filePath;
 }
 
-std::string getResultTxtFilePath(const char *path, const char *imgName) {
+std::string getResultTxtFilePath(
+        const char *path,
+        const char *imgName
+)
+{
     std::string filePath;
-    filePath.append(path).append(imgName).append("-result.txt");
+    filePath.append(path)
+            .append(imgName)
+            .append("-result.txt");
     return filePath;
 }
 
-std::string getResultImgFilePath(const char *path, const char *imgName) {
+std::string getResultImgFilePath(
+        const char *path,
+        const char *imgName
+)
+{
     std::string filePath;
-    filePath.append(path).append(imgName).append("-result.jpg");
+    filePath.append(path)
+            .append(imgName)
+            .append("-result.jpg");
     return filePath;
 }
 
-std::string getDebugImgFilePath(const char *path, const char *imgName, size_t i, const char *tag) {
+std::string getDebugImgFilePath(
+        const char *path,
+        const char *imgName,
+        size_t i,
+        const char *tag
+)
+{
     std::string filePath;
-    filePath.append(path).append(imgName).append(tag).append(std::to_string(i)).append(".jpg");
+    filePath.append(path)
+            .append(imgName)
+            .append(tag)
+            .append(std::to_string(i))
+            .append(".jpg");
     return filePath;
 }
+
+BAAS_NAMESPACE_END

@@ -7,12 +7,12 @@
 
 #include "BAAS.h"
 
-namespace ISA{
-    class Work {
-    public:
-        static bool implement(BAAS* baas);
+namespace ISA {
+class Work {
+public:
+    static bool implement(baas::BAAS *baas);
 
-    };
+};
 }
 
 

@@ -20,7 +20,12 @@ int optopt = 0;
 int postpone_count = 0;
 int nextchar = 0;
 
-static void postpone(int argc, char *const argv[], int index) {
+static void postpone(
+        int argc,
+        char *const argv[],
+        int index
+)
+{
     char **nc_argv = (char **) argv;
     char *p = nc_argv[index];
     int j = index;
@@ -30,7 +35,12 @@ static void postpone(int argc, char *const argv[], int index) {
     nc_argv[argc - 1] = p;
 }
 
-static int postpone_noopt(int argc, char *const argv[], int index) {
+static int postpone_noopt(
+        int argc,
+        char *const argv[],
+        int index
+)
+{
     int i = index;
     for (; i < argc; i++) {
         if (*(argv[i]) == '-') {
@@ -41,9 +51,14 @@ static int postpone_noopt(int argc, char *const argv[], int index) {
     return 0;
 }
 
-static int _getopt_(int argc, char *const argv[],
-                    const char *optstring,
-                    const struct option *longopts, int *longindex) {
+static int _getopt_(
+        int argc,
+        char *const argv[],
+        const char *optstring,
+        const struct option *longopts,
+        int *longindex
+)
+{
     while (1) {
         int c;
         const char *optptr = 0;
@@ -149,7 +164,8 @@ static int _getopt_(int argc, char *const argv[],
             if (opterr) {
                 fprintf(stderr,
                         "%s: invalid option -- %c\n",
-                        argv[0], c);
+                        argv[0], c
+                );
             }
             ++nextchar;
             return '?';
@@ -174,7 +190,8 @@ static int _getopt_(int argc, char *const argv[],
                     if (opterr) {
                         fprintf(stderr,
                                 "%s: option requires an argument -- %c\n",
-                                argv[0], c);
+                                argv[0], c
+                        );
                     }
                     if (optstring[0] == ':' || ((optstring[0] == '-' || optstring[0] == '+') && optstring[1] == ':')) {
                         c = ':';
@@ -202,14 +219,23 @@ static int _getopt_(int argc, char *const argv[],
     return -1;
 }
 
-int getopt(int argc, char *const argv[],
-           const char *optstring) {
+int getopt(
+        int argc,
+        char *const argv[],
+        const char *optstring
+)
+{
     return _getopt_(argc, argv, optstring, 0, 0);
 }
 
-int getopt_long(int argc, char *const argv[],
-                const char *optstring,
-                const struct option *longopts, int *longindex) {
+int getopt_long(
+        int argc,
+        char *const argv[],
+        const char *optstring,
+        const struct option *longopts,
+        int *longindex
+)
+{
     return _getopt_(argc, argv, optstring, longopts, longindex);
 }
 /********************************************************

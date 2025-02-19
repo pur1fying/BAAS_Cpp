@@ -6,7 +6,9 @@
 #define BAAS_DEVICE_LDOPENGLSCREENSHOT_H_
 
 #include "device/BAASLdopengl.h"
-#include "BaseScreenshot.h"
+#include "device/screenshot/BaseScreenshot.h"
+
+BAAS_NAMESPACE_BEGIN
 
 class LDOpenGLScreenshot : public BaseScreenshot {
 public:
@@ -25,6 +27,8 @@ private:
 
     int instance_id;
 };
+
+BAAS_NAMESPACE_END
 
 
 #endif //BAAS_DEVICE_LDOPENGLSCREENSHOT_H_

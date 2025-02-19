@@ -4,22 +4,27 @@
 
 
 #include "device/BAASScrcpyClient.h"
+#include "BAASGlobals.h"
 
 using namespace std;
 using namespace std::filesystem;
 
-map<BAASConnection*, BAASScrcpyClient*> BAASScrcpyClient::clients;
+BAAS_NAMESPACE_BEGIN
 
-BAASScrcpyClient::BAASScrcpyClient(BAASConnection *connection) {
+map<BAASConnection *, BAASScrcpyClient *> BAASScrcpyClient::clients;
+
+BAASScrcpyClient::BAASScrcpyClient(BAASConnection *connection)
+{
     this->connection = connection;
     logger = connection->get_logger();
 }
 
 // server stream
-bool BAASScrcpyClient::deploy_server() {
-    try{
+bool BAASScrcpyClient::deploy_server()
+{
+    try {
         connection->adb_push(scrcpyJarPath, "/data/local/tmp/" + scrcpyJarName);
-    }catch (AdbError &e) {
+    } catch (AdbError &e) {
         string msg(e.what());
         logger->BAASError("Fail to push scrcpy-server : " + msg);
         return false;
@@ -28,8 +33,8 @@ bool BAASScrcpyClient::deploy_server() {
             "CLASSPATH=/data/local/tmp/" + scrcpyJarName,
             "app_process",
             "/",
-            "com.genymobile.scrcpy.Server",
-            "1.20",                                 // Server version
+            "com.genymobile.scrcpy.GameServer",
+            "1.20",                                 // GameServer version
             "info",                                 // Log level
             fmt::format("{}", maxWidth),            // Max screen width
             fmt::format("{}", bitrate),             // Bit rate
@@ -46,18 +51,21 @@ bool BAASScrcpyClient::deploy_server() {
             "-",                                    // Encoder name
             "false"                                 // Power off screen after server closed
     };
-    try{
-        logger->BAASInfo("Create Server Stream.");
+    try {
+        logger->BAASInfo("Create GameServer Stream.");
         serverStream = device->shellStream(cmd, 3000.0);
         string ret = serverStream->readFully(10);
-        logger->BAASInfo("Server response : " + ret);
-        if(ret.find("Aborted") != string::npos)throw ScrcpyError("Aborted");
-        else if(ret.find("[server] E") != string::npos) {
+        logger->BAASInfo("GameServer response : " + ret);
+        if (ret.find("Aborted") != string::npos)throw ScrcpyError("Aborted");
+        else if (ret.find("[server] E") != string::npos) {
             string ret_err;
             serverStream->readUntilClose(ret_err);
             logger->BAASError(ret);
-            if(ret.find("match the client") != string::npos)throw ScrcpyError("Server version does not match the client.");
-            else throw ScrcpyError("Unknown Server Error");
+            if (ret.find("match the client") != string::npos)
+                throw ScrcpyError(
+                        "GameServer version does not match the client."
+                );
+            else throw ScrcpyError("Unknown GameServer Error");
         }
     }
     catch (AdbError &e) {
@@ -69,26 +77,27 @@ bool BAASScrcpyClient::deploy_server() {
 }
 
 // control socket and video socket
-bool BAASScrcpyClient::init_socket() {
+bool BAASScrcpyClient::init_socket()
+{
     BAASAdbConnection *video_stream, *control_stream;
     logger->BAASInfo("Create Video Stream.");
     for (int i = 1; i <= 30; ++i) {
-        try{
+        try {
             video_stream = device->createConnection(Network::LOCAL_ABSTRACT, "scrcpy");
             break;
-        }catch (AdbError &e) {
+        } catch (AdbError &e) {
             video_stream = nullptr;
             logger->BAASInfo(e.what());
             BAASUtil::sleepMS(100);
         }
     }
-    if(video_stream == nullptr) {
+    if (video_stream == nullptr) {
         logger->BAASError("Can't connect to Scrcpy server after 30 attempts");
-        throw ScrcpyError("Server Connect Error");
+        throw ScrcpyError("GameServer Connect Error");
     }
 
     string buffer = video_stream->readFully(1);
-    if(buffer.size() != 1 || buffer[0] != 0) {
+    if (buffer.size() != 1 || buffer[0] != 0) {
         logger->BAASError("Invalid scrcpy server response");
         delete video_stream;
         return false;
@@ -102,13 +111,15 @@ bool BAASScrcpyClient::init_socket() {
     logger->BAASInfo("Device name : " + buffer);
     buffer = video_stream->readFully(4);
 
-    set_resolution(uint16_t(BAASUtil::unsignedBinary2int(buffer.substr(0, 2), 2)),
-                   uint16_t(BAASUtil::unsignedBinary2int(buffer.substr(2, 2), 2)));
+    set_resolution(
+            uint16_t(BAASUtil::unsignedBinary2int(buffer.substr(0, 2), 2)),
+            uint16_t(BAASUtil::unsignedBinary2int(buffer.substr(2, 2), 2)));
 
     logger->BAASInfo("Resolution : " + to_string(resolution.first) + "x" + to_string(resolution.second));
     u_long mode = 1;
 
-    logger->BAASInfo("Set video socket blocking : " + to_string(ioctlsocket(video_stream->getConnection(), FIONBIO, &mode)));
+    logger->BAASInfo(
+            "Set video socket blocking : " + to_string(ioctlsocket(video_stream->getConnection(), FIONBIO, &mode)));
 
     video_stream->setCloseSocketWhenDestruct(false);
     control_stream->setCloseSocketWhenDestruct(false);
@@ -122,52 +133,60 @@ bool BAASScrcpyClient::init_socket() {
 }
 
 
-
-bool BAASScrcpyClient::screenshot_loop() {
+bool BAASScrcpyClient::screenshot_loop()
+{
     try {
         ffmpeg_init();
         int ret;
 
         pair<uint16_t, uint16_t> resol;
 
-        while(get_alive()) {
+        while (get_alive()) {
             rawH264 = ret_buffer;
-            int dataSize = recv(videoSocket, rawH264, 1<<16, 0);
+            int dataSize = recv(videoSocket, rawH264, 1 << 16, 0);
             if (dataSize <= 0) {
                 this_thread::sleep_for(chrono::milliseconds(1));
                 continue;
             }
             while (dataSize > 0) {
-                if(packet == nullptr || frame == nullptr) {
+                if (packet == nullptr || frame == nullptr) {
                     ffmpeg_release_resource();
                     throw ScrcpyError("Cannot allocate packet or frame");
                 }
-                ret = av_parser_parse2(parser, codecContext, &packet->data, &packet->size, (uint8_t*)rawH264, dataSize, AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0);
+                ret = av_parser_parse2(
+                        parser, codecContext, &packet->data, &packet->size, (uint8_t *) rawH264, dataSize,
+                        AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0
+                );
                 dataSize -= ret;
                 rawH264 += ret;
-                if(packet->size == 0) {
+                if (packet->size == 0) {
                     continue;
                 }
                 ret = avcodec_send_packet(codecContext, packet);
-                if(ret != 0) {
-                    cout<<"Error sending packet"<<endl;
+                if (ret != 0) {
+                    cout << "Error sending packet" << endl;
                     continue;
                 }
                 while (avcodec_receive_frame(codecContext, frame) == 0) {
                     frame_mutex.lock();
                     int width = frame->width, height = frame->height;
                     resol = get_resolution();
-                    if(uint16_t(width) != resol.first || uint16_t(height) != resol.second) {
-                        logger->BAASInfo("Device Resolution changed : " + to_string(resol.first) + "x" + to_string(resol.second) + " --> " + to_string(width) + "x" + to_string(height));
+                    if (uint16_t(width) != resol.first || uint16_t(height) != resol.second) {
+                        logger->BAASInfo(
+                                "Device Resolution changed : " + to_string(resol.first) + "x" +
+                                to_string(resol.second) + " --> " + to_string(width) + "x" + to_string(height));
                         set_resolution(uint16_t(width), uint16_t(height));
                     }
-                    if(last_frame.rows != height || last_frame.cols != width || last_frame.type() != CV_8UC3) {
+                    if (last_frame.rows != height || last_frame.cols != width || last_frame.type() != CV_8UC3) {
                         last_frame = cv::Mat(height, width, CV_8UC3);
                     }
                     int cv_line_size[1];
                     cv_line_size[0] = int(last_frame.step1());
-                    SwsContext* conversion = sws_getContext(width, height, (AVPixelFormat)frame->format, width, height, AV_PIX_FMT_BGR24, SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
-                    if(conversion == nullptr) {
+                    SwsContext *conversion = sws_getContext(
+                            width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_BGR24,
+                            SWS_FAST_BILINEAR, nullptr, nullptr, nullptr
+                    );
+                    if (conversion == nullptr) {
                         ffmpeg_release_resource();
                         throw ScrcpyError("Cannot create SwsContext");
                     }
@@ -182,7 +201,7 @@ bool BAASScrcpyClient::screenshot_loop() {
     } catch (AdbError &e) {
         logger->BAASError(e.what());
         return false;
-    }catch(ScrcpyError &e) {
+    } catch (ScrcpyError &e) {
         logger->BAASError(e.what());
         return false;
     }
@@ -193,11 +212,12 @@ bool BAASScrcpyClient::screenshot_loop() {
     return true;
 }
 
-bool BAASScrcpyClient::screenshot(cv::Mat &output) {
+bool BAASScrcpyClient::screenshot(cv::Mat &output)
+{
     long long currentTime = BAASUtil::getCurrentTimeMS();
 
     while (get_last_frame_arrive_time() < currentTime) {
-        if(!alive)throw RuntimeError("Scrcpy Client is not alive");
+        if (!alive)throw RuntimeError("Scrcpy Client is not alive");
         BAASUtil::sleepMS(1);
     }
 
@@ -207,8 +227,9 @@ bool BAASScrcpyClient::screenshot(cv::Mat &output) {
     return true;
 }
 
-bool BAASScrcpyClient::start() {
-    if(get_alive()) {
+bool BAASScrcpyClient::start()
+{
+    if (get_alive()) {
         logger->BAASInfo("Client already started.");
         return true;
     }
@@ -230,41 +251,50 @@ bool BAASScrcpyClient::start() {
     return true;
 }
 
-bool BAASScrcpyClient::stop() {
+bool BAASScrcpyClient::stop()
+{
     set_alive(false);
 
-    if(screenshotThread.joinable())screenshotThread.join();
+    if (screenshotThread.joinable())screenshotThread.join();
 
     delete serverStream;
 
-    if(videoSocket != INVALID_SOCKET)
+    if (videoSocket != INVALID_SOCKET)
         closesocket(videoSocket);
 
-    if(controlSocket != INVALID_SOCKET)
+    if (controlSocket != INVALID_SOCKET)
         closesocket(controlSocket);
     logger->BAASInfo("Scrcpy Client stopped.");
     return true;
 }
 
-BAASScrcpyClient *BAASScrcpyClient::get_client(BAASConnection *connection) {
-    if(clients.find(connection) == clients.end()) {
+BAASScrcpyClient *BAASScrcpyClient::get_client(BAASConnection *connection)
+{
+    if (clients.find(connection) == clients.end()) {
         clients[connection] = new BAASScrcpyClient(connection);
     }
     return clients[connection];
 }
 
-void BAASScrcpyClient::release_client(BAASConnection *connection) {
+void BAASScrcpyClient::release_client(BAASConnection *connection)
+{
     auto it = clients.find(connection);
-    if(it != clients.end()) {
+    if (it != clients.end()) {
         clients.erase(connection);
     }
 }
 
 
-void BAASScrcpyClient::touch(int x, int y, uint8_t action, unsigned long long touch_id)  {
-    pair<uint16_t , uint16_t> resol = get_resolution();
+void BAASScrcpyClient::touch(
+        int x,
+        int y,
+        uint8_t action,
+        unsigned long long touch_id
+)
+{
+    pair<uint16_t, uint16_t> resol = get_resolution();
 
-    if(x < 0 || y < 0 || x >= resol.first || y >= resol.second) {
+    if (x < 0 || y < 0 || x >= resol.first || y >= resol.second) {
         logger->BAASError("Scrcpy Touch out of screen : ( " + to_string(x) + ", " + to_string(y) + " )");
         return;
     }
@@ -285,7 +315,12 @@ void BAASScrcpyClient::touch(int x, int y, uint8_t action, unsigned long long to
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::keycode(int keycode, uint8_t action, int repeat)  {
+void BAASScrcpyClient::keycode(
+        int keycode,
+        uint8_t action,
+        int repeat
+)
+{
     uint8_t inject = ScrcpyConst::TYPE_INJECT_KEYCODE;
     uint32_t cst = 0;
 
@@ -299,7 +334,8 @@ void BAASScrcpyClient::keycode(int keycode, uint8_t action, int repeat)  {
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::text(const string &text)  {
+void BAASScrcpyClient::text(const string &text)
+{
     uint8_t inject = ScrcpyConst::TYPE_INJECT_TEXT;
 
     string msg;
@@ -311,10 +347,16 @@ void BAASScrcpyClient::text(const string &text)  {
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::scroll(int x, int y, int h, int v) {
+void BAASScrcpyClient::scroll(
+        int x,
+        int y,
+        int h,
+        int v
+)
+{
     uint8_t inject = ScrcpyConst::TYPE_INJECT_SCROLL_EVENT;
 
-    pair<uint16_t , uint16_t> resol = get_resolution();
+    pair<uint16_t, uint16_t> resol = get_resolution();
 
     string msg;
     BAASUtil::append_big_endian(msg, inject);
@@ -328,7 +370,8 @@ void BAASScrcpyClient::scroll(int x, int y, int h, int v) {
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::back_or_turn_screen_on(uint8_t action) {
+void BAASScrcpyClient::back_or_turn_screen_on(uint8_t action)
+{
     uint8_t inject = ScrcpyConst::TYPE_BACK_OR_SCREEN_ON;
 
     string msg;
@@ -338,7 +381,8 @@ void BAASScrcpyClient::back_or_turn_screen_on(uint8_t action) {
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::expand_notification_panel() {
+void BAASScrcpyClient::expand_notification_panel()
+{
     uint8_t inject = ScrcpyConst::TYPE_EXPAND_NOTIFICATION_PANEL;
 
     string msg;
@@ -347,7 +391,8 @@ void BAASScrcpyClient::expand_notification_panel() {
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::expand_settings_panel() {
+void BAASScrcpyClient::expand_settings_panel()
+{
     uint8_t inject = ScrcpyConst::TYPE_EXPAND_SETTINGS_PANEL;
 
     string msg;
@@ -356,7 +401,8 @@ void BAASScrcpyClient::expand_settings_panel() {
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::collapse_panels() {
+void BAASScrcpyClient::collapse_panels()
+{
     uint8_t inject = ScrcpyConst::TYPE_COLLAPSE_PANELS;
 
     string msg;
@@ -365,13 +411,14 @@ void BAASScrcpyClient::collapse_panels() {
     control_socket_send(msg);
 }
 
-std::string BAASScrcpyClient::get_clipboard() {
+std::string BAASScrcpyClient::get_clipboard()
+{
     // clear control socket
     u_long mode = 1;
     ioctlsocket(controlSocket, FIONBIO, &mode);
     char buffer[1024];
     int len;
-    while(true) {
+    while (true) {
         len = recv(controlSocket, buffer, sizeof(buffer), 0);
         if (len == SOCKET_ERROR) {
             int error = WSAGetLastError();
@@ -399,7 +446,11 @@ std::string BAASScrcpyClient::get_clipboard() {
     return msg;
 }
 
-void BAASScrcpyClient::set_clipboard(const string &text, const bool paste) {
+void BAASScrcpyClient::set_clipboard(
+        const string &text,
+        const bool paste
+)
+{
     uint8_t inject = ScrcpyConst::TYPE_SET_CLIPBOARD;
     uint8_t paste_flag = paste ? 1 : 0;
 
@@ -413,7 +464,8 @@ void BAASScrcpyClient::set_clipboard(const string &text, const bool paste) {
 }
 
 
-void BAASScrcpyClient::set_screen_power_mode(int8_t mode) {
+void BAASScrcpyClient::set_screen_power_mode(int8_t mode)
+{
     uint8_t inject = ScrcpyConst::TYPE_SET_SCREEN_POWER_MODE;
 
     string msg;
@@ -423,7 +475,8 @@ void BAASScrcpyClient::set_screen_power_mode(int8_t mode) {
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::rotate_device() {
+void BAASScrcpyClient::rotate_device()
+{
     uint8_t inject = ScrcpyConst::TYPE_ROTATE_DEVICE;
 
     string msg;
@@ -433,7 +486,15 @@ void BAASScrcpyClient::rotate_device() {
 }
 
 // total sleep time = step_delay * (points.size() - 2)
-void BAASScrcpyClient::swipe(int start_x, int start_y, int end_x, int end_y, int step_len, double step_delay) {
+void BAASScrcpyClient::swipe(
+        int start_x,
+        int start_y,
+        int end_x,
+        int end_y,
+        int step_len,
+        double step_delay
+)
+{
     vector<pair<int, int>> points;
     BAASUtil::insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
 
@@ -441,7 +502,7 @@ void BAASScrcpyClient::swipe(int start_x, int start_y, int end_x, int end_y, int
 
     touch(start_x, start_y, ScrcpyConst::ACTION_DOWN);
 
-    for(int i = 1; i < points.size() - 1; ++i) {
+    for (int i = 1; i < points.size() - 1; ++i) {
         touch(points[i].first, points[i].second, ScrcpyConst::ACTION_MOVE);
         BAASUtil::sleepMS(sleep_time);
     }
@@ -450,7 +511,4 @@ void BAASScrcpyClient::swipe(int start_x, int start_y, int end_x, int end_y, int
 }
 
 
-
-
-
-
+BAAS_NAMESPACE_END

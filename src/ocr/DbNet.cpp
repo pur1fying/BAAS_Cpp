@@ -3,9 +3,12 @@
 #include "BAASGlobals.h"
 #include "config/BAASGlobalSetting.h"
 
+BAAS_NAMESPACE_BEGIN
+
 std::map<std::string, DbNet *> DbNet::nets;
 
-void DbNet::setGpuIndex(int gpuIndex) {
+void DbNet::setGpuIndex(int gpuIndex)
+{
 #ifdef __CUDA__
     if (gpuIndex >= 0) {
         OrtCUDAProviderOptions cuda_options;
@@ -17,20 +20,21 @@ void DbNet::setGpuIndex(int gpuIndex) {
 
         sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
         printf("det try to use GPU%d\n", gpuIndex);
-    }
-    else {
+    } else {
         printf("det use CPU\n");
     }
 #endif
 }
 
-DbNet::~DbNet() {
+DbNet::~DbNet()
+{
     delete session;
     inputNamesPtr.clear();
     outputNamesPtr.clear();
 }
 
-void DbNet::setNumThread(int numOfThread) {
+void DbNet::setNumThread(int numOfThread)
+{
     numThread = numOfThread;
     //===session options===
     // Sets the number of threads used to parallelize the execution within nodes
@@ -52,7 +56,8 @@ void DbNet::setNumThread(int numOfThread) {
     sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 }
 
-void DbNet::initModel(const std::string &pathStr) {
+void DbNet::initModel(const std::string &pathStr)
+{
 #ifdef _WIN32
     std::wstring detPath = strToWstr(pathStr);
     session = new Ort::Session(env, detPath.c_str(), sessionOptions);
@@ -64,16 +69,24 @@ void DbNet::initModel(const std::string &pathStr) {
     outputNamesPtr = getOutputNames(session);
 }
 
-std::vector<TextBox> findRsBoxes(const cv::Mat &predMat, const cv::Mat &dilateMat, ScaleParam &s,
-                                 const float boxScoreThresh, const float unClipRatio) {
+std::vector<TextBox> findRsBoxes(
+        const cv::Mat &predMat,
+        const cv::Mat &dilateMat,
+        ScaleParam &s,
+        const float boxScoreThresh,
+        const float unClipRatio
+)
+{
     const int longSideThresh = 3;//minBox 长边门限
     const int maxCandidates = 1000;
 
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
 
-    cv::findContours(dilateMat, contours, hierarchy, cv::RETR_LIST,
-                     cv::CHAIN_APPROX_SIMPLE);
+    cv::findContours(
+            dilateMat, contours, hierarchy, cv::RETR_LIST,
+            cv::CHAIN_APPROX_SIMPLE
+    );
 
     size_t numContours = contours.size() >= maxCandidates ? maxCandidates : contours.size();
 
@@ -98,7 +111,9 @@ std::vector<TextBox> findRsBoxes(const cv::Mat &predMat, const cv::Mat &dilateMa
 
         //-----unClip-----
         cv::RotatedRect clipRect = unClip(minBoxes, unClipRatio);
-        if (clipRect.size.height < 1.001 && clipRect.size.width < 1.001) {
+        if (clipRect.size
+                    .height < 1.001 && clipRect.size
+                                               .width < 1.001) {
             continue;
         }
         //-----unClip-----
@@ -124,25 +139,40 @@ std::vector<TextBox> findRsBoxes(const cv::Mat &predMat, const cv::Mat &dilateMa
 }
 
 std::vector<TextBox>
-DbNet::getTextBoxes(cv::Mat &src, ScaleParam &s, float boxScoreThresh, float boxThresh, float unClipRatio) {
+DbNet::getTextBoxes(
+        cv::Mat &src,
+        ScaleParam &s,
+        float boxScoreThresh,
+        float boxThresh,
+        float unClipRatio
+)
+{
     cv::Mat srcResize;
     resize(src, srcResize, cv::Size(s.dstWidth, s.dstHeight));
     std::vector<float> inputTensorValues = substractMeanNormalize(srcResize, meanValues, normValues);
     std::array<int64_t, 4> inputShape{1, srcResize.channels(), srcResize.rows, srcResize.cols};
     auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
-    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(memoryInfo, inputTensorValues.data(),
-                                                             inputTensorValues.size(), inputShape.data(),
-                                                             inputShape.size());
+    Ort::Value inputTensor = Ort::Value::CreateTensor<float>(
+            memoryInfo, inputTensorValues.data(),
+            inputTensorValues.size(), inputShape.data(),
+            inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
-    auto outputTensor = session->Run(Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
-                                     inputNames.size(), outputNames.data(), outputNames.size());
-    assert(outputTensor.size() == 1 && outputTensor.front().IsTensor());
-    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
-    int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1,
-                                          std::multiplies<int64_t>());
-    float *floatArray = outputTensor.front().GetTensorMutableData<float>();
+    std::vector<const char *> inputNames = {inputNamesPtr.data()
+                                                         ->get()};
+    std::vector<const char *> outputNames = {outputNamesPtr.data()
+                                                           ->get()};
+    auto outputTensor = session->Run(
+            Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
+            inputNames.size(), outputNames.data(), outputNames.size());
+    assert(outputTensor.size() == 1 && outputTensor.front()
+                                                   .IsTensor());
+    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo()
+                                                      .GetShape();
+    int64_t outputCount = std::accumulate(
+            outputShape.begin(), outputShape.end(), 1,
+            std::multiplies<int64_t>());
+    float *floatArray = outputTensor.front()
+                                    .GetTensorMutableData<float>();
     std::vector<float> outputData(floatArray, floatArray + outputCount);
 
     //-----Data preparation-----
@@ -175,23 +205,26 @@ DbNet::getTextBoxes(cv::Mat &src, ScaleParam &s, float boxScoreThresh, float box
     return findRsBoxes(predMat, dilateMat, s, boxScoreThresh, unClipRatio);
 }
 
-DbNet *DbNet::get_net(const std::string &model_path) {
+DbNet *DbNet::get_net(const std::string &model_path)
+{
     auto it = nets.find(model_path);
     if (it != nets.end()) return it->second;
     auto *net = new DbNet();
     net->modelPath = BAAS_OCR_MODEL_DIR + "\\" + model_path;
-    net->setGpuIndex(global_setting->ocr_flagGpu());
-    net->setNumThread(global_setting->ocr_numThread());
+    net->setGpuIndex(global_setting->ocr_gpu_id());
+    net->setNumThread(global_setting->ocr_num_thread());
     nets[model_path] = net;
     return net;
 }
 
-void DbNet::initModel() {
+void DbNet::initModel()
+{
     initModel(modelPath);
 }
 
 
-bool DbNet::release_net(const std::string &model_path) {
+bool DbNet::release_net(const std::string &model_path)
+{
     auto it = nets.find(model_path);
     if (it != nets.end()) {
         delete it->second;
@@ -201,10 +234,11 @@ bool DbNet::release_net(const std::string &model_path) {
     return false;
 }
 
-void DbNet::release_all() {
-    for (auto &it : nets) delete it.second;
+void DbNet::release_all()
+{
+    for (auto &it: nets) delete it.second;
     nets.clear();
 }
 
 
-
+BAAS_NAMESPACE_END

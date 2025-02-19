@@ -12,43 +12,45 @@
 
 using namespace std::filesystem;
 using namespace std;
-string BAAS_PROJECT_DIR;
 
-string BAAS_CONFIG_DIR;
+BAAS_NAMESPACE_BEGIN
 
-string BAAS_IMAGE_RESOURCE_DIR;
+std::string BAAS_PROJECT_DIR;
 
-string BAAS_FEATURE_DIR;
+std::string BAAS_CONFIG_DIR;
 
-string BAAS_PROCEDURE_DIR;
+std::string BAAS_IMAGE_RESOURCE_DIR;
 
-string BAAS_OCR_MODEL_DIR;
+std::string BAAS_FEATURE_DIR;
 
-string scrcpyJarPath;
+std::string BAAS_PROCEDURE_DIR;
 
-string scrcpyJarName;
+std::string BAAS_OCR_MODEL_DIR;
 
-string nemuDllPath;
+std::string scrcpyJarPath;
 
-string DEVELOPER_PROJECT_DIR;
+std::string scrcpyJarName;
 
-string MuMuInstallPath;
+std::string MuMuInstallPath;
 
-string BAAS_OUTPUT_DIR;
+std::string BAAS_OUTPUT_DIR;
 
-string CURRENT_TIME_STRING;
+std::string CURRENT_TIME_STRING;
 
-string ASCREENCAP_BIN_DIR;
+std::string ASCREENCAP_BIN_DIR;
 
-string ASCREENCAP_REMOTE_DIR;
+std::string ASCREENCAP_REMOTE_DIR;
 
-void init_globals() {
+std::string DEVELOPER_PROJECT_DIR;
+
+void init_globals()
+{
     if (inited) {
         return;
     }
     inited = true;
     BAASUtil::initWinsock();
-    path curr = current_path();
+    std::filesystem::path curr = std::filesystem::current_path();
 
     BAAS_PROJECT_DIR = curr.string();
     BAAS_OUTPUT_DIR = BAAS_PROJECT_DIR + R"(\output)";
@@ -59,7 +61,7 @@ void init_globals() {
     BAAS_OCR_MODEL_DIR = BAAS_PROJECT_DIR + R"(\resource\ocr_models)";
 
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
-    BAASGlobalLogger->BAASInfo("BAAS VERSION : " + string(BAAS_VERSION));
+    BAASGlobalLogger->BAASInfo("BAAS VERSION : " + std::string(BAAS_VERSION));
     BAASGlobalLogger->BAASInfo(BAAS_PROJECT_DIR);
 
     scrcpyJarName = "scrcpy-server.jar";
@@ -68,12 +70,12 @@ void init_globals() {
     ASCREENCAP_BIN_DIR = BAAS_PROJECT_DIR + R"(\resource\bin\ascreencap\)";
     ASCREENCAP_REMOTE_DIR = "/data/local/tmp/ascreencap";
 
-    nemuDllPath = BAAS_PROJECT_DIR + R"(\resource\nemu_dll\external_renderer_ipc.dll)";
-
     baas_ocr = BAASOCR::get_instance();
 
 
-    DEVELOPER_PROJECT_DIR = curr.parent_path().parent_path().string();
+    DEVELOPER_PROJECT_DIR = curr.parent_path()
+                                .parent_path()
+                                .string();
 
     static_config = BAASStaticConfig::getStaticConfig();
 
@@ -81,7 +83,7 @@ void init_globals() {
     baas_procedures = BAASProcedure::get_instance();
     resource = BAASImageResource::get_instance();
 
-    Server::init();
+    GameServer::init();
     BAAS::init_implement_funcs();
 
     config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);
@@ -90,3 +92,5 @@ void init_globals() {
     BAASGlobalSetting::check_global_setting_exist();
     global_setting = BAASGlobalSetting::getGlobalSetting();
 }
+
+BAAS_NAMESPACE_END

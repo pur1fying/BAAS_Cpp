@@ -6,6 +6,9 @@
 #define BAAS_DEVICE_SCREENSHOT_ASCREENCAP_H_
 
 #include "device/screenshot/BaseScreenshot.h"
+
+BAAS_NAMESPACE_BEGIN
+
 class AScreenCap : public BaseScreenshot {
 public:
     explicit AScreenCap(BAASConnection *connection);
@@ -25,7 +28,7 @@ private:
 
     void decompress();
 
-    BAASConnection* connection;
+    BAASConnection *connection;
 
     std::string adb_path;
 
@@ -35,7 +38,7 @@ private:
 
     std::string ret_buffer;
 
-    char* decompress_buffer;
+    char *decompress_buffer;
 
     void reposition_byte_pointer();
 
@@ -44,18 +47,23 @@ private:
 
 class AScreenCapError : public std::exception {
 public:
-    explicit AScreenCapError(const std::string &msg) {
+    explicit AScreenCapError(const std::string &msg)
+    {
         message = msg;
     }
 
-    [[nodiscard]] const char *what() const noexcept override {
+    [[nodiscard]] const char *what() const noexcept override
+    {
         return message.c_str();
     }
+
 private:
     std::string message;
 
 
 };
+
+BAAS_NAMESPACE_END
 
 
 #endif //BAAS_DEVICE_SCREENSHOT_ASCREENCAP_H_

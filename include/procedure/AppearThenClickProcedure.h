@@ -10,11 +10,16 @@
 
 #include "procedure/BaseProcedure.h"
 
+BAAS_NAMESPACE_BEGIN
+
 class AppearThenClickProcedure : public BaseProcedure {
 public:
-    explicit AppearThenClickProcedure(BAASConfig* possible_features);
+    explicit AppearThenClickProcedure(BAASConfig *possible_features);
 
-    void implement(BAAS* baas, BAASConfig& output) override;
+    void implement(
+            BAAS *baas,
+            BAASConfig &output
+    ) override;
 
     void clear_resource() override;
 
@@ -23,15 +28,18 @@ private:
 
     void clear_possibles();
 
-    void solve_feature_appear(BAASConfig* feature,bool show_log = false);
+    void solve_feature_appear(
+            BAASConfig *feature,
+            bool show_log = false
+    );
 
-    void solve_feature_action_click(BAASConfig* parameters);
+    void solve_feature_action_click(BAASConfig *parameters);
 
-    void pop_last_clicked_queue(int size=0);
+    void pop_last_clicked_queue(int size = 0);
 
-    void insert_last_clicked_queue(std::string& feature_name);
+    void insert_last_clicked_queue(std::string &feature_name);
 
-    std::vector<BAASConfig*> possibles;
+    std::vector<BAASConfig *> possibles;
 
     std::vector<std::string> possibles_feature_names;
 
@@ -66,12 +74,14 @@ private:
     std::string last_appeared_feature_name;
 
 
-    std::pair<std::pair<std::string, int>,std::pair<std::string, int>> last_clicked_pair_counter; // too many clicked between two features
+    std::pair<std::pair<std::string, int>, std::pair<std::string, int>> last_clicked_pair_counter; // too many clicked between two features
 
     std::string current_comparing_feature_name;
 
     BAASConfig temp_output;
 
 };
+
+BAAS_NAMESPACE_END
 
 #endif //BAAS_PROCEDURE_APPEARTHENCLICKPROCEDURE_H_

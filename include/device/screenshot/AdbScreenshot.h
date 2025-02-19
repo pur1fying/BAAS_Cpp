@@ -7,9 +7,10 @@
 
 #include "device/screenshot/BaseScreenshot.h"
 
+BAAS_NAMESPACE_BEGIN
+
 class AdbScreenshot : public BaseScreenshot {
 public:
-
     explicit AdbScreenshot(BAASConnection *connection);
 
     void init() override;
@@ -19,8 +20,11 @@ public:
     void exit() override;
 
     bool is_lossy() override;
+
 private:
 
 };
+
+BAAS_NAMESPACE_END
 
 #endif //BAAS_DEVICE_SCREENSHOT_ADBSCREENSHOT_H_

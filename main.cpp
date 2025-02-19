@@ -2,6 +2,8 @@
 #include <iostream>
 #include "BAAS.h"
 #include "httplib.h"
+#include "BAASGlobals.h"
+
 #pragma comment(lib, "ws2_32.lib")
 #include <BAASExternalIPC.h>
 using namespace cv;
@@ -15,9 +17,10 @@ int main(int argc, char **argv) {
     string config_name = "default_config";
     cv::Mat img;
     try{
+        baas::init_globals();
         cout <<shared_memory_exists("test") << endl;
 //        img = cv::imread("game_update.png");
-        auto sm = (Shared_Memory*)get_shared_memory("test", 1280*720*3, img.data);
+        auto sm = (baas::Shared_Memory*)get_shared_memory("test", 1280*720*3, img.data);
         auto t1 = std::chrono::high_resolution_clock::now();
         img = cv::Mat(720, 1280, CV_8UC3, sm->get_data());
 //        cv::imshow("img", img);
@@ -36,11 +39,11 @@ int main(int argc, char **argv) {
 //        cv::waitKey(0);
 //        return 0;
 //        system("pause");
-        init_globals();
-        BAAS baas(config_name);
-        BAASConfig config;
+        baas::BAAS baas(config_name);
+//        return 0;
+        baas::BAASConfig config;
 //        img = cv::imread("1.png");
-        global_setting->show();
+        baas::global_setting->show();
 //        BAASConnection* conn = baas.get_connection();
 //        baas.update_screenshot_array();
 //        baas.get_latest_screenshot(img);
@@ -63,20 +66,20 @@ int main(int argc, char **argv) {
         baas.solve("collect_reward");
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
-        baas_ocr->init("zh-cn");
+        baas::baas_ocr->init("zh-cn");
 //        baas_ocr->init("zh-tw");
 //        baas_ocr->init("en-us");
 //        baas_ocr->init("ja-jp");
 //        baas_ocr->init("ko-kr");
 //        baas_ocr->init("ru-ru");
 //        baas_ocr->test_ocr();
-        OcrResult result;
-        TextLine result2;
+        baas::OcrResult result;
+        baas::TextLine result2;
         std::string a = "1234567890/";
         baas.update_screenshot_array();
-        BAASRectangle region_ap = {345, 32, 452, 53};
+        baas::BAASRectangle region_ap = {345, 32, 452, 53};
         baas.ocr_for_single_line("zh-cn", result2, region_ap, "AP", a);
-        BAASRectangle region_diamond = {549, 30, 663, 63};
+        baas::BAASRectangle region_diamond = {549, 30, 663, 63};
         baas.ocr_for_single_line("zh-cn", result2, region_diamond, "Diamond", "1234567890,");
         json j;
 //        BAASOCR::ocrResult2json(result, j);
@@ -102,7 +105,7 @@ int main(int argc, char **argv) {
 //
 //        }
             catch (const std::exception& e){
-                BAASGlobalLogger->BAASInfo(e.what());
+                baas::BAASGlobalLogger->BAASInfo(e.what());
             }
 
             return 0;
