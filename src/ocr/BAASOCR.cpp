@@ -4,7 +4,6 @@
 
 #include "ocr/BAASOCR.h"
 #include "config/BAASStaticConfig.h"
-#include "config/BAASGlobalSetting.h"
 #include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
 
@@ -40,11 +39,12 @@ bool BAASOCR::init(const std::string &language)
 
     auto ocr = new OcrLite();
     ocr->initLogger(false, false, false);
-    BAASGlobalLogger->BAASInfo("Ocr init lan [ " + language + " ]");
-    BAASGlobalLogger->BAASInfo("Det : " + det);
-    BAASGlobalLogger->BAASInfo("Cls : " + cls);
-    BAASGlobalLogger->BAASInfo("Rec : " + rec);
-    BAASGlobalLogger->BAASInfo("Key : " + keys);
+    BAASGlobalLogger->sub_title("OCR Init");
+    BAASGlobalLogger->BAASInfo("language: " + language);
+    BAASGlobalLogger->BAASInfo("Det     : " + det);
+    BAASGlobalLogger->BAASInfo("Cls     : " + cls);
+    BAASGlobalLogger->BAASInfo("Rec     : " + rec);
+    BAASGlobalLogger->BAASInfo("Key     : " + keys);
     ocr->get_net(det, cls, rec, keys);
     ocr->initModels();
     ocr_map[language] = ocr;
@@ -135,16 +135,17 @@ std::vector<bool> BAASOCR::init(const std::vector<std::string> &languages)
 void BAASOCR::test_ocr()
 {
     BAASGlobalLogger->hr("Test OCR");
-    std::string path = BAAS_IMAGE_RESOURCE_DIR + "\\test_ocr";
-    std::string temp;
+    std::filesystem::path path = BAAS_IMAGE_RESOURCE_DIR / "test_ocr";
+    std::filesystem::path temp;
     TextLine result;
     for (auto &i: ocr_map) {
-        temp = path + "\\" + i.first + ".png";
+        temp = path / (i.first + ".png");
         if (!std::filesystem::exists(temp)) {
-            BAASGlobalLogger->BAASError("File not found : " + temp);
+            BAASGlobalLogger->BAASError("File not found : ");
+            BAASGlobalLogger->Path(temp, 3);
             continue;
         }
-        cv::Mat img = cv::imread(temp);
+        cv::Mat img = cv::imread(temp.string());
         ocr_for_single_line(i.first, img, result, i.first, (BAASLogger *) (BAASGlobalLogger));
     }
 }

@@ -90,8 +90,7 @@ string BAASUtil::current_time_string()
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
     std::tm localTime = *std::localtime(&timeT);
     std::ostringstream oss;
-    oss << std::put_time(&localTime, "%Y-%m-%d_%H-%M-%S");
-    oss << '.' << std::setw(4) << std::setfill('0') << ms.count();
+    oss << std::put_time(&localTime, "%Y-%m-%d_%H.%M.%S");
     std::string formattedTime = oss.str();
     CURRENT_TIME_STRING = oss.str();
     return CURRENT_TIME_STRING;

@@ -49,9 +49,9 @@ void OcrLite::enableResultTxt(
 
 void OcrLite::set_gpu_id(int gpu_id)
 {
-    dbNet->setGpuIndex(gpu_id);
-    angleNet->setGpuIndex(gpu_id);
-    crnnNet->setGpuIndex(gpu_id);
+    dbNet->set_gpu_id(gpu_id);
+    angleNet->set_gpu_id(gpu_id);
+    crnnNet->set_gpu_id(gpu_id);
 }
 
 bool OcrLite::initModels()
@@ -383,10 +383,10 @@ OcrResult OcrLite::detect(
 }
 
 void OcrLite::get_net(
-        const std::string &detPath,
-        const std::string &clsPath,
-        const std::string &recPath,
-        const std::string &keysPath
+        const std::filesystem::path &detPath,
+        const std::filesystem::path &clsPath,
+        const std::filesystem::path &recPath,
+        const std::filesystem::path &keysPath
 )
 {
     dbNet = DbNet::get_net(detPath);

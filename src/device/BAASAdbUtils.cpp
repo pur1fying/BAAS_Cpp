@@ -2,6 +2,7 @@
 // Created by pc on 2024/5/27.
 //
 #include "device/BAASAdbUtils.h"
+#include "BAASLogger.h"
 
 using namespace std;
 

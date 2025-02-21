@@ -14,7 +14,7 @@ double getCurrentTime()
 //onnxruntime init windows
 std::wstring strToWstr(std::string str)
 {
-    if (str.length() == 0)
+    if (str.empty())
         return L"";
     std::wstring wstr;
     wstr.assign(str.begin(), str.end());

@@ -175,7 +175,7 @@ void BAASImageResource::load(
         BAASGlobalLogger->BAASInfo("Image Resource [ " + server + " ] [ " + language + " ] already loaded");
         return;
     }
-    string info_path;
+    std::filesystem::path info_path;
     resource_path(server, language, "image_info", info_path);
     if (!filesystem::exists(info_path)) {
         BAASGlobalLogger->BAASError("Image Resource [ " + server + " ] [ " + language + " ] not found");
@@ -232,18 +232,16 @@ int BAASImageResource::load_from_json(
     string path = info.getString("path");
     std::string json_ptr = "/image";
     json j = info.get(json_ptr, json());
-    string group_path;
-    string image_path;
+    std::filesystem::path group_path;
+    std::filesystem::path image_path;
     resource_path(server, language, group, group_path);
     for (auto &it: j.items()) {
         const string &name = it.key();
         vector<int> region = info.get(json_ptr + "/" + name + "/region", vector<int>{-1, -1, -1, -1});
         uint8_t d = info.get(json_ptr + "/" + name + "/direction", uint8_t(0));
         BAASImage image(region, d);
-        image_path = group_path;
-        image_path += "\\";
-        image_path += name + ".png";
-        if (!BAASImageUtil::load(image_path, image.image)) {
+        image_path = group_path / (name + ".png");
+        if (!BAASImageUtil::load(image_path.string(), image.image)) {
             BAASGlobalLogger->BAASError(
                     "Image [ " + resource_pointer(server, language, group, name) +
                     " ] load failed, reason : not exist or broken"
@@ -261,10 +259,10 @@ inline void BAASImageResource::resource_path(
         const string &server,
         const string &language,
         const std::string &suffix,
-        string &out
+        std::filesystem::path &out
 )
 {
-    out = BAAS_IMAGE_RESOURCE_DIR + "\\" + server + "\\" + language + "\\" + suffix;
+    out = BAAS_IMAGE_RESOURCE_DIR / server / language / suffix;
 }
 
 std::string BAASImageResource::resource_pointer(
@@ -291,8 +289,7 @@ inline bool BAASImageResource::check_shape(
     int h_true = image.image.rows;
     int w_true = image.image.cols;
     if (h_record != h_true || w_record != w_true) {
-        BAASGlobalLogger
-                ->BAASError("Image [ " + resource_pointer(server, language, group, name) + " ] shape not match");
+        BAASGlobalLogger->BAASError("Image [ " + resource_pointer(server, language, group, name) + " ] shape not match");
         BAASGlobalLogger->BAASError("Recorded Shape : [ " + to_string(h_record) + "x" + to_string(w_record) + " ]");
         BAASGlobalLogger->BAASError("True Shape : [ " + to_string(h_true) + "x" + to_string(w_true) + " ]");
         return false;

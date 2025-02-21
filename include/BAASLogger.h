@@ -6,7 +6,7 @@
 #define BAAS_BAASLOGGER_H_
 
 #include <map>
-
+#include <filesystem>
 #include <iostream>
 
 #include <spdlog/sinks/basic_file_sink.h>
@@ -14,6 +14,7 @@
 #include <spdlog/spdlog.h>
 
 #include "core_defines.h"
+#include "BAASUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -27,6 +28,24 @@ void gen_hr_msg(
 class GlobalLogger {
 public:
     static GlobalLogger *getGlobalLogger();
+
+    inline void Path(const std::filesystem::path& path, const int level=2)
+    {
+#ifdef _WIN32
+        std::string message;
+        BAASUtil::wstr2str(path.wstring(), message);
+        _out(message, level);
+#else
+        _out(path.string(), level);
+#endif
+
+    }
+
+    inline void BAASTrace(const std::string &message)
+    {
+        if (enable & 0b1) consoleLogger->trace(message);
+        if (enable & 0b10)fileLogger->trace(message);
+    }
 
     inline void BAASTrance(const std::string &message)
     {
@@ -147,13 +166,38 @@ public:
         std::cout << "console : " << (enable & 0b1) << " file : " << (enable & 0b10) << std::endl;
     }
 
-    inline static std::string get_folder_path()
+    inline static std::filesystem::path get_folder_path()
     {
         return folder_path;
     }
+    inline void _out(const std::string &message, const int level)
+    {
+        switch (level) {
+            case 0:
+                BAASTrance(message);
+                break;
+            case 1:
+                BAASDebug(message);
+                break;
+            case 2:
+                BAASInfo(message);
+                break;
+            case 3:
+                BAASWarn(message);
+                break;
+            case 4:
+                BAASError(message);
+                break;
+            case 5:
+                BAASCritical(message);
+                break;
+            default:
+                break;
+        }
+    }
 
 private:
-    static std::string folder_path;
+    static std::filesystem::path folder_path;
 
     static GlobalLogger *global_logger;
 

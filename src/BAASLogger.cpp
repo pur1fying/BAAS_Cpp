@@ -5,14 +5,13 @@
 
 #include <fstream>
 
-#include "BAASUtil.h"
 #include "BAASGlobals.h"
 
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-string GlobalLogger::folder_path;
+std::filesystem::path GlobalLogger::folder_path;
 
 GlobalLogger *GlobalLogger::global_logger = nullptr;
 
@@ -47,16 +46,13 @@ GlobalLogger::GlobalLogger()
     try {
         enable = 0b11;
         consoleLogger = spdlog::stdout_color_mt("console");
-        if (!filesystem::exists("output")) {
-            filesystem::create_directory("output");
-        }
-
+        if (!filesystem::exists(BAAS_OUTPUT_DIR)) filesystem::create_directory(BAAS_OUTPUT_DIR);
         string currTime = BAASUtil::current_time_string();
-        folder_path = BAAS_OUTPUT_DIR + "\\" + currTime;
+        folder_path = BAAS_OUTPUT_DIR / currTime;
         filesystem::create_directory(folder_path);
-        fstream file(folder_path + "\\global_log.txt", ios::out);
+        fstream file(folder_path / "global_log.txt", ios::out);
         file.close();
-        fileLogger = spdlog::basic_logger_mt("file_logger", folder_path + "\\global_log.txt");
+        fileLogger = spdlog::basic_logger_mt("file_logger", (folder_path / "global_log.txt").string());
     }
     catch (const spdlog::spdlog_ex &ex) {
         cout << "Log init failed: " << ex.what() << endl;
@@ -109,9 +105,9 @@ BAASLogger::BAASLogger(const string &name) : GlobalLogger(1)
     }
     string currTime = BAASUtil::current_time_string();
     filename = name + ".txt";
-    fstream file(GlobalLogger::folder_path + "\\" + filename, ios::out);
+    fstream file(GlobalLogger::folder_path / filename, ios::out);
     file.close();
-    fileLogger = spdlog::basic_logger_mt(name + "_file_logger", GlobalLogger::folder_path + "\\" + filename);
+    fileLogger = spdlog::basic_logger_mt(name + "_file_logger", (GlobalLogger::folder_path / filename).string());
 }
 
 

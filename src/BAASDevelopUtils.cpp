@@ -17,18 +17,18 @@ void BAASDevelopUtils::shotStudentSkill(
 {
     string MuMuPlayerPath = "H:\\MuMuPlayer-12.0";
     auto *nemu = new BAASNemu(MuMuPlayerPath);
-    string temp = BAAS_PROJECT_DIR + R"(\resource\image\CN\)";
+    std::filesystem::path temp = BAAS_PROJECT_DIR / "resource" / "image" / "CN";
     if (type == SKILL_FULL) {
-        temp = temp + "skill_icon_bright";
+        temp = temp / "skill_icon_bright";
     } else if (type == SKILL_LEFT) {
-        temp = temp + "skill_icon_left_black";
+        temp = temp / "skill_icon_left_black";
     } else if (type == SKILL_RIGHT) {
-        temp = temp + "skill_icon_right_grey";
+        temp = temp / "skill_icon_right_grey";
     }
     Mat image;
     nemu->screenshot(image);
     Mat im = BAASImageUtil::crop(image, r);
-    BAASImageUtil::save(im, name, temp, true);
+    BAASImageUtil::save(im, name, temp.string(), true);
     delete nemu;
 }
 

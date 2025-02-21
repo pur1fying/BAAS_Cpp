@@ -13,9 +13,9 @@
 #include <random>
 #include <regex>
 
+#include <simdutf.h>
 #include <opencv2/opencv.hpp>
 
-#include "BAASLogger.h"
 #include "BAASExceptions.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -262,6 +262,47 @@ public:
             int &step_len,
             double &sleep_delay
     );
+
+    inline static void str2wstr(const std::string& in, std::wstring & out)
+    {
+#ifdef _WIN32
+        const size_t size = in.size();
+        if (size == 0) {
+            out.clear();
+            return;
+        }
+        const size_t expected_utf16_words = simdutf::utf16_length_from_utf8(in.c_str(), size);
+        out.resize(expected_utf16_words);
+        const size_t real = simdutf::convert_utf8_to_utf16le(
+                in.c_str(),
+                size,
+                reinterpret_cast<char16_t*>(out.data())
+        );
+#else
+#endif
+    }
+
+    inline static void wstr2str(const std::wstring& in, std::string & out)
+    {
+#ifdef _WIN32
+        const size_t size = in.size();
+        if (size == 0) {
+            out.clear();
+            return;
+        }
+        const size_t expected_utf8_bytes = simdutf::utf8_length_from_utf16(
+                                                    reinterpret_cast<const char16_t*>(in.c_str()),
+                                                    size
+                                                    );
+        out.resize(expected_utf8_bytes);
+        simdutf::convert_utf16le_to_utf8(
+                reinterpret_cast<const char16_t*>(in.c_str()),
+                size,
+                out.data()
+                );
+#else
+#endif
+    }
 
 };
 

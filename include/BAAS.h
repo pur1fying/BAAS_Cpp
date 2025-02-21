@@ -25,6 +25,12 @@ BAAS_NAMESPACE_BEGIN
 
 class BAAS {
 public:
+    static void check_config(std::string &config_name);
+
+    static void check_user_config(const std::string &config_name);
+
+    static void write_all_default_config(const std::filesystem::path& dir);
+
     bool solve(const std::string &task);
 
     explicit BAAS(std::string &config_name);

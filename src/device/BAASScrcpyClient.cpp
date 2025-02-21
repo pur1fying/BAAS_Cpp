@@ -23,14 +23,14 @@ BAASScrcpyClient::BAASScrcpyClient(BAASConnection *connection)
 bool BAASScrcpyClient::deploy_server()
 {
     try {
-        connection->adb_push(scrcpyJarPath, "/data/local/tmp/" + scrcpyJarName);
+        connection->adb_push(scrcpyJarPath.string(), scrcpyJar_REMOTE_DIR.string());
     } catch (AdbError &e) {
         string msg(e.what());
         logger->BAASError("Fail to push scrcpy-server : " + msg);
         return false;
     }
     vector<string> cmd = {
-            "CLASSPATH=/data/local/tmp/" + scrcpyJarName,
+            "CLASSPATH=/data/local/tmp/" + scrcpyJarName.string(),
             "app_process",
             "/",
             "com.genymobile.scrcpy.GameServer",
@@ -62,9 +62,7 @@ bool BAASScrcpyClient::deploy_server()
             serverStream->readUntilClose(ret_err);
             logger->BAASError(ret);
             if (ret.find("match the client") != string::npos)
-                throw ScrcpyError(
-                        "GameServer version does not match the client."
-                );
+                throw ScrcpyError("GameServer version does not match the client.");
             else throw ScrcpyError("Unknown GameServer Error");
         }
     }

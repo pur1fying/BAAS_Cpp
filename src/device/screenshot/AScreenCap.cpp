@@ -16,7 +16,7 @@ AScreenCap::AScreenCap(BAASConnection *connection) : BaseScreenshot(connection)
     this->connection = connection;
     byte_pointer = 0;
     available = true;
-    shot_cmd = ASCREENCAP_REMOTE_DIR + shot_cmd;
+    shot_cmd = ASCREENCAP_REMOTE_DIR.string() + shot_cmd;
 }
 
 void AScreenCap::init()
@@ -34,16 +34,15 @@ void AScreenCap::init()
                 to_string(sdk));
         throw RequestHumanTakeOver("AScreenCap Version Not Supported");
     }
-    filesystem::path p(ASCREENCAP_BIN_DIR);
-    p.append(ver)
-     .append(arch)
-     .append("ascreencap");
+    filesystem::path p = ASCREENCAP_BIN_DIR / ver / arch / "ascreencap";
     assert(filesystem::exists(p));
-    logger->BAASInfo("Pushing [ " + p.string() + " ] to [ " + ASCREENCAP_REMOTE_DIR + " ]");
-    connection->adb_push(p.string(), ASCREENCAP_REMOTE_DIR);
+    logger->BAASInfo("Pushing");
+    logger->Path(p);
+    logger->BAASInfo(" to ");
+    logger->Path(ASCREENCAP_REMOTE_DIR);
+    connection->adb_push(p.string(), ASCREENCAP_REMOTE_DIR.string());
 
-    logger->BAASInfo("chmod 0777 " + ASCREENCAP_REMOTE_DIR);
-    connection->adb_shell_bytes("chmod 0777 " + ASCREENCAP_REMOTE_DIR);
+    connection->adb_shell_bytes("chmod 0777 " + ASCREENCAP_REMOTE_DIR.string());
 
     ret_buffer = connection->adb_shell_bytes(shot_cmd);
 
@@ -82,7 +81,7 @@ void AScreenCap::screenshot(cv::Mat &img)
 void AScreenCap::uninstall()
 {
     logger->BAASInfo("Remove AScreenCap from device [ " + connection->get_serial() + " ]");
-    connection->adb_shell_bytes("rm " + ASCREENCAP_REMOTE_DIR);
+    connection->adb_shell_bytes("rm " + ASCREENCAP_REMOTE_DIR.string());
 }
 
 void AScreenCap::decompress()
@@ -131,6 +130,5 @@ bool AScreenCap::is_lossy()
 {
     return false;
 }
-}
 
-
+BAAS_NAMESPACE_END

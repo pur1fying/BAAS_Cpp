@@ -1,7 +1,8 @@
-#include "ocr/CrnnNet.h"
-#include "ocr/OcrUtils.h"
 #include <fstream>
 #include <numeric>
+
+#include "ocr/CrnnNet.h"
+#include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
 #include "config/BAASGlobalSetting.h"
 
@@ -11,28 +12,28 @@
 
 BAAS_NAMESPACE_BEGIN
 
-void CrnnNet::setGpuIndex(int gpuIndex)
+void CrnnNet::set_gpu_id(int gpu_id)
 {
 #ifdef __CUDA__
-    if (gpuIndex >= 0) {
+    if (gpu_id >= 0) {
         OrtCUDAProviderOptions cuda_options;
-        cuda_options.device_id = gpuIndex;
+        cuda_options.device_id = gpu_id;
         cuda_options.arena_extend_strategy = 0;
         cuda_options.gpu_mem_limit = 2ULL * 1024 * 1024 * 1024;
         cuda_options.cudnn_conv_algo_search = OrtCudnnConvAlgoSearchDefault;
         cuda_options.do_copy_in_default_stream = 1;
 
         sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
-        printf("rec try to use GPU%d\n", gpuIndex);
+        BAASGlobalLogger->BAASInfo("Rec try to use GPU " + std::to_string(gpu_id));
     } else {
-        printf("rec use CPU\n");
+        BAASGlobalLogger->BAASInfo("Rec use CPU.");
     }
 #endif
 
 #ifdef __DIRECTML__
-    if (gpuIndex >= 0) {
-        OrtSessionOptionsAppendExecutionProvider_DML(sessionOptions, gpuIndex);
-        printf("rec try to use GPU%d\n", gpuIndex);
+    if (gpu_id >= 0) {
+        OrtSessionOptionsAppendExecutionProvider_DML(sessionOptions, gpu_id);
+        printf("rec try to use GPU%d\n", gpu_id);
     }
     else {
         printf("rec use CPU\n");
@@ -73,12 +74,12 @@ void CrnnNet::setNumThread(int numOfThread)
 }
 
 void CrnnNet::initModel(
-        const std::string &pathStr,
-        const std::string &keysPath
+        const std::filesystem::path &pathStr,
+        const std::filesystem::path &keysPath
 )
 {
 #ifdef _WIN32
-    std::wstring crnnPath = strToWstr(pathStr);
+    std::wstring crnnPath = pathStr.wstring();
     session = new Ort::Session(env, crnnPath.c_str(), sessionOptions);
 #else
     session = new Ort::Session(env, pathStr.c_str(), sessionOptions);
@@ -226,11 +227,8 @@ TextLine CrnnNet::getTextLine(const cv::Mat &src)
                                                    .IsTensor());
     std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo()
                                                       .GetShape();
-    int64_t outputCount = std::accumulate(
-            outputShape.begin(), outputShape.end(), 1,
-            std::multiplies<int64_t>());
-    float *floatArray = outputTensor.front()
-                                    .GetTensorMutableData<float>();
+    int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1, std::multiplies<int64_t>());
+    float *floatArray = outputTensor.front().GetTensorMutableData<float>();
     std::vector<float> outputData(floatArray, floatArray + outputCount);
     return scoreToTextLine(outputData, outputShape[1], outputShape[2]);
 }
@@ -263,9 +261,7 @@ TextLine CrnnNet::getTextLine(
                                                    .IsTensor());
     std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo()
                                                       .GetShape();
-    int64_t outputCount = std::accumulate(
-            outputShape.begin(), outputShape.end(), 1,
-            std::multiplies<int64_t>());
+    int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1,std::multiplies<int64_t>());
     float *floatArray = outputTensor.front()
                                     .GetTensorMutableData<float>();
     std::vector<float> outputData(floatArray, floatArray + outputCount);
@@ -332,31 +328,34 @@ std::vector<TextLine> CrnnNet::getTextLines(
 }
 
 CrnnNet *CrnnNet::get_net(
-        const std::string &model_path,
-        const std::string &keys_path
+        const std::filesystem::path &model_path,
+        const std::filesystem::path &keys_path
 )
 {
     std::string joined_path = model_key_joined_path(model_path, keys_path);
     auto it = nets.find(joined_path);
-    if (it != nets.end()) return it->second;
+    if (it != nets.end()) {
+        BAASGlobalLogger->BAASInfo("Rec Already Inited");
+        return it->second;
+    }
 
     auto *net = new CrnnNet();
 
-    net->modelPath = BAAS_OCR_MODEL_DIR + "\\" + model_path;
-    net->keyDictPath = BAAS_OCR_MODEL_DIR + "\\" + keys_path;
-    net->setGpuIndex(global_setting->ocr_gpu_id());
+    net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
+    net->keyDictPath = BAAS_OCR_MODEL_DIR / keys_path;
+    net->set_gpu_id(global_setting->ocr_gpu_id());
     net->setNumThread(global_setting->ocr_num_thread());
     nets[joined_path] = net;
     return net;
 }
 
 bool CrnnNet::release_net(
-        const std::string &model_path,
-        const std::string &keys_path
+        const std::filesystem::path &model_path,
+        const std::filesystem::path &keys_path
 )
 {
-    std::string joined_path = model_key_joined_path(model_path, keys_path);
-    auto it = nets.find(joined_path);
+    std::filesystem::path joined_path = model_key_joined_path(model_path, keys_path);
+    auto it = nets.find(joined_path.string());
     if (it == nets.end()) return false;
     delete it->second;
     nets.erase(it);
@@ -370,11 +369,11 @@ void CrnnNet::release_all()
 }
 
 std::string CrnnNet::model_key_joined_path(
-        const std::string &model_path,
-        const std::string &keys_path
+        const std::filesystem::path &model_path,
+        const std::filesystem::path &keys_path
 )
 {
-    return model_path + " | " + keys_path;
+    return model_path.string() + " | " + keys_path.string();
 }
 
 void CrnnNet::initModel()

@@ -55,10 +55,8 @@ void BAASUserConfig::update_name()
             removeByKey(it.key());
         } else {
             if (!config.contains(t)) {
-                logger->BAASWarn(
-                        "Didn't find either new( " + t + " ) or old( " + it.key() + " ) key in config file : [ " +
-                        path + " ]."
-                );
+                logger->BAASWarn("Didn't find either new( " + t + " ) or old( " + it.key() + " ) key in config :");
+                logger->Path(path, 3);
             }
         }
     }

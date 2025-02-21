@@ -18,6 +18,7 @@ int main(int argc, char **argv) {
     cv::Mat img;
     try{
         baas::init_globals();
+        filesystem::path curr = filesystem::current_path();
         cout <<shared_memory_exists("test") << endl;
 //        img = cv::imread("game_update.png");
         auto sm = (baas::Shared_Memory*)get_shared_memory("test", 1280*720*3, img.data);
@@ -39,6 +40,7 @@ int main(int argc, char **argv) {
 //        cv::waitKey(0);
 //        return 0;
 //        system("pause");
+        baas::BAAS::check_config(config_name);
         baas::BAAS baas(config_name);
 //        return 0;
         baas::BAASConfig config;
@@ -65,13 +67,13 @@ int main(int argc, char **argv) {
         baas.solve("competition");
         baas.solve("collect_reward");
 //        cv::imshow("img", img);
-//        cv::waitKey(0);
+//        cv::waitKey(0
         baas::baas_ocr->init("zh-cn");
-//        baas_ocr->init("zh-tw");
-//        baas_ocr->init("en-us");
-//        baas_ocr->init("ja-jp");
-//        baas_ocr->init("ko-kr");
-//        baas_ocr->init("ru-ru");
+        baas::baas_ocr->init("zh-tw");
+        baas::baas_ocr->init("en-us");
+        baas::baas_ocr->init("ja-jp");
+        baas::baas_ocr->init("ko-kr");
+        baas::baas_ocr->init("ru-ru");
 //        baas_ocr->test_ocr();
         baas::OcrResult result;
         baas::TextLine result2;

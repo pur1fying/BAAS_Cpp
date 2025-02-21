@@ -121,7 +121,7 @@ public:
             const std::string &server,
             const std::string &language,
             const std::string &suffix,
-            std::string &out
+            std::filesystem::path &out
     );
 
     static bool check_shape(

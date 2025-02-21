@@ -42,7 +42,9 @@ BAASProcedure *BAASProcedure::get_instance()
 void BAASProcedure::load()
 {
     if (!filesystem::exists(BAAS_PROCEDURE_DIR)) {
-        BAASGlobalLogger->BAASError("Procedure Dir [ " + BAAS_PROCEDURE_DIR + " ] not exists");
+        BAASGlobalLogger->BAASError("Procedure Dir :");
+        BAASGlobalLogger->Path(BAAS_PROCEDURE_DIR, 3);
+        BAASGlobalLogger->BAASError("not exists.");
         return;
     }
 

@@ -10,33 +10,36 @@
 
 BAAS_NAMESPACE_BEGIN
 
-extern std::string BAAS_PROJECT_DIR;
+extern std::filesystem::path BAAS_PROJECT_DIR;
 
-extern std::string BAAS_CONFIG_DIR;
+extern std::filesystem::path BAAS_CONFIG_DIR;
 
-extern std::string BAAS_IMAGE_RESOURCE_DIR;
+extern std::filesystem::path BAAS_IMAGE_RESOURCE_DIR;
 
-extern std::string BAAS_FEATURE_DIR;
+extern std::filesystem::path BAAS_FEATURE_DIR;
 
-extern std::string BAAS_PROCEDURE_DIR;
+extern std::filesystem::path BAAS_PROCEDURE_DIR;
 
-extern std::string BAAS_OCR_MODEL_DIR;
+extern std::filesystem::path BAAS_OCR_MODEL_DIR;
 
-extern std::string scrcpyJarPath;
+extern std::filesystem::path scrcpyJarPath;
 
-extern std::string scrcpyJarName;
+extern std::filesystem::path scrcpyJar_REMOTE_DIR;
 
-extern std::string MuMuInstallPath;
+extern std::filesystem::path scrcpyJarName;
 
-extern std::string BAAS_OUTPUT_DIR;
+extern std::filesystem::path MuMuInstallPath;
+
+extern std::filesystem::path BAAS_OUTPUT_DIR;
+
+extern std::filesystem::path ASCREENCAP_BIN_DIR;
+
+extern std::filesystem::path ASCREENCAP_REMOTE_DIR;
+
+extern std::filesystem::path DEVELOPER_PROJECT_DIR;
 
 extern std::string CURRENT_TIME_STRING;
 
-extern std::string ASCREENCAP_BIN_DIR;
-
-extern std::string ASCREENCAP_REMOTE_DIR;
-
-extern std::string DEVELOPER_PROJECT_DIR;
 
 /*
  *  BAAS_CPP --
@@ -47,6 +50,8 @@ extern std::string DEVELOPER_PROJECT_DIR;
  */
 
 void init_globals();
+
+void init_path();
 
 static bool inited = false;
 

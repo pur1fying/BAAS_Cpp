@@ -15,33 +15,35 @@ using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-std::string BAAS_PROJECT_DIR;
+std::filesystem::path BAAS_PROJECT_DIR;
 
-std::string BAAS_CONFIG_DIR;
+std::filesystem::path BAAS_CONFIG_DIR;
 
-std::string BAAS_IMAGE_RESOURCE_DIR;
+std::filesystem::path BAAS_IMAGE_RESOURCE_DIR;
 
-std::string BAAS_FEATURE_DIR;
+std::filesystem::path BAAS_FEATURE_DIR;
 
-std::string BAAS_PROCEDURE_DIR;
+std::filesystem::path BAAS_PROCEDURE_DIR;
 
-std::string BAAS_OCR_MODEL_DIR;
+std::filesystem::path BAAS_OCR_MODEL_DIR;
 
-std::string scrcpyJarPath;
+std::filesystem::path scrcpyJarPath;
 
-std::string scrcpyJarName;
+std::filesystem::path scrcpyJar_REMOTE_DIR;
 
-std::string MuMuInstallPath;
+std::filesystem::path scrcpyJarName;
 
-std::string BAAS_OUTPUT_DIR;
+std::filesystem::path MuMuInstallPath;
+
+std::filesystem::path BAAS_OUTPUT_DIR;
+
+std::filesystem::path ASCREENCAP_BIN_DIR;
+
+std::filesystem::path ASCREENCAP_REMOTE_DIR;
+
+std::filesystem::path DEVELOPER_PROJECT_DIR;
 
 std::string CURRENT_TIME_STRING;
-
-std::string ASCREENCAP_BIN_DIR;
-
-std::string ASCREENCAP_REMOTE_DIR;
-
-std::string DEVELOPER_PROJECT_DIR;
 
 void init_globals()
 {
@@ -50,35 +52,13 @@ void init_globals()
     }
     inited = true;
     BAASUtil::initWinsock();
-    std::filesystem::path curr = std::filesystem::current_path();
-
-    BAAS_PROJECT_DIR = curr.string();
-    BAAS_OUTPUT_DIR = BAAS_PROJECT_DIR + R"(\output)";
-    BAAS_CONFIG_DIR = BAAS_PROJECT_DIR + R"(\config)";
-    BAAS_IMAGE_RESOURCE_DIR = BAAS_PROJECT_DIR + R"(\resource\image)";
-    BAAS_FEATURE_DIR = BAAS_PROJECT_DIR + R"(\resource\features)";
-    BAAS_PROCEDURE_DIR = BAAS_PROJECT_DIR + R"(\resource\procedure)";
-    BAAS_OCR_MODEL_DIR = BAAS_PROJECT_DIR + R"(\resource\ocr_models)";
+    init_path();
 
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
     BAASGlobalLogger->BAASInfo("BAAS VERSION : " + std::string(BAAS_VERSION));
-    BAASGlobalLogger->BAASInfo(BAAS_PROJECT_DIR);
-
-    scrcpyJarName = "scrcpy-server.jar";
-    scrcpyJarPath = BAAS_PROJECT_DIR + R"(\resource\bin\scrcpy\scrcpy-server.jar)";
-
-    ASCREENCAP_BIN_DIR = BAAS_PROJECT_DIR + R"(\resource\bin\ascreencap\)";
-    ASCREENCAP_REMOTE_DIR = "/data/local/tmp/ascreencap";
-
+    BAASGlobalLogger->Path(BAAS_PROJECT_DIR);
     baas_ocr = BAASOCR::get_instance();
-
-
-    DEVELOPER_PROJECT_DIR = curr.parent_path()
-                                .parent_path()
-                                .string();
-
     static_config = BAASStaticConfig::getStaticConfig();
-
     baas_features = BAASFeature::get_instance();
     baas_procedures = BAASProcedure::get_instance();
     resource = BAASImageResource::get_instance();
@@ -89,8 +69,36 @@ void init_globals()
     config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);
     config_template = new BAASUserConfig(CONFIG_TYPE_DEFAULT_CONFIG);
     default_global_setting = new BAASConfig(CONFIG_TYPE_DEFAULT_GLOBAL_SETTING);
+
+    // check config dir
+    BAASGlobalLogger->sub_title("Config Dir");
+    BAASGlobalLogger->Path(BAAS_CONFIG_DIR);
+    if (!std::filesystem::exists(BAAS_CONFIG_DIR)) {
+        BAASGlobalLogger->sub_title("Create Config Dir");
+        std::filesystem::create_directory(BAAS_CONFIG_DIR);
+    }
     BAASGlobalSetting::check_global_setting_exist();
     global_setting = BAASGlobalSetting::getGlobalSetting();
+}
+
+void init_path() {
+    BAAS_PROJECT_DIR = std::filesystem::current_path();
+    BAAS_OUTPUT_DIR = BAAS_PROJECT_DIR / "output";
+    BAAS_CONFIG_DIR = BAAS_PROJECT_DIR / "config";
+    BAAS_IMAGE_RESOURCE_DIR = BAAS_PROJECT_DIR / "resource" / "image";
+
+    BAAS_FEATURE_DIR = BAAS_PROJECT_DIR / "resource" / "features";
+    BAAS_PROCEDURE_DIR = BAAS_PROJECT_DIR / "resource" / "procedure";
+    BAAS_OCR_MODEL_DIR = BAAS_PROJECT_DIR / "resource" / "ocr_models";
+    DEVELOPER_PROJECT_DIR = BAAS_PROJECT_DIR.parent_path()
+                                            .parent_path()
+                                            .string();
+    scrcpyJarName = "scrcpy-server.jar";
+    scrcpyJarPath = BAAS_PROJECT_DIR / "resource" / "bin" / "scrcpy" / scrcpyJarName;
+    scrcpyJar_REMOTE_DIR = "/data/local/tmp" / scrcpyJarName;
+
+    ASCREENCAP_BIN_DIR = BAAS_PROJECT_DIR / "resource" / "bin" / "ascreencap";
+    ASCREENCAP_REMOTE_DIR = "/data/local/tmp/ascreencap";
 }
 
 BAAS_NAMESPACE_END

@@ -1,6 +1,8 @@
 #ifndef __OCR_CRNNNET_H__
 #define __OCR_CRNNNET_H__
 
+#include <filesystem>
+
 #include "OcrStruct.h"
 #include "onnxruntime/onnxruntime_cxx_api.h"
 #include "opencv2/opencv.hpp"
@@ -10,18 +12,18 @@ BAAS_NAMESPACE_BEGIN
 class CrnnNet {
 public:
     static CrnnNet *get_net(
-            const std::string &model_path,
-            const std::string &keys_path
+            const std::filesystem::path &model_path,
+            const std::filesystem::path &keys_path
     );
 
     static bool release_net(
-            const std::string &model_path,
-            const std::string &keys_path
+            const std::filesystem::path &model_path,
+            const std::filesystem::path &keys_path
     );
 
     static inline std::string model_key_joined_path(
-            const std::string &model_path,
-            const std::string &keys_path
+            const std::filesystem::path &model_path,
+            const std::filesystem::path &keys_path
     );
 
     static void release_all();
@@ -30,7 +32,7 @@ public:
 
     void setNumThread(int numOfThread);
 
-    void setGpuIndex(int gpuIndex);
+    void set_gpu_id(int gpu_id);
 
     void initModel();
 
@@ -61,11 +63,11 @@ public:
 
 private:
     void initModel(
-            const std::string &pathStr,
-            const std::string &keysPath
+            const std::filesystem::path &pathStr,
+            const std::filesystem::path &keysPath
     );
 
-    std::string modelPath, keyDictPath;
+    std::filesystem::path modelPath, keyDictPath;
 
     static std::map<std::string, CrnnNet *> nets;
 
@@ -98,6 +100,7 @@ private:
             size_t w,
             const std::vector<size_t> &enabledIndexes
     );
+
 
 };
 

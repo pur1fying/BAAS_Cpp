@@ -7,21 +7,21 @@ BAAS_NAMESPACE_BEGIN
 
 std::map<std::string, DbNet *> DbNet::nets;
 
-void DbNet::setGpuIndex(int gpuIndex)
+void DbNet::set_gpu_id(int gpu_id)
 {
 #ifdef __CUDA__
-    if (gpuIndex >= 0) {
+    if (gpu_id >= 0) {
         OrtCUDAProviderOptions cuda_options;
-        cuda_options.device_id = gpuIndex;
+        cuda_options.device_id = gpu_id;
         cuda_options.arena_extend_strategy = 0;
         cuda_options.gpu_mem_limit = 2ULL * 1024 * 1024 * 1024;
         cuda_options.cudnn_conv_algo_search = OrtCudnnConvAlgoSearchDefault;
         cuda_options.do_copy_in_default_stream = 1;
 
         sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
-        printf("det try to use GPU%d\n", gpuIndex);
+        BAASGlobalLogger->BAASInfo("Det try to use GPU " + std::to_string(gpu_id));
     } else {
-        printf("det use CPU\n");
+        BAASGlobalLogger->BAASInfo("Det use CPU");
     }
 #endif
 }
@@ -56,14 +56,9 @@ void DbNet::setNumThread(int numOfThread)
     sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 }
 
-void DbNet::initModel(const std::string &pathStr)
+void DbNet::initModel(const std::filesystem::path &pathStr)
 {
-#ifdef _WIN32
-    std::wstring detPath = strToWstr(pathStr);
-    session = new Ort::Session(env, detPath.c_str(), sessionOptions);
-#else
     session = new Ort::Session(env, pathStr.c_str(), sessionOptions);
-#endif
     modelPath = pathStr;
     inputNamesPtr = getInputNames(session);
     outputNamesPtr = getOutputNames(session);
@@ -205,15 +200,18 @@ DbNet::getTextBoxes(
     return findRsBoxes(predMat, dilateMat, s, boxScoreThresh, unClipRatio);
 }
 
-DbNet *DbNet::get_net(const std::string &model_path)
+DbNet *DbNet::get_net(const std::filesystem::path &model_path)
 {
-    auto it = nets.find(model_path);
-    if (it != nets.end()) return it->second;
+    auto it = nets.find(model_path.string());
+    if (it != nets.end()) {
+        BAASGlobalLogger->BAASInfo("Det Already Inited");
+        return it->second;
+    }
     auto *net = new DbNet();
-    net->modelPath = BAAS_OCR_MODEL_DIR + "\\" + model_path;
-    net->setGpuIndex(global_setting->ocr_gpu_id());
+    net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
+    net->set_gpu_id(global_setting->ocr_gpu_id());
     net->setNumThread(global_setting->ocr_num_thread());
-    nets[model_path] = net;
+    nets[model_path.string()] = net;
     return net;
 }
 
@@ -223,9 +221,9 @@ void DbNet::initModel()
 }
 
 
-bool DbNet::release_net(const std::string &model_path)
+bool DbNet::release_net(const std::filesystem::path &model_path)
 {
-    auto it = nets.find(model_path);
+    auto it = nets.find(model_path.string());
     if (it != nets.end()) {
         delete it->second;
         nets.erase(it);

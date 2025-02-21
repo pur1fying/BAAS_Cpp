@@ -1,18 +1,21 @@
 #ifndef __OCR_DBNET_H__
 #define __OCR_DBNET_H__
 
+#include <filesystem>
+
 #include "OcrStruct.h"
 #include "onnxruntime/onnxruntime_cxx_api.h"
 #include "opencv2/opencv.hpp"
+
 BAAS_NAMESPACE_BEGIN
 
 class DbNet {
 public:
-    static DbNet *get_net(const std::string &model_path);
+    static DbNet *get_net(const std::filesystem::path &model_path);
 
     void initModel();
 
-    static bool release_net(const std::string &model_path);
+    static bool release_net(const std::filesystem::path &model_path);
 
     static void release_all();
 
@@ -20,7 +23,7 @@ public:
 
     void setNumThread(int numOfThread);
 
-    void setGpuIndex(int gpuIndex);
+    void set_gpu_id(int gpu_id);
 
     std::vector<TextBox> getTextBoxes(
             cv::Mat &src,
@@ -32,11 +35,11 @@ public:
 
 
 private:
-    void initModel(const std::string &pathStr);
+    void initModel(const std::filesystem::path &pathStr);
 
     static std::map<std::string, DbNet *> nets;
 
-    std::string modelPath;
+    std::filesystem::path modelPath;
 
     Ort::Session *session;
     Ort::Env env = Ort::Env(ORT_LOGGING_LEVEL_ERROR, "DbNet");

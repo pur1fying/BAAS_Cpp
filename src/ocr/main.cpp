@@ -43,7 +43,7 @@
 //    int flagDoAngle = 1;
 //    bool mostAngle = true;
 //    int flagMostAngle = 1;
-//    int flagGpu = -1;
+//    int gpu_id = -1;
 //
 //    int opt;
 //    int optionIndex = 0;
@@ -125,7 +125,7 @@
 //                printHelp(stdout, argv[0]);
 //                return 0;
 //            case 'G':
-//                flagGpu = (int) strtol(optarg, NULL, 10);
+//                gpu_id = (int) strtol(optarg, NULL, 10);
 //                break;
 //            default:
 //                printf("other option %c :%s\n", opt, optarg);
@@ -164,12 +164,12 @@
 //            true);//isOutputResultImg
 //
 //    ocrLite.enableResultTxt(imgDir.c_str(), imgName.c_str());
-//    ocrLite.set_gpu_id(flagGpu);
+//    ocrLite.set_gpu_id(gpu_id);
 //    ocrLite.Logger("=====Input Params=====\n");
 //    ocrLite.Logger(
 //            "numThread(%d),padding(%d),maxSideLen(%d),boxScoreThresh(%f),boxThresh(%f),unClipRatio(%f),doAngle(%d),mostAngle(%d),GPU(%d)\n",
 //            numThread, padding, maxSideLen, boxScoreThresh, boxThresh, unClipRatio, doAngle, mostAngle,
-//            flagGpu);
+//            gpu_id);
 //
 //    ocrLite.initModels(modelDetPath, modelClsPath, modelRecPath, keysPath);
 //

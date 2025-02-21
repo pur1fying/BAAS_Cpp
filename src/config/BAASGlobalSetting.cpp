@@ -26,7 +26,8 @@ BAASGlobalSetting *BAASGlobalSetting::getGlobalSetting()
 }
 
 BAASGlobalSetting::BAASGlobalSetting() : BAASConfig(
-        BAAS_CONFIG_DIR + "/global_setting.json", (BAASLogger *) BAASGlobalLogger
+        BAAS_CONFIG_DIR / "global_setting.json",
+        (BAASLogger *) BAASGlobalLogger
 )
 {
     create_modify_history_file();
@@ -36,11 +37,16 @@ BAASGlobalSetting::BAASGlobalSetting() : BAASConfig(
 
 void BAASGlobalSetting::check_global_setting_exist()
 {
-    if (!std::filesystem::exists(BAAS_CONFIG_DIR + "/global_setting.json")) {
-        std::ofstream ofs(BAAS_CONFIG_DIR + "/global_setting.json");
-        ofs << default_global_setting->get_config()
-                                           .dump(4);
+    std::filesystem::path global_setting_path = BAAS_CONFIG_DIR / "global_setting.json";
+    if (!std::filesystem::exists(global_setting_path)) {
+        BAASGlobalLogger->sub_title("Write Default Global Setting");
+        std::ofstream ofs(BAAS_CONFIG_DIR / "global_setting.json");
+        ofs << default_global_setting->get_config().dump(4);
         ofs.close();
+    }
+    if (!std::filesystem::exists(global_setting_path)) {
+        BAASGlobalLogger->BAASError("Failed to write default global setting.");
+        throw PathError("Global Setting Do Not Exist");
     }
 }
 
@@ -75,7 +81,7 @@ void BAASGlobalSetting::update_global_setting()
 
 void BAASGlobalSetting::create_modify_history_file()
 {
-    modify_history_path = GlobalLogger::get_folder_path() + R"(\global_setting_change.json)";
+    modify_history_path = GlobalLogger::get_folder_path() / "global_setting_change.json";
     std::ofstream modify_record_file(modify_history_path);
     modify_record_file << json::object({}).dump(4);
 }

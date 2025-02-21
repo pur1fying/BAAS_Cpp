@@ -34,10 +34,10 @@ public:
     void set_gpu_id(int gpu_id);
 
     void get_net(
-            const std::string &detPath,
-            const std::string &clsPath,
-            const std::string &recPath,
-            const std::string &keysPath
+            const std::filesystem::path &detPath,
+            const std::filesystem::path &clsPath,
+            const std::filesystem::path &recPath,
+            const std::filesystem::path &keysPath
     );
 
     bool initModels();
@@ -113,7 +113,7 @@ public:
     const int flagDoAngle = 1;
     const bool mostAngle = true;
     const int flagMostAngle = 1;
-    const int flagGpu = 0;
+    const int gpu_id = 0;
 private:
     bool isOutputConsole = false;
     bool isOutputPartImg = false;

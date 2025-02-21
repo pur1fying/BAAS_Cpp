@@ -38,9 +38,13 @@ bool BAAS::solve(const std::string &task)
 
 BAAS::BAAS(std::string &config_name)
 {
-    std::string temp = config_name + "\\config.json";
+    logger = BAASLogger::get(config_name);
+    logger->hr("BAAS Instance [ " + config_name + " ]");
 
-    config = new BAASUserConfig(temp);
+    std::filesystem::path temp = config_name;
+    temp =  temp / "config.json";
+
+    config = new BAASUserConfig(temp.string());
     config->update_name();
     config->config_update();
     config->save();
@@ -48,7 +52,6 @@ BAAS::BAAS(std::string &config_name)
 
     flag_run = true;
 
-    logger = config->get_logger();
 
     script_show_image_compare_log = config->script_show_image_compare_log();
 
@@ -347,22 +350,10 @@ void BAAS::screenshot_cut(
 )
 {
     // crop an screenshot, region resized by screen_ratio
-    int x1 = int(
-            region.ul
-                  .x * screen_ratio
-    );
-    int y1 = int(
-            region.ul
-                  .y * screen_ratio
-    );
-    int x2 = int(
-            region.lr
-                  .x * screen_ratio
-    );
-    int y2 = int(
-            region.lr
-                  .y * screen_ratio
-    );
+    int x1 = int(region.ul.x * screen_ratio);
+    int y1 = int(region.ul.y * screen_ratio);
+    int x2 = int(region.lr.x * screen_ratio);
+    int y2 = int(region.lr.y * screen_ratio);
     BAASImageUtil::crop(latest_screenshot, x1, y1, x2, y2).copyTo(output);
 }
 
@@ -378,6 +369,57 @@ void BAAS::ocr(
     screenshot_cut(region, roi_img);
     baas_ocr->ocr(language, roi_img, result, logger, candidates);
 }
+
+void BAAS::check_config(string &config_name)
+{
+    BAASGlobalLogger->sub_title("Config Check");
+    BAASGlobalLogger->BAASInfo("Name : " + config_name);
+    std::filesystem::path config_dir = BAAS_CONFIG_DIR / config_name;
+    if (!std::filesystem::exists(config_dir)) {
+        BAASGlobalLogger->BAASInfo("Config Dir Not Exist");
+        std::filesystem::create_directory(config_dir);
+        write_all_default_config(config_dir);
+    }
+    else {
+        check_user_config(config_name);
+    }
+}
+
+void BAAS::write_all_default_config(const std::filesystem::path& dir)
+{
+    BAASGlobalLogger->sub_title("Write All Default Config");
+    // user config
+    std::ofstream ofs(dir / "config.json");
+    ofs << config_template->get_config().dump(4);
+    ofs.close();
+}
+
+void BAAS::check_user_config(const string &config_name)
+{
+    std::filesystem::path user_config_path = BAAS_CONFIG_DIR / config_name / "config.json";
+    bool write_default = false;
+    if (!std::filesystem::exists(user_config_path)) {
+        BAASGlobalLogger->BAASInfo("User Config Not Exist");
+        write_default = true;
+    }
+    else {
+        std::ifstream file(user_config_path);
+        // check json
+        if (nlohmann::json::accept(file)) {
+        } else {
+            BAASGlobalLogger->BAASWarn("User Config Invalid");
+            write_default = true;
+        }
+    }
+    if (write_default) {
+        BAASGlobalLogger->sub_title("Write Default User Config");
+        std::ofstream ofs(user_config_path);
+        ofs << config_template->get_config().dump(4);
+        ofs.close();
+    }
+}
+
+
 
 
 BAAS_NAMESPACE_END

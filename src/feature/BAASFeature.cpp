@@ -43,7 +43,9 @@ void BAASFeature::init_funcs()
 void BAASFeature::load()
 {
     if (!filesystem::exists(BAAS_FEATURE_DIR)) {
-        BAASGlobalLogger->BAASError("Feature Dir [ " + BAAS_FEATURE_DIR + " ] not exists");
+        BAASGlobalLogger->BAASError("Feature Dir :");
+        BAASGlobalLogger->Path(BAAS_FEATURE_DIR);
+        BAASGlobalLogger->BAASError("Not Exists");
         return;
     }
     // load from image_info folder

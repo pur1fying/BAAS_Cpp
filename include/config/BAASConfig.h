@@ -31,6 +31,11 @@ public:
             BAASLogger *logger
     );
 
+    explicit BAASConfig(
+            const std::filesystem::path &path,
+            BAASLogger *logger
+    );
+
     // create a simple json read and write config with json path and logger
     explicit BAASConfig(
             const std::string &path,
@@ -115,6 +120,22 @@ public:
     )
     {
         return get<std::string>(key, default_value);
+    }
+
+    inline std::filesystem::path getPath(
+            const std::string &key,
+            const std::filesystem::path &default_value = ""
+    )
+    {
+        std::string str_path = getString(key, default_value.string());
+#ifdef _WIN32
+        std::wstring wstr_path;
+        BAASUtil::str2wstr(str_path, wstr_path);
+        std::filesystem::path p = wstr_path;
+#else
+        std::filesystem::path p = str_path;
+#endif
+        return p;
     }
 
     inline bool getBool(
@@ -242,7 +263,7 @@ public:
             auto it = config.find(key);
             if (it == config.end()) {            // not exist, create it
                 std::string log = "create key [ " + key + " ]";
-                if (!path.empty()) log += " \" in config file : [ " + path + " ]";
+                if (!path.empty()) log += " \" in config file : [ " + path.string() + " ]";
                 logger->BAASInfo(log);
                 config[key] = value;
                 modified.push_back(
@@ -363,7 +384,7 @@ public:
         return logger;
     }
 
-    [[nodiscard]] inline const std::string &get_path() const
+    [[nodiscard]] inline const std::filesystem::path &get_path() const
     {
         return path;
     }
@@ -431,7 +452,7 @@ protected:
 
     inline void throwKeyError(const std::string &desc)
     {
-        throw KeyError("In Config file [ " + path + " ] : \n" + desc);
+        throw KeyError("In Config file [ " + path.string() + " ] : \n" + desc);
     }
 
     inline void save_modify_history()
@@ -453,7 +474,8 @@ protected:
 
     BAASLogger *logger{};
     nlohmann::json config, modified;
-    std::string path, modify_history_path, config_name;
+    std::filesystem::path path, modify_history_path;
+    std::string config_name;
 };
 
 extern BAASConfig *config_name_change;

@@ -1,6 +1,7 @@
 #ifndef __OCR_ANGLENET_H__
 #define __OCR_ANGLENET_H__
 
+#include <filesystem>
 #include "OcrStruct.h"
 #include "onnxruntime/onnxruntime_cxx_api.h"
 #include "opencv2/opencv.hpp"
@@ -9,9 +10,9 @@ BAAS_NAMESPACE_BEGIN
 
 class AngleNet {
 public:
-    static AngleNet *get_net(const std::string &model_path);
+    static AngleNet *get_net(const std::filesystem::path &model_path);
 
-    static bool release_net(const std::string &model_path);
+    static bool release_net(const std::filesystem::path &model_path);
 
     static void release_all();
 
@@ -21,7 +22,7 @@ public:
 
     void setNumThread(int numOfThread);
 
-    void setGpuIndex(int gpuIndex);
+    void set_gpu_id(int gpu_id);
 
     std::vector<Angle> getAngles(
             std::vector<cv::Mat> &partImgs,
@@ -32,11 +33,11 @@ public:
     );
 
 private:
-    void initModel(const std::string &pathStr);
+    void initModel(const std::filesystem::path &path);
 
     static std::map<std::string, AngleNet *> nets;
 
-    std::string modelPath;
+    std::filesystem::path modelPath;
 
     bool isOutputAngleImg = false;
 

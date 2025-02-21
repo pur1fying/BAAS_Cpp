@@ -13,28 +13,28 @@ BAAS_NAMESPACE_BEGIN
 
 std::map<std::string, AngleNet *> AngleNet::nets;
 
-void AngleNet::setGpuIndex(int gpuIndex)
+void AngleNet::set_gpu_id(int gpu_id)
 {
 #ifdef __CUDA__
-    if (gpuIndex >= 0) {
+    if (gpu_id >= 0) {
         OrtCUDAProviderOptions cuda_options;
-        cuda_options.device_id = gpuIndex;
+        cuda_options.device_id = gpu_id;
         cuda_options.arena_extend_strategy = 0;
         cuda_options.gpu_mem_limit = 2ULL * 1024 * 1024 * 1024;
         cuda_options.cudnn_conv_algo_search = OrtCudnnConvAlgoSearchDefault;
         cuda_options.do_copy_in_default_stream = 1;
 
         sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
-        printf("cls try to use GPU%d\n", gpuIndex);
+        BAASGlobalLogger->BAASInfo("Cls try to use GPU " + std::to_string(gpu_id));
     } else {
-        printf("cls use CPU\n");
+        BAASGlobalLogger->BAASInfo("Cls use CPU.");
     }
 #endif
 
 #ifdef __DIRECTML__
-    if (gpuIndex >= 0) {
-        OrtSessionOptionsAppendExecutionProvider_DML(sessionOptions, gpuIndex);
-        printf("cls try to use GPU%d\n", gpuIndex);
+    if (gpu_id >= 0) {
+        OrtSessionOptionsAppendExecutionProvider_DML(sessionOptions, gpu_id);
+        printf("cls try to use GPU%d\n", gpu_id);
     }
     else {
         printf("cls use CPU\n");
@@ -72,16 +72,10 @@ void AngleNet::setNumThread(int numOfThread)
     sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 }
 
-void AngleNet::initModel(const std::string &pathStr)
+void AngleNet::initModel(const std::filesystem::path &path)
 {
-#ifdef _WIN32
-    std::wstring clsPath = strToWstr(pathStr);
-    session = new Ort::Session(env, clsPath.c_str(), sessionOptions);
-#else
-    session = new Ort::Session(env, pathStr.c_str(), sessionOptions);
-#endif
-
-    modelPath = pathStr;
+    session = new Ort::Session(env, path.c_str(), sessionOptions);
+    modelPath = path;
     inputNamesPtr = getInputNames(session);
     outputNamesPtr = getOutputNames(session);
 }
@@ -181,20 +175,29 @@ std::vector<Angle> AngleNet::getAngles(
     return angles;
 }
 
-AngleNet *AngleNet::get_net(const std::string &model_path)
+AngleNet *AngleNet::get_net(const std::filesystem::path &model_path)
 {
-    auto it = nets.find(model_path);
-    if (it != nets.end()) return it->second;
+    auto it = nets.find(model_path.string());
+    if (it != nets.end()) {
+        BAASGlobalLogger->BAASInfo("Cls Already Inited");
+        return it->second;
+    }
     auto *net = new AngleNet();
-    net->modelPath = BAAS_OCR_MODEL_DIR + "\\" + model_path;
-    net->setGpuIndex(global_setting->ocr_gpu_id());
+    net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
+    net->set_gpu_id(global_setting->ocr_gpu_id());
     net->setNumThread(global_setting->ocr_num_thread());
-    nets[model_path] = net;
+    nets[model_path.string()] = net;
     return net;
 }
 
-bool AngleNet::release_net(const std::string &model_path)
+bool AngleNet::release_net(const std::filesystem::path &model_path)
 {
+    auto it = nets.find(model_path.string());
+    if (it != nets.end()) {
+        delete it->second;
+        nets.erase(it);
+        return true;
+    }
     return false;
 }
 
@@ -205,7 +208,8 @@ void AngleNet::initModel()
 
 void AngleNet::release_all()
 {
-
+    for (auto &it: nets) delete it.second;
+    nets.clear();
 }
 
 BAAS_NAMESPACE_END
