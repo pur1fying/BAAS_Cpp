@@ -67,8 +67,7 @@ GlobalLogger::GlobalLogger()
 void GlobalLogger::clearLogData()
 {
     for (filesystem::directory_iterator itr(BAAS_OUTPUT_DIR); itr != filesystem::directory_iterator(); ++itr) {
-        if ((itr->path()
-                .string() != folder_path) && filesystem::is_directory(itr->path())) {
+        if ((itr->path().string() != folder_path) && filesystem::is_directory(itr->path())) {
             BAASGlobalLogger->BAASInfo(
                     "Remove folder : [ " + itr->path()
                                               .string() + " ]."
