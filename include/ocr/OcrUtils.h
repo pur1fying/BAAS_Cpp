@@ -1,5 +1,5 @@
-#ifndef __OCR_UTILS_H__
-#define __OCR_UTILS_H__
+#ifndef BAAS_OCR_UTILS_H_
+#define BAAS_OCR_UTILS_H_
 
 #include "opencv2/core.hpp"
 #include "OcrStruct.h"
@@ -166,4 +166,4 @@ std::string getDebugImgFilePath(
 
 BAAS_NAMESPACE_END
 
-#endif //__OCR_UTILS_H__
+#endif //BAAS_OCR_UTILS_H_

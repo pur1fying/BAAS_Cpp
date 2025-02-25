@@ -1,6 +1,10 @@
 //
 // Created by pc on 2024/8/10.
 //
+
+#if defined(BAAS_APP_BUILD_FEATURE) && defined(BAAS_APP_BUILD_PROCEDURE)
+
+#include "BAAS.h"
 #include "procedure/AppearThenClickProcedure.h"
 
 using namespace std;
@@ -29,9 +33,7 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
-AppearThenClickProcedure::AppearThenClickProcedure(BAASConfig *possible_features) : BaseProcedure(
-        possible_features
-)
+AppearThenClickProcedure::AppearThenClickProcedure(BAASConfig *possible_features) : BaseProcedure(possible_features)
 {
 
 }
@@ -145,7 +147,7 @@ void AppearThenClickProcedure::wait_loading()
     long long start = BAASUtil::getCurrentTimeMS();
     string zero, ld;
     while (baas->is_running()) {
-        if (baas->reset_then_feature_appear("common_loading_appear")) {
+        if (BAASFeature::reset_then_feature_appear(baas, "common_loading_appear")) {
             t_loading = BAASUtil::getCurrentTimeMS() - start;
             ld = to_string(t_loading);
             zero = string(6 - ld.length(), ' ');
@@ -221,60 +223,32 @@ void AppearThenClickProcedure::insert_last_clicked_queue(string &feature_name)
 {
     last_clicked.push(feature_name);
     last_clicked_counter[feature_name]++;
-    if (last_clicked_pair_counter.first
-                                 .first
-                                 .empty() && last_clicked_pair_counter.second
-                                                                      .first
-                                                                      .empty()) { // both are empty
-        last_clicked_pair_counter.first
-                                 .first = feature_name;
-        last_clicked_pair_counter.first
-                                 .second = 1;
-    } else if (!last_clicked_pair_counter.first
-                                         .first
-                                         .empty() && last_clicked_pair_counter.second
-                                                                              .first
-                                                                              .empty()) { // first is not empty, second is empty
-        if (last_clicked_pair_counter.first
-                                     .first != feature_name) {
-            last_clicked_pair_counter.second
-                                     .first = feature_name;
-            last_clicked_pair_counter.second
-                                     .second = 1;
+    if (last_clicked_pair_counter.first.first.empty() && last_clicked_pair_counter.second.first.empty()) { // both are empty
+        last_clicked_pair_counter.first.first = feature_name;
+        last_clicked_pair_counter.first.second = 1;
+    } else if (!last_clicked_pair_counter.first.first.empty() && last_clicked_pair_counter.second.first.empty()) { // first is not empty, second is empty
+        if (last_clicked_pair_counter.first.first != feature_name) {
+            last_clicked_pair_counter.second.first = feature_name;
+            last_clicked_pair_counter.second.second = 1;
         }
-    } else if (last_clicked_pair_counter.first
-                                        .first != feature_name && last_clicked_pair_counter.second
-                                                                                           .first !=
-                                                                  feature_name) {  // 3rd feature appear
-        last_clicked_pair_counter.first
-                                 .first
-                                 .clear();
-        last_clicked_pair_counter.second
-                                 .first
-                                 .clear();
-    } else if (last_clicked_pair_counter.first
-                                        .first == feature_name || last_clicked_pair_counter.second
-                                                                                           .first ==
-                                                                  feature_name) { // equal to first or second
-        if (last_clicked_pair_counter.first
-                                     .first == feature_name) {
-            last_clicked_pair_counter.first
-                                     .second++;
-        } else if (last_clicked_pair_counter.second
-                                            .first == feature_name) {
-            last_clicked_pair_counter.second
-                                     .second++;
+    } else if (last_clicked_pair_counter.first.first != feature_name
+                && last_clicked_pair_counter.second.first !=feature_name) {  // 3rd feature appear
+        last_clicked_pair_counter.first.first.clear();
+        last_clicked_pair_counter.second.first.clear();
+    } else if (last_clicked_pair_counter.first.first == feature_name
+                || last_clicked_pair_counter.second.first ==feature_name) { // equal to first or second
+        if (last_clicked_pair_counter.first.first == feature_name) {
+            last_clicked_pair_counter.first.second++;
+        } else if (last_clicked_pair_counter.second.first == feature_name) {
+            last_clicked_pair_counter.second.second++;
         }
     }
 
-    if (last_clicked_pair_counter.first
-                                 .second + last_clicked_pair_counter.second
-                                                                    .second >= max_click) {
+    if (last_clicked_pair_counter.first.second + last_clicked_pair_counter.second.second >= max_click) {
         logger->BAASInfo(
-                to_string(max_click) + " Clicks Between : " + last_clicked_pair_counter.first
-                                                                                       .first + " and " +
-                last_clicked_pair_counter.second
-                                         .first
+                to_string(max_click) + " Clicks Between : " +
+                last_clicked_pair_counter.first.first + " and " +
+                last_clicked_pair_counter.second.first
         );
         throw TooManyClicksBetweenTwoClicksError("Too Many clicks between two features.");
     }
@@ -291,12 +265,8 @@ void AppearThenClickProcedure::clear_resource()
     last_appeared_time = 0;
     last_clicked_time = 0;
 
-    last_clicked_pair_counter.first
-                             .first
-                             .clear();
-    last_clicked_pair_counter.second
-                             .first
-                             .clear();
+    last_clicked_pair_counter.first.first.clear();
+    last_clicked_pair_counter.second.first.clear();
 
     current_comparing_feature_name.clear();
 
@@ -304,3 +274,5 @@ void AppearThenClickProcedure::clear_resource()
 }
 
 BAAS_NAMESPACE_END
+
+#endif  //BAAS_APP_BUILD_FEATURE && BAAS_APP_BUILD_PROCEDURE

@@ -3,14 +3,7 @@
 //
 
 #include "BAAS.h"
-
 #include "procedure/BAASProcedure.h"
-#include "module/competition/Competition.h"
-#include "module/work/Work.h"
-#include "module/collect_activity_fee/CollectActivityFee.h"
-#include "module/restart/Restart.h"
-#include "module/collect_reward/CollectReward.h"
-#include "module/mail/Mail.h"
 
 using namespace std;
 using namespace cv;
@@ -18,23 +11,6 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
-map <string, function<bool(BAAS *)>> BAAS::implement_funcs = {};
-
-bool BAAS::solve(const std::string &task)
-{
-    auto it = BAAS::implement_funcs.find(task);
-    if (it == BAAS::implement_funcs.end()) {
-        logger->BAASError("Task implement not found : [ " + task + " ]");
-        return false;
-    }
-    try {
-        logger->hr(task);
-        return it->second(this);
-    } catch (exception &e) {
-        logger->BAASError("Error in solve task: [ " + task + " ] " + e.what());
-        return false;
-    }
-}
 
 BAAS::BAAS(std::string &config_name)
 {
@@ -86,149 +62,6 @@ void BAAS::get_latest_screenshot(
     if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
     img = BAASImageUtil::crop(latest_screenshot, region);
 }
-
-bool BAAS::reset_then_feature_appear(const string &feature_name)
-{
-    BAASFeature::reset_feature(feature_name);
-    return feature_appear(feature_name);
-}
-
-bool BAAS::feature_appear(
-        const string &feature_name,
-        BAASConfig &output,
-        bool show_log
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    return BAASFeature::appear(connection, feature_name, latest_screenshot, output, show_log);
-}
-
-bool BAAS::feature_appear(const string &feature_name)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    return BAASFeature::appear(connection, feature_name, latest_screenshot, output, script_show_image_compare_log);
-}
-
-void BAAS::solve_procedure(const string &name)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    solve_procedure(name, output);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        BAASConfig &output
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASProcedure::implement(this, name, output);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        const bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    solve_procedure(name, output, skip_first_screenshot);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        const bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    json j;
-    j["skip_first_screenshot"] = skip_first_screenshot;
-    BAASConfig patch(j, logger);
-    BAASProcedure::implement(this, name, patch, output);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        json &patch
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    BAASConfig p(patch, logger);
-    solve_procedure(name, output, p);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        json &patch
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig p(patch, logger);
-    solve_procedure(name, output, p);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        json &patch,
-        const bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    BAASConfig p(patch, logger);
-    solve_procedure(name, output, p, skip_first_screenshot);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        json &patch,
-        bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig p(patch, logger);
-    p.update("skip_first_screenshot", skip_first_screenshot);
-    solve_procedure(name, output, p);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        BAASConfig &patch
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASProcedure::implement(this, name, patch, output);
-}
-
-void BAAS::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        BAASConfig &patch,
-        const bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    patch.update("skip_first_screenshot", skip_first_screenshot);
-    BAASProcedure::implement(this, name, patch, output);
-}
-
-
-void BAAS::init_implement_funcs()
-{
-    implement_funcs["competition"] = ISA::Competition::implement;
-    implement_funcs["work"] = ISA::Work::implement;
-    implement_funcs["collect_activity_fee"] = ISA::CollectActivityFee::implement;
-    implement_funcs["restart"] = ISA::Restart::implement;
-    implement_funcs["collect_reward"] = ISA::CollectReward::implement;
-    implement_funcs["mail"] = ISA::Mail::implement;
-}
-
 void BAAS::wait_region_static(
         const BAASRectangle &region,
         double frame_diff_ratio,

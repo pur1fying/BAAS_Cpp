@@ -1,9 +1,8 @@
 //
 // Created by pc on 2024/4/12.
 //
-
+#include "ocr/BAASOCR.h"
 #include "BAASGlobals.h"
-
 #include "config.h"
 #include "version.h"
 #include "BAASImageResource.h"
@@ -59,12 +58,15 @@ void init_globals()
     BAASGlobalLogger->Path(BAAS_PROJECT_DIR);
     baas_ocr = BAASOCR::get_instance();
     static_config = BAASStaticConfig::getStaticConfig();
+#ifdef BAAS_APP_BUILD_FEATURE
     baas_features = BAASFeature::get_instance();
+#endif // BAAS_APP_BUILD_FEATURE
+
+#if defined(BAAS_APP_BUILD_FEATURE) || defined(BAAS_APP_BUILD_PROCEDURE)
     baas_procedures = BAASProcedure::get_instance();
-    resource = BAASImageResource::get_instance();
+#endif // defined(BAAS_APP_BUILD_FEATURE) || defined(BAAS_APP_BUILD_PROCEDURE)
 
     GameServer::init();
-    BAAS::init_implement_funcs();
 
     config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);
     config_template = new BAASUserConfig(CONFIG_TYPE_DEFAULT_CONFIG);

@@ -1,6 +1,7 @@
 //
 // Created by pc on 2024/8/7.
 //
+#ifdef BAAS_APP_BUILD_FEATURE
 
 #include <stdexcept>
 
@@ -67,8 +68,7 @@ double BaseFeature::all_average_cost(
     for (const auto &i: and_features)
         all_costs.push_back(BAASFeature::get_feature(i)->all_average_cost(image, server, language));
     for (const auto &i: or_features)
-        all_costs.push_back(
-                BAASFeature::get_feature(i)->all_average_cost(image, server, language));
+        all_costs.push_back(BAASFeature::get_feature(i)->all_average_cost(image, server, language));
 
     double sum = 0;
 
@@ -99,3 +99,5 @@ void BaseFeature::get_image(
 }
 
 BAAS_NAMESPACE_END
+
+#endif //BAAS_APP_BUILD_FEATURE

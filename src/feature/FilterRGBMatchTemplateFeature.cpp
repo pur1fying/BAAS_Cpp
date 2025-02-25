@@ -1,6 +1,7 @@
 //
 // Created by pc on 2024/8/8.
 //
+#ifdef BAAS_APP_BUILD_FEATURE
 
 #include "feature/FilterRGBMatchTemplateFeature.h"
 
@@ -161,3 +162,5 @@ double FilterRGBMatchTemplateFeature::self_average_cost(
 }
 
 BAAS_NAMESPACE_END
+
+#endif //BAAS_APP_BUILD_FEATURE

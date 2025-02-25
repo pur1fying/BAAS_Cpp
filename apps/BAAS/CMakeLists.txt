@@ -6,16 +6,23 @@ configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/version.h.in
         ${CMAKE_BINARY_DIR}/BAAS_Version.h
 )
+# core build options
+option(BAAS_APP_BUILD_FEATURE       "build image compare fuc"   ON)
+option(BAAS_APP_BUILD_PROCEDURE     "build procedure methods"   ON)
+option(BAAS_APP_BUILD_OCR           "build basic ocr fuc"       ON)
+option(BAAS_APP_BUILD_USER_CONFIG   "need user config class"    ON)
+option(BAAS_APP_BUILD_STATIC_CONFIG "need static config class"  ON)
+option(BAAS_APP_BUILD_GLOBAL_CONFIG "need global config class"  ON)
 
-set(BIN_RESOURCE_REQUIRED               ON)
-set(ADB_BINARY_RESOURCE_REQUIRED        ON)
-set(OCR_MODEL_RESOURCE_REQUIRED         ON)
-set(USER_CONFIG_RESOURCE_REQUIRED       ON)
-set(STATIC_CONFIG_RESOURCE_REQUIRED     ON)
-set(GLOBAL_CONFIG_RESOURCE_REQUIRED     ON)
-set(BAAS_FEATURE_RESOURCE_REQUIRED      ON)
-set(BAAS_PROCEDURE_RESOURCE_REQUIRED    ON)
-set(BAAS_IMAGE_RESOURCE_REQUIRED        ON)
+set(BIN_RESOURCE_REQUIRED               ON PARENT_SCOPE)
+set(ADB_BINARY_RESOURCE_REQUIRED        ON PARENT_SCOPE)
+set(OCR_MODEL_RESOURCE_REQUIRED         ON PARENT_SCOPE)
+set(USER_CONFIG_RESOURCE_REQUIRED       ON PARENT_SCOPE)
+set(STATIC_CONFIG_RESOURCE_REQUIRED     ON PARENT_SCOPE)
+set(GLOBAL_CONFIG_RESOURCE_REQUIRED     ON PARENT_SCOPE)
+set(BAAS_FEATURE_RESOURCE_REQUIRED      ON PARENT_SCOPE)
+set(BAAS_PROCEDURE_RESOURCE_REQUIRED    ON PARENT_SCOPE)
+set(BAAS_IMAGE_RESOURCE_REQUIRED        ON PARENT_SCOPE)
 
 if (MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
@@ -28,11 +35,32 @@ endif()
 option(USE_CUDA "Use CUDA" OFF)
 message(STATUS "USE_CUDA: ${USE_CUDA}")
 
+file(
+        GLOB_RECURSE
+        BAAS_MODULE_RESOURCE
+        ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
+)
+
 add_executable(
         BAAS_APP
         main.cpp
         ${BAAS_CORE_SOURCES}
+        ${BAAS_MODULE_RESOURCE}
 )
+
+if(BAAS_APP_BUILD_FEATURE)
+    target_compile_definitions(
+        BAAS_APP PRIVATE
+        BAAS_APP_BUILD_FEATURE
+    )
+endif()
+
+if(BAAS_APP_BUILD_PROCEDURE)
+    target_compile_definitions(
+        BAAS_APP PRIVATE
+        BAAS_APP_BUILD_PROCEDURE
+    )
+endif()
 
 target_link_directories(
         BAAS_APP

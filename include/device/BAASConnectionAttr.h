@@ -100,6 +100,8 @@ public:
         return serial;
     }
 
+    static int LDPlayer_serial2instance_id(const std::string &serial);
+
 protected:
     BAASUserConfig *config;
 

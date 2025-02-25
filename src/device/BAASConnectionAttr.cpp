@@ -75,4 +75,11 @@ void BAASConnectionAttr::revise_serial()
     BAASUtil::stringReplace("auto127.0.0.1", "127.0.0.1", serial);
 }
 
+int BAASConnectionAttr::LDPlayer_serial2instance_id(const string &serial)
+{
+    pair<string, string> pair_serial = BAASConnection::port_emu_pair_serial(serial);
+    int port = serial2port(pair_serial.first);
+    if (5555 <= port && port <= 5555 + 32) return int((port - 5555) / 2);
+    return -1;
+}
 BAAS_NAMESPACE_END

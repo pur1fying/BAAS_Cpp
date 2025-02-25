@@ -1,5 +1,5 @@
-#ifndef __OCR_DBNET_H__
-#define __OCR_DBNET_H__
+#ifndef BAAS_OCR_DBNET_H_
+#define BAAS_OCR_DBNET_H_
 
 #include <filesystem>
 
@@ -54,4 +54,4 @@ private:
 };
 
 BAAS_NAMESPACE_END
-#endif //__OCR_DBNET_H__
+#endif //BAAS_OCR_DBNET_H_

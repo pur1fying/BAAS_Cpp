@@ -2,7 +2,7 @@
 #include "opencv2/imgcodecs.hpp"
 #include <numeric>
 #include "ocr/OcrUtils.h"
-#include "ocr/clipper.hpp"
+#include "ocr/clipper.h"
 
 BAAS_NAMESPACE_BEGIN
 

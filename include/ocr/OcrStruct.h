@@ -1,5 +1,5 @@
-#ifndef __OCR_STRUCT_H__
-#define __OCR_STRUCT_H__
+#ifndef BAAS_OCR_STRUCT_H_
+#define BAAS_OCR_STRUCT_H_
 
 #include "opencv2/core.hpp"
 #include <vector>
@@ -58,4 +58,4 @@ struct OcrResult {
 
 BAAS_NAMESPACE_END
 
-#endif //__OCR_STRUCT_H__
+#endif //BAAS_OCR_STRUCT_H_

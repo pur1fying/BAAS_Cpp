@@ -403,9 +403,6 @@ void BAASConfig::unflatten(json &value)
     value = result;
 }
 
-
-
-
 BAASConfig *config_name_change = nullptr;
 BAASConfig *default_global_setting = nullptr;
 

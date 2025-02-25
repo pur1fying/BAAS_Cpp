@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
         baas::baas_ocr->init("ja-jp");
         baas::baas_ocr->init("ko-kr");
         baas::baas_ocr->init("ru-ru");
-//        baas_ocr->test_ocr();
+//        baas_ocr->test_images();
         baas::OcrResult result;
         baas::TextLine result2;
         std::string a = "1234567890/";

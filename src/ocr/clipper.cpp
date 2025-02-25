@@ -38,7 +38,7 @@
 *                                                                              *
 *******************************************************************************/
 
-#include "ocr/clipper.hpp"
+#include "ocr/clipper.h"
 #include <cmath>
 #include <vector>
 #include <algorithm>

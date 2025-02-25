@@ -12,7 +12,6 @@
 #include "device/screenshot/BAASScreenshot.h"
 #include "device/control/BAASControl.h"
 
-#include "feature/BAASFeature.h"
 #include "BAASGlobals.h"
 
 #include "BAASAutoFight.h"
@@ -31,7 +30,6 @@ public:
 
     static void write_all_default_config(const std::filesystem::path& dir);
 
-    bool solve(const std::string &task);
 
     explicit BAAS(std::string &config_name);
 
@@ -42,71 +40,6 @@ public:
     void get_latest_screenshot(
             cv::Mat &img,
             const BAASRectangle &region
-    );
-
-    bool reset_then_feature_appear(const std::string &feature_name);
-
-    bool feature_appear(
-            const std::string &feature_name,
-            BAASConfig &output,
-            bool show_log = false
-    );
-
-    bool feature_appear(const std::string &feature_name);
-
-    void solve_procedure(const std::string &name);
-
-    void solve_procedure(
-            const std::string &name,
-            BAASConfig &output
-    );
-
-    void solve_procedure(
-            const std::string &name,
-            bool skip_first_screenshot
-    );
-
-    void solve_procedure(
-            const std::string &name,
-            BAASConfig &output,
-            bool skip_first_screenshot
-    );
-
-    void solve_procedure(
-            const std::string &name,
-            nlohmann::json &patch
-    );
-
-    void solve_procedure(
-            const std::string &name,
-            BAASConfig &output,
-            nlohmann::json &patch
-    );
-
-    void solve_procedure(
-            const std::string &name,
-            nlohmann::json &patch,
-            bool skip_first_screenshot
-    );
-
-    void solve_procedure(
-            const std::string &name,
-            BAASConfig &output,
-            nlohmann::json &patch,
-            bool skip_first_screenshot
-    );
-
-    void solve_procedure(
-            const std::string &name,
-            BAASConfig &output,
-            BAASConfig &patch
-    );
-
-    void solve_procedure(
-            const std::string &name,
-            BAASConfig &output,
-            BAASConfig &patch,
-            bool skip_first_screenshot
     );
 
     void get_each_round_type(std::vector<int> &round_type);
@@ -256,8 +189,6 @@ public:
             double max_execute_time = 60
     );
 
-    static void init_implement_funcs();
-
     void screenshot_cut(
             const BAASRectangle &region,
             cv::Mat &output
@@ -295,7 +226,7 @@ private:
 
     BAASControl *control;
 
-    static std::map<std::string, std::function<bool(BAAS *)>> implement_funcs;
+    friend class BAASFeature;
 
     friend class AppearThenDoProcedure;
 

@@ -1,1 +1,2 @@
-1. 路径数据使用std::filesystem::path, 从json读取的路径由std::string 转为std::filesystem::path
+1. json文件编码是utf-8, 读取路径数据时, Windows需要转为utf-16
+

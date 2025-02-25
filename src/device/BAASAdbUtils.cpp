@@ -7,6 +7,15 @@
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
+
+const string Network::TCP = "tcp";
+const string Network::UNIX = "unix";
+const string Network::DEV = "dev";
+const string Network::LOCAL = "local";
+const string Network::LOCAL_RESERVED = "localreserved";
+const string Network::LOCAL_FILESYSTEM = "localfilesystem";
+const string Network::LOCAL_ABSTRACT = "localabstract";
+
 // Connection
 bool BAASAdbConnection::checkServer(
         std::string &host,

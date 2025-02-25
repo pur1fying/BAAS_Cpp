@@ -1,5 +1,5 @@
-#ifndef __OCR_LITE_H__
-#define __OCR_LITE_H__
+#ifndef BAAS_OCR_OCRLITE_H_
+#define BAAS_OCR_OCRLITE_H_
 
 #include "opencv2/core.hpp"
 #include "onnxruntime/onnxruntime_cxx_api.h"
@@ -149,4 +149,4 @@ private:
 
 BAAS_NAMESPACE_END
 
-#endif //__OCR_LITE_H__
+#endif //BAAS_OCR_OCRLITE_H_

@@ -73,19 +73,17 @@ void BAASOCR::ocr(
         BAASUtil::stringJoin(unique_candidates, "", temp);
         logger->BAASInfo("Ocr Candidates [ " + temp + " ]");
     }
-    result = res->second
-                ->detect(
-                        img, res->second
-                                ->padding, res->second
-                                              ->maxSideLen,
-                        res->second
-                           ->boxScoreThresh, res->second
-                                                ->boxThresh, res->second
-                                                                ->unClipRatio,
-                        res->second
-                           ->doAngle, res->second
-                                         ->mostAngle, unique_candidates
-                );
+    result = res->second->detect(
+            img,
+            res->second->padding,
+            res->second->maxSideLen,
+            res->second->boxScoreThresh,
+            res->second->boxThresh,
+            res->second->unClipRatio,
+            res->second->doAngle,
+            res->second->mostAngle,
+            unique_candidates
+            );
 
 }
 
@@ -135,7 +133,7 @@ std::vector<bool> BAASOCR::init(const std::vector<std::string> &languages)
 void BAASOCR::test_ocr()
 {
     BAASGlobalLogger->hr("Test OCR");
-    std::filesystem::path path = BAAS_IMAGE_RESOURCE_DIR / "test_ocr";
+    std::filesystem::path path = BAAS_IMAGE_RESOURCE_DIR / "test_images";
     std::filesystem::path temp;
     TextLine result;
     for (auto &i: ocr_map) {

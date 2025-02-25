@@ -1,5 +1,5 @@
-#ifndef __OCR_ANGLENET_H__
-#define __OCR_ANGLENET_H__
+#ifndef BAAS_OCR_ANGLENET_H_
+#define BAAS_OCR_ANGLENET_H_
 
 #include <filesystem>
 #include "OcrStruct.h"
@@ -59,4 +59,4 @@ private:
 
 BAAS_NAMESPACE_END
 
-#endif //__OCR_ANGLENET_H__
+#endif //BAAS_OCR_ANGLENET_H_

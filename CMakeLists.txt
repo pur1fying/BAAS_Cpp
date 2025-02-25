@@ -21,17 +21,26 @@ macro(BAAS_sub_title_LOG)
     message(STATUS "${LEFT} ${ARGN} ${RIGHT}")
 endmacro()
 
+
+
 BAAS_hr_LOG("PROJECT BAAS")
 BAAS_sub_title_LOG("BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 cmake_minimum_required(VERSION 3.25)
-
 project(BAAS VERSION 1.0.0)
+configure_file(
+        version.h.in
+        version.h
+)
+
 set(CMAKE_CXX_STANDARD 20)
 
 get_filename_component(BAAS_PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 
-option(BUILD_BAAS     "build BAAS app" ON)
-option(BUILD_BAAS_OCR "build the ocr server app" ON)
+# app options
+option(BUILD_BAAS               "build BAAS app"            OFF)
+option(BUILD_BAAS_OCR           "build the ocr server app"  ON)
+
+
 
 set(BIN_RESOURCE_REQUIRED OFF)
 set(ADB_BINARY_RESOURCE_REQUIRED OFF)
@@ -86,13 +95,6 @@ file(
         GLOB
         STATIC_CONFIG_FILE
         ${CMAKE_CURRENT_LIST_DIR}/resource/static.json
-)
-
-file (
-        GLOB
-        OCR_MODELS
-        ${CMAKE_CURRENT_LIST_DIR}/resource/ocr_models/*.onnx
-        ${CMAKE_CURRENT_LIST_DIR}/resource/ocr_models/*.txt
 )
 
 file(

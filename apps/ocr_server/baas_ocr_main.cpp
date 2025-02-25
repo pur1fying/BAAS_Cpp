@@ -2,8 +2,9 @@
 // Created by pc on 2025/2/22.
 //
 #include <iostream>
+
 #include <BAAS_OCR_Version.h>
-#include <BAAS.h>
+#include <ocr/BAASOCR.h>
 
 int main()
 {

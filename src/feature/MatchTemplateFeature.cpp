@@ -2,6 +2,8 @@
 // Created by pc on 2024/8/6.
 //
 
+#ifdef BAAS_APP_BUILD_FEATURE
+
 #include "feature/MatchTemplateFeature.h"
 
 using namespace std;
@@ -154,10 +156,8 @@ double MatchTemplateFeature::self_average_cost(
     string server_language = server + "_" + language;
     auto it = self_average_cost_map.find(server_language);
     if (it != self_average_cost_map.end())
-        if (it->second
-              .has_value())
-            return it->second
-                     .value();
+        if (it->second.has_value())
+            return it->second.value();
     string group = config->getString("group");
     assert(!group.empty());
     string name = config->getString("name");
@@ -168,11 +168,11 @@ double MatchTemplateFeature::self_average_cost(
     BAASImage template_image;
     resource->get(server, language, group, name, template_image);
 
-    double average_cost = template_image.image
-                                        .rows * template_image.image
-                                                              .cols;
+    double average_cost = template_image.image.rows * template_image.image.cols;
     self_average_cost_map[server_language] = average_cost;
     return average_cost;
 }
 
 BAAS_NAMESPACE_END
+
+#endif //BAAS_APP_BUILD_FEATURE

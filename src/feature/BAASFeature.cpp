@@ -1,12 +1,14 @@
 //
 // Created by pc on 2024/8/6.
-//
-#include "feature/BAASFeature.h"
 
+#ifdef BAAS_APP_BUILD_FEATURE
+
+#include "feature/BAASFeature.h"
 #include "feature/MatchTemplateFeature.h"
 #include "feature/FilterRGBMatchTemplateFeature.h"
 #include "feature/JudgePointRGBRangeFeature.h"
 #include "BAASGlobals.h"
+#include "BAAS.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -113,12 +115,7 @@ int BAASFeature::load_from_json(const string &path)
 void BAASFeature::show()
 {
     for (auto &i: features)
-        BAASGlobalLogger->BAASInfo(
-                "Feature [ " + i.first + " ]\n" + i.second
-                                                   ->get_config()
-                                                   ->get_config()
-                                                   .dump(4));
-
+        BAASGlobalLogger->BAASInfo("Feature [ " + i.first + " ]\n" + i.second->get_config()->get_config().dump(4));
 }
 
 bool BAASFeature::appear(
@@ -195,15 +192,13 @@ bool BAASFeature::appear(
     }
 
     vector<pair<double, pair<string, bool>>> feature_queue;     // <cost, <name, is_or>>
-    vector<string> bundle = it->second
-                              ->get_or_features();
+    vector<string> bundle = it->second->get_or_features();
     if (!bundle.empty())
         for (const auto &i: bundle)
             feature_queue.emplace_back(
                     BAASFeature::get_feature(i)->all_average_cost(image, server, language), make_pair(i, true));
 
-    bundle = it->second
-               ->get_and_features();
+    bundle = it->second->get_and_features();
     bool has_and = !bundle.empty();
     if (!bundle.empty())
         for (const auto &i: bundle)
@@ -253,19 +248,56 @@ void BAASFeature::reset_feature(const std::string &name)
     auto it = features.find(name);
     if (it == features.end()) return;
 
-    it->second
-      ->reset_checked();
+    it->second->reset_checked();
 
-    vector<string> bundle = it->second
-                              ->get_and_features();
+    vector<string> bundle = it->second->get_and_features();
     for (const auto &i: bundle)
         reset_feature(i);
 
-    bundle = it->second
-               ->get_or_features();
+    bundle = it->second->get_or_features();
     for (const auto &i: bundle)
         reset_feature(i);
 
 }
 
+bool BAASFeature::reset_then_feature_appear(
+        BAAS* baas,
+        const string &feature_name
+)
+{
+    BAASFeature::reset_feature(feature_name);
+    return feature_appear(baas, feature_name);
+}
+
+bool BAASFeature::feature_appear(
+        BAAS* baas,
+        const string &feature_name,
+        BAASConfig &output,
+        bool show_log
+)
+{
+    if (!baas->flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+    return BAASFeature::appear(
+            baas->get_connection(),
+            feature_name,baas->latest_screenshot,
+            output,
+            show_log
+            );
+}
+
+bool BAASFeature::feature_appear(BAAS* baas, const string &feature_name)
+{
+    if (!baas->flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+    BAASConfig output;
+    return appear(
+            baas->get_connection(),
+            feature_name,
+            baas->latest_screenshot,
+            output,
+            baas->script_show_image_compare_log
+            );
+}
+
 BAAS_NAMESPACE_END
+
+#endif //BAAS_APP_BUILD_FEATURE

@@ -13,13 +13,23 @@
 
 #include "BAASExceptions.h"
 #include "BAASUtil.h"
-#include "Network.h"
 
 #define OKAY "OKAY"
 #define FAIL "FAIL"
 #define STAT "STAT"
 
 BAAS_NAMESPACE_BEGIN
+
+class Network {
+public:
+    static const std::string TCP;
+    static const std::string UNIX;
+    static const std::string DEV;
+    static const std::string LOCAL;
+    static const std::string LOCAL_RESERVED;
+    static const std::string LOCAL_FILESYSTEM;
+    static const std::string LOCAL_ABSTRACT;
+};
 
 class BAASAdbConnection {
 public:

@@ -8,7 +8,6 @@
 #include "feature/BAASFeature.h"
 #include "device/screenshot/BAASScreenshot.h"
 #include "device/control/BAASControl.h"
-#include "BAAS.h"
 
 #define BAAS_ACTION_TYPE_DO_NOTHING 0
 #define BAAS_ACTION_TYPE_CLICK 1
@@ -16,6 +15,8 @@
 #define BAAS_ACTION_TYPE_SWIPE 3
 
 BAAS_NAMESPACE_BEGIN
+
+class BAAS;
 
 class BaseProcedure {
 public:

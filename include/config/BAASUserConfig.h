@@ -55,7 +55,7 @@ public:
     }
 };
 
-extern BAASUserConfig *config_template;
+extern BAASUserConfig* config_template;  // resource/default_config.json
 
 BAAS_NAMESPACE_END
 

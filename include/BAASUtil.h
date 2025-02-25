@@ -4,7 +4,9 @@
 #ifndef BAAS_UTIL_H_
 #define BAAS_UTIL_H_
 
+#ifdef _WIN32
 #include <WinSock2.h>
+#endif
 
 #include <chrono>
 #include <filesystem>
@@ -145,7 +147,6 @@ public:
 
     static int MuMu_serial2instance_id(const std::string &serial);
 
-    static int LDPlayer_serial2instance_id(const std::string &serial);
 
     static std::pair<std::string, std::string> serialToHostPort(const std::string &serial);
 

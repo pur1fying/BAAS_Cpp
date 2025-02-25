@@ -339,13 +339,6 @@ int BAASUtil::MuMu_serial2instance_id(const std::string &serial)
     return -1;
 }
 
-int BAASUtil::LDPlayer_serial2instance_id(const string &serial)
-{
-    pair<string, string> pair_serial = BAASConnection::port_emu_pair_serial(serial);
-    int port = serial2port(pair_serial.first);
-    if (5555 <= port && port <= 5555 + 32) return int((port - 5555) / 2);
-    return -1;
-}
 
 void BAASUtil::stringJoin(
         const vector<std::string> &src,
@@ -556,8 +549,7 @@ void BAASUtil::re_find_all(
     std::smatch match;
     while (std::regex_search(search_start, src.cend(), match, regex_pattern)) {
         dst.push_back(match);
-        search_start = match.suffix()
-                            .first;
+        search_start = match.suffix().first;
     }
 }
 
