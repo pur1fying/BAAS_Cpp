@@ -23,6 +23,11 @@ void DbNet::set_gpu_id(int gpu_id)
     } else {
         BAASGlobalLogger->BAASInfo("Det use CPU");
     }
+#else
+    if (gpu_id >= 0) {
+        BAASGlobalLogger->BAASWarn("Det not support GPU");
+    }
+    BAASGlobalLogger->BAASInfo("Det use CPU");
 #endif
 }
 
@@ -33,9 +38,9 @@ DbNet::~DbNet()
     outputNamesPtr.clear();
 }
 
-void DbNet::setNumThread(int numOfThread)
+void DbNet::set_num_thread(int num_thread)
 {
-    numThread = numOfThread;
+    numThread = num_thread;
     //===session options===
     // Sets the number of threads used to parallelize the execution within nodes
     // A value of 0 means ORT will pick a default
@@ -200,7 +205,7 @@ DbNet::getTextBoxes(
     return findRsBoxes(predMat, dilateMat, s, boxScoreThresh, unClipRatio);
 }
 
-DbNet *DbNet::get_net(const std::filesystem::path &model_path)
+DbNet* DbNet::get_net(const std::filesystem::path &model_path)
 {
     auto it = nets.find(model_path.string());
     if (it != nets.end()) {
@@ -210,7 +215,7 @@ DbNet *DbNet::get_net(const std::filesystem::path &model_path)
     auto *net = new DbNet();
     net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
     net->set_gpu_id(global_setting->ocr_gpu_id());
-    net->setNumThread(global_setting->ocr_num_thread());
+    net->set_num_thread(global_setting->ocr_num_thread());
     nets[model_path.string()] = net;
     return net;
 }

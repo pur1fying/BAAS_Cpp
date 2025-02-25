@@ -1,0 +1,11 @@
+//
+// Created by pc on 2025/2/25.
+//
+
+#ifndef BAAS_OCR_SERVER_DEFINITIONS_H_
+#define BAAS_OCR_SERVER_DEFINITIONS_H_
+
+#define OCR_NAMESPACE_BEGIN namespace BAAS_OCR {
+#define OCR_NAMESPACE_END }
+
+#endif //BAAS_OCR_SERVER_DEFINITIONS_H_

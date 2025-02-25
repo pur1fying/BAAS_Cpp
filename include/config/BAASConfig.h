@@ -74,6 +74,14 @@ public:
         return get<int>(key, default_value);
     }
 
+    inline unsigned int getUInt(
+            const std::string &key,
+            unsigned int default_value = 0
+    )
+    {
+        return get<unsigned int>(key, default_value);
+    }
+
     inline long getLong(
             const std::string &key,
             long default_value = 0
@@ -452,7 +460,10 @@ protected:
 
     inline void throwKeyError(const std::string &desc)
     {
-        throw KeyError("In Config file [ " + path.string() + " ] : \n" + desc);
+        std::string msg;
+        if (!path.empty()) msg = "In Config file : [ " + path.string() + " ] : \n";
+        msg += desc;
+        throw KeyError(msg);
     }
 
     inline void save_modify_history()

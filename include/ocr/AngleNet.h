@@ -20,7 +20,7 @@ public:
 
     void initModel();
 
-    void setNumThread(int numOfThread);
+    void set_num_thread(int num_thread);
 
     void set_gpu_id(int gpu_id);
 
@@ -31,6 +31,8 @@ public:
             bool doAngle,
             bool mostAngle
     );
+
+    inline const std::filesystem::path getModelPath() const { return modelPath; }
 
 private:
     void initModel(const std::filesystem::path &path);

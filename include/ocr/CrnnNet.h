@@ -30,7 +30,7 @@ public:
 
     ~CrnnNet();
 
-    void setNumThread(int numOfThread);
+    void set_num_thread(int num_thread);
 
     void set_gpu_id(int gpu_id);
 
@@ -61,6 +61,7 @@ public:
             std::vector<size_t> &enabledIndexes
     );
 
+    inline const std::filesystem::path getModelPath() const { return model_key_joined_path(modelPath, keyDictPath); }
 private:
     void initModel(
             const std::filesystem::path &pathStr,

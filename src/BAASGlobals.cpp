@@ -5,7 +5,6 @@
 #include "BAASGlobals.h"
 #include "config.h"
 #include "version.h"
-#include "BAASImageResource.h"
 #include "feature/BAASFeature.h"
 #include "procedure/BAASProcedure.h"
 

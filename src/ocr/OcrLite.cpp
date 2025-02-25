@@ -2,8 +2,6 @@
 #include "ocr/OcrUtils.h"
 #include <string>
 
-#include "BAASGlobals.h"
-
 using namespace cv;
 using namespace std;
 
@@ -18,11 +16,11 @@ OcrLite::~OcrLite()
     }
 }
 
-void OcrLite::setNumThread(int numOfThread)
+void OcrLite::set_num_thread(int num_thread)
 {
-    dbNet->setNumThread(numOfThread);
-    angleNet->setNumThread(numOfThread);
-    crnnNet->setNumThread(numOfThread);
+    dbNet->set_num_thread(num_thread);
+    angleNet->set_num_thread(num_thread);
+    crnnNet->set_num_thread(num_thread);
 }
 
 void OcrLite::initLogger(

@@ -19,9 +19,13 @@ class BAASOCR {
 public:
     static BAASOCR *get_instance();
 
-    bool init(const std::string &language);
+    static void update_valid_languages();
 
-    std::vector<bool> init(const std::vector<std::string> &languages);
+    int init(const std::string &language, int gpu_id = -2, int num_thread = 0);
+
+    std::vector<int> init(const std::vector<std::string> &languages, int gpu_id = -2, int num_thread = 0);
+
+    void release_all();
 
     void test_ocr();
 
@@ -52,9 +56,12 @@ public:
 
     static std::string REGEX_UTF8PATTERN;
 private:
-    BAASOCR() = default;
+    BAASOCR();
 
     static BAASOCR *instance;
+
+    static std::vector<std::string> valid_languages;
+
     std::map<std::string, OcrLite *> ocr_map;     // language -> ocr
 
 };

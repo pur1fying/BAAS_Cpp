@@ -3,7 +3,6 @@
 #include "ocr/AngleNet.h"
 #include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
-#include "config/BAASGlobalSetting.h"
 
 #ifdef __DIRECTML__
 #include <onnxruntime/core/providers/dml/dml_provider_factory.h>
@@ -29,6 +28,11 @@ void AngleNet::set_gpu_id(int gpu_id)
     } else {
         BAASGlobalLogger->BAASInfo("Cls use CPU.");
     }
+#else
+    if (gpu_id >= 0) {
+        BAASGlobalLogger->BAASWarn("Cls not support GPU.");
+    }
+    BAASGlobalLogger->BAASInfo("Cls use CPU.");
 #endif
 
 #ifdef __DIRECTML__
@@ -49,9 +53,9 @@ AngleNet::~AngleNet()
     outputNamesPtr.clear();
 }
 
-void AngleNet::setNumThread(int numOfThread)
+void AngleNet::set_num_thread(int num_thread)
 {
-    numThread = numOfThread;
+    numThread = num_thread;
     //===session options===
     // Sets the number of threads used to parallelize the execution within nodes
     // A value of 0 means ORT will pick a default
@@ -184,8 +188,6 @@ AngleNet *AngleNet::get_net(const std::filesystem::path &model_path)
     }
     auto *net = new AngleNet();
     net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
-    net->set_gpu_id(global_setting->ocr_gpu_id());
-    net->setNumThread(global_setting->ocr_num_thread());
     nets[model_path.string()] = net;
     return net;
 }

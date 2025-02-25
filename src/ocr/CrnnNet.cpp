@@ -28,6 +28,11 @@ void CrnnNet::set_gpu_id(int gpu_id)
     } else {
         BAASGlobalLogger->BAASInfo("Rec use CPU.");
     }
+#else
+    if (gpu_id >= 0) {
+        BAASGlobalLogger->BAASWarn("Rec not support GPU.");
+    }
+    BAASGlobalLogger->BAASInfo("Rec use CPU.");
 #endif
 
 #ifdef __DIRECTML__
@@ -50,9 +55,9 @@ CrnnNet::~CrnnNet()
     outputNamesPtr.clear();
 }
 
-void CrnnNet::setNumThread(int numOfThread)
+void CrnnNet::set_num_thread(int num_thread)
 {
-    numThread = numOfThread;
+    numThread = num_thread;
     //===session options===
     // Sets the number of threads used to parallelize the execution within nodes
     // A value of 0 means ORT will pick a default
@@ -343,8 +348,7 @@ CrnnNet *CrnnNet::get_net(
 
     net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
     net->keyDictPath = BAAS_OCR_MODEL_DIR / keys_path;
-    net->set_gpu_id(global_setting->ocr_gpu_id());
-    net->setNumThread(global_setting->ocr_num_thread());
+
     nets[joined_path] = net;
     return net;
 }

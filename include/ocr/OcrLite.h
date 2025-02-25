@@ -18,7 +18,7 @@ public:
 
     ~OcrLite();
 
-    void setNumThread(int numOfThread);
+    void set_num_thread(int num_thread);
 
     void initLogger(
             bool isConsole,
@@ -120,9 +120,10 @@ private:
     bool isOutputResultTxt = false;
     bool isOutputResultImg = false;
     FILE *resultTxt;
-    DbNet *dbNet;                // det
-    AngleNet *angleNet;          // cls
-    CrnnNet *crnnNet;            // rec
+    DbNet* dbNet;                // det
+    AngleNet* angleNet;          // cls
+    CrnnNet* crnnNet;            // rec
+
 
     std::vector<cv::Mat> getPartImages(
             cv::Mat &src,

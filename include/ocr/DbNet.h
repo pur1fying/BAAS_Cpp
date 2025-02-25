@@ -2,7 +2,6 @@
 #define BAAS_OCR_DBNET_H_
 
 #include <filesystem>
-
 #include "OcrStruct.h"
 #include "onnxruntime/onnxruntime_cxx_api.h"
 #include "opencv2/opencv.hpp"
@@ -11,7 +10,7 @@ BAAS_NAMESPACE_BEGIN
 
 class DbNet {
 public:
-    static DbNet *get_net(const std::filesystem::path &model_path);
+    static DbNet* get_net(const std::filesystem::path &model_path);
 
     void initModel();
 
@@ -21,7 +20,7 @@ public:
 
     ~DbNet();
 
-    void setNumThread(int numOfThread);
+    void set_num_thread(int num_thread);
 
     void set_gpu_id(int gpu_id);
 
@@ -32,6 +31,8 @@ public:
             float boxThresh,
             float unClipRatio
     );
+
+    inline const std::filesystem::path getModelPath() const { return modelPath; }
 
 
 private:

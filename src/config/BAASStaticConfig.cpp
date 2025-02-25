@@ -4,6 +4,7 @@
 #include "config/BAASStaticConfig.h"
 
 BAAS_NAMESPACE_BEGIN
+
 BAASStaticConfig *static_config = nullptr;
 
 BAASStaticConfig *BAASStaticConfig::staticConfig = nullptr;

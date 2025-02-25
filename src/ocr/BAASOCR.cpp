@@ -6,11 +6,14 @@
 #include "config/BAASStaticConfig.h"
 #include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
+#include "config/BAASGlobalSetting.h"
 
 BAAS_NAMESPACE_BEGIN
 
 
 BAASOCR *BAASOCR::instance = nullptr;
+
+std::vector<std::string> BAASOCR::valid_languages;
 
 std::string BAASOCR::REGEX_UTF8PATTERN = R"(([\x00-\x7F]|[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}))";
 
@@ -24,13 +27,24 @@ BAASOCR *BAASOCR::get_instance()
     return instance;
 }
 
-bool BAASOCR::init(const std::string &language)
+int BAASOCR::init(const std::string &language, int gpu_id, int num_thread)
+/*
+ * -1 : invalid language
+ * 0 : already inited
+ * 1 : success
+ */
 {
     auto it = ocr_map.find(language);
     if (it != ocr_map.end()) {
         BAASGlobalLogger->BAASInfo("Ocr " + language + " already inited");
-        return true;
+        return 0;
     }
+
+    if (std::find(valid_languages.begin(), valid_languages.end(), language) == valid_languages.end()) {
+        BAASGlobalLogger->BAASError("Invalid language : " + language);
+        return -1;
+    }
+
     std::string key = "/ocr_model_name/" + language + "/";
     std::string det = static_config->get(key + "det", std::string());
     std::string cls = static_config->get(key + "cls", std::string());
@@ -45,10 +59,20 @@ bool BAASOCR::init(const std::string &language)
     BAASGlobalLogger->BAASInfo("Cls     : " + cls);
     BAASGlobalLogger->BAASInfo("Rec     : " + rec);
     BAASGlobalLogger->BAASInfo("Key     : " + keys);
+
     ocr->get_net(det, cls, rec, keys);
+
+    if (gpu_id == -2) gpu_id = global_setting->get("/ocr/gpu_id", -1);
+    if (num_thread == 0) num_thread = global_setting->getInt("/ocr/num_thread", 0);
+
+    BAASGlobalLogger->BAASInfo("GPU ID  : " + std::to_string(gpu_id));
+    BAASGlobalLogger->BAASInfo("Num Thread : " + std::to_string(num_thread));
+    ocr->set_gpu_id(gpu_id);
+    ocr->set_num_thread(num_thread);
+
     ocr->initModels();
     ocr_map[language] = ocr;
-    return true;
+    return 1;
 }
 
 void BAASOCR::ocr(
@@ -121,12 +145,14 @@ void BAASOCR::ocr_for_single_line(
     }
 }
 
-std::vector<bool> BAASOCR::init(const std::vector<std::string> &languages)
+std::vector<int> BAASOCR::init(
+        const std::vector<std::string> &languages,
+        int gpu_id,
+        int num_thread
+        )
 {
-    std::vector<bool> res;
-    for (auto &i: languages) {
-        res.push_back(init(i));
-    }
+    std::vector<int> res;
+    for (auto &i: languages) res.push_back(init(i, gpu_id, num_thread));
     return res;
 }
 
@@ -203,5 +229,35 @@ void BAASOCR::string_unique_utf8_characters(
     std::set<std::string> unique(output.begin(), output.end());
     output.assign(unique.begin(), unique.end());
 }
+
+BAASOCR::BAASOCR()
+{
+}
+
+void BAASOCR::update_valid_languages()
+{
+    BAASGlobalLogger->sub_title("OCR Valid Languages");
+    std::string language;
+    auto j = static_config->get<nlohmann::json>("/ocr_model_name", nlohmann::json());
+    for (auto &i: j.items()) {
+        language = i.key();
+        BAASGlobalLogger->BAASInfo(language);
+        valid_languages.push_back(i.key());
+    }
+}
+
+void BAASOCR::release_all()
+{
+    BAASGlobalLogger->sub_title("Release All OCR");
+    DbNet::release_all();
+    BAASGlobalLogger->sub_title("Release All OCR");
+    CrnnNet::release_all();
+    BAASGlobalLogger->sub_title("Release All OCR");
+    AngleNet::release_all();
+
+    for (auto &i: ocr_map) delete i.second;
+    ocr_map.clear();
+}
+
 
 BAAS_NAMESPACE_END
