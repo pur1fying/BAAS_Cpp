@@ -3,6 +3,7 @@
 #include "ocr/AngleNet.h"
 #include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
+#include "ocr/BAASOCR.h"
 
 #ifdef __DIRECTML__
 #include <onnxruntime/core/providers/dml/dml_provider_factory.h>
@@ -10,7 +11,7 @@
 
 BAAS_NAMESPACE_BEGIN
 
-std::map<std::string, AngleNet *> AngleNet::nets;
+std::map<std::string, std::shared_ptr<AngleNet>> AngleNet::nets;
 
 void AngleNet::set_gpu_id(int gpu_id)
 {
@@ -48,7 +49,7 @@ void AngleNet::set_gpu_id(int gpu_id)
 
 AngleNet::~AngleNet()
 {
-    delete session;
+    session.reset();
     inputNamesPtr.clear();
     outputNamesPtr.clear();
 }
@@ -78,8 +79,13 @@ void AngleNet::set_num_thread(int num_thread)
 
 void AngleNet::initModel(const std::filesystem::path &path)
 {
-    session = new Ort::Session(env, path.c_str(), sessionOptions);
-    modelPath = path;
+
+#ifdef _WIN32
+    std::wstring anglePath = path.wstring();
+    session = std::make_unique<Ort::Session>(env, anglePath.c_str(), sessionOptions);
+#else
+    session = std::make_unique<Ort::Session>(env, path.c_str(), sessionOptions);
+#endif
     inputNamesPtr = getInputNames(session);
     outputNamesPtr = getOutputNames(session);
 }
@@ -91,7 +97,7 @@ Angle scoreToAngle(const std::vector<float> &outputData)
     for (size_t i = 0; i < outputData.size(); i++) {
         if (outputData[i] > maxScore) {
             maxScore = outputData[i];
-            maxIndex = i;
+            maxIndex = int(i);
         }
     }
     return {maxIndex, maxScore};
@@ -127,8 +133,6 @@ Angle AngleNet::getAngle(cv::Mat &src)
 
 std::vector<Angle> AngleNet::getAngles(
         std::vector<cv::Mat> &partImgs,
-        const char *path,
-        const char *imgName,
         bool doAngle,
         bool mostAngle
 )
@@ -143,14 +147,7 @@ std::vector<Angle> AngleNet::getAngles(
             Angle angle = getAngle(angleImg);
             double endAngle = getCurrentTime();
             angle.time = endAngle - startAngle;
-
             angles[i] = angle;
-
-            //OutPut AngleImg
-            if (isOutputAngleImg) {
-                std::string angleImgFile = getDebugImgFilePath(path, imgName, i, "-angle-");
-                saveImg(angleImg, angleImgFile.c_str());
-            }
         }
     } else {
         for (size_t i = 0; i < size; ++i) {
@@ -179,24 +176,39 @@ std::vector<Angle> AngleNet::getAngles(
     return angles;
 }
 
-AngleNet *AngleNet::get_net(const std::filesystem::path &model_path)
+std::shared_ptr<AngleNet> AngleNet::get_net(
+        const std::filesystem::path &model_path,
+        int gpu_id,
+        int num_thread
+)
 {
-    auto it = nets.find(model_path.string());
+    auto it = nets.find((BAAS_OCR_MODEL_DIR / model_path).string());
     if (it != nets.end()) {
         BAASGlobalLogger->BAASInfo("Cls Already Inited");
         return it->second;
     }
-    auto *net = new AngleNet();
+    auto net = std::make_shared<AngleNet>();
     net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
-    nets[model_path.string()] = net;
+    net->set_gpu_id(gpu_id);
+    net->set_num_thread(num_thread);
+//    net->initModel();
+
+    nets[net->modelPath.string()] = net;
+    BAASOCR::uninited_anglenet.push_back(net.get());
     return net;
 }
 
-bool AngleNet::release_net(const std::filesystem::path &model_path)
+bool AngleNet::try_release_net(const std::string &model_path)
 {
-    auto it = nets.find(model_path.string());
+    auto it = nets.find(model_path);
     if (it != nets.end()) {
-        delete it->second;
+        auto count = it->second.use_count();
+        if (count > 1) {
+            BAASGlobalLogger->BAASWarn("Cls : " + it->first + " use_count : " + std::to_string(count) + " > 1, can't release.");
+            return false;
+        }
+        it->second.reset();
+        BAASGlobalLogger->BAASInfo("Cls Release : " + it->first);
         nets.erase(it);
         return true;
     }
@@ -208,10 +220,21 @@ void AngleNet::initModel()
     initModel(modelPath);
 }
 
-void AngleNet::release_all()
+void AngleNet::try_release_all()
 {
-    for (auto &it: nets) delete it.second;
-    nets.clear();
+    BAASGlobalLogger->sub_title("Cls Release All");
+    for (auto it = nets.begin(); it != nets.end();) {
+        auto count = it->second.use_count();
+        if (count > 1) {
+            BAASGlobalLogger->BAASWarn("Cls : " + it->first + " use_count : " + std::to_string(count) + " > 1, can't release.");
+            ++it;
+            continue;
+        }
+        it->second.reset();
+        BAASGlobalLogger->BAASInfo("Cls Release : " + it->first);
+        it = nets.erase(it);
+    }
+    BAASGlobalLogger->BAASInfo("Angle map size : " + std::to_string(baas::AngleNet::nets.size()));
 }
 
 BAAS_NAMESPACE_END

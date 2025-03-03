@@ -75,26 +75,6 @@ ScaleParam getScaleParam(
 
 std::vector<cv::Point2f> getBox(const cv::RotatedRect &rect);
 
-int getThickness(cv::Mat &boxImg);
-
-void drawTextBox(
-        cv::Mat &boxImg,
-        cv::RotatedRect &rect,
-        int thickness
-);
-
-void drawTextBox(
-        cv::Mat &boxImg,
-        const std::vector<cv::Point> &box,
-        int thickness
-);
-
-void drawTextBoxes(
-        cv::Mat &boxImg,
-        std::vector<TextBox> &textBoxes,
-        int thickness
-);
-
 cv::Mat matRotateClockWise180(cv::Mat src);
 
 cv::Mat matRotateClockWise90(cv::Mat src);
@@ -133,36 +113,9 @@ std::vector<float> substractMeanNormalize(
 
 std::vector<int> getAngleIndexes(std::vector<Angle> &angles);
 
-std::vector<Ort::AllocatedStringPtr> getInputNames(Ort::Session *session);
+std::vector<Ort::AllocatedStringPtr> getInputNames(const std::unique_ptr<Ort::Session>& session);
 
-std::vector<Ort::AllocatedStringPtr> getOutputNames(Ort::Session *session);
-
-void saveImg(
-        cv::Mat &img,
-        const char *imgPath
-);
-
-std::string getSrcImgFilePath(
-        const char *path,
-        const char *imgName
-);
-
-std::string getResultTxtFilePath(
-        const char *path,
-        const char *imgName
-);
-
-std::string getResultImgFilePath(
-        const char *path,
-        const char *imgName
-);
-
-std::string getDebugImgFilePath(
-        const char *path,
-        const char *imgName,
-        size_t i,
-        const char *tag
-);
+std::vector<Ort::AllocatedStringPtr> getOutputNames(const std::unique_ptr<Ort::Session>& session);
 
 BAAS_NAMESPACE_END
 

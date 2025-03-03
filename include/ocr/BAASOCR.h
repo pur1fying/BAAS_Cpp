@@ -7,8 +7,10 @@
 
 #include <map>
 #include <string>
-
+#include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
+#include <ThreadPool.h>
+
 #include "ocr/OcrStruct.h"
 #include "ocr/OcrLite.h"
 #include "BAASLogger.h"
@@ -19,13 +21,21 @@ class BAASOCR {
 public:
     static BAASOCR *get_instance();
 
+    static void enable_thread_pool(unsigned int thread_count = 4);
+
+    static void disable_thread_pool();
+
     static void update_valid_languages();
 
-    int init(const std::string &language, int gpu_id = -2, int num_thread = 0);
+    bool language_inited(const std::string &language);
 
     std::vector<int> init(const std::vector<std::string> &languages, int gpu_id = -2, int num_thread = 0);
 
     void release_all();
+
+    bool release(const std::string &language);
+
+    std::vector<bool> release(const std::vector<std::string> &languages);
 
     void test_ocr();
 
@@ -46,7 +56,8 @@ public:
 
     static void ocrResult2json(
             OcrResult &result,
-            nlohmann::json &output
+            nlohmann::json &output,
+            uint8_t options = 0b111
     );
 
     static void string_unique_utf8_characters(
@@ -55,15 +66,32 @@ public:
     );
 
     static std::string REGEX_UTF8PATTERN;
+
 private:
+    int init(const std::string &language, int gpu_id = -2, int num_thread = 0);
+
+    static std::vector<DbNet*> uninited_dbnet;
+
+    static std::vector<CrnnNet*> uninited_crnnnet;
+
+    static std::vector<AngleNet*> uninited_anglenet;
+
+    static std::unique_ptr<ThreadPool> pool;
+
+    static bool thread_pool_enabled;
+
     BAASOCR();
 
     static BAASOCR *instance;
 
     static std::vector<std::string> valid_languages;
 
-    std::map<std::string, OcrLite *> ocr_map;     // language -> ocr
+    std::map<std::string, OcrLite*> ocr_map;     // language -> ocr
 
+    friend class OcrLite;
+    friend class AngleNet;
+    friend class DbNet;
+    friend class CrnnNet;
 };
 
 extern BAASOCR *baas_ocr;

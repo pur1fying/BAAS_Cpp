@@ -1,11 +1,11 @@
 #include "ocr/DbNet.h"
 #include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
-#include "config/BAASGlobalSetting.h"
+#include "ocr/BAASOCR.h"
 
 BAAS_NAMESPACE_BEGIN
 
-std::map<std::string, DbNet *> DbNet::nets;
+std::map<std::string, std::shared_ptr<DbNet>> DbNet::nets;
 
 void DbNet::set_gpu_id(int gpu_id)
 {
@@ -33,7 +33,7 @@ void DbNet::set_gpu_id(int gpu_id)
 
 DbNet::~DbNet()
 {
-    delete session;
+    session.reset();
     inputNamesPtr.clear();
     outputNamesPtr.clear();
 }
@@ -61,10 +61,15 @@ void DbNet::set_num_thread(int num_thread)
     sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 }
 
-void DbNet::initModel(const std::filesystem::path &pathStr)
+void DbNet::initModel(const std::filesystem::path &path)
 {
-    session = new Ort::Session(env, pathStr.c_str(), sessionOptions);
-    modelPath = pathStr;
+#ifdef _WIN32
+    std::wstring dbPath = path.wstring();
+    session = std::make_unique<Ort::Session>(env, dbPath.c_str(), sessionOptions);
+#else
+    session = std::make_unique<Ort::Session>(env, path.c_str(), sessionOptions);
+#endif
+    modelPath = path;
     inputNamesPtr = getInputNames(session);
     outputNamesPtr = getOutputNames(session);
 }
@@ -111,9 +116,7 @@ std::vector<TextBox> findRsBoxes(
 
         //-----unClip-----
         cv::RotatedRect clipRect = unClip(minBoxes, unClipRatio);
-        if (clipRect.size
-                    .height < 1.001 && clipRect.size
-                                               .width < 1.001) {
+        if (clipRect.size.height < 1.001 && clipRect.size.width < 1.001) {
             continue;
         }
         //-----unClip-----
@@ -157,10 +160,8 @@ DbNet::getTextBoxes(
             inputTensorValues.size(), inputShape.data(),
             inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()
-                                                         ->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()
-                                                           ->get()};
+    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
+    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
     auto outputTensor = session->Run(
             Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
             inputNames.size(), outputNames.data(), outputNames.size());
@@ -205,18 +206,25 @@ DbNet::getTextBoxes(
     return findRsBoxes(predMat, dilateMat, s, boxScoreThresh, unClipRatio);
 }
 
-DbNet* DbNet::get_net(const std::filesystem::path &model_path)
+std::shared_ptr<DbNet> DbNet::get_net(
+        const std::filesystem::path &model_path,
+        int gpu_id,
+        int num_thread
+)
 {
-    auto it = nets.find(model_path.string());
+    auto it = nets.find((BAAS_OCR_MODEL_DIR / model_path).string());
     if (it != nets.end()) {
         BAASGlobalLogger->BAASInfo("Det Already Inited");
         return it->second;
     }
-    auto *net = new DbNet();
+    auto net = std::make_shared<DbNet>();
     net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
-    net->set_gpu_id(global_setting->ocr_gpu_id());
-    net->set_num_thread(global_setting->ocr_num_thread());
-    nets[model_path.string()] = net;
+
+    net->set_gpu_id(gpu_id);
+    net->set_num_thread(num_thread);
+//    net->initModel();
+    nets[net->modelPath.string()] = net;
+    BAASOCR::uninited_dbnet.push_back(net.get());
     return net;
 }
 
@@ -226,21 +234,39 @@ void DbNet::initModel()
 }
 
 
-bool DbNet::release_net(const std::filesystem::path &model_path)
+bool DbNet::try_release_net(const std::string &model_path)
 {
-    auto it = nets.find(model_path.string());
+    auto it = nets.find(model_path);
     if (it != nets.end()) {
-        delete it->second;
+        auto count = it->second.use_count();
+        if (count > 1) {
+            BAASGlobalLogger->BAASWarn("Det : " + it->first + " use_count : " + std::to_string(count) + " > 1, can't release.");
+            return false;
+        }
+        it->second.reset();
+        BAASGlobalLogger->BAASInfo("Det Release : " + it->first);
         nets.erase(it);
         return true;
     }
-    return false;
+    return true;
 }
 
-void DbNet::release_all()
+void DbNet::try_release_all()
 {
-    for (auto &it: nets) delete it.second;
-    nets.clear();
+    BAASGlobalLogger->sub_title("Det Release All");
+    for (auto it = nets.begin(); it != nets.end();) {
+        auto count = it->second.use_count();
+        if (count > 1) {
+            BAASGlobalLogger->BAASWarn("Det : " + it->first + " use_count : " + std::to_string(count) + " > 1, can't release.");
+            ++it;
+            continue;
+        }
+        it->second.reset();
+        BAASGlobalLogger->BAASInfo("Det Release : " + it->first);
+        it = nets.erase(it);
+    }
+    BAASGlobalLogger->BAASInfo("DbNet map size : " + std::to_string(baas::DbNet::nets.size()));
+
 }
 
 

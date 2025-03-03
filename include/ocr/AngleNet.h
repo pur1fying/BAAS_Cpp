@@ -10,11 +10,15 @@ BAAS_NAMESPACE_BEGIN
 
 class AngleNet {
 public:
-    static AngleNet *get_net(const std::filesystem::path &model_path);
+    static std::shared_ptr<AngleNet> get_net(
+            const std::filesystem::path &model_path,
+            int gpu_id = -1,
+            int num_thread = 4
+            );
 
-    static bool release_net(const std::filesystem::path &model_path);
+    static bool try_release_net(const std::string &model_path);
 
-    static void release_all();
+    static void try_release_all();
 
     ~AngleNet();
 
@@ -26,8 +30,6 @@ public:
 
     std::vector<Angle> getAngles(
             std::vector<cv::Mat> &partImgs,
-            const char *path,
-            const char *imgName,
             bool doAngle,
             bool mostAngle
     );
@@ -37,13 +39,11 @@ public:
 private:
     void initModel(const std::filesystem::path &path);
 
-    static std::map<std::string, AngleNet *> nets;
+    static std::map<std::string, std::shared_ptr<AngleNet>> nets;
 
     std::filesystem::path modelPath;
 
-    bool isOutputAngleImg = false;
-
-    Ort::Session *session;
+    std::unique_ptr<Ort::Session> session;
     Ort::Env env = Ort::Env(ORT_LOGGING_LEVEL_ERROR, "AngleNet");
     Ort::SessionOptions sessionOptions = Ort::SessionOptions();
     int numThread = 0;

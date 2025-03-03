@@ -11,14 +11,15 @@ BAAS_NAMESPACE_BEGIN
 
 class CrnnNet {
 public:
-    static CrnnNet *get_net(
+    static std::shared_ptr<CrnnNet> get_net(
             const std::filesystem::path &model_path,
-            const std::filesystem::path &keys_path
+            const std::filesystem::path &keys_path,
+            int gpu_id=-1,
+            int num_thread=4
     );
 
-    static bool release_net(
-            const std::filesystem::path &model_path,
-            const std::filesystem::path &keys_path
+    static bool try_release_net(
+            const std::string& joined_path
     );
 
     static inline std::string model_key_joined_path(
@@ -26,7 +27,7 @@ public:
             const std::filesystem::path &keys_path
     );
 
-    static void release_all();
+    static void try_release_all();
 
     ~CrnnNet();
 
@@ -37,15 +38,11 @@ public:
     void initModel();
 
     std::vector<TextLine> getTextLines(
-            std::vector<cv::Mat> &partImg,
-            const char *path,
-            const char *imgName
+            std::vector<cv::Mat> &partImg
     );
 
     std::vector<TextLine> getTextLines(
             std::vector<cv::Mat> &partImg,
-            const char *path,
-            const char *imgName,
             const std::vector<std::string> &candidates
     );
 
@@ -61,7 +58,7 @@ public:
             std::vector<size_t> &enabledIndexes
     );
 
-    inline const std::filesystem::path getModelPath() const { return model_key_joined_path(modelPath, keyDictPath); }
+    inline const std::filesystem::path get_joined_path() const { return model_key_joined_path(modelPath, keyDictPath); }
 private:
     void initModel(
             const std::filesystem::path &pathStr,
@@ -70,12 +67,12 @@ private:
 
     std::filesystem::path modelPath, keyDictPath;
 
-    static std::map<std::string, CrnnNet *> nets;
+    static std::map<std::string, std::shared_ptr<CrnnNet>> nets;
 
-    bool isOutputDebugImg = false;
-    Ort::Session *session;
+    std::unique_ptr<Ort::Session> session;
     Ort::Env env = Ort::Env(ORT_LOGGING_LEVEL_ERROR, "CrnnNet");
     Ort::SessionOptions sessionOptions = Ort::SessionOptions();
+
     int numThread = 0;
 
     std::vector<Ort::AllocatedStringPtr> inputNamesPtr;
@@ -101,8 +98,6 @@ private:
             size_t w,
             const std::vector<size_t> &enabledIndexes
     );
-
-
 };
 
 BAAS_NAMESPACE_END

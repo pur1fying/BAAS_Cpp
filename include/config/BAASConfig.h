@@ -56,20 +56,59 @@ public:
 
     void save();
 
-    inline bool contains(const std::string &key)
+    inline nlohmann::json::value_t value_type(const std::string &key) const
+    {
+        assert(!key.empty());
+        if (key[0] != '/') {
+            auto it = config.find(key);
+            if (it == config.end()) throwKeyError("Key [ " + key + " ] not found.");
+            return it->type();
+        }
+        try {
+            return config.at(nlohmann::json::json_pointer(key)).type();
+        }
+        catch (std::exception &e) {
+            throwKeyError("Key [ " + key + " ] not found.");
+        }
+    }
+
+    inline bool contains(const std::string &key) const
     {
         assert(!key.empty());
         if (key[0] != '/') return config.contains(key);
         try {
-            nlohmann::json &j = config.at(nlohmann::json::json_pointer(key));
+            config.at(nlohmann::json::json_pointer(key));
             return true;
         } catch (std::exception &e) { return false; }
+    }
+
+    inline void getBAASConfig(
+            const std::string &key,
+            BAASConfig &output,
+            BAASLogger* logger = (BAASLogger*)(BAASGlobalLogger)
+    )   const
+    {
+        assert(!key.empty());
+        if (key[0] != '/') {
+            auto it = config.find(key);
+            if (it == config.end()) {
+                throwKeyError("Key [ " + key + " ] not found.");
+            }
+            output = BAASConfig(*it, logger);
+            return;
+        }
+        try {
+            output = BAASConfig(config.at(nlohmann::json::json_pointer(key)), logger);
+        }
+        catch (std::exception &e) {
+            throwKeyError("Key [ " + key + " ] not found.");
+        }
     }
 
     inline int getInt(
             const std::string &key,
             int default_value = 0
-    )
+    )   const
     {
         return get<int>(key, default_value);
     }
@@ -77,15 +116,23 @@ public:
     inline unsigned int getUInt(
             const std::string &key,
             unsigned int default_value = 0
-    )
+    )   const
     {
         return get<unsigned int>(key, default_value);
+    }
+
+    inline uint8_t getUInt8(
+            const std::string &key,
+            uint8_t default_value = 0
+    )   const
+    {
+        return get<uint8_t>(key, default_value);
     }
 
     inline long getLong(
             const std::string &key,
             long default_value = 0
-    )
+    )   const
     {
         return get<long>(key, default_value);
     }
@@ -93,7 +140,7 @@ public:
     inline unsigned long getULong(
             const std::string &key,
             unsigned long default_value = 0
-    )
+    )   const
     {
         return get<unsigned long>(key, default_value);
     }
@@ -101,7 +148,7 @@ public:
     inline long long getLLong(
             const std::string &key,
             long long default_value = 0
-    )
+    )   const
     {
         return get<long long>(key, default_value);
     }
@@ -109,7 +156,7 @@ public:
     inline float getFloat(
             const std::string &key,
             float default_value = 0.0f
-    )
+    )   const
     {
         return get<float>(key, default_value);
     }
@@ -117,7 +164,7 @@ public:
     inline double getDouble(
             const std::string &key,
             double default_value = 0.0
-    )
+    ) const
     {
         return get<double>(key, default_value);
     }
@@ -125,7 +172,7 @@ public:
     inline std::string getString(
             const std::string &key,
             const std::string &default_value = ""
-    )
+    ) const
     {
         return get<std::string>(key, default_value);
     }
@@ -133,7 +180,7 @@ public:
     inline std::filesystem::path getPath(
             const std::string &key,
             const std::filesystem::path &default_value = ""
-    )
+    )   const
     {
         std::string str_path = getString(key, default_value.string());
 #ifdef _WIN32
@@ -149,7 +196,7 @@ public:
     inline bool getBool(
             const std::string &key,
             bool default_value = false
-    )
+    ) const
     {
         return get<bool>(key, default_value);
     }
@@ -162,7 +209,7 @@ public:
     inline T get(
             const std::string &key,
             T default_value
-    )
+    )   const
     {
         assert(!key.empty());
         if (key[0] != '/') {
@@ -185,7 +232,7 @@ public:
     }
 
     template<typename T>
-    inline T get(const std::string &key)
+    inline T get(const std::string &key) const
     {
         T default_value;
         assert(!key.empty());
@@ -458,7 +505,7 @@ protected:
             nlohmann::json &value
     );
 
-    inline void throwKeyError(const std::string &desc)
+    inline void throwKeyError(const std::string &desc)  const
     {
         std::string msg;
         if (!path.empty()) msg = "In Config file : [ " + path.string() + " ] : \n";
@@ -483,7 +530,7 @@ protected:
         modified.clear();
     }
 
-    BAASLogger *logger{};
+    BAASLogger *logger;
     nlohmann::json config, modified;
     std::filesystem::path path, modify_history_path;
     std::string config_name;

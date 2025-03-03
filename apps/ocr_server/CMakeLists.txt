@@ -75,7 +75,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             DLL_DEBUG
             opencv_world490d
     )
-elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     SET(
             LIB_RELEASE
             opencv_world490

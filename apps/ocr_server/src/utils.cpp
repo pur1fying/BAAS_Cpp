@@ -27,8 +27,6 @@ void __init()
     static_config = BAASStaticConfig::getStaticConfig();
     default_global_setting = new BAASConfig(CONFIG_TYPE_DEFAULT_GLOBAL_SETTING);
 
-
-
     // check config dir
     BAASGlobalLogger->sub_title("Config Dir");
     BAASGlobalLogger->Path(BAAS_CONFIG_DIR);

@@ -15,6 +15,16 @@ BAASOCR *BAASOCR::instance = nullptr;
 
 std::vector<std::string> BAASOCR::valid_languages;
 
+std::unique_ptr<ThreadPool> BAASOCR::pool;
+
+std::vector<DbNet*> BAASOCR::uninited_dbnet;
+
+std::vector<AngleNet*> BAASOCR::uninited_anglenet;
+
+std::vector<CrnnNet*> BAASOCR::uninited_crnnnet;
+
+bool BAASOCR::thread_pool_enabled = false;
+
 std::string BAASOCR::REGEX_UTF8PATTERN = R"(([\x00-\x7F]|[\xC0-\xDF][\x80-\xBF]|[\xE0-\xEF][\x80-\xBF]{2}|[\xF0-\xF7][\x80-\xBF]{3}))";
 
 BAASOCR *baas_ocr = nullptr;
@@ -29,20 +39,20 @@ BAASOCR *BAASOCR::get_instance()
 
 int BAASOCR::init(const std::string &language, int gpu_id, int num_thread)
 /*
- * -1 : invalid language
- * 0 : already inited
+ * 0 : invalid language
  * 1 : success
+ * 2 : already inited
  */
 {
     auto it = ocr_map.find(language);
     if (it != ocr_map.end()) {
-        BAASGlobalLogger->BAASInfo("Ocr " + language + " already inited");
-        return 0;
+        BAASGlobalLogger->BAASInfo("Ocr [ " + language + " ] already inited");
+        return 2;
     }
 
     if (std::find(valid_languages.begin(), valid_languages.end(), language) == valid_languages.end()) {
         BAASGlobalLogger->BAASError("Invalid language : " + language);
-        return -1;
+        return 0;
     }
 
     std::string key = "/ocr_model_name/" + language + "/";
@@ -52,7 +62,6 @@ int BAASOCR::init(const std::string &language, int gpu_id, int num_thread)
     std::string keys = static_config->get(key + "dict", std::string());
 
     auto ocr = new OcrLite();
-    ocr->initLogger(false, false, false);
     BAASGlobalLogger->sub_title("OCR Init");
     BAASGlobalLogger->BAASInfo("language: " + language);
     BAASGlobalLogger->BAASInfo("Det     : " + det);
@@ -60,17 +69,15 @@ int BAASOCR::init(const std::string &language, int gpu_id, int num_thread)
     BAASGlobalLogger->BAASInfo("Rec     : " + rec);
     BAASGlobalLogger->BAASInfo("Key     : " + keys);
 
-    ocr->get_net(det, cls, rec, keys);
-
+    // use config in global setting
     if (gpu_id == -2) gpu_id = global_setting->get("/ocr/gpu_id", -1);
     if (num_thread == 0) num_thread = global_setting->getInt("/ocr/num_thread", 0);
 
     BAASGlobalLogger->BAASInfo("GPU ID  : " + std::to_string(gpu_id));
     BAASGlobalLogger->BAASInfo("Num Thread : " + std::to_string(num_thread));
-    ocr->set_gpu_id(gpu_id);
-    ocr->set_num_thread(num_thread);
 
-    ocr->initModels();
+    ocr->get_net(det, cls, rec, keys, gpu_id, num_thread);
+
     ocr_map[language] = ocr;
     return 1;
 }
@@ -118,6 +125,7 @@ void BAASOCR::ocr_for_single_line(
         const std::string &log_content,
         BAASLogger *logger,
         const std::string &candidates
+
 )
 {
     auto res = ocr_map.find(language);
@@ -134,8 +142,7 @@ void BAASOCR::ocr_for_single_line(
         logger->BAASInfo("Ocr Candidates [ " + temp + " ]");
     }
 
-    res->second
-       ->ocr_for_single_line(img, result, unique_candidates);
+    res->second->ocr_for_single_line(img, result, unique_candidates);
     if (logger != nullptr) {
         std::string log = "Ocr ";
         if (!log_content.empty()) log += "[ " + log_content + " ] ";
@@ -153,6 +160,26 @@ std::vector<int> BAASOCR::init(
 {
     std::vector<int> res;
     for (auto &i: languages) res.push_back(init(i, gpu_id, num_thread));
+
+    std::vector<std::future<void>> threads;
+    if (thread_pool_enabled) {
+        for (auto &i: uninited_dbnet) threads.push_back(pool->submit(OcrLite::submit_dbNet_initModel, i));
+        for (auto &i: uninited_anglenet) threads.push_back(pool->submit(OcrLite::submit_angleNet_initModel, i));
+        for (auto &i: uninited_crnnnet) threads.push_back(pool->submit(OcrLite::submit_crnnNet_initModel, i));
+
+        for (auto &i: threads) i.get();
+        uninited_dbnet.clear();
+        uninited_anglenet.clear();
+        uninited_crnnnet.clear();
+    }
+    else {
+        for (auto &i: uninited_dbnet) i->initModel();
+        for (auto &i: uninited_anglenet) i->initModel();
+        for (auto &i: uninited_crnnnet) i->initModel();
+        uninited_dbnet.clear();
+        uninited_anglenet.clear();
+        uninited_crnnnet.clear();
+    }
     return res;
 }
 
@@ -176,7 +203,8 @@ void BAASOCR::test_ocr()
 
 void BAASOCR::ocrResult2json(
         OcrResult &result,
-        nlohmann::json &output
+        nlohmann::json &output,
+        uint8_t options
 )
 {
     output.clear();
@@ -187,30 +215,36 @@ void BAASOCR::ocrResult2json(
     nlohmann::json text;
     int min_x, min_y, max_x, max_y;
     for (auto &textBlock: result.textBlocks) {
-        if (textBlock.text
-                     .empty())
+        if (textBlock.text.empty())
             continue;
         text["text"] = textBlock.text;
-        text["position"] = nlohmann::json::array();
-        min_x = result.boxImg
-                      .cols;
-        min_y = result.boxImg
-                      .rows;
-        max_x = 0;
-        max_y = 0;
-        for (auto &point: textBlock.boxPoint) {
-            min_x = std::min(min_x, point.x);
-            min_y = std::min(min_y, point.y);
-            max_x = std::max(max_x, point.x);
-            max_y = std::max(max_y, point.y);
+        // angle net info
+        if (options & 0b1) {
+            text["angle_net"]["index"] = textBlock.angleIndex;
+            text["angle_net"]["score"] = textBlock.angleScore;
+            text["angle_net"]["time"] = std::round(textBlock.angleTime);
         }
-        text["position"].push_back({min_x, min_y});
-        text["position"].push_back({max_x, max_y});
-        text["/angle_net/index"_json_pointer] = textBlock.angleIndex;
-        text["/angle_net/score"_json_pointer] = textBlock.angleScore;
-        text["/angle_net/time"_json_pointer] = textBlock.angleTime;
-        text["char_scores"] = textBlock.charScores;
-        text["crnn_time"] = textBlock.crnnTime;
+        // character score
+        if (options & 0b10) {
+            text["char_scores"] = textBlock.charScores;
+        }
+        // position
+        if (options & 0b100) {
+            text["position"] = nlohmann::json::array();
+            min_x = INT_MAX;
+            min_y = INT_MAX;
+            max_x = 0;
+            max_y = 0;
+            for (auto &point: textBlock.boxPoint) {
+                min_x = std::min(min_x, point.x);
+                min_y = std::min(min_y, point.y);
+                max_x = std::max(max_x, point.x);
+                max_y = std::max(max_y, point.y);
+            }
+            text["position"].push_back({min_x, min_y});
+            text["position"].push_back({max_x, max_y});
+        }
+        text["crnn_time"] = std::round(textBlock.crnnTime);
         output["text_list"].push_back(text);
     }
 }
@@ -248,15 +282,71 @@ void BAASOCR::update_valid_languages()
 
 void BAASOCR::release_all()
 {
-    BAASGlobalLogger->sub_title("Release All OCR");
-    DbNet::release_all();
-    BAASGlobalLogger->sub_title("Release All OCR");
-    CrnnNet::release_all();
-    BAASGlobalLogger->sub_title("Release All OCR");
-    AngleNet::release_all();
+    BAASGlobalLogger->sub_title("OCR Lite Release All");
+    for (auto &i: ocr_map) {
+        i.second->dbNet.reset();
+        i.second->angleNet.reset();
+        i.second->crnnNet.reset();
+        delete i.second;
+    }
+    DbNet::try_release_all();
+    AngleNet::try_release_all();
+    CrnnNet::try_release_all();
 
-    for (auto &i: ocr_map) delete i.second;
+
     ocr_map.clear();
+}
+
+bool BAASOCR::release(const std::string &language)
+{
+    auto it = ocr_map.find(language);
+    if (it == ocr_map.end()) {
+        BAASGlobalLogger->BAASError("Language " + language + " not exist.");
+        return false;
+    }
+    BAASGlobalLogger->sub_title("OCR Release : " + language);
+    std::string key = it->second->dbNet->getModelPath().string();
+    it->second->dbNet.reset();
+    DbNet::try_release_net(key);
+
+    key = it->second->angleNet->getModelPath().string();
+    it->second->angleNet.reset();
+    AngleNet::try_release_net(key);
+
+    key = it->second->crnnNet->get_joined_path().string();
+    it->second->crnnNet.reset();
+    CrnnNet::try_release_net(key);
+
+    ocr_map.erase(it);
+    return true;
+}
+
+std::vector<bool> BAASOCR::release(const std::vector<std::string> &languages)
+{
+    std::vector<bool> res;
+    for (auto &i: languages) res.push_back(release(i));
+    return res;
+}
+
+bool BAASOCR::language_inited(const std::string &language)
+{
+    return ocr_map.find(language) != ocr_map.end();
+}
+
+void BAASOCR::enable_thread_pool(unsigned int thread_count)
+{
+    if (pool != nullptr) {
+        pool->shutdown();
+        pool.reset();
+    }
+    pool = std::make_unique<ThreadPool>(int(thread_count));
+    pool->init();
+    thread_pool_enabled = true;
+}
+
+void BAASOCR::disable_thread_pool()
+{
+    thread_pool_enabled = false;
 }
 
 

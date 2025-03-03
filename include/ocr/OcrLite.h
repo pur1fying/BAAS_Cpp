@@ -1,14 +1,11 @@
 #ifndef BAAS_OCR_OCRLITE_H_
 #define BAAS_OCR_OCRLITE_H_
 
-#include "opencv2/core.hpp"
 #include "onnxruntime/onnxruntime_cxx_api.h"
 #include "OcrStruct.h"
 #include "DbNet.h"
 #include "AngleNet.h"
 #include "CrnnNet.h"
-
-#include "nlohmann/json.hpp"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -18,46 +15,14 @@ public:
 
     ~OcrLite();
 
-    void set_num_thread(int num_thread);
-
-    void initLogger(
-            bool isConsole,
-            bool isPartImg,
-            bool isResultImg
-    );
-
-    void enableResultTxt(
-            const char *path,
-            const char *imgName
-    );
-
-    void set_gpu_id(int gpu_id);
-
     void get_net(
             const std::filesystem::path &detPath,
             const std::filesystem::path &clsPath,
             const std::filesystem::path &recPath,
-            const std::filesystem::path &keysPath
+            const std::filesystem::path &keysPath,
+            int gpu_id=-1,
+            int num_thread=4
     );
-
-    bool initModels();
-
-    void Logger(
-            const char *format,
-            ...
-    );
-
-    OcrResult detect(
-            const char *path,
-            const char *imgName,
-            int padding,
-            int maxSideLen,
-            float boxScoreThresh,
-            float boxThresh,
-            float unClipRatio,
-            bool doAngle,
-            bool mostAngle,
-            const std::vector<std::string> &candidates = std::vector<std::string>());
 
     OcrResult detect(
             const cv::Mat &mat,
@@ -102,8 +67,6 @@ public:
             bool mostAngle
     );
 
-
-    int numThread = 4;
     int padding = 50;
     const int maxSideLen = 1024;
     float boxScoreThresh = 0.5f;
@@ -113,28 +76,17 @@ public:
     const int flagDoAngle = 1;
     const bool mostAngle = true;
     const int flagMostAngle = 1;
-    const int gpu_id = 0;
 private:
-    bool isOutputConsole = false;
-    bool isOutputPartImg = false;
-    bool isOutputResultTxt = false;
-    bool isOutputResultImg = false;
-    FILE *resultTxt;
-    DbNet* dbNet;                // det
-    AngleNet* angleNet;          // cls
-    CrnnNet* crnnNet;            // rec
-
+    std::shared_ptr<DbNet> dbNet;                // det
+    std::shared_ptr<AngleNet> angleNet;          // cls
+    std::shared_ptr<CrnnNet> crnnNet;            // rec
 
     std::vector<cv::Mat> getPartImages(
             cv::Mat &src,
-            std::vector<TextBox> &textBoxes,
-            const char *path,
-            const char *imgName
+            std::vector<TextBox> &textBoxes
     );
 
     OcrResult detect(
-            const char *path,
-            const char *imgName,
             cv::Mat &src,
             cv::Rect &originRect,
             ScaleParam &scale,
@@ -145,6 +97,78 @@ private:
             bool mostAngle = true,
             const std::vector<std::string> &candidates = std::vector<std::string>());
 
+    inline static std::vector<TextBox> submit_getTextBoxes(
+            std::shared_ptr<DbNet>& dbNet,
+            cv::Mat &src,
+            ScaleParam &s,
+            float boxScoreThresh,
+            float boxThresh,
+            float unClipRatio
+    )
+    {
+        return dbNet->getTextBoxes(src, s, boxScoreThresh, boxThresh, unClipRatio);
+    }
+
+    inline static std::vector<Angle> submit_getAngles(
+            std::shared_ptr<AngleNet>& angleNet,
+            std::vector<cv::Mat> &partImages,
+            bool doAngle,
+            bool mostAngle
+    )
+    {
+        return angleNet->getAngles(partImages, doAngle, mostAngle);
+    }
+
+    inline static std::vector<TextLine> submit_getTextLines_withCandidates(
+            std::shared_ptr<CrnnNet>& crnnNet,
+            std::vector<cv::Mat> &partImages,
+            const std::vector<std::string> &candidates
+    )
+    {
+        return crnnNet->getTextLines(partImages, candidates);
+    }
+
+    inline static std::vector<TextLine> submit_getTextLines(
+            std::shared_ptr<CrnnNet>& crnnNet,
+            std::vector<cv::Mat> &partImages
+    )
+    {
+        return crnnNet->getTextLines(partImages);
+    }
+
+    inline static TextLine submit_getTextLine_withEnabledIndexes(
+            std::shared_ptr<CrnnNet>& crnnNet,
+            const cv::Mat &src,
+            const std::vector<size_t> &enabledIndexes
+    )
+    {
+        return {crnnNet->getTextLine(src, enabledIndexes)};
+    }
+
+    inline static TextLine submit_getTextLine(
+            std::shared_ptr<CrnnNet>& crnnNet,
+            const cv::Mat &src
+    )
+    {
+        return {crnnNet->getTextLine(src)};
+    }
+
+    inline static void submit_dbNet_initModel(DbNet* dbNet)
+    {
+        dbNet->initModel();
+    }
+
+    inline static void submit_angleNet_initModel(AngleNet* angleNet)
+    {
+        angleNet->initModel();
+    }
+
+    inline static void submit_crnnNet_initModel(CrnnNet* crnnNet)
+    {
+        crnnNet->initModel();
+    }
+
+    friend class BAASOCR;
 
 };
 

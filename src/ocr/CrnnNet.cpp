@@ -1,10 +1,12 @@
 #include <fstream>
+#include <memory>
 #include <numeric>
 
 #include "ocr/CrnnNet.h"
 #include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
 #include "config/BAASGlobalSetting.h"
+#include "ocr/BAASOCR.h"
 
 #ifdef __DIRECTML__
 #include <onnxruntime/core/providers/dml/dml_provider_factory.h>
@@ -46,11 +48,11 @@ void CrnnNet::set_gpu_id(int gpu_id)
 #endif
 }
 
-std::map<std::string, CrnnNet *> CrnnNet::nets;
+std::map<std::string, std::shared_ptr<CrnnNet>> CrnnNet::nets;
 
 CrnnNet::~CrnnNet()
 {
-    delete session;
+    session.reset();
     inputNamesPtr.clear();
     outputNamesPtr.clear();
 }
@@ -79,17 +81,17 @@ void CrnnNet::set_num_thread(int num_thread)
 }
 
 void CrnnNet::initModel(
-        const std::filesystem::path &pathStr,
+        const std::filesystem::path &path,
         const std::filesystem::path &keysPath
 )
 {
 #ifdef _WIN32
-    std::wstring crnnPath = pathStr.wstring();
-    session = new Ort::Session(env, crnnPath.c_str(), sessionOptions);
+    std::wstring crnnPath = path.wstring();
+    session = std::make_unique<Ort::Session>(env, crnnPath.c_str(), sessionOptions);
 #else
-    session = new Ort::Session(env, pathStr.c_str(), sessionOptions);
+    session = std::make_unique<Ort::Session>(env, path.c_str(), sessionOptions);
 #endif
-    modelPath = pathStr;
+    modelPath = path;
     keyDictPath = keysPath;
     inputNamesPtr = getInputNames(session);
     outputNamesPtr = getOutputNames(session);
@@ -100,7 +102,7 @@ void CrnnNet::initModel(
     keys.clear();
     keys.emplace_back("#");
     if (in) {
-        while (getline(in, line)) {// line中不包括每行的换行符
+        while (getline(in, line)) {
             keys.push_back(line);
             if (character2Index.find(line) != character2Index.end()) {
                 BAASGlobalLogger->BAASError("keys.txt has duplicate keys");
@@ -112,8 +114,9 @@ void CrnnNet::initModel(
         BAASGlobalLogger->BAASError("keys.txt not found");
         return;
     }
+    in.close();
     keys.emplace_back(" ");
-    BAASGlobalLogger->BAASInfo("keys size : " + std::to_string(keys.size()));
+    character2Index[" "] = keys.size() - 1;
 }
 
 template<class ForwardIterator>
@@ -152,8 +155,7 @@ TextLine CrnnNet::scoreToTextLine(
         maxIndex = int(argmax(&outputData[start], &outputData[stop]));
         maxValue = float(*std::max_element(&outputData[start], &outputData[stop]));
 
-        if (maxIndex > 0 && maxIndex < keySize &&
-            (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by " "
+        if (maxIndex > 0 && maxIndex < keySize && (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by " "
             scores.emplace_back(maxValue);
             strRes.append(keys[maxIndex]);
         }
@@ -197,8 +199,7 @@ TextLine CrnnNet::scoreToTextLine(
         maxIndex = int(argmax(&enabledScores[start], &enabledScores[stop]));
         maxValue = float(*std::max_element(&enabledScores[start], &enabledScores[stop]));
 
-        if (maxIndex > 0 && maxIndex < keySize &&
-            (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by "#"
+        if (maxIndex > 0 && maxIndex < keySize && (!(i > 0 && maxIndex == lastIndex))) {        // every letter is divided by "#"
             scores.emplace_back(maxValue);
             strRes.append(keys[enabledIndexes[maxIndex]]);
         }
@@ -221,10 +222,8 @@ TextLine CrnnNet::getTextLine(const cv::Mat &src)
             inputTensorValues.size(), inputShape.data(),
             inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()
-                                                         ->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()
-                                                           ->get()};
+    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
+    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
     auto outputTensor = session->Run(
             Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
             inputNames.size(), outputNames.data(), outputNames.size());
@@ -255,10 +254,8 @@ TextLine CrnnNet::getTextLine(
             inputTensorValues.size(), inputShape.data(),
             inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()
-                                                         ->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()
-                                                           ->get()};
+    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
+    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
     auto outputTensor = session->Run(
             Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
             inputNames.size(), outputNames.data(), outputNames.size());
@@ -275,20 +272,13 @@ TextLine CrnnNet::getTextLine(
 
 
 std::vector<TextLine> CrnnNet::getTextLines(
-        std::vector<cv::Mat> &partImg,
-        const char *path,
-        const char *imgName
+        std::vector<cv::Mat> &partImg
 )
 {
     int size = int(partImg.size());
     std::vector<TextLine> textLines(size);
     std::vector<size_t> enabledIndexes;
     for (int i = 0; i < size; ++i) {
-        //OutPut DebugImg
-        if (isOutputDebugImg) {
-            std::string debugImgFile = getDebugImgFilePath(path, imgName, i, "-debug-");
-            saveImg(partImg[i], debugImgFile.c_str());
-        }
 
         //getTextLine
         cv::flip(partImg[i], partImg[i], 1);
@@ -304,8 +294,6 @@ std::vector<TextLine> CrnnNet::getTextLines(
 
 std::vector<TextLine> CrnnNet::getTextLines(
         std::vector<cv::Mat> &partImg,
-        const char *path,
-        const char *imgName,
         const std::vector<std::string> &candidates
 )
 {
@@ -314,12 +302,6 @@ std::vector<TextLine> CrnnNet::getTextLines(
     std::vector<size_t> enabledIndexes;
     getTextIndexes(candidates, enabledIndexes);
     for (int i = 0; i < size; ++i) {
-        //OutPut DebugImg
-        if (isOutputDebugImg) {
-            std::string debugImgFile = getDebugImgFilePath(path, imgName, i, "-debug-");
-            saveImg(partImg[i], debugImgFile.c_str());
-        }
-
         //getTextLine
         cv::flip(partImg[i], partImg[i], 1);
         cv::flip(partImg[i], partImg[i], 1);
@@ -332,44 +314,70 @@ std::vector<TextLine> CrnnNet::getTextLines(
     return textLines;
 }
 
-CrnnNet *CrnnNet::get_net(
+std::shared_ptr<CrnnNet> CrnnNet::get_net(
         const std::filesystem::path &model_path,
-        const std::filesystem::path &keys_path
+        const std::filesystem::path &keys_path,
+        int gpu_id,
+        int num_thread
 )
 {
-    std::string joined_path = model_key_joined_path(model_path, keys_path);
+    std::string joined_path = model_key_joined_path(
+            BAAS_OCR_MODEL_DIR / model_path,
+            BAAS_OCR_MODEL_DIR / keys_path
+            );
     auto it = nets.find(joined_path);
     if (it != nets.end()) {
         BAASGlobalLogger->BAASInfo("Rec Already Inited");
         return it->second;
     }
 
-    auto *net = new CrnnNet();
-
+    auto net = std::make_shared<CrnnNet>();
     net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
     net->keyDictPath = BAAS_OCR_MODEL_DIR / keys_path;
+    net->set_gpu_id(gpu_id);
+    net->set_num_thread(num_thread);
+//    net->initModel();
 
     nets[joined_path] = net;
+    BAASOCR::uninited_crnnnet.push_back(net.get());
     return net;
 }
 
-bool CrnnNet::release_net(
-        const std::filesystem::path &model_path,
-        const std::filesystem::path &keys_path
+bool CrnnNet::try_release_net(
+        const std::string& joined_path
 )
 {
-    std::filesystem::path joined_path = model_key_joined_path(model_path, keys_path);
-    auto it = nets.find(joined_path.string());
-    if (it == nets.end()) return false;
-    delete it->second;
-    nets.erase(it);
+    auto it = nets.find(joined_path);
+    if (it != nets.end()) {
+        auto count = it->second.use_count();
+        if (count > 1) {
+            BAASGlobalLogger->BAASWarn("Rec : " + it->first + " use_count : " + std::to_string(count) + " > 1, can't release.");
+            return false;
+        }
+        it->second.reset();
+        BAASGlobalLogger->BAASInfo("Rec Release : " + it->first);
+        nets.erase(it);
+        return true;
+    }
     return true;
 }
 
-void CrnnNet::release_all()
+void CrnnNet::try_release_all()
 {
-    for (auto &it: nets) delete it.second;
-    nets.clear();
+    BAASGlobalLogger->sub_title("Rec Release All");
+    for (auto it = nets.begin(); it != nets.end();) {
+        auto count = it->second.use_count();
+        if (count > 1) {
+            BAASGlobalLogger->BAASWarn("Rec : " + it->first + " use_count : " + std::to_string(count) + " > 1, can't release.");
+            ++it;
+            continue;
+        }
+        it->second.reset();
+        BAASGlobalLogger->BAASInfo("Rec Release : " + it->first);
+        it = nets.erase(it);
+    }
+    BAASGlobalLogger->BAASInfo("CrnnNet map size : " + std::to_string(baas::CrnnNet::nets.size()));
+
 }
 
 std::string CrnnNet::model_key_joined_path(

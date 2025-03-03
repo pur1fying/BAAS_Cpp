@@ -54,6 +54,12 @@
   "available_control_methods": ["adb", "scrcpy", "nemu"],
   "google_store_package_name": "com.android.vending",
   "ocr_model_name": {
+    "zh-cn_v3": {
+      "det": "ch_PP-OCRv3_det_infer.onnx",
+      "cls": "ch_ppocr_mobile_v2.0_cls_infer.onnx",
+      "rec": "ch_PP-OCRv3_rec_infer.onnx",
+      "dict": "dict_chinese.txt"
+    },
     "zh-cn": {
       "det": "ch_PP-OCRv4_det_infer.onnx",
       "cls": "ch_ppocr_mobile_v2.0_cls_infer.onnx",
