@@ -23,6 +23,10 @@ public:
 
     void stop();
 
+    static void handle_create_shared_memory(const httplib::Request &req, httplib::Response &res);
+
+    static void handle_release_shared_memory(const httplib::Request &req, httplib::Response &res);
+
     static void handle_enable_thread_pool(const httplib::Request &req, httplib::Response &res);
 
     static void handle_disable_thread_pool(const httplib::Request &req, httplib::Response &res);

@@ -213,36 +213,27 @@ void BAASOCR::ocrResult2json(
     output["str_res"] = result.strRes;
     output["text_list"] = nlohmann::json::array();
     nlohmann::json text;
-    int min_x, min_y, max_x, max_y;
     for (auto &textBlock: result.textBlocks) {
         if (textBlock.text.empty())
             continue;
         text["text"] = textBlock.text;
         // angle net info
-        if (options & 0b1) {
+        if (options & 0b001) {
             text["angle_net"]["index"] = textBlock.angleIndex;
             text["angle_net"]["score"] = textBlock.angleScore;
             text["angle_net"]["time"] = std::round(textBlock.angleTime);
         }
         // character score
-        if (options & 0b10) {
+        if (options & 0b010) {
             text["char_scores"] = textBlock.charScores;
         }
         // position
         if (options & 0b100) {
             text["position"] = nlohmann::json::array();
-            min_x = INT_MAX;
-            min_y = INT_MAX;
-            max_x = 0;
-            max_y = 0;
-            for (auto &point: textBlock.boxPoint) {
-                min_x = std::min(min_x, point.x);
-                min_y = std::min(min_y, point.y);
-                max_x = std::max(max_x, point.x);
-                max_y = std::max(max_y, point.y);
-            }
-            text["position"].push_back({min_x, min_y});
-            text["position"].push_back({max_x, max_y});
+            text["position"].push_back({textBlock.boxPoint[0].x, textBlock.boxPoint[0].y});
+            text["position"].push_back({textBlock.boxPoint[1].x, textBlock.boxPoint[1].y});
+            text["position"].push_back({textBlock.boxPoint[2].x, textBlock.boxPoint[2].y});
+            text["position"].push_back({textBlock.boxPoint[3].x, textBlock.boxPoint[3].y});
         }
         text["crnn_time"] = std::round(textBlock.crnnTime);
         output["text_list"].push_back(text);

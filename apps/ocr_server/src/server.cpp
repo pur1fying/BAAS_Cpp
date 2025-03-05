@@ -1,11 +1,12 @@
 //
 // Created by pc on 2025/2/25.
 //
-#include <server.h>
-#include <BAASLogger.h>
-#include <config/BAASGlobalSetting.h>
-#include <ocr/BAASOCR.h>
-#include <crtdbg.h>
+#include "server.h"
+#include "BAASLogger.h"
+#include "config/BAASGlobalSetting.h"
+#include "ocr/BAASOCR.h"
+
+#include "BAASExternalIPC.h"
 
 using namespace baas;
 
@@ -28,6 +29,12 @@ Server::Server(){
 
 void Server::start()
 {
+    svr.Post("/create_shared_memory", [](const httplib::Request &req, httplib::Response &res) {
+        BAAS_OCR::Server::handle_create_shared_memory(req, res);
+    });
+    svr.Post("/release_shared_memory", [](const httplib::Request &req, httplib::Response &res) {
+        BAAS_OCR::Server::handle_release_shared_memory(req, res);
+    });
     svr.Post("/init_model", [](const httplib::Request &req, httplib::Response &res) {
         BAAS_OCR::Server::handle_init_model(req, res);
     });
@@ -133,11 +140,21 @@ void Server::handle_ocr(
     try{
         long long t_start = BAASUtil::getCurrentTimeMS();
         BAASGlobalLogger->sub_title("OCR");
-        BAASConfig temp = BAASConfig(
-                nlohmann::json::parse(req.get_file_value("data").content),
-                (BAASLogger*)BAASGlobalLogger
-                );
+        BAASConfig temp;
+        if (req.has_file("data")){
+            temp =  BAASConfig(
+                    nlohmann::json::parse(req.get_file_value("data").content),
+                    (BAASLogger*)BAASGlobalLogger
+            );
+        }
+        else{
+            temp = BAASConfig(
+                    nlohmann::json::parse(req.body),
+                    (BAASLogger*)BAASGlobalLogger
+            );
+        }
         out_req_params(temp.get_config());
+
         if (!temp.contains("language")){
             set_error_response(res, "Request must contains 'language' key.");
             return;
@@ -162,6 +179,8 @@ void Server::handle_ocr(
             return;
         }
 
+        cv::imshow("image", image);
+        cv::waitKey(0);
         std::string candidates = temp.getString("candidates", "");
 
         // ocr
@@ -191,14 +210,23 @@ void Server::handle_ocr_for_single_line(
         httplib::Response &res
 )
 {
-    BAASGlobalLogger->BAASInfo("OCR for single line");
     try{
         long long t_start = BAASUtil::getCurrentTimeMS();
-        BAASGlobalLogger->sub_title("OCR");
-        BAASConfig temp = BAASConfig(
-                        nlohmann::json::parse(req.get_file_value("data").content),
-                        (BAASLogger*)BAASGlobalLogger
-                );
+        BAASGlobalLogger->sub_title("OCR for single line");
+        BAASConfig temp;
+        if (req.has_file("data")){
+            temp =  BAASConfig(
+                    nlohmann::json::parse(req.get_file_value("data").content),
+                    (BAASLogger*)BAASGlobalLogger
+            );
+        }
+        else{
+            temp = BAASConfig(
+                    nlohmann::json::parse(req.body),
+                    (BAASLogger*)BAASGlobalLogger
+            );
+        }
+
         out_req_params(temp.get_config());
         if (!temp.contains("language")){
             set_error_response(res, "Request must contains 'language' key.");
@@ -312,7 +340,37 @@ int Server::req_get_image(
     BAASGlobalLogger->BAASInfo("Pass method : " + pass_method_name);
     // shared memory
     if(pass_method == 0) {
-
+        if (!image_info.contains("shared_memory_name")) {
+            BAASGlobalLogger->BAASError("image_info must contains 'shared_memory_name'.");
+            return 1;
+        }
+        if (image_info.value_type("shared_memory_name") != nlohmann::detail::value_t::string) {
+            BAASGlobalLogger->BAASError("'/image_info/shared_memory_name' must be string.");
+            return 1;
+        }
+        int x = image_info.getInt("/resolution/0", 0);
+        int y = image_info.getInt("/resolution/1", 0);
+        if (x == 0 or y == 0) {
+            BAASGlobalLogger->BAASError("Resolution must be set.");
+            return 1;
+        }
+        std::string shared_memory_name = image_info.getString("shared_memory_name");
+        unsigned char *data = Shared_Memory::get_data_ptr(shared_memory_name);
+        if (data == nullptr) {
+            BAASGlobalLogger->BAASError("Failed to get shared memory data.");
+            return 1;
+        }
+        size_t size = x * y * 3;
+        size_t shm_size = Shared_Memory::get_shared_memory_size(shared_memory_name);
+        if (size > shm_size) {
+            BAASGlobalLogger->BAASError
+                (
+                "Required size [" + std::to_string(size) + "] "
+                "is larger than shared memory size [" + std::to_string(shm_size) + "]."
+                );
+            return 1;
+        }
+        ret = cv::Mat(y, x, CV_8UC3, data);
     }
     // post file
     else if (pass_method == 1) {
@@ -431,6 +489,73 @@ void Server::handle_disable_thread_pool(
     baas::BAASOCR::disable_thread_pool();
     res.status = 200;
     res.set_content("Success.", "text/plain");
+}
+
+void Server::handle_create_shared_memory(
+        const httplib::Request &req,
+        httplib::Response &res
+)
+{
+    auto t1= std::chrono::high_resolution_clock::now();
+    BAASGlobalLogger->sub_title("Ocr Create Shared Memory");
+    BAASConfig temp = BAASConfig(nlohmann::json::parse(req.body), (BAASLogger*)BAASGlobalLogger);
+    out_req_params(temp.get_config());
+
+    if (!temp.contains("shared_memory_name")){
+        set_error_response(res, "Request must contains 'shared_memory_name' key.");
+        return;
+    }
+    if (temp.value_type("shared_memory_name") != nlohmann::detail::value_t::string) {
+        set_error_response(res, "Value type of 'shared_memory_name' must be string.");
+        return;
+    }
+    if (!temp.contains("size")){
+        set_error_response(res, "Request must contains 'size' key.");
+        return;
+    }
+    if (temp.value_type("size") != nlohmann::detail::value_t::number_unsigned){
+        set_error_response(res, "Value type of 'size' must be unsigned.");
+        return;
+    }
+    auto name = temp.getString("shared_memory_name");
+    auto size = temp.getUInt("size");
+
+    baas::Shared_Memory::get_shared_memory(name, size, nullptr);
+    res.status = 200;
+    res.set_content("Success.", "text/plain");
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
+    std::cout << "create shared memory time: " << duration << "ms" << std::endl;
+}
+
+void Server::handle_release_shared_memory(
+        const httplib::Request &req,
+        httplib::Response &res
+)
+{
+    BAASGlobalLogger->sub_title("Ocr Release Shared Memory");
+    BAASConfig temp = BAASConfig(nlohmann::json::parse(req.body), (BAASLogger*)BAASGlobalLogger);
+    out_req_params(temp.get_config());
+
+    if (!temp.contains("shared_memory_name")){
+        set_error_response(res, "Request must contains 'shared_memory_name' key.");
+        return;
+    }
+    if (temp.value_type("shared_memory_name") != nlohmann::detail::value_t::string) {
+        set_error_response(res, "Value type of 'shared_memory_name' must be string.");
+        return;
+    }
+    auto name = temp.getString("shared_memory_name");
+
+    int ret = baas::Shared_Memory::release_shared_memory(name);
+    if (ret == 0){
+        res.status = 200;
+        res.set_content("Success.", "text/plain");
+    }
+    else{
+        res.status = 400;
+        res.set_content("Shm not exists.", "text/plain");
+    }
 }
 
 

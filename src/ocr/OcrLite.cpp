@@ -264,10 +264,22 @@ OcrResult OcrLite::detect(
     for (size_t i = 0; i < textLines.size(); ++i) {
         std::vector<cv::Point> boxPoint = std::vector<cv::Point>(4);
         int padding = originRect.x;//padding conversion
-        boxPoint[0] = cv::Point(textBoxes[i].boxPoint[0].x - padding, textBoxes[i].boxPoint[0].y - padding);
-        boxPoint[1] = cv::Point(textBoxes[i].boxPoint[1].x - padding, textBoxes[i].boxPoint[1].y - padding);
-        boxPoint[2] = cv::Point(textBoxes[i].boxPoint[2].x - padding, textBoxes[i].boxPoint[2].y - padding);
-        boxPoint[3] = cv::Point(textBoxes[i].boxPoint[3].x - padding, textBoxes[i].boxPoint[3].y - padding);
+        boxPoint[0] = cv::Point(
+                std::max(textBoxes[i].boxPoint[0].x - padding, 0),
+                std::max(textBoxes[i].boxPoint[0].y - padding, 0)
+                );
+        boxPoint[1] = cv::Point(
+                std::min(textBoxes[i].boxPoint[1].x - padding, src.cols - 1),
+                std::max(textBoxes[i].boxPoint[1].y - padding, 0)
+                );
+        boxPoint[2] = cv::Point(
+                std::min(textBoxes[i].boxPoint[2].x - padding, src.cols - 1),
+                std::min(textBoxes[i].boxPoint[2].y - padding, src.rows - 1)
+                );
+        boxPoint[3] = cv::Point(
+                std::max(textBoxes[i].boxPoint[3].x - padding, 0),
+                std::min(textBoxes[i].boxPoint[3].y - padding, src.rows - 1)
+                );
         TextBlock textBlock{
             boxPoint,
             textBoxes[i].score,
@@ -282,8 +294,6 @@ OcrResult OcrLite::detect(
     }
 
     double endTime = getCurrentTime();
-    double fullTime = endTime - startTime;
-
     cv::Mat textBoxImg;
     std::string strRes;
     for (auto &textBlock: textBlocks) {
@@ -293,6 +303,7 @@ OcrResult OcrLite::detect(
         strRes.append("\n");
     }
 
+    double fullTime = endTime - startTime;
     return OcrResult{dbNetTime, textBlocks, fullTime, strRes};
 }
 

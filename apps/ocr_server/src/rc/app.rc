@@ -1,0 +1,8 @@
+#if defined(UNDER_CE)
+#include <winbase.h>
+#else
+#include <windows.h>
+#endif
+
+IDI_ICON1 ICON "logo.ico"
+

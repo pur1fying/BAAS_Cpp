@@ -7,8 +7,5 @@
       "host": "localhost",
       "port": 1145
     }
-  },
-  "log": {
-    "enable": 3
   }
 }

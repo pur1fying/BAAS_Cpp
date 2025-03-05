@@ -112,7 +112,11 @@ endif()
 if (BUILD_BAAS_OCR)
     add_subdirectory(apps/ocr_server)
 endif()
-add_library(lib_BAAS SHARED ${BAAS_PROJECT_PATH}/src/BAASExternalIPC.cpp)
+add_library(
+        lib_BAAS
+        SHARED
+        ${BAAS_PROJECT_PATH}/src/BAASExternalIPC.cpp
+)
 
 if (ADB_BINARY_RESOURCE_REQUIRED)
     file(

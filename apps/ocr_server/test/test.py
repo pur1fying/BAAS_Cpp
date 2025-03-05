@@ -1,12 +1,11 @@
 import json
 import time
-
+import mmap
 import cv2
 import requests
+from multiprocessing.shared_memory import SharedMemory
 
 basic_url = "http://localhost:1145/"
-
-image_path = 'apps/ocr_server/test/test_ocr3.png'
 
 
 def test_enable_thread_pool(count=4):
@@ -52,55 +51,73 @@ def test_release_model():
 
 def test_ocr():
     url = basic_url + "ocr"
+    image_path = 'apps/ocr_server/test/test_images/test_ocr1.png'
     image = cv2.imread(image_path)
-    _, encoded_image = cv2.imencode('.png', image)
-    image_bytes = encoded_image.tobytes()
+    t1 = time.time()
+    shm = SharedMemory(name="test_shared_memory", create=False)
+    shm.buf[:image.size] = image.tobytes()
+    t2 = time.time()
+    print("Put image into shared memory: ", t2 - t1)
     data = {
         "language": "zh-cn",
         "image": {
-            "pass_method": 1,
+            "pass_method": 0,
+            "shared_memory_name": "test_shared_memory",
+            "resolution": [image.shape[1], image.shape[0]],
         },
         "ret_options": 0b100
-
-    }
-    files = {
-        "data": (None, json.dumps(data), "application/json"),
-        "image": ("image.png", image_bytes, "image/png")
     }
     t1 = time.time()
-    response = requests.post(url, files=files)
+    response = requests.post(url, json=data)
     t2 = time.time()
-    print(t2 - t1)
-    print(json.dumps(json.loads(response.text), indent=4))
+    print("Time: ", t2 - t1)
+    ret = json.loads(response.text)
+    print(json.dumps(ret, indent=4))
 
 
 def test_ocr_for_single_line():
     url = basic_url + "ocr_for_single_line"
-    test_img_path = 'apps/ocr_server/test/test_images/test_ocr_for_single_line2.png'
+    test_img_path = "C:\\Users\\pc\\Desktop\\work\\c\\BAAS_Cpp\\cmake-build-debug\\resource\\ocr_models\\test_images\\en-us.png"
     image = cv2.imread(test_img_path)
-    _, encoded_image = cv2.imencode('.png', image)
-    image_bytes = encoded_image.tobytes()
     data = {
         "language": "en-us",
         "image": {
-            "pass_method": 1,
-            "single_line": True
+            "pass_method": 2,
+            "local_path": test_img_path
         },
         "candidates": "I loveAri1s "
     }
-    files = {
-        "data": (None, json.dumps(data), "application/json"),
-        "image": ("image.png", image_bytes, "image/png")
-    }
-    response = requests.post(url, files=files)
+    response = requests.post(url, json=data)
     print(json.dumps(json.loads(response.text), indent=4))
 
 
+def test_create_shared_memory():
+    url = basic_url + "create_shared_memory"
+    data = {
+        "shared_memory_name": "test_shared_memory",
+        "size": 1280 * 720 * 3
+    }
+    t1 = time.time()
+    response = requests.post(url, json=data)
+
+
+def test_release_shared_memory():
+    url = basic_url + "release_shared_memory"
+    data = {
+        "shared_memory_name": "test_shared_memory"
+    }
+    response = requests.post(url, json=data)
+
+
 if __name__ == "__main__":
-    test_enable_thread_pool()
+    # test_enable_thread_pool()
     # test_disable_thread_pool()
-    test_init_model()
+    # test_init_model()
+    # test_create_shared_memory()
+    test_release_shared_memory()
+
     # test_ocr()
-    test_ocr_for_single_line()
+    # time.sleep(1)
+    # test_ocr_for_single_line()
     # test_release_model()
     # test_release_all()

@@ -33,6 +33,7 @@ file(
         ${BAAS_PROJECT_PATH}/src/BAASLogger.cpp
         ${BAAS_PROJECT_PATH}/src/BAASUtil.cpp
         ${BAAS_PROJECT_PATH}/src/simdutf.cpp
+        ${BAAS_PROJECT_PATH}/src/BAASExternalIPC.cpp
 )
 
 add_executable(
@@ -143,3 +144,10 @@ target_link_libraries(
         lib_BAAS
         ${LIB_RAW}
 )
+
+
+if(WIN32)
+    set(ICON_RESOURCE "${CMAKE_CURRENT_LIST_DIR}/src/rc/logo.ico")
+    set(RES_FILE "${CMAKE_CURRENT_LIST_DIR}/src/rc/app.rc")
+    target_sources(BAAS_ocr_server PRIVATE ${RES_FILE})
+endif()

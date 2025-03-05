@@ -5,7 +5,7 @@
 #include <utils.h>
 #include <ocr/BAASOCR.h>
 #include <server.h>
-
+#include "BAASExternalIPC.h"
 using namespace baas;
 int main()
 {
