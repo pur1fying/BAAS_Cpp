@@ -25,7 +25,10 @@ public:
     static inline std::string model_key_joined_path(
             const std::filesystem::path &model_path,
             const std::filesystem::path &keys_path
-    );
+    )
+    {
+        return model_path.string() + " | " + keys_path.string();
+    }
 
     static void try_release_all();
 

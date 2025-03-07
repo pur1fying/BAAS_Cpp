@@ -14,7 +14,7 @@
 #include <codecvt>
 #include <random>
 #include <regex>
-
+#include <thread>
 #include <simdutf.h>
 #include <opencv2/opencv.hpp>
 
@@ -61,15 +61,6 @@ public:
     );
 
     static std::string current_time_string();
-
-    static std::string executeCommandAndGetOutput(const std::string &command);
-
-    static std::string executeCommandAndGetOutput(
-            const std::vector<std::string> &commandList,
-            int n
-    );
-
-    static FILE *executeCommand(const std::string &command);
 
     static std::string getStreamOutput(FILE *stream);
 

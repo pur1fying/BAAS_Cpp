@@ -496,7 +496,6 @@ void Server::handle_create_shared_memory(
         httplib::Response &res
 )
 {
-    auto t1= std::chrono::high_resolution_clock::now();
     BAASGlobalLogger->sub_title("Ocr Create Shared Memory");
     BAASConfig temp = BAASConfig(nlohmann::json::parse(req.body), (BAASLogger*)BAASGlobalLogger);
     out_req_params(temp.get_config());
@@ -520,12 +519,14 @@ void Server::handle_create_shared_memory(
     auto name = temp.getString("shared_memory_name");
     auto size = temp.getUInt("size");
 
-    baas::Shared_Memory::get_shared_memory(name, size, nullptr);
+    void* p = baas::Shared_Memory::get_shared_memory(name, size, nullptr);
+    if (p == nullptr) {
+        res.status = 400;
+        res.set_content("Failed to create shared memory.", "text/plain");
+        return;
+    }
     res.status = 200;
     res.set_content("Success.", "text/plain");
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>( t2 - t1 ).count();
-    std::cout << "create shared memory time: " << duration << "ms" << std::endl;
 }
 
 void Server::handle_release_shared_memory(

@@ -380,14 +380,6 @@ void CrnnNet::try_release_all()
 
 }
 
-std::string CrnnNet::model_key_joined_path(
-        const std::filesystem::path &model_path,
-        const std::filesystem::path &keys_path
-)
-{
-    return model_path.string() + " | " + keys_path.string();
-}
-
 void CrnnNet::initModel()
 {
     initModel(modelPath, keyDictPath);

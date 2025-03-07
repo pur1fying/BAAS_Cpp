@@ -110,13 +110,13 @@ def test_release_shared_memory():
 
 
 if __name__ == "__main__":
-    # test_enable_thread_pool()
+    test_enable_thread_pool()
     # test_disable_thread_pool()
-    # test_init_model()
-    # test_create_shared_memory()
-    test_release_shared_memory()
+    test_init_model()
+    test_create_shared_memory()
+    # test_release_shared_memory()
 
-    # test_ocr()
+    test_ocr()
     # time.sleep(1)
     # test_ocr_for_single_line()
     # test_release_model()

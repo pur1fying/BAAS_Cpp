@@ -5,8 +5,10 @@
 #ifndef BAAS_DEVICE_BAASADBUTILS_H_
 #define BAAS_DEVICE_BAASADBUTILS_H_
 
+#ifdef _WIN32
 #include "WinSock2.h"
 #include "WS2tcpip.h"
+#endif
 
 #include <vector>
 #include <fstream>

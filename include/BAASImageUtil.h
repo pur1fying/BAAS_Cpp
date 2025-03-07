@@ -262,11 +262,7 @@ inline bool operator<=(
         const BAASRectangle &rect
 )
 {
-    return (point.x >= rect.ul
-                           .x && point.x <= rect.lr
-                                                .x) && (point.y >= rect.ul
-                                                                       .y && point.y <= rect.lr
-                                                                                            .y);
+    return (point.x >= rect.ul.x && point.x <= rect.lr.x) && (point.y >= rect.ul.y && point.y <= rect.lr.y);
 }
 
 inline bool operator<(

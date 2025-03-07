@@ -5,17 +5,50 @@
 #ifndef BAAS_BAASEXTERNALIPC_H_
 #define BAAS_BAASEXTERNALIPC_H_
 
-#define SHARED_MEMORY_EXISTS 1
-#define SHARED_MEMORY_NOT_EXISTS 2
-#define SHARED_MEMORY_FAIL_OPEN_FILE_MAPPING 1
-#define SHARED_MEMORY_FAIL_GET_MAP_VIEW 2
-
 #include <map>
 #include <string>
 #include <memory>
 #include "core_defines.h"
 
+
 BAAS_NAMESPACE_BEGIN
+
+size_t query_shm_size(void *p_buf_ptr);
+
+struct shm_core{    // metadata of shm
+public:
+    shm_core() = default;
+
+    explicit shm_core(const std::string& name, size_t size, const unsigned char *data = nullptr);
+
+    std::string shm_name;
+
+    size_t size = 0;
+
+    int put_data(const unsigned char *data, size_t sz) const;
+
+    void safe_release();
+
+    inline unsigned char *get_data() const {
+#ifdef _WIN32
+        return (unsigned char *)pBuf;
+#elif UNIX_LIKE_PLATFORM
+        return (unsigned char *)shm_address;
+#endif // _WIN32
+
+    }
+#ifdef _WIN32
+    void *hMapFile;
+
+    void *pBuf;
+#elif UNIX_LIKE_PLATFORM
+    int shm_fd = 0;
+
+    void * shm_address = nullptr;
+#endif // _WIN32
+
+
+};
 /*
  * for BAAS to exchange image data between different processes
  * 1. Every shm is used by one BAAS instance
@@ -66,19 +99,10 @@ private:
 
     inline size_t get_size() const
     {
-        return size;
+        return shm.size;
     }
 
-    static size_t query_size(void *p_buf_ptr);
-
-#ifdef _WIN32
-    void *hMapFile;
-
-    void *pBuf;     // virtual address of the shared memory, assigned by kernel
-#endif // _WIN32
-    std::string name;
-
-    size_t size;
+    shm_core shm;
 
     static std::map<std::string, std::unique_ptr<Shared_Memory>> shm_map;
 public:
@@ -100,11 +124,16 @@ private:
 };
 
 BAAS_NAMESPACE_END
-
+#ifdef _WIN32
 #ifdef BAAS_BUILD_DLL
-#define BAAS_API __declspec(dllexport)
+    #define BAAS_API __declspec(dllexport)
 #else
-#define BAAS_API __declspec(dllimport)
+    #define BAAS_API __declspec(dllimport)
+#endif
+#endif
+
+#if UNIX_LIKE_PLATFORM
+#define BAAS_API __attribute__((visibility("default")))
 #endif
 
 #ifdef __cplusplus

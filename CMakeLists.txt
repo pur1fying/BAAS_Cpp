@@ -21,11 +21,31 @@ macro(BAAS_sub_title_LOG)
     message(STATUS "${LEFT} ${ARGN} ${RIGHT}")
 endmacro()
 
-
+macro(LOG_LINE)
+    message(STATUS "---------------------------------")
+endmacro()
 
 BAAS_hr_LOG("PROJECT BAAS")
 BAAS_sub_title_LOG("BUILD TYPE: ${CMAKE_BUILD_TYPE}")
-cmake_minimum_required(VERSION 3.25)
+
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+    set(CURRENT_OS_NAME "Linux")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+    set(CURRENT_OS_NAME "Windows")
+elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+    set(CURRENT_OS_NAME "MacOS")
+else()
+    message(STATUS "Unknown OS: ${CMAKE_SYSTEM_NAME}")
+endif()
+if ( NOT DEFINED CURRENT_OS_NAME)
+    message(FATAL_ERROR "Unknown OS: ${CMAKE_SYSTEM_NAME}")
+endif()
+
+message(STATUS "OS : ${CURRENT_OS_NAME}")
+set(BAAS_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${CURRENT_OS_NAME}")
+set(BAAS_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${CURRENT_OS_NAME}")
+
+cmake_minimum_required(VERSION 3.22)
 project(BAAS VERSION 1.0.0)
 configure_file(
         version.h.in
@@ -39,7 +59,7 @@ get_filename_component(BAAS_PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 # app options
 option(BUILD_BAAS               "build BAAS app"            OFF)
 option(BUILD_BAAS_OCR           "build the ocr server app"  ON)
-
+option(BUILD_TEST               "build the test"            OFF)
 
 
 set(BIN_RESOURCE_REQUIRED OFF)
@@ -53,6 +73,7 @@ set(BAAS_PROCEDURE_RESOURCE_REQUIRED OFF)
 set(BAAS_IMAGE_RESOURCE_REQUIRED OFF)
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 
 include_directories(
         ${BAAS_PROJECT_PATH}/external
@@ -112,6 +133,11 @@ endif()
 if (BUILD_BAAS_OCR)
     add_subdirectory(apps/ocr_server)
 endif()
+# --------------  TEST  ----------------------
+if (BUILD_TEST)
+    add_subdirectory(apps/test)
+endif()
+
 add_library(
         lib_BAAS
         SHARED
