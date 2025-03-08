@@ -179,8 +179,6 @@ void Server::handle_ocr(
             return;
         }
 
-        cv::imshow("image", image);
-        cv::waitKey(0);
         std::string candidates = temp.getString("candidates", "");
 
         // ocr

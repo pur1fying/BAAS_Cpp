@@ -19,7 +19,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     SET(
             DLL_RELEASE
-            libopencv_world.so.409
+            libopencv_world.so.4.9.0
     )
 endif ()
 
