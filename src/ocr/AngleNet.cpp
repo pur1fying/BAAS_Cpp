@@ -79,7 +79,6 @@ void AngleNet::set_num_thread(int num_thread)
 
 void AngleNet::initModel(const std::filesystem::path &path)
 {
-
 #ifdef _WIN32
     std::wstring anglePath = path.wstring();
     session = std::make_unique<Ort::Session>(env, anglePath.c_str(), sessionOptions);
@@ -180,7 +179,8 @@ std::vector<Angle> AngleNet::getAngles(
 std::shared_ptr<AngleNet> AngleNet::get_net(
         const std::filesystem::path &model_path,
         int gpu_id,
-        int num_thread
+        int num_thread,
+        bool enable_cpu_memory_arena
 )
 {
     auto it = nets.find((BAAS_OCR_MODEL_DIR / model_path).string());
@@ -192,6 +192,7 @@ std::shared_ptr<AngleNet> AngleNet::get_net(
     net->modelPath = BAAS_OCR_MODEL_DIR / model_path;
     net->set_gpu_id(gpu_id);
     net->set_num_thread(num_thread);
+    net->set_cpu_memory_arena(enable_cpu_memory_arena);
 //    net->initModel();
 
     nets[net->modelPath.string()] = net;
@@ -236,6 +237,15 @@ void AngleNet::try_release_all()
         it = nets.erase(it);
     }
     BAASGlobalLogger->BAASInfo("Angle map size : " + std::to_string(baas::AngleNet::nets.size()));
+}
+
+void AngleNet::set_cpu_memory_arena(bool state)
+{
+    if (state) {
+        sessionOptions.EnableCpuMemArena();
+    } else {
+        sessionOptions.DisableCpuMemArena();
+    }
 }
 
 BAAS_NAMESPACE_END

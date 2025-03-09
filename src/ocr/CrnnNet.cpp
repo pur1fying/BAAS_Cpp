@@ -311,7 +311,8 @@ std::shared_ptr<CrnnNet> CrnnNet::get_net(
         const std::filesystem::path &model_path,
         const std::filesystem::path &keys_path,
         int gpu_id,
-        int num_thread
+        int num_thread,
+        bool enable_cpu_memory_arena
 )
 {
     std::string joined_path = model_key_joined_path(
@@ -329,6 +330,7 @@ std::shared_ptr<CrnnNet> CrnnNet::get_net(
     net->keyDictPath = BAAS_OCR_MODEL_DIR / keys_path;
     net->set_gpu_id(gpu_id);
     net->set_num_thread(num_thread);
+    net->set_cpu_memory_arena(enable_cpu_memory_arena);
 //    net->initModel();
 
     nets[joined_path] = net;
@@ -388,6 +390,15 @@ void CrnnNet::getTextIndexes(
     for (size_t i = 0; i < characters.size(); i++) {
         auto it = character2Index.find(characters[i]);
         if (it != character2Index.end()) enabledIndexes.push_back(it->second);
+    }
+}
+
+void CrnnNet::set_cpu_memory_arena(bool state)
+{
+    if (state) {
+        sessionOptions.EnableCpuMemArena();
+    } else {
+        sessionOptions.DisableCpuMemArena();
     }
 }
 

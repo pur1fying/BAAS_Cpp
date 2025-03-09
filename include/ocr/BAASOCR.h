@@ -29,7 +29,12 @@ public:
 
     bool language_inited(const std::string &language);
 
-    std::vector<int> init(const std::vector<std::string> &languages, int gpu_id = -2, int num_thread = 0);
+    std::vector<int> init(
+            const std::vector<std::string> &languages,
+            std::optional<int> gpu_id = std::nullopt,
+            std::optional<int> num_thread = std::nullopt,
+            std::optional<bool> enable_cpu_memory_arena = std::nullopt
+    );
 
     void release_all();
 
@@ -68,7 +73,13 @@ public:
     static std::string REGEX_UTF8PATTERN;
 
 private:
-    int init(const std::string &language, int gpu_id = -2, int num_thread = 0);
+    int init
+    (
+            const std::string &language,
+            int gpu_id,
+            int num_thread,
+            bool enable_cpu_memory_arena
+     );
 
     static std::vector<DbNet*> uninited_dbnet;
 

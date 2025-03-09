@@ -313,12 +313,13 @@ void OcrLite::get_net(
         const std::filesystem::path &recPath,
         const std::filesystem::path &keysPath,
         int gpu_id,
-        int num_thread
+        int num_thread,
+        bool enable_cpu_memory_arena
 )
 {
-    dbNet = DbNet::get_net(detPath, gpu_id, num_thread);
-    angleNet = AngleNet::get_net(clsPath, gpu_id, num_thread);
-    crnnNet = CrnnNet::get_net(recPath, keysPath, gpu_id, num_thread);
+    dbNet    = DbNet::get_net(detPath, gpu_id, num_thread, enable_cpu_memory_arena);
+    angleNet = AngleNet::get_net(clsPath, gpu_id, num_thread, enable_cpu_memory_arena);
+    crnnNet  = CrnnNet::get_net(recPath, keysPath, gpu_id, num_thread, enable_cpu_memory_arena);
 
     std::cout << dbNet->getModelPath() << std::endl;
     std::cout<< dbNet.use_count() << std::endl;

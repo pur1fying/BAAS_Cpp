@@ -75,13 +75,15 @@ void Server::handle_init_model(
     out_req_params(temp.get_config());
 
     int gpu_id, num_thread;
+    bool EnableCpuMemoryArena;
     std::vector<std::string> languages;
     try{
         nlohmann::json j_ret;
         languages = temp.get<std::vector<std::string>>("language");
         gpu_id = temp.getInt("gpu_id", -1);
         num_thread = temp.getInt("num_thread", 4);
-        std::vector<int> ret = baas_ocr->init(languages, gpu_id, num_thread);
+        EnableCpuMemoryArena = temp.getBool("EnableCpuMemoryArena", false);
+        std::vector<int> ret = baas_ocr->init(languages, gpu_id, num_thread, EnableCpuMemoryArena);
         long long t_end = BAASUtil::getCurrentTimeMS();
         j_ret["ret"] = ret;
         j_ret["time"] = int(t_end - t_start);

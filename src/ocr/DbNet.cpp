@@ -215,7 +215,8 @@ DbNet::getTextBoxes(
 std::shared_ptr<DbNet> DbNet::get_net(
         const std::filesystem::path &model_path,
         int gpu_id,
-        int num_thread
+        int num_thread,
+        bool enable_cpu_memory_arena
 )
 {
     auto it = nets.find((BAAS_OCR_MODEL_DIR / model_path).string());
@@ -228,6 +229,7 @@ std::shared_ptr<DbNet> DbNet::get_net(
 
     net->set_gpu_id(gpu_id);
     net->set_num_thread(num_thread);
+    net->set_cpu_memory_arena(enable_cpu_memory_arena);
 //    net->initModel();
     nets[net->modelPath.string()] = net;
     BAASOCR::uninited_dbnet.push_back(net.get());
@@ -273,6 +275,15 @@ void DbNet::try_release_all()
     }
     BAASGlobalLogger->BAASInfo("DbNet map size : " + std::to_string(baas::DbNet::nets.size()));
 
+}
+
+void DbNet::set_cpu_memory_arena(bool state)
+{
+    if (state) {
+        sessionOptions.EnableCpuMemArena();
+    } else {
+        sessionOptions.DisableCpuMemArena();
+    }
 }
 
 

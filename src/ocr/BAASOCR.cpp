@@ -37,7 +37,12 @@ BAASOCR *BAASOCR::get_instance()
     return instance;
 }
 
-int BAASOCR::init(const std::string &language, int gpu_id, int num_thread)
+int BAASOCR::init(
+        const std::string &language,
+        int gpu_id,
+        int num_thread,
+        bool enable_cpu_memory_arena
+        )
 /*
  * 0 : invalid language
  * 1 : success
@@ -69,14 +74,20 @@ int BAASOCR::init(const std::string &language, int gpu_id, int num_thread)
     BAASGlobalLogger->BAASInfo("Rec     : " + rec);
     BAASGlobalLogger->BAASInfo("Key     : " + keys);
 
-    // use config in global setting
-    if (gpu_id == -2) gpu_id = global_setting->get("/ocr/gpu_id", -1);
-    if (num_thread == 0) num_thread = global_setting->getInt("/ocr/num_thread", 0);
 
-    BAASGlobalLogger->BAASInfo("GPU ID  : " + std::to_string(gpu_id));
-    BAASGlobalLogger->BAASInfo("Num Thread : " + std::to_string(num_thread));
+    BAASGlobalLogger->BAASInfo("GPU ID      : " + std::to_string(gpu_id));
+    BAASGlobalLogger->BAASInfo("Num Thread  : " + std::to_string(num_thread));
+    BAASGlobalLogger->BAASInfo("Memory Pool : " + std::to_string(enable_cpu_memory_arena));
 
-    ocr->get_net(det, cls, rec, keys, gpu_id, num_thread);
+    ocr->get_net(
+            det,
+            cls,
+            rec,
+            keys,
+            gpu_id,
+            num_thread,
+            enable_cpu_memory_arena
+            );
 
     ocr_map[language] = ocr;
     return 1;
@@ -154,12 +165,27 @@ void BAASOCR::ocr_for_single_line(
 
 std::vector<int> BAASOCR::init(
         const std::vector<std::string> &languages,
-        int gpu_id,
-        int num_thread
-        )
+        std::optional<int> gpu_id,
+        std::optional<int> num_thread,
+        std::optional<bool> enable_cpu_memory_arena
+)
 {
+    // use config in global setting
+    if (!gpu_id.has_value())
+        gpu_id = global_setting->get("/ocr/gpu_id", -1);
+    if (!num_thread.has_value())
+        num_thread = global_setting->getInt("/ocr/num_thread", 0);
+    if (!enable_cpu_memory_arena.has_value())
+        enable_cpu_memory_arena = global_setting->getBool("/ocr/enable_cpu_memory_arena", false);
     std::vector<int> res;
-    for (auto &i: languages) res.push_back(init(i, gpu_id, num_thread));
+    for (auto &i: languages)
+        res.push_back(
+                init(
+                        i,
+                        gpu_id.value(),
+                        num_thread.value(),
+                        enable_cpu_memory_arena.value()
+                    ));
 
     std::vector<std::future<void>> threads;
     if (thread_pool_enabled) {

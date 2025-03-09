@@ -21,7 +21,8 @@ public:
             const std::filesystem::path &recPath,
             const std::filesystem::path &keysPath,
             int gpu_id=-1,
-            int num_thread=4
+            int num_thread=4,
+            bool enable_cpu_memory_arena=false
     );
 
     OcrResult detect(

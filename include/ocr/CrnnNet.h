@@ -15,7 +15,8 @@ public:
             const std::filesystem::path &model_path,
             const std::filesystem::path &keys_path,
             int gpu_id=-1,
-            int num_thread=4
+            int num_thread=4,
+            bool enable_cpu_memory_arena=false
     );
 
     static bool try_release_net(
@@ -37,6 +38,8 @@ public:
     void set_num_thread(int num_thread);
 
     void set_gpu_id(int gpu_id);
+
+    void set_cpu_memory_arena(bool state);
 
     void initModel();
 
@@ -75,6 +78,7 @@ public:
 
     inline const std::filesystem::path get_joined_path() const { return model_key_joined_path(modelPath, keyDictPath); }
 private:
+
     void initModel(
             const std::filesystem::path &pathStr,
             const std::filesystem::path &keysPath

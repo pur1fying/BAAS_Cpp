@@ -13,7 +13,8 @@ public:
     static std::shared_ptr<AngleNet> get_net(
             const std::filesystem::path &model_path,
             int gpu_id = -1,
-            int num_thread = 4
+            int num_thread = 4,
+            bool enable_cpu_memory_arena = false
             );
 
     static bool try_release_net(const std::string &model_path);
@@ -27,6 +28,8 @@ public:
     void set_num_thread(int num_thread);
 
     void set_gpu_id(int gpu_id);
+
+    void set_cpu_memory_arena(bool state);
 
     std::vector<Angle> getAngles(
             std::vector<cv::Mat> &partImgs,
