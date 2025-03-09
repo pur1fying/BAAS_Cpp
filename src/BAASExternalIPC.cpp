@@ -282,6 +282,7 @@ int Shared_Memory::release_shared_memory(const std::string &name)
     if (it == shm_map.end()) return 1;
     it->second->release();
     it->second.reset();
+    shm_map.erase(it);
     return 0;
 }
 
@@ -369,8 +370,8 @@ size_t get_shared_memory_size(const char *name)
         MEMORY_BASIC_INFORMATION mbi;
         VirtualQuery(pBuf, &mbi, sizeof(mbi));
         CloseHandle(hFileMapping);
+        sz = mbi.RegionSize;
     }
-    sz = mbi.RegionSize;
 #elif UNIX_LIKE_PLATFORM
     int shm_fd = shm_open(name, O_RDONLY, 0);
     if (shm_fd == -1){
