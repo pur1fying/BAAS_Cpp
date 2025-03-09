@@ -95,7 +95,8 @@ void CrnnNet::initModel(
     keyDictPath = keysPath;
     inputNamesPtr = getInputNames(session);
     outputNamesPtr = getOutputNames(session);
-
+    inputNames = {inputNamesPtr.data()->get()};
+    outputNames = {outputNamesPtr.data()->get()};
     //load keys
     std::ifstream in(keysPath.c_str());
     std::string line;
@@ -222,8 +223,6 @@ TextLine CrnnNet::getTextLine(const cv::Mat &src)
             inputTensorValues.size(), inputShape.data(),
             inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
     auto outputTensor = session->Run(
             Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
             inputNames.size(), outputNames.data(), outputNames.size());
@@ -254,18 +253,12 @@ TextLine CrnnNet::getTextLine(
             inputTensorValues.size(), inputShape.data(),
             inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
-    auto outputTensor = session->Run(
-            Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
-            inputNames.size(), outputNames.data(), outputNames.size());
-    assert(outputTensor.size() == 1 && outputTensor.front()
-                                                   .IsTensor());
-    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo()
-                                                      .GetShape();
+    auto outputTensor = session_run(&inputTensor);
+
+    assert(outputTensor.size() == 1 && outputTensor.front().IsTensor());
+    std::vector<int64_t> outputShape = outputTensor[0].GetTensorTypeAndShapeInfo().GetShape();
     int64_t outputCount = std::accumulate(outputShape.begin(), outputShape.end(), 1,std::multiplies<int64_t>());
-    float *floatArray = outputTensor.front()
-                                    .GetTensorMutableData<float>();
+    float *floatArray = outputTensor.front().GetTensorMutableData<float>();
     std::vector<float> outputData(floatArray, floatArray + outputCount);
     return scoreToTextLine(outputData, outputShape[1], outputShape[2], enabledIndexes);
 }

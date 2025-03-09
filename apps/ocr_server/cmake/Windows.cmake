@@ -11,7 +11,8 @@ endif()
 target_link_directories(
         BAAS_ocr_server
         PRIVATE
-        ${BAAS_PROJECT_PATH}/lib/${CUURENT_OS_NAME}
+        ${BAAS_PROJECT_PATH}/lib/${CURRENT_OS_NAME}
+
 )
 
 SET(
@@ -35,7 +36,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             DLL_DEBUG
             opencv_world490d
     )
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(
             LIB_RELEASE
             opencv_world490
@@ -98,8 +99,6 @@ endforeach ()
 
 target_link_libraries(
         BAAS_ocr_server
-        lib_BAAS
+        BAAS_ipc
         ${LIB_RAW}
 )
-
-

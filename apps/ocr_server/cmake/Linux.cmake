@@ -16,7 +16,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             DLL_DEBUG
             opencv_worldd
     )
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(
             DLL_RELEASE
             libopencv_world.so.409

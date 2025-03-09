@@ -471,7 +471,7 @@ void Server::handle_enable_thread_pool(
         return;
     }
     auto num_thread = temp.getUInt("thread_count");
-    BAASGlobalLogger->sub_title("thread_count : [" + std::to_string(num_thread) + "]");
+    BAASGlobalLogger->sub_title("thread_count : " + std::to_string(num_thread) + "");
     baas::BAASOCR::enable_thread_pool(num_thread);
 
     res.status = 200;
@@ -483,7 +483,7 @@ void Server::handle_disable_thread_pool(
         httplib::Response &res
 )
 {
-    BAASGlobalLogger->BAASInfo("Disable thread pool");
+    BAASGlobalLogger->sub_title("Disable thread pool");
     baas::BAASOCR::disable_thread_pool();
     res.status = 200;
     res.set_content("Success.", "text/plain");

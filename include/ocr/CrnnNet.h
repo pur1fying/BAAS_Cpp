@@ -56,6 +56,18 @@ public:
             const std::vector<size_t> &enabledIndexes
     );
 
+    inline std::vector<Ort::Value> session_run(const Ort::Value* inputTensors)
+    {
+        return session->Run(
+                Ort::RunOptions{nullptr},
+                inputNames.data(),
+                inputTensors,
+                inputNames.size(),
+                outputNames.data(),
+                outputNames.size()
+        );
+    }
+
     void getTextIndexes(
             const std::vector<std::string> &characters,
             std::vector<size_t> &enabledIndexes
@@ -67,7 +79,6 @@ private:
             const std::filesystem::path &pathStr,
             const std::filesystem::path &keysPath
     );
-
     std::filesystem::path modelPath, keyDictPath;
 
     static std::map<std::string, std::shared_ptr<CrnnNet>> nets;
@@ -80,6 +91,8 @@ private:
 
     std::vector<Ort::AllocatedStringPtr> inputNamesPtr;
     std::vector<Ort::AllocatedStringPtr> outputNamesPtr;
+    std::vector<const char *> inputNames;
+    std::vector<const char *> outputNames;
 
     const float meanValues[3] = {127.5, 127.5, 127.5};
     const float normValues[3] = {1.0 / 127.5, 1.0 / 127.5, 1.0 / 127.5};

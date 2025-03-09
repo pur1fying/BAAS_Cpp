@@ -12,8 +12,6 @@
 using namespace baas;
 OCR_NAMESPACE_BEGIN
 
-ThreadPool* ocr_pool = nullptr;
-
 void __init()
 {
     init_path();
@@ -36,10 +34,6 @@ void __init()
     }
     BAASGlobalSetting::check_global_setting_exist();
     global_setting = BAASGlobalSetting::getGlobalSetting();
-
-    int temp = static_config->getInt("/ocr/thread_pool_count", 4);
-    BAASGlobalLogger->BAASInfo("Thread Pool Count : " + std::to_string(temp));
-    ocr_pool = new ThreadPool(temp);
 }
 
 OCR_NAMESPACE_END

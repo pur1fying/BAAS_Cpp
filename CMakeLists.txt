@@ -26,8 +26,15 @@ macro(LOG_LINE)
 endmacro()
 
 BAAS_hr_LOG("PROJECT BAAS")
+
+# Build type
+if (NOT CMAKE_BUILD_TYPE OR NOT (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Debug"))
+    message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}. Allowed : Debug, Release")
+endif()
+
 BAAS_sub_title_LOG("BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 
+# Platform
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
     set(CURRENT_OS_NAME "Linux")
 elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
@@ -139,7 +146,7 @@ if (BUILD_TEST)
 endif()
 
 add_library(
-        lib_BAAS
+        BAAS_ipc
         SHARED
         ${BAAS_PROJECT_PATH}/src/BAASExternalIPC.cpp
 )

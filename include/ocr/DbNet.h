@@ -56,6 +56,8 @@ private:
 
     std::vector<Ort::AllocatedStringPtr> inputNamesPtr;
     std::vector<Ort::AllocatedStringPtr> outputNamesPtr;
+    std::vector<const char *> inputNames;
+    std::vector<const char *> outputNames;
 
     const float meanValues[3] = {0.485 * 255, 0.456 * 255, 0.406 * 255};
     const float normValues[3] = {1.0 / 0.229 / 255.0, 1.0 / 0.224 / 255.0, 1.0 / 0.225 / 255.0};

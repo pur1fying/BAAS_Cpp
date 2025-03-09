@@ -176,6 +176,6 @@ endforeach ()
 
 target_link_libraries(
         BAAS_APP
-        lib_BAAS
+        BAAS_ipc
         ${LIB_RAW}
 )

@@ -88,6 +88,8 @@ void AngleNet::initModel(const std::filesystem::path &path)
 #endif
     inputNamesPtr = getInputNames(session);
     outputNamesPtr = getOutputNames(session);
+    inputNames = {inputNamesPtr.data()->get()};
+    outputNames = {outputNamesPtr.data()->get()};
 }
 
 Angle scoreToAngle(const std::vector<float> &outputData)
@@ -113,8 +115,7 @@ Angle AngleNet::getAngle(cv::Mat &src)
             inputTensorValues.size(), inputShape.data(),
             inputShape.size());
     assert(inputTensor.IsTensor());
-    std::vector<const char *> inputNames = {inputNamesPtr.data()->get()};
-    std::vector<const char *> outputNames = {outputNamesPtr.data()->get()};
+
     auto outputTensor = session->Run(
             Ort::RunOptions{nullptr}, inputNames.data(), &inputTensor,
             inputNames.size(), outputNames.data(), outputNames.size());
