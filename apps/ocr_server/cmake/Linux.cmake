@@ -12,10 +12,7 @@ SET(
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    SET(
-            DLL_DEBUG
-            opencv_worldd
-    )
+    message(FATAL_ERROR "Please use Release in Linux")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(
             DLL_RELEASE
@@ -40,7 +37,6 @@ set(
         DLL_RAW
         ${DLL_COMMON}
         ${DLL_RELEASE}
-        ${DLL_DEBUG}
 )
 LOG_LINE()
 message(STATUS "DLL RAW :")
