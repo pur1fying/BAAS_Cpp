@@ -79,8 +79,8 @@ set(BAAS_FEATURE_RESOURCE_REQUIRED OFF)
 set(BAAS_PROCEDURE_RESOURCE_REQUIRED OFF)
 set(BAAS_IMAGE_RESOURCE_REQUIRED OFF)
 
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(
         ${BAAS_PROJECT_PATH}/external
@@ -163,7 +163,7 @@ if (GLOBAL_CONFIG_RESOURCE_REQUIRED)
     file(
             COPY
             ${GLOBAL_CONFIG_FILE}
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
     )
 endif ()
 
@@ -179,7 +179,7 @@ if (STATIC_CONFIG_RESOURCE_REQUIRED)
     file(
             COPY
             ${STATIC_CONFIG_FILE}
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
     )
 endif ()
 
@@ -219,6 +219,6 @@ if (OCR_MODEL_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/ocr_models
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
     )
 endif ()
