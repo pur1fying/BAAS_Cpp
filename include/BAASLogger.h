@@ -27,6 +27,13 @@ void gen_hr_msg(
 
 class GlobalLogger {
 public:
+    inline void flush() {
+        if (enable & 0b1)
+            consoleLogger->flush();
+        if (enable & 0b10)
+            fileLogger->flush();
+    }
+
     static GlobalLogger *getGlobalLogger();
 
     inline void Path(const std::filesystem::path& path, const int level=2)
@@ -38,7 +45,6 @@ public:
 #else
         _out(path.string(), level);
 #endif
-
     }
 
     inline void BAASTrace(const std::string &message)
