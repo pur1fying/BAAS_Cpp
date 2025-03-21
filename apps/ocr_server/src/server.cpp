@@ -457,7 +457,7 @@ void Server::set_error_response(
 {
     BAASGlobalLogger->BAASError(msg);
     res.status = 400;
-    res.set_content(msg, "text/plain");
+    res.set_content("Bad Request : " + msg, "text/plain");
 }
 
 void Server::handle_enable_thread_pool(
