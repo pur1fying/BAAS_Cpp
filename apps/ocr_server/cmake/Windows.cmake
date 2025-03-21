@@ -94,7 +94,7 @@ endforeach ()
 # get dll full path and copy to binary dir
 foreach (dll ${DLL_RAW})
     set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}/${dll}.dll)
-    file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endforeach ()
 
 target_link_libraries(
