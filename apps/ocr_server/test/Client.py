@@ -78,11 +78,13 @@ class BaasOcrClient:
 
     def create_shared_memory(self, name, size):
         url = self.config.base_url + "/create_shared_memory"
+        pass_name = "/" + name if sys.platform == "darwin" else name
         data = {
-            "shared_memory_name": name,
+            "shared_memory_name": pass_name,
             "size": size
         }
         ret = requests.post(url, json=data)
+        print(ret.text)
         if ret.status_code == 200:
             SharedMemory.get(name)
         return ret
@@ -179,7 +181,7 @@ class BaasOcrClient:
             row = origin_image.shape[0]
             size = col * row * 3
             SharedMemory.set_data(shared_memory_name, origin_image.tobytes(), size)
-            data["image"]["shared_memory_name"] = shared_memory_name
+            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform == "darwin" else shared_memory_name
             data["image"]["shape"] = [row, col]
             return requests.post(url, json=data)
         if pass_method == 1:
@@ -217,7 +219,7 @@ class BaasOcrClient:
             row = origin_image.shape[0]
             size = col * row * 3
             SharedMemory.set_data(shared_memory_name, origin_image.tobytes(), size)
-            data["image"]["shared_memory_name"] = shared_memory_name
+            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform == "darwin" else shared_memory_name
             data["image"]["resolution"] = [col, row]
             return requests.post(url, json=data)
         elif pass_method == 1:
