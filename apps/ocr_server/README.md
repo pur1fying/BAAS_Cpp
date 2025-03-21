@@ -5,9 +5,18 @@
     - Target    : BAAS_ocr_server
 
 2. Test Code
-    - Use python to test all the api and check response
-    TODO:: write test script
-
+    - Use python unittest to test all the api and check response
+    - working directory : folder `BAAS_Cpp`
+    - python version : 3.9.18
+    - command : 
+        1. install dependencies
+            ```shell
+               pip install -r apps/ocr_server/test/requirements.txt
+            ```
+        2. run test
+           ```shell
+              python -m unittest discover -s apps/ocr_server/test -p "*.py"
+           ```
     If test passed:
 3. Push binaries to corresponding repository
     - Windows: https://github.com/pur1fying/WindowsCompiled_baas_ocr_server.git
