@@ -77,6 +77,17 @@ jobs:
         run: |
           cmake -B build -DBUILD_BAAS_OCR=$BUILD_BAAS_OCR -DCMAKE_BUILD_TYPE=$BUILD_TYPE
           cmake --build build --config Release -j $(sysctl -n hw.logicalcpu)
+      - name: Pack artifacts
+        id: pack_artifacts
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        run: |
+          zip -r baas-ocr-bin-macOS-arm64.zip ./build/bin/*
+      - name: Upload artifacts
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          path: baas-ocr-bin-macOS-arm64.zip
+          name: baas-ocr-bin-macOS-arm64.zip
 
   Windows-latest-cmake-x64:
     name: 'Build Binary for Windows x64'
@@ -96,3 +107,14 @@ jobs:
         run: |
           cmake -S . -B build -DBUILD_BAAS_OCR=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} # Hard encode command with env var before exec
           cmake --build build --config Release -j 4 # TODO: add number of threads
+      - name: Pack artifacts
+        id: pack_artifacts
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        run: |
+          7z a baas-ocr-bin-windows-x64.zip .\build\bin\*
+      - name: Upload artifacts
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          path: baas-ocr-bin-windows-x64.zip
+          name: baas-ocr-bin-windows-x64.zip
