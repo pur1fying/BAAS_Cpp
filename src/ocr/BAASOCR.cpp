@@ -309,8 +309,6 @@ void BAASOCR::release_all()
     DbNet::try_release_all();
     AngleNet::try_release_all();
     CrnnNet::try_release_all();
-
-
     ocr_map.clear();
 }
 
