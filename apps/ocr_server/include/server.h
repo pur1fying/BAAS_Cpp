@@ -41,6 +41,8 @@ public:
 
     static void handle_ocr_for_single_line(const httplib::Request &req, httplib::Response &res);
 
+    static void handle_stop(const httplib::Request &req, httplib::Response &res);
+
     static void out_req_params(const httplib::Request &req);
 
     static void out_req_params(const nlohmann::json &j);
@@ -48,7 +50,6 @@ public:
     static void set_error_response(httplib::Response &res, const std::string &msg);
 
     static void handler_test(const httplib::Request& req, httplib::Response& res);
-
 
     static int req_get_image(
             const httplib::Request &req,

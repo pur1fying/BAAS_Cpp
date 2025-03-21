@@ -15,7 +15,6 @@ OCR_NAMESPACE_BEGIN
 void __init()
 {
     init_path();
-
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
     BAASGlobalLogger->BAASInfo("BAAS     VERSION : " + std::string(BAAS_VERSION));
     BAASGlobalLogger->BAASInfo("BAAS OCR VERSION : " + std::string(BAAS_OCR_VERSION));
@@ -34,6 +33,8 @@ void __init()
     }
     BAASGlobalSetting::check_global_setting_exist();
     global_setting = BAASGlobalSetting::getGlobalSetting();
+
+    spdlog::flush_every(std::chrono::milliseconds(global_setting->getInt("/log/flush_inteval", 1000)));
 }
 
 OCR_NAMESPACE_END

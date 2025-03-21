@@ -4,9 +4,10 @@
 #include "BAASLogger.h"
 
 #include <fstream>
+#include <spdlog/async.h>
 
 #include "BAASGlobals.h"
-
+#include "config/BAASGlobalSetting.h"
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
@@ -28,8 +29,11 @@ void gen_hr_msg(
     out = "|" + std::string(left_space_len, ' ') + msg + std::string(right_space_len, ' ') + "|";
 }
 
+
 GlobalLogger *GlobalLogger::getGlobalLogger()
 {
+
+
     if (global_logger == nullptr) {
         mutex m;
         m.lock();
@@ -44,6 +48,7 @@ GlobalLogger *GlobalLogger::getGlobalLogger()
 GlobalLogger::GlobalLogger()
 {
     try {
+        spdlog::init_thread_pool(8192, 1);
         enable = 0b11;
         consoleLogger = spdlog::stdout_color_mt("console");
         if (!filesystem::exists(BAAS_OUTPUT_DIR)) filesystem::create_directory(BAAS_OUTPUT_DIR);
@@ -106,7 +111,11 @@ BAASLogger::BAASLogger(const string &name) : GlobalLogger(1)
     filename = name + ".txt";
     fstream file(GlobalLogger::folder_path / filename, ios::out);
     file.close();
-    fileLogger = spdlog::basic_logger_mt(name + "_file_logger", (GlobalLogger::folder_path / filename).string());
+    fileLogger = spdlog::basic_logger_mt<spdlog::async_factory>(
+                                                name + "_file_logger", 
+                                                (GlobalLogger::folder_path / filename).string(),
+                                                true
+                                            );
 }
 
 

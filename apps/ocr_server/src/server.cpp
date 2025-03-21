@@ -59,7 +59,13 @@ void Server::start()
     svr.Post("/test", [](const httplib::Request &req, httplib::Response &res) {
         BAAS_OCR::Server::handler_test(req, res);
     });
-    BAASGlobalLogger->hr("Server start.");
+    svr.Get("/shutdown", [&](const httplib::Request &req, httplib::Response &res) {
+        BAASGlobalLogger->sub_title("Shutdown server.");
+        res.status = 200;
+        res.set_content("Success.", "text/plain");
+        stop();
+    });
+    BAASGlobalLogger->hr("Server started.");
     svr.listen(host, port);
 }
 
@@ -307,7 +313,7 @@ void Server::out_req_params(const nlohmann::json &j)
 void Server::stop()
 {
     svr.stop();
-    BAASGlobalLogger->hr("Server stop.");
+    BAASGlobalLogger->hr("Server stopped.");
 }
 
 int Server::req_get_image(

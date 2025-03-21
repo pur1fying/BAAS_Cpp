@@ -23,5 +23,6 @@ int main()
     BAAS_OCR::Server server;
 
     server.start();
+    BAASGlobalLogger->BAASInfo("exit 0");
     return 0;
 }
