@@ -244,7 +244,7 @@ public:
             } catch (std::exception &e) {
                 throwKeyError(
                         "Value With Key [ " + key + " ] Type Error. Real : " + std::string(it->type_name()) +
-                        " Expected : " + typeid(default_value).name());
+                        " .Expected : " + typeid(default_value).name());
             }
         }
         try {
