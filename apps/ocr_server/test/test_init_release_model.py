@@ -30,6 +30,12 @@ class TestInitModel(unittest.TestCase):
                 "EnableCpuMemoryArena": False
             },
             {
+                "language": True,
+                "gpu_id": 0,
+                "num_thread": 4,
+                "EnableCpuMemoryArena": False
+            },
+            {
                 "language": 1,
                 "gpu_id": 0,
                 "num_thread": 4,
@@ -37,6 +43,12 @@ class TestInitModel(unittest.TestCase):
             },
             {
                 "language": {"en-us": True},
+                "gpu_id": 0,
+                "num_thread": 4,
+                "EnableCpuMemoryArena": True
+            },
+            {
+                "language": [1, 2],
                 "gpu_id": 0,
                 "num_thread": 4,
                 "EnableCpuMemoryArena": True

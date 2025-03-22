@@ -50,6 +50,7 @@ class BaasOcrClient:
             raise Exception("Didn't find ocr server executable.")
         self.config = ServerConfig()
         self.server_process = None
+        self.kilL_existing_server()
 
     @staticmethod
     def kilL_existing_server():
@@ -131,7 +132,10 @@ class BaasOcrClient:
         url = self.config.base_url + "/shutdown"
         ret = requests.get(url)
         if ret.status_code == 200:
-            self.server_process.wait(30)
+            try:
+                self.server_process.wait(30)
+            except subprocess.TimeoutExpired:
+                self.kilL_existing_server()
             self.server_process = None
         return ret
 
@@ -182,7 +186,7 @@ class BaasOcrClient:
             size = col * row * 3
             SharedMemory.set_data(shared_memory_name, origin_image.tobytes(), size)
             data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform != "win32" else shared_memory_name
-            data["image"]["shape"] = [row, col]
+            data["image"]["resolution"] = [col, row]
             return requests.post(url, json=data)
         if pass_method == 1:
             image_bytes = self.get_image_bytes(origin_image)

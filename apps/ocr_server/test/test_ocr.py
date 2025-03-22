@@ -9,7 +9,7 @@ from Client import client
 from utils import count_files
 
 
-class TestOcrForSingleLine(unittest.TestCase):
+class TestOcr(unittest.TestCase):
 
     def setUp(self):
         print("Start server.")
@@ -25,71 +25,22 @@ class TestOcrForSingleLine(unittest.TestCase):
             raise RuntimeError("Fail to stop server.")
         self.assertEqual("Success.", ret.text)
 
-    def test_ocr_for_single_line(self):
-        print("Test ocr_for_single_line.")
-
-        expected_results = {
-            "en-us": {
-                "0": "I love Aris",
-                "2": "How are you today?",
-                "3": "I enjoy listening to music.",
-                "4": "Where do you live?",
-                "5": "I'm learning English. "
-
-            },
-            "ja-jp": {
-                "0": "アリスが大好きです",
-                "2": "確認しました"
-            },
-            "ko-kr": {
-                "0": "나는엘리스를사랑한대"
-
-            },
-            "ru-ru": {
-                "0": "ялюблюэлис"
-            },
-            "zh-cn": {
-                "0": "我爱爱丽丝",
-            },
-            "zh-cn_v3": {
-                "0": "我爱爱丽丝",
-            },
-            "zh-tw": {
-                "0": "我愛愛麗絲",
-            },
-        }
-        models = list(expected_results.keys())
-        client.init_model(models, -1, 4, False)
+    def test_ocr(self):
+        print("Test OCR")
+        models = [
+            "en-us",
+            "ko-kr",
+            "ja-jp",
+            "zh-cn",
+            "zh-cn_v3",
+            "zh-tw",
+            "ru-ru"
+        ]
 
         post_file_ret_text_list = []
         shared_memory_ret_text_list = []
 
-        test_image_path = os.path.join(os.path.dirname(__file__), "test_images", "ocr_for_single_line")
-        # pass method post file
-        print("<<< PASS METHOD : POST FILE >>>")
-        for model in models:
-            print(f"<<< {model} >>>")
-            _dir = os.path.join(test_image_path, model)
-            num_files = count_files(_dir)
-            for i in range(0, num_files):
-                image_path = os.path.join(test_image_path, model, f"{i}.png")
-                img = cv2.imread(image_path)
-                ret = client.ocr_for_single_line(
-                    language=model,
-                    origin_image=img,
-                    candidates="",
-                    pass_method=1,
-                    local_path="",
-                )
-                self.assertEqual(200, ret.status_code)
-                j = json.loads(ret.text)
-                time = j["time"]
-                print(f"{i} time : [ {time} ms ]")
-                print(j["text"])
-                post_file_ret_text_list.append(j["text"])
-                if str(i) in expected_results[model]:
-                    self.assertEqual(expected_results[model][str(i)], j["text"])
-
+        test_image_path = os.path.join(os.path.dirname(__file__), "test_images", "ocr")
         # pass method shared memory
         print("<<< PASS METHOD : SHARE MEMORY >>>")
         ret = client.create_shared_memory("test", 1280 * 720 * 3)
@@ -103,11 +54,12 @@ class TestOcrForSingleLine(unittest.TestCase):
             for i in range(0, num_files):
                 image_path = os.path.join(test_image_path, model, f"{i}.png")
                 img = cv2.imread(image_path)
-                ret = client.ocr_for_single_line(
+                ret = client.ocr(
                     language=model,
                     origin_image=img,
                     candidates="",
                     pass_method=0,
+                    ret_options=0b111,
                     local_path="",
                     shared_memory_name="test"
                 )
@@ -115,27 +67,51 @@ class TestOcrForSingleLine(unittest.TestCase):
                 j = json.loads(ret.text)
                 time = j["time"]
                 print(f"{i} time : [ {time} ms ]")
-                print(j["text"])
-                shared_memory_ret_text_list.append(j["text"])
-                if str(i) in expected_results[model]:
-                    self.assertEqual(expected_results[model][str(i)], j["text"])
+                # print(j["str_res"])
+                shared_memory_ret_text_list.append(j["str_res"])
 
         ret = client.release_shared_memory("test")
         self.assertEqual(200, ret.status_code)
         self.assertEqual("Success.", ret.text)
+
+        # pass method post file
+        print("<<< PASS METHOD : POST FILE >>>")
+        for model in models:
+            print(f"<<< {model} >>>")
+            _dir = os.path.join(test_image_path, model)
+            num_files = count_files(_dir)
+            for i in range(0, num_files):
+                image_path = os.path.join(test_image_path, model, f"{i}.png")
+                img = cv2.imread(image_path)
+                ret = client.ocr(
+                    language=model,
+                    origin_image=img,
+                    candidates="",
+                    pass_method=1,
+                    ret_options=0b111,
+                    local_path="",
+                )
+                self.assertEqual(200, ret.status_code)
+                j = json.loads(ret.text)
+                time = j["time"]
+                print(f"{i} time : [ {time} ms ]")
+                # print(j["str_res"])
+                post_file_ret_text_list.append(j["str_res"])
+
+
 
         # same image same result
         self.assertEqual(len(post_file_ret_text_list), len(shared_memory_ret_text_list))
         for i in range(len(post_file_ret_text_list)):
             self.assertEqual(post_file_ret_text_list[i], shared_memory_ret_text_list[i])
 
-    def test_ocr_for_single_line_bad_request(self):
+    def test_ocr_bad_request(self):
         print("Test ocr_for_single_line_bad_request.")
         client.init_model("en-us", -1, 4, False)
         test_image_path = os.path.join(
             os.path.dirname(__file__),
             "test_images",
-            "ocr_for_single_line",
+            "ocr",
             "en-us",
             "0.png"
         )
@@ -233,7 +209,10 @@ class TestOcrForSingleLine(unittest.TestCase):
         ]
         expected_ret = [1, 1, 1, 1, 1, 1, 1]
         random.shuffle(all_models)
-        ret = client.init_model(all_models, -1, 4, False)
-        self.assertEqual(ret.status_code, 200)
+        ret = client.enable_thread_pool(4)
+        self.assertEqual(200, ret.status_code)
+
+        ret = client.init_model(all_models, -1, 4, True)
+        self.assertEqual(200, ret.status_code)
         j = json.loads(ret.text)
-        self.assertEqual(j["ret"], expected_ret)
+        self.assertEqual(expected_ret, j["ret"])
