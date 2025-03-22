@@ -61,12 +61,41 @@ class TestOcrForSingleLine(unittest.TestCase):
         models = list(expected_results.keys())
         client.init_model(models, -1, 4, False)
 
+        post_file_ret_text_list = []
+        shared_memory_ret_text_list = []
+
         test_image_path = os.path.join(os.path.dirname(__file__), "test_images", "ocr_for_single_line")
         # pass method post file
+        print("<<< PASS METHOD : POST FILE >>>")
+        for model in models:
+            print(f"<<< {model} >>>")
+            _dir = os.path.join(test_image_path, model)
+            num_files = count_files(_dir)
+            for i in range(0, num_files):
+                image_path = os.path.join(test_image_path, model, f"{i}.png")
+                img = cv2.imread(image_path)
+                ret = client.ocr_for_single_line(
+                    language=model,
+                    origin_image=img,
+                    candidates="",
+                    pass_method=1,
+                    local_path="",
+                )
+                self.assertEqual(200, ret.status_code)
+                j = json.loads(ret.text)
+                time = j["time"]
+                print(f"{i} time : [ {time} ms ]")
+                print(j["text"])
+                post_file_ret_text_list.append(j["text"])
+                if str(i) in expected_results[model]:
+                    self.assertEqual(expected_results[model][str(i)], j["text"])
 
         # pass method shared memory
+        print("<<< PASS METHOD : SHARE MEMORY >>>")
         ret = client.create_shared_memory("test", 1280 * 720 * 3)
         self.assertEqual(200, ret.status_code)
+        self.assertEqual("Success.", ret.text)
+
         for model in models:
             print(f"<<< {model} >>>")
             _dir = os.path.join(test_image_path, model)
@@ -87,11 +116,17 @@ class TestOcrForSingleLine(unittest.TestCase):
                 time = j["time"]
                 print(f"{i} time : [ {time} ms ]")
                 print(j["text"])
+                shared_memory_ret_text_list.append(j["text"])
                 if str(i) in expected_results[model]:
                     self.assertEqual(expected_results[model][str(i)], j["text"])
 
-        client.release_shared_memory("test")
+        ret = client.release_shared_memory("test")
         self.assertEqual(200, ret.status_code)
+        self.assertEqual("Success.", ret.text)
+
+        # same image same result
+        for i in range(len(post_file_ret_text_list)):
+            self.assertEqual(post_file_ret_text_list[i], shared_memory_ret_text_list[i])
 
     def test_ocr_for_single_line_bad_request(self):
         print("Test ocr_for_single_line_bad_request.")
