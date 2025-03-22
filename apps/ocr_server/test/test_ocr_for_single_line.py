@@ -23,7 +23,7 @@ class TestOcrForSingleLine(unittest.TestCase):
         ret = client.stop_server()
         if ret.status_code != 200:
             raise RuntimeError("Fail to stop server.")
-        self.assertEqual(ret.text, "Success.")
+        self.assertEqual("Success.", ret.text)
 
     def test_ocr_for_single_line(self):
         print("Test ocr_for_single_line.")
@@ -62,9 +62,11 @@ class TestOcrForSingleLine(unittest.TestCase):
         client.init_model(models, -1, 4, False)
 
         test_image_path = os.path.join(os.path.dirname(__file__), "test_images", "ocr_for_single_line")
+        # pass method post file
 
-        client.create_shared_memory("test", 1280 * 720 * 3)
-
+        # pass method shared memory
+        ret = client.create_shared_memory("test", 1280 * 720 * 3)
+        self.assertEqual(200, ret.status_code)
         for model in models:
             print(f"<<< {model} >>>")
             _dir = os.path.join(test_image_path, model)
@@ -80,13 +82,16 @@ class TestOcrForSingleLine(unittest.TestCase):
                     local_path="",
                     shared_memory_name="test"
                 )
-                self.assertEqual(ret.status_code, 200)
+                self.assertEqual(200, ret.status_code)
                 j = json.loads(ret.text)
                 time = j["time"]
                 print(f"{i} time : [ {time} ms ]")
                 print(j["text"])
                 if str(i) in expected_results[model]:
                     self.assertEqual(expected_results[model][str(i)], j["text"])
+
+        client.release_shared_memory("test")
+        self.assertEqual(200, ret.status_code)
 
     def test_ocr_for_single_line_bad_request(self):
         print("Test ocr_for_single_line_bad_request.")
@@ -164,7 +169,7 @@ class TestOcrForSingleLine(unittest.TestCase):
                 local_path=data["local_path"],
                 shared_memory_name=data["shared_memory_name"]
             )
-            self.assertEqual(ret.status_code, 400)
+            self.assertEqual(400, ret.status_code)
             print(ret.text)
             self.assertIn("Bad Request", ret.text)
 

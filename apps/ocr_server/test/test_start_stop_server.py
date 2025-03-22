@@ -9,5 +9,5 @@ class TestStartStopServer(unittest.TestCase):
         self.assertTrue(client.is_server_running())
         # stop
         ret = client.stop_server()
-        self.assertEqual(ret.status_code, 200)
-        self.assertEqual(ret.text, "Success.")
+        self.assertEqual(200, ret.status_code)
+        self.assertEqual("Success.", ret.text)
