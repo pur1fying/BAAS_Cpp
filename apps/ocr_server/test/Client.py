@@ -84,15 +84,15 @@ class BaasOcrClient:
             "size": size
         }
         ret = requests.post(url, json=data)
-        print(ret.text)
         if ret.status_code == 200:
             SharedMemory.get(name)
         return ret
 
     def release_shared_memory(self, name):
         url = self.config.base_url + "/release_shared_memory"
+        pass_name = "/" + name if sys.platform == "darwin" else name
         data = {
-            "name": name
+            "name": pass_name
         }
         SharedMemory.release(name)
         return requests.post(url, json=data)

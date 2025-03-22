@@ -18,7 +18,7 @@ class TestInitModel(unittest.TestCase):
         ret = client.stop_server()
         if ret.status_code != 200:
             raise RuntimeError("Fail to stop server.")
-        self.assertEqual(ret.text, "Success.")
+        self.assertEqual("Success.", ret.text)
 
     def test_init_model_bad_request(self):
         print("Test init model bad request.")
