@@ -63,8 +63,8 @@ jobs:
       - name: Install Test Dependencies
         id: install_test_depends 
         run: |
-          python pip install --upgrade pip
-          python pip install -r apps/ocr_server/test/requirements.txt
+          python -m pip install --upgrade pip
+          python -m pip install -r apps/ocr_server/test/requirements.txt
       
       - name: Test
         id: test_build
