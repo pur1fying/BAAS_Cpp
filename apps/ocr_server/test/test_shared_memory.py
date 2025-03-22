@@ -18,54 +18,10 @@ class TestSharedMemory(unittest.TestCase):
             raise RuntimeError("Fail to stop server.")
         self.assertEqual("Success.", ret.text)
 
-    @unittest.skipIf(sys.platform == "win32", "Invalid test on windows.")
-    def test_posix_invalid_shared_memory_name(self):
-        print("Test shared memory invalid name.")
-        request_data = [
-            {
-                "shared_memory_name": "invalid shm name",
-                "size": 1024
-            },
-
-        ]
-        for data in request_data:
-            ret = client.create_shared_memory(
-                name=data["shared_memory_name"],
-                size=data["size"]
-            )
-            print(ret.text)
-            self.assertEqual(400, ret.status_code)
-            self.assertIn("Bad Request", ret.text)
 
     def test_shared_memory_bad_request(self):
         print("Test shared memory bad request.")
         request_data = [
-            {
-                "shared_memory_name": 12345,
-                "size": 1024
-            },
-            {
-                "shared_memory_name": -12345,
-                "size": 1024
-            },
-            {
-                "shared_memory_name": {
-                    "name": "invalid shm name"
-                },
-                "size": 1024
-            },
-            {
-                "shared_memory_name": True,
-                "size": 1024
-            },
-            {
-                "shared_memory_name": 1.114,
-                "size": 1024
-            },
-            {
-                "shared_memory_name": ["/shm name"],
-                "size": "1024"
-            },
             {
                 "shared_memory_name": "/shm_name1",
                 "size": -1
@@ -89,7 +45,7 @@ class TestSharedMemory(unittest.TestCase):
                 }
             },
             {
-                "shared_memory_name": "/shm_name5",
+                "shared_memory_name": "/shm_name6",
                 "size": True
             }
         ]

@@ -60,7 +60,7 @@ class TestThreadPool(unittest.TestCase):
         ret = client.disable_thread_pool()
         self.assertEqual(200, ret.status_code)
         self.assertEqual("Success.", ret.text)
-        ret = client.init_model(all_models, 0, 4, False)
+        ret = client.init_model(all_models, -1, 4, False)
         self.assertEqual(200, ret.status_code)
         j = json.loads(ret.text)
         t_disable = j["time"]
@@ -72,7 +72,7 @@ class TestThreadPool(unittest.TestCase):
         ret = client.enable_thread_pool(thread_count)
         self.assertEqual(200, ret.status_code)
         self.assertEqual("Success.", ret.text)
-        ret = client.init_model(all_models, 0, 4, False)
+        ret = client.init_model(all_models, -1, 4, False)
         self.assertEqual(200, ret.status_code)
         j = json.loads(ret.text)
         t_enable = j["time"]

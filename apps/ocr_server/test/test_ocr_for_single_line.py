@@ -59,7 +59,6 @@ class TestOcrForSingleLine(unittest.TestCase):
             },
         }
         models = list(expected_results.keys())
-        client.init_model(models, -1, 4, False)
 
         post_file_ret_text_list = []
         shared_memory_ret_text_list = []
@@ -141,7 +140,10 @@ class TestOcrForSingleLine(unittest.TestCase):
         )
         img = cv2.imread(test_image_path)
         shm_name = "test"
-        client.create_shared_memory(shm_name, 1280 * 720 * 3)
+        ret = client.create_shared_memory(shm_name, 1280 * 720 * 3)
+        self.assertEqual(200, ret.status_code)
+        self.assertEqual("Success.", ret.text)
+        
         request_data = [
             {
                 "language": "non-exist-language",
@@ -221,6 +223,12 @@ class TestOcrForSingleLine(unittest.TestCase):
             print(ret.text)
             self.assertIn("Bad Request", ret.text)
 
+        print("Release shared memory.")
+        ret = client.release_shared_memory(shm_name)
+        
+        self.assertEqual(200, ret.status_code)
+        self.assertEqual("Success.", ret.text)
+
     def init_all_models(self):
         all_models = [
             "en-us",
@@ -233,6 +241,9 @@ class TestOcrForSingleLine(unittest.TestCase):
         ]
         expected_ret = [1, 1, 1, 1, 1, 1, 1]
         random.shuffle(all_models)
+        ret = client.enable_thread_pool(4)
+        self.assertEqual(ret.status_code, 200)
+        self.assertEqual("Success.", ret.text)
         ret = client.init_model(all_models, -1, 4, False)
         self.assertEqual(ret.status_code, 200)
         j = json.loads(ret.text)

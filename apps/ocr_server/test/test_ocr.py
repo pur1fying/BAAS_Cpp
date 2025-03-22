@@ -106,7 +106,7 @@ class TestOcr(unittest.TestCase):
             self.assertEqual(post_file_ret_text_list[i], shared_memory_ret_text_list[i])
 
     def test_ocr_bad_request(self):
-        print("Test ocr_for_single_line_bad_request.")
+        print("Test ocr_bad_request.")
         client.init_model("en-us", -1, 4, False)
         test_image_path = os.path.join(
             os.path.dirname(__file__),
@@ -196,6 +196,10 @@ class TestOcr(unittest.TestCase):
             self.assertEqual(400, ret.status_code)
             print(ret.text)
             self.assertIn("Bad Request", ret.text)
+
+        ret = client.release_shared_memory(shm_name)
+        self.assertEqual(200, ret.status_code)
+        self.assertEqual("Success.", ret.text)
 
     def init_all_models(self):
         all_models = [
