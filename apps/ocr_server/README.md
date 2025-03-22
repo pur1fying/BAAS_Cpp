@@ -26,8 +26,7 @@
 
 
 ### Known Issues
-1. MacOS : python can't get shared memory by name.
-2. MacOS & Linux : file logger create the log file but didn't write log.ß
-3. api "get_text_boxes" is not implemented
-4. need a method / api to shutdown the server    
-5. update test code
+1. MacOS & Linux : python will destroy the shared_memory automatically when code exit
+2. api "get_text_boxes" is not implemented
+3. need a method / api to shutdown the server    
+4. update test code
