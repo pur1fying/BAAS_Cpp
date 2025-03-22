@@ -102,11 +102,15 @@ jobs:
         id: depends
         run: |
           choco install ninja
+      - name: Setup MSVC Dev  # Setup Developer Command Prompt for Microsotf Visual C++
+        uses: TheMrMilchmann/setup-msvc-dev@v3
+        with:
+          arch: x64
       - name: Build
         id: cmake_build
         run: |
-          cmake -S . -B build -DBUILD_BAAS_OCR=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} # Hard encode command with env var before exec
-          cmake --build build --config Release -j 4 # TODO: add number of threads
+          cmake -S . -B build -DBUILD_BAAS_OCR=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
+          cmake --build build --config Release -j 4      # TODO: add number of threads
       - name: Pack artifacts
         id: pack_artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
