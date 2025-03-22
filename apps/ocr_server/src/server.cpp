@@ -515,7 +515,7 @@ void Server::handle_create_shared_memory(
         return;
     }
     auto name = temp.getString("shared_memory_name");
-#ifdef UNIX_LIKE_PLATFORM
+#if UNIX_LIKE_PLATFORM
     if (!name.starts_with('/')) {
         set_error_response(res, "Invalid shm name : [ " + name + " ] .In UNIX like platform shm name must start with '/' .");
         return;

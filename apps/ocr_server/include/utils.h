@@ -9,8 +9,10 @@
 #include <ThreadPool.h>
 OCR_NAMESPACE_BEGIN
 
-void __init();
+void _init();
 
+
+void _cleanup();
 extern ThreadPool *ocr_pool;
 
 OCR_NAMESPACE_END

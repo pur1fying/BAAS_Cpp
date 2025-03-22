@@ -58,7 +58,6 @@ shm_core::shm_core(
         );
         if (hMapFile == nullptr) {
             std::string msg = "OpenFileMapping failed " + std::to_string(GetLastError());
-            std::cerr << msg << std::endl;
             throw Shared_Memory_Error(msg.c_str());
         }
         this->size = query_shm_size(pBuf);  // adjust to actual size
@@ -69,6 +68,10 @@ shm_core::shm_core(
                 0,
                 0   // map whole file
         );
+        if (pBuf == nullptr) {
+            std::string msg = "MapViewOfFile failed " + std::to_string(GetLastError());
+            throw Shared_Memory_Error(msg.c_str());
+        }
 #elif UNIX_LIKE_PLATFORM
         this->shm_fd = shm_open(name.c_str(), O_RDWR, 0);
         if (shm_fd == -1) {
@@ -89,10 +92,10 @@ shm_core::shm_core(
             throw Shared_Memory_Error(msg.c_str());
         }
 #endif // _WIN32
-
-// create new shm
+    }
+    else {
+        // create new shm
 #ifdef _WIN32
-    } else {
         this->hMapFile = CreateFileMapping(
                 INVALID_HANDLE_VALUE,
                 nullptr,
@@ -119,7 +122,7 @@ shm_core::shm_core(
         throw Shared_Memory_Error(msg.c_str());
     }
 #elif UNIX_LIKE_PLATFORM
-    } else {
+        // create new shm
         this->shm_fd = shm_open(name.c_str(), O_CREAT | O_RDWR, 0666);
         if (shm_fd == -1) {
             std::string msg = "shm_open failed " + std::to_string(errno);
@@ -129,20 +132,21 @@ shm_core::shm_core(
             std::string msg = "ftruncate failed " + std::to_string(errno);
             throw Shared_Memory_Error(msg.c_str());
         }
+        this->size = query_shm_size(shm_fd);  // adjust to actual size ( create size may be larger than required size )
+        this->shm_address = mmap(
+                nullptr,
+                this->size,
+                PROT_READ | PROT_WRITE,
+                MAP_SHARED,
+                shm_fd,
+                0
+        );
+        if (shm_address == MAP_FAILED) {
+            std::string msg = "mmap failed " + std::to_string(errno);
+            throw Shared_Memory_Error(msg.c_str());
+        }
     }
-    this->size = query_shm_size(shm_fd);  // adjust to actual size ( create size may be larger than required size )
-    this->shm_address = mmap(
-            nullptr,
-            this->size,
-            PROT_READ | PROT_WRITE,
-            MAP_SHARED,
-            shm_fd,
-            0
-    );
-    if (shm_address == MAP_FAILED) {
-        std::string msg = "mmap failed " + std::to_string(errno);
-        throw Shared_Memory_Error(msg.c_str());
-    }
+
 #endif // _WIN32
     if (data != nullptr) put_data(data, size);
 }
@@ -209,9 +213,6 @@ void Shared_Memory::release()
 {
     shm.safe_release();
 }
-
-
-
 
 void* Shared_Memory::get_shared_memory(
         const std::string &name,
@@ -296,6 +297,15 @@ unsigned char* Shared_Memory::get_data_ptr(const std::string &name)
     auto it = shm_map.find(name);
     if (it == shm_map.end()) return nullptr;
     return it->second->get_data();
+}
+
+void Shared_Memory::release_all()
+{
+    for (auto &it : shm_map) {
+        it.second->release();
+        it.second.reset();
+    }
+    shm_map.clear();
 }
 
 BAAS_NAMESPACE_END

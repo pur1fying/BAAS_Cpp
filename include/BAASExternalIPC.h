@@ -81,6 +81,7 @@ public:
 
     static unsigned char *get_data_ptr(const std::string &name);
 
+    static void release_all();
 private:
     explicit Shared_Memory(
             const std::string &name,
