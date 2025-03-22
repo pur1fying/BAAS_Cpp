@@ -1,5 +1,6 @@
 name: CI
 
+
 on: 
   workflow_dispatch: # allow manual triggering
     inputs:
@@ -15,16 +16,20 @@ on:
     types: [opened, synchronize, reopened]
     paths: ['.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp']
 
+
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run }}
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
   cancel-in-progress: true
+
 
 permissions:
   contents: write # for creating release
 
+
 env:
   BUILD_TYPE: Release
   BUILD_BAAS_OCR: ON
+
 
 jobs:
   Ubuntu-latest-cmake-x64:
@@ -36,27 +41,49 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Dependencies
-        id: depends
+
+      - name: Install Build Dependencies
+        id: install_build_depends
         run: |
           sudo apt-get update
           sudo apt-get install build-essential
+
       - name: Build
         id: cmake_build
         run: |
           cmake -B build -DBUILD_BAAS_OCR=$BUILD_BAAS_OCR -DCMAKE_BUILD_TYPE=$BUILD_TYPE
           cmake --build build --config Release -j $(nproc)
-      - name: Pack artifacts
+
+      - name: Install Python
+        id: install_python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Test Dependencies
+        id: install_test_depends 
+        run: |
+          python pip install --upgrade pip
+          python pip install -r apps/ocr_server/test/requirements.txt
+      
+      - name: Test
+        id: test_build
+        run: |
+          python -m unittest discover -s apps/ocr_server/test -p "*.py"
+
+      - name: Pack Artifacts
         id: pack_artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         run: |
           zip -r baas-ocr-bin-ubuntu-x64.zip ./build/bin/*
-      - name: Upload artifacts
+
+      - name: Upload Artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           path: baas-ocr-bin-ubuntu-x64.zip
           name: baas-ocr-bin-ubuntu-x64.zip
+
 
   macOS-latest-cmake-arm64:
     name: 'Build Binary for macOS arm64'
@@ -67,27 +94,32 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Dependencies
         id: depends
         continue-on-error: true
         run: |
           brew update
+
       - name: Build
         id: cmake_build
         run: |
           cmake -B build -DBUILD_BAAS_OCR=$BUILD_BAAS_OCR -DCMAKE_BUILD_TYPE=$BUILD_TYPE
           cmake --build build --config Release -j $(sysctl -n hw.logicalcpu)
+
       - name: Pack artifacts
         id: pack_artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         run: |
           zip -r baas-ocr-bin-macOS-arm64.zip ./build/bin/*
+
       - name: Upload artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           path: baas-ocr-bin-macOS-arm64.zip
           name: baas-ocr-bin-macOS-arm64.zip
+
 
   Windows-latest-cmake-x64:
     name: 'Build Binary for Windows x64'
@@ -98,24 +130,29 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Dependencies
         id: depends
         run: |
           choco install ninja
+
       - name: Setup MSVC Dev  # Setup Developer Command Prompt for Microsotf Visual C++
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
+
       - name: Build
         id: cmake_build
         run: |
           cmake -S . -B build -DBUILD_BAAS_OCR=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
           cmake --build build --config Release -j 4      # TODO: add number of threads
+
       - name: Pack artifacts
         id: pack_artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         run: |
           7z a baas-ocr-bin-windows-x64.zip .\build\bin\*
+
       - name: Upload artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
