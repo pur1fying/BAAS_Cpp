@@ -101,8 +101,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Dependencies
-        id: depends
+      - name: Install Build Dependencies
+        id: install_build_depends
         continue-on-error: true
         run: |
           brew update
@@ -110,8 +110,31 @@ jobs:
       - name: Build
         id: cmake_build
         run: |
+          echo "::group::Generate makefile"
           cmake -B build -DBUILD_BAAS_OCR=$BUILD_BAAS_OCR -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+          echo "::endgroup::"
+          echo "::group::Build"
           cmake --build build --config Release -j $(sysctl -n hw.logicalcpu)
+          echo "::endgroup::"
+
+      - name: Install Python
+        id: install_python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+  
+      - name: Install Test Dependencies
+        id: install_test_depends 
+        run: |
+          if ${{ steps.install_python.outputs.cache-hit }} ;  then echo "::notice::Hitting pip cache, using cached packages may lead to issues.";  fi 
+          python -m pip install --upgrade pip
+          python -m pip install -r apps/ocr_server/test/requirements.txt
+      
+      - name: Run Test
+        id: run_test
+        run: |
+          python -m unittest discover -s apps/ocr_server/test -p "*.py"
 
       - name: Pack artifacts
         id: pack_artifacts
@@ -137,19 +160,44 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Dependencies
-        id: depends
+      - name: Install Build Dependencies
+        id: install_build_depends
         run: |
           choco install ninja
-      - name: Setup MSVC Dev  # Setup Developer Command Prompt for Microsotf Visual C++
+
+      - name: Setup MSVC Dev Cmd   # Setup Developer Command Prompt for Microsotf Visual C++
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
       - name: Build
         id: cmake_build
         run: |
+          Write-Output "::group::Generate makefile"
           cmake -S . -B build -DBUILD_BAAS_OCR=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
+          Write-Output "::endgroup::"
+          Write-Output "::group::Build"
           cmake --build build --config Release -j 4      # TODO: add number of threads
+          Write-Output "::endgroup::"
+
+      - name: Install Python
+        id: install_python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+  
+      - name: Install Test Dependencies
+        id: install_test_depends 
+        shell: cmd
+        run: |
+          if (${{ steps.install_python.outputs.cache-hit }}) {Write-Output "::notice::Hitting pip cache, using cached packages may lead to issues.}
+          python -m pip install --upgrade pip
+          python -m pip install -r apps/ocr_server/test/requirements.txt
+      
+      - name: Run Test
+        id: run_test
+        run: |
+          python -m unittest discover -s apps/ocr_server/test -p "*.py"
 
       - name: Pack artifacts
         id: pack_artifacts
