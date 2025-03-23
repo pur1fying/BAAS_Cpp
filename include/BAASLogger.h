@@ -201,6 +201,7 @@ public:
                 break;
         }
     }
+    ~GlobalLogger();
 
 private:
     static std::filesystem::path folder_path;

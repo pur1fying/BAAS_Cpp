@@ -32,8 +32,6 @@ void gen_hr_msg(
 
 GlobalLogger *GlobalLogger::getGlobalLogger()
 {
-
-
     if (global_logger == nullptr) {
         mutex m;
         m.lock();
@@ -74,8 +72,7 @@ void GlobalLogger::clearLogData()
     for (filesystem::directory_iterator itr(BAAS_OUTPUT_DIR); itr != filesystem::directory_iterator(); ++itr) {
         if ((itr->path().string() != folder_path) && filesystem::is_directory(itr->path())) {
             BAASGlobalLogger->BAASInfo(
-                    "Remove folder : [ " + itr->path()
-                                              .string() + " ]."
+                    "Remove folder : [ " + itr->path().string() + " ]."
             );
             filesystem::remove_all(itr->path());
         }
@@ -85,6 +82,14 @@ void GlobalLogger::clearLogData()
 GlobalLogger::GlobalLogger(const int)
 {
 
+}
+
+GlobalLogger::~GlobalLogger()
+{
+    flush();
+    fileLogger.reset();
+    consoleLogger.reset();
+    BAASGlobalLogger = nullptr;
 }
 
 GlobalLogger *BAASGlobalLogger = nullptr;

@@ -9,9 +9,12 @@
 #include "BAAS_OCR_Version.h"
 #include "BAASGlobals.h"
 #include "BAASExternalIPC.h"
+#include <server.h>
 
 using namespace baas;
 OCR_NAMESPACE_BEGIN
+
+Server server;
 
 void _init()
 {
@@ -48,8 +51,28 @@ void _cleanup()
     delete global_setting;
     delete static_config;
     delete baas_ocr;
+    BAASGlobalLogger->sub_title("Logger Shutdown");
     delete BAASGlobalLogger;
     spdlog::shutdown();
+}
+
+void server_thread() {
+    server.init();
+    server.start();
+}
+
+void handle_input() {
+    std::string input;
+    while (true) {
+        std::cin >> input;
+        BAASGlobalLogger->BAASInfo("Input : " + input);
+        if (input == "exit") {
+            break;
+        }
+        else {
+            BAASGlobalLogger->BAASInfo("Invalid Input.");
+        }
+    }
 }
 
 OCR_NAMESPACE_END

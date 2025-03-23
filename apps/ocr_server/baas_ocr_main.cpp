@@ -3,15 +3,16 @@
 //
 
 #include <utils.h>
-#include <server.h>
 
-using namespace baas;
 int main()
 {
     BAAS_OCR::_init();
-    BAAS_OCR::Server server;
-    server.start();
+    std::thread server_thread(BAAS_OCR::server_thread);
 
+    BAAS_OCR::handle_input();
+    BAAS_OCR::server.stop();
+
+    server_thread.join();
     BAAS_OCR::_cleanup();
     return 0;
 }

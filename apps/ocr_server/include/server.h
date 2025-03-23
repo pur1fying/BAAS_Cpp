@@ -19,9 +19,13 @@ class Server
 public:
     Server();
 
+    void init();
+
     void start();
 
     void stop();
+
+    static void stop_server_thread(httplib::Server &svr);
 
     static void handle_create_shared_memory(const httplib::Request &req, httplib::Response &res);
 
@@ -40,8 +44,6 @@ public:
     static void handle_ocr(const httplib::Request &req, httplib::Response &res);
 
     static void handle_ocr_for_single_line(const httplib::Request &req, httplib::Response &res);
-
-    static void handle_stop(const httplib::Request &req, httplib::Response &res);
 
     static void out_req_params(const httplib::Request &req);
 

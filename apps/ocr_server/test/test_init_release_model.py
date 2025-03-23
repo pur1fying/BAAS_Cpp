@@ -15,10 +15,7 @@ class TestInitModel(unittest.TestCase):
 
     def tearDown(self):
         print("Stop server.")
-        ret = client.stop_server()
-        if ret.status_code != 200:
-            raise RuntimeError("Fail to stop server.")
-        self.assertEqual("Success.", ret.text)
+        client.stop_server()
 
     def test_init_model_bad_request(self):
         print("Test init model bad request.")
@@ -134,6 +131,7 @@ class TestInitModel(unittest.TestCase):
         ret = client.init_model(models, -1, 4, False)
         self.assertEqual(200, ret.status_code)
         ret = client.release_all()
+        print("ret" ,ret.text)
         self.assertEqual(200, ret.status_code)
 
     def test_release_single_model(self):

@@ -13,10 +13,7 @@ class TestThreadPool(unittest.TestCase):
 
     def tearDown(self):
         print("Stop server.")
-        ret = client.stop_server()
-        if ret.status_code != 200:
-            raise RuntimeError("Fail to stop server.")
-        self.assertEqual("Success.", ret.text)
+        client.stop_server()
 
     def test_thread_pool_bad_request(self):
         print("Test thread pool bad request.")

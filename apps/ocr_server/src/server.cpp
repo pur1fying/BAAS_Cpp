@@ -2,10 +2,12 @@
 // Created by pc on 2025/2/25.
 //
 #include "server.h"
+
+#include <thread>
+
 #include "BAASLogger.h"
 #include "config/BAASGlobalSetting.h"
 #include "ocr/BAASOCR.h"
-
 #include "BAASExternalIPC.h"
 
 using namespace baas;
@@ -19,12 +21,7 @@ std::vector<std::string> Server::image_pass_method_names = {
 };
 
 Server::Server(){
-    BAASGlobalLogger->hr("BAAS Ocr Server Init.");
 
-    host = global_setting->getString("/ocr/server/host", "localhost");
-    port = global_setting->getInt("/ocr/server/port", 1145);
-
-    BAASGlobalLogger->BAASInfo("Server serial : " + host + ":" + std::to_string(port));
 }
 
 void Server::start()
@@ -59,14 +56,24 @@ void Server::start()
     svr.Post("/test", [](const httplib::Request &req, httplib::Response &res) {
         BAAS_OCR::Server::handler_test(req, res);
     });
-    svr.Get("/shutdown", [&](const httplib::Request &req, httplib::Response &res) {
-        BAASGlobalLogger->sub_title("Shutdown server.");
-        res.status = 200;
-        res.set_content("Success.", "text/plain");
-        stop();
-    });
     BAASGlobalLogger->hr("Server started.");
     svr.listen(host, port);
+}
+
+void Server::stop()
+{
+    BAASGlobalLogger->hr("Shutdown Server.");
+    svr.stop();
+}
+
+void Server::init()
+{
+    BAASGlobalLogger->hr("BAAS Ocr Server Init.");
+
+    host = global_setting->getString("/ocr/server/host", "localhost");
+    port = global_setting->getInt("/ocr/server/port", 1145);
+
+    BAASGlobalLogger->BAASInfo("Server serial : " + host + ":" + std::to_string(port));
 }
 
 void Server::handle_init_model(
@@ -308,12 +315,6 @@ void Server::out_req_params(const nlohmann::json &j)
 {
     BAASGlobalLogger->sub_title("Request Body");
     BAASGlobalLogger->BAASInfo("\n" + j.dump(4));
-}
-
-void Server::stop()
-{
-    svr.stop();
-    BAASGlobalLogger->hr("Server stopped.");
 }
 
 int Server::req_get_image(
@@ -570,6 +571,15 @@ void Server::handle_release_shared_memory(
         res.set_content("Shm not exists.", "text/plain");
     }
 }
+
+void Server::stop_server_thread(httplib::Server &svr)
+{
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    svr.stop();
+    BAASGlobalLogger->hr("Server stopped.");
+}
+
+
 
 
 OCR_NAMESPACE_END

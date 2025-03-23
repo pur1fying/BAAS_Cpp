@@ -55,7 +55,7 @@ class BaasOcrClient:
     @staticmethod
     def kilL_existing_server():
         try:
-            if sys.platform == "linux":
+            if sys.platform == "linux" or sys.platform == "darwin":
                 subprocess.run(["pkill", "-9", BaasOcrClient.executable_name])
             elif sys.platform == "win32":
                 subprocess.run(["taskkill", "/f", "/im", BaasOcrClient.executable_name], check=True)
@@ -118,7 +118,10 @@ class BaasOcrClient:
         self.server_process = subprocess.Popen(
             self.exe_path,
             cwd=self.server_folder_path,
-            stdout=subprocess.DEVNULL
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            # stderr=subprocess.PIPE,
+            text=True
         )
         # wait for server start
         for _ in range(0, 30):
@@ -129,15 +132,13 @@ class BaasOcrClient:
                 time.sleep(0.1)
 
     def stop_server(self):
-        url = self.config.base_url + "/shutdown"
-        ret = requests.get(url)
-        if ret.status_code == 200:
-            try:
-                self.server_process.wait(30)
-            except subprocess.TimeoutExpired:
-                self.kilL_existing_server()
-            self.server_process = None
-        return ret
+        self.server_process.stdin.write("exit\n")
+        self.server_process.stdin.flush()
+        self.server_process.wait(10)
+        self.server_process.stdin.close()
+        if client.is_server_running():
+            raise RuntimeError("Fail to stop server.")
+        self.server_process = None
 
     def init_model(self, language: list[str], gpu_id=-1, num_thread=4, EnableCpuMemoryArena=False):
         url = self.config.base_url + "/init_model"
