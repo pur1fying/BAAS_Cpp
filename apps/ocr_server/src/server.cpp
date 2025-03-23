@@ -572,14 +572,4 @@ void Server::handle_release_shared_memory(
     }
 }
 
-void Server::stop_server_thread(httplib::Server &svr)
-{
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    svr.stop();
-    BAASGlobalLogger->hr("Server stopped.");
-}
-
-
-
-
 OCR_NAMESPACE_END

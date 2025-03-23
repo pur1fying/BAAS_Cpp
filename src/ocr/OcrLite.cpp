@@ -132,7 +132,7 @@ void OcrLite::ocr_for_single_line(
         if (BAASOCR::thread_pool_enabled) {
             text = BAASOCR::pool->submit(
                     submit_getTextLine,
-                    crnnNet,
+                    crnnNet.get(),
                     img
             ).get();
         }
@@ -146,7 +146,7 @@ void OcrLite::ocr_for_single_line(
         if (BAASOCR::thread_pool_enabled) {
             text = BAASOCR::pool->submit(
                     submit_getTextLine_withEnabledIndexes,
-                    crnnNet,
+                    crnnNet.get(),
                     img,
                     enabledIndexes
             ).get();
@@ -190,7 +190,7 @@ OcrResult OcrLite::detect(
     if (BAASOCR::thread_pool_enabled) {
         textBoxes = BAASOCR::pool->submit(
                 submit_getTextBoxes,
-                dbNet,
+                dbNet.get(),
                 src,
                 scale,
                 boxScoreThresh,
@@ -214,7 +214,7 @@ OcrResult OcrLite::detect(
     if (BAASOCR::thread_pool_enabled) {
         angles = BAASOCR::pool->submit(
                 submit_getAngles,
-                angleNet,
+                angleNet.get(),
                 partImages,
                 doAngle,
                 mostAngle
@@ -238,7 +238,7 @@ OcrResult OcrLite::detect(
         if (BAASOCR::thread_pool_enabled) {
             textLines = BAASOCR::pool->submit(
                     submit_getTextLines_withCandidates,
-                    crnnNet,
+                    crnnNet.get(),
                     partImages,
                     candidates
             ).get();
@@ -251,7 +251,7 @@ OcrResult OcrLite::detect(
         if (BAASOCR::thread_pool_enabled) {
             textLines = BAASOCR::pool->submit(
                     submit_getTextLines,
-                    crnnNet,
+                    crnnNet.get(),
                     partImages
             ).get();
         }
@@ -321,14 +321,12 @@ void OcrLite::get_net(
     angleNet = AngleNet::get_net(clsPath, gpu_id, num_thread, enable_cpu_memory_arena);
     crnnNet  = CrnnNet::get_net(recPath, keysPath, gpu_id, num_thread, enable_cpu_memory_arena);
 
-    std::cout << dbNet->getModelPath() << std::endl;
-    std::cout<< dbNet.use_count() << std::endl;
-
-    std::cout << angleNet->getModelPath() << std::endl;
-    std::cout<< angleNet.use_count() << std::endl;
-
-    std::cout << crnnNet->get_joined_path() << std::endl;
-    std::cout<< crnnNet.use_count() << std::endl;
+    BAASGlobalLogger->BAASInfo("DBNet    : " + detPath.string());   
+    BAASGlobalLogger->BAASInfo("Use count: " + std::to_string(dbNet.use_count()));
+    BAASGlobalLogger->BAASInfo("AngleNet : " + clsPath.string());
+    BAASGlobalLogger->BAASInfo("Use count: " + std::to_string(angleNet.use_count()));
+    BAASGlobalLogger->BAASInfo("CrnnNet  : " + recPath.string());
+    BAASGlobalLogger->BAASInfo("Use count: " + std::to_string(crnnNet.use_count()));
 }
 
 BAAS_NAMESPACE_END

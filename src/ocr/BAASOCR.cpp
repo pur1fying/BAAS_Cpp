@@ -37,6 +37,14 @@ BAASOCR *BAASOCR::get_instance()
     return instance;
 }
 
+void BAASOCR::shutdown()
+{
+    if (instance != nullptr) {
+        delete instance;
+        instance = nullptr;
+    }
+}
+
 int BAASOCR::init(
         const std::string &language,
         int gpu_id,
@@ -285,6 +293,17 @@ BAASOCR::BAASOCR()
 {
 }
 
+BAASOCR::~BAASOCR()
+{
+    /*
+       1. release all models 
+       2. shut down thread pool 
+       note : if we do not shut down thread pool, operating system will call terminate , process can't exit with code 0 (-6 instead) 
+    */ 
+    release_all();
+    disable_thread_pool();
+}
+
 void BAASOCR::update_valid_languages()
 {
     BAASGlobalLogger->sub_title("OCR Valid Languages");
@@ -362,6 +381,10 @@ void BAASOCR::enable_thread_pool(unsigned int thread_count)
 void BAASOCR::disable_thread_pool()
 {
     thread_pool_enabled = false;
+    if (pool != nullptr) {
+        pool->shutdown();
+        pool.reset();
+    }
 }
 
 

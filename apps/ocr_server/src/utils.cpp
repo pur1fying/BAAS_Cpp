@@ -45,12 +45,11 @@ void _init()
 
 void _cleanup()
 {
-    baas_ocr->release_all();
     Shared_Memory::release_all();
     delete default_global_setting;
     delete global_setting;
     delete static_config;
-    delete baas_ocr;
+    baas_ocr->shutdown();
     BAASGlobalLogger->sub_title("Logger Shutdown");
     delete BAASGlobalLogger;
     spdlog::shutdown();

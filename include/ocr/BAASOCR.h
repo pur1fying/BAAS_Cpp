@@ -21,6 +21,8 @@ class BAASOCR {
 public:
     static BAASOCR *get_instance();
 
+    static void shutdown();
+
     static void enable_thread_pool(unsigned int thread_count = 4);
 
     static void disable_thread_pool();
@@ -92,6 +94,8 @@ private:
     static bool thread_pool_enabled;
 
     BAASOCR();
+
+    ~BAASOCR();
 
     static BAASOCR *instance;
 

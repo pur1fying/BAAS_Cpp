@@ -3,7 +3,6 @@
 //
 
 #include <utils.h>
-
 int main()
 {
     BAAS_OCR::_init();

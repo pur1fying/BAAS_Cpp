@@ -6,6 +6,7 @@
 #include "DbNet.h"
 #include "AngleNet.h"
 #include "CrnnNet.h"
+#include "BAASLogger.h" 
 
 BAAS_NAMESPACE_BEGIN
 
@@ -99,7 +100,7 @@ private:
             const std::vector<std::string> &candidates = std::vector<std::string>());
 
     inline static std::vector<TextBox> submit_getTextBoxes(
-            std::shared_ptr<DbNet>& dbNet,
+            DbNet* dbNet,
             cv::Mat &src,
             ScaleParam &s,
             float boxScoreThresh,
@@ -111,7 +112,7 @@ private:
     }
 
     inline static std::vector<Angle> submit_getAngles(
-            std::shared_ptr<AngleNet>& angleNet,
+            AngleNet* angleNet,
             std::vector<cv::Mat> &partImages,
             bool doAngle,
             bool mostAngle
@@ -121,7 +122,7 @@ private:
     }
 
     inline static std::vector<TextLine> submit_getTextLines_withCandidates(
-            std::shared_ptr<CrnnNet>& crnnNet,
+            CrnnNet* crnnNet,
             std::vector<cv::Mat> &partImages,
             const std::vector<std::string> &candidates
     )
@@ -130,7 +131,7 @@ private:
     }
 
     inline static std::vector<TextLine> submit_getTextLines(
-            std::shared_ptr<CrnnNet>& crnnNet,
+            CrnnNet* crnnNet,
             std::vector<cv::Mat> &partImages
     )
     {
@@ -138,7 +139,7 @@ private:
     }
 
     inline static TextLine submit_getTextLine_withEnabledIndexes(
-            std::shared_ptr<CrnnNet>& crnnNet,
+            CrnnNet* crnnNet,
             const cv::Mat &src,
             const std::vector<size_t> &enabledIndexes
     )
@@ -147,7 +148,7 @@ private:
     }
 
     inline static TextLine submit_getTextLine(
-            std::shared_ptr<CrnnNet>& crnnNet,
+            CrnnNet* crnnNet,
             const cv::Mat &src
     )
     {
