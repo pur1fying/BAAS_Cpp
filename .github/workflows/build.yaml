@@ -59,6 +59,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+          cache: 'pip'
 
       - name: Install Test Dependencies
         id: install_test_depends 
@@ -66,8 +67,8 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r apps/ocr_server/test/requirements.txt
       
-      - name: Test
-        id: test_build
+      - name: Run Test
+        id: run_test
         run: |
           python -m unittest discover -s apps/ocr_server/test -p "*.py"
 
@@ -144,6 +145,7 @@ jobs:
         run: |
           cmake -S . -B build -DBUILD_BAAS_OCR=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
           cmake --build build --config Release -j 4      # TODO: add number of threads
+
       - name: Pack artifacts
         id: pack_artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
