@@ -28,5 +28,12 @@
 ### Known Issues
 1. MacOS & Linux : python will destroy the shared_memory automatically when code exit
 2. api "get_text_boxes" is not implemented
-3. need a method / api to shutdown the server    
-4. update test code
+3. update test code 
+    - [x] init / release model  
+    - [x] start / stop server 
+    - [x] ocr 
+    - [x] ocr_for_single_line
+    - [x] enable / disable thread pool
+    - [x] create / release shared memory
+    - [ ] get_text_boxes
+    - [ ] multithread request test
