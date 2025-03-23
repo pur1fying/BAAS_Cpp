@@ -68,10 +68,9 @@ jobs:
       - name: Install Test Dependencies
         id: install_test_depends 
         run: |
+          if ${{ steps.install_python.outputs.cache-hit }} ;  then echo "::notice::Pip Cache Hit";  fi 
           python -m pip install --upgrade pip
           python -m pip install -r apps/ocr_server/test/requirements.txt
-
-      - run: if[[ ${{ steps.install_test_depends.outputs.cache-hit }} == true ]]; then echo "::notice::Pip Cache Hit"; fi
       
       - name: Run Test
         id: run_test
