@@ -1,0 +1,69 @@
+name: Windows Test
+
+
+on: 
+  workflow_dispatch: # allow manual triggering
+    inputs:
+      create_release:
+        description: 'Create new release'
+        required: true
+        type: boolean
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+
+env:
+  BUILD_TYPE: Release
+  BUILD_BAAS_OCR: ON
+
+
+jobs:
+    Windows-latest-cmake-x64:
+        name: 'Build Binary for Windows x64'
+        runs-on: windows-latest
+        steps:
+        - name: Clone
+          id: checkout
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+
+        - name: Install Build Dependencies
+          id: install_build_depends
+          run: |
+            choco install ninja
+
+        - name: Setup MSVC Dev Cmd   # Setup Developer Command Prompt for Microsotf Visual C++
+          uses: TheMrMilchmann/setup-msvc-dev@v3
+          with:
+            arch: x64
+
+        - name: Build
+          id: cmake_build
+          run: |
+            Write-Output "::group::Generate makefile"
+            cmake -S . -B build -DBUILD_BAAS_OCR=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
+            Write-Output "::endgroup::"
+            Write-Output "::group::Build"
+            cmake --build build --config Release -j 4      # TODO: add number of threads
+            Write-Output "::endgroup::"
+        
+        - name: Install VC
+          id: install_vc
+          run: |
+            choco install vcredist-all
+        
+        - name: List Dependencies
+          run: |
+            dumpbin /dependents build\bin\BAAS_ocr_server.exe
+        
+        - name: Run
+          id: run
+          shell: cmd
+          run: |
+            tree /a /f .\build\bin
+            .\build\bin\BAAS_ocr_server.exe
+
