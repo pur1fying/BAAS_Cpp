@@ -1,22 +1,21 @@
 import unittest
 from Client import client
 import json
-
+from utils import logger
 
 class TestThreadPool(unittest.TestCase):
     def setUp(self):
-        print("-------------------------------------------------")
-        print("Start server.")
+        logger.sub_title("Start Server")
         client.start_server()
         if not client.is_server_running():
             raise RuntimeError("Fail to start server.")
 
     def tearDown(self):
-        print("Stop server.")
+        logger.sub_title("Stop Server")
         client.stop_server()
 
     def test_thread_pool_bad_request(self):
-        print("Test thread pool bad request.")
+        logger.hr("Test thread pool bad request.")
         request_data = [
             {
                 "thread_count": -151
@@ -38,12 +37,12 @@ class TestThreadPool(unittest.TestCase):
         ]
         for data in request_data:
             ret = client.enable_thread_pool(data["thread_count"])
-            print(ret.text)
+            logger.info(ret.text)
             self.assertEqual(400, ret.status_code)
             self.assertIn("Bad Request", ret.text)
 
     def test_thread_pool_performance(self):
-        print("Test thread pool performance.")
+        logger.hr("Test thread pool performance.")
         all_models = [
             "en-us",
             "ko-kr",
@@ -75,6 +74,6 @@ class TestThreadPool(unittest.TestCase):
         t_enable = j["time"]
         ret = client.release_all()
         self.assertEqual(200, ret.status_code)
-        print(f"t Disable thread pool: {t_disable} ms")
-        print(f"t Enable thread pool : {t_enable} ms")
+        logger.info(f"t Disable thread pool: {t_disable} ms")
+        logger.info(f"t Enable thread pool : {t_enable} ms")
         self.assertLess(t_enable, t_disable)

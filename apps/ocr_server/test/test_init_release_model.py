@@ -2,23 +2,23 @@ import json
 import random
 import unittest
 from Client import client
+from utils import logger
 
 
 class TestInitModel(unittest.TestCase):
 
     def setUp(self):
-        print("-------------------------------------------------")
-        print("Start server.")
+        logger.sub_title("Start Server")
         client.start_server()
         if not client.is_server_running():
             raise RuntimeError("Fail to start server.")
 
     def tearDown(self):
-        print("Stop server.")
+        logger.sub_title("Stop Server")
         client.stop_server()
 
     def test_init_model_bad_request(self):
-        print("Test init model bad request.")
+        logger.hr("Test init model bad request.")
         request_data = [
             {
                 "language": "en-us",
@@ -58,12 +58,12 @@ class TestInitModel(unittest.TestCase):
                 data["num_thread"],
                 data["EnableCpuMemoryArena"]
             )
-            print(ret.text)
+            logger.info(ret.text)
             self.assertEqual(400, ret.status_code)
             self.assertIn("Bad Request", ret.text)
 
     def test_init_single_model(self):
-        print("Test init single model.")
+        logger.hr("Test init single model.")
         models = [
             "en-us",
             "ko-kr",
@@ -72,7 +72,7 @@ class TestInitModel(unittest.TestCase):
             "zh-cn_v3",
             "zh-tw",
             "ru-ru",
-            "en-us",    # already initialized
+            "en-us",  # already initialized
             "non-exist-language"
         ]
         expected = [
@@ -87,13 +87,14 @@ class TestInitModel(unittest.TestCase):
             [0]
         ]
         for i in range(len(models)):
+            logger.info(f"Model: {models[i]}")
             ret = client.init_model([models[i]], -1, 4, False)
             self.assertEqual(200, ret.status_code)
             j = json.loads(ret.text)
             self.assertEqual(expected[i], j["ret"])
 
     def test_init_all_models(self):
-        print("Test init all models.")
+        logger.hr("Test init all models.")
         all_models = [
             "en-us",
             "ko-kr",
@@ -111,7 +112,7 @@ class TestInitModel(unittest.TestCase):
         self.assertEqual(expected_ret, j["ret"])
 
     def test_release_all_models(self):
-        print("Test release all models.")
+        logger.hr("Test release all models.")
         # no models are initialized
         ret = client.release_all()
         self.assertEqual(200, ret.status_code)
@@ -131,11 +132,10 @@ class TestInitModel(unittest.TestCase):
         ret = client.init_model(models, -1, 4, False)
         self.assertEqual(200, ret.status_code)
         ret = client.release_all()
-        print("ret" ,ret.text)
         self.assertEqual(200, ret.status_code)
 
     def test_release_single_model(self):
-        print("Test release single model.")
+        logger.hr("Test release single model.")
         models = [
             "en-us",
             "ko-kr",

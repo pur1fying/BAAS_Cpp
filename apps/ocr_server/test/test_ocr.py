@@ -1,10 +1,9 @@
 import json
 import os
+import cv2
 import random
 import unittest
-
-import cv2
-
+from utils import logger
 from Client import client
 from utils import count_files
 
@@ -12,18 +11,18 @@ from utils import count_files
 class TestOcr(unittest.TestCase):
 
     def setUp(self):
-        print("Start server.")
+        logger.sub_title("Start Server")
         client.start_server()
         if not client.is_server_running():
             raise RuntimeError("Fail to start server.")
         self.init_all_models()
 
     def tearDown(self):
-        print("Stop server.")
+        logger.sub_title("Stop Server")
         client.stop_server()
 
     def test_ocr(self):
-        print("Test OCR")
+        logger.hr("Test OCR.")
         models = [
             "en-us",
             "ko-kr",
@@ -39,13 +38,13 @@ class TestOcr(unittest.TestCase):
 
         test_image_path = os.path.join(os.path.dirname(__file__), "test_images", "ocr")
         # pass method shared memory
-        print("<<< PASS METHOD : SHARE MEMORY >>>")
+        logger.sub_title("PASS METHOD : SHARED MEMORY")
         ret = client.create_shared_memory("test", 1280 * 720 * 3)
         self.assertEqual(200, ret.status_code)
         self.assertEqual("Success.", ret.text)
 
         for model in models:
-            print(f"<<< {model} >>>")
+            logger.sub_title(model)
             _dir = os.path.join(test_image_path, model)
             num_files = count_files(_dir)
             for i in range(0, num_files):
@@ -63,7 +62,7 @@ class TestOcr(unittest.TestCase):
                 self.assertEqual(200, ret.status_code)
                 j = json.loads(ret.text)
                 time = j["time"]
-                print(f"{i} time : [ {time} ms ]")
+                logger.info(f"{i} time : [ {time} ms ]")
                 # print(j["str_res"])
                 shared_memory_ret_text_list.append(j["str_res"])
 
@@ -72,9 +71,9 @@ class TestOcr(unittest.TestCase):
         self.assertEqual("Success.", ret.text)
 
         # pass method post file
-        print("<<< PASS METHOD : POST FILE >>>")
+        logger.sub_title("PASS METHOD : POST FILE")
         for model in models:
-            print(f"<<< {model} >>>")
+            logger.sub_title(model)
             _dir = os.path.join(test_image_path, model)
             num_files = count_files(_dir)
             for i in range(0, num_files):
@@ -91,7 +90,7 @@ class TestOcr(unittest.TestCase):
                 self.assertEqual(200, ret.status_code)
                 j = json.loads(ret.text)
                 time = j["time"]
-                print(f"{i} time : [ {time} ms ]")
+                logger.info(f"{i} time : [ {time} ms ]")
                 # print(j["str_res"])
                 post_file_ret_text_list.append(j["str_res"])
 
@@ -103,7 +102,7 @@ class TestOcr(unittest.TestCase):
             self.assertEqual(post_file_ret_text_list[i], shared_memory_ret_text_list[i])
 
     def test_ocr_bad_request(self):
-        print("Test ocr_bad_request.")
+        logger.hr("Test OCR Bad Request.")
         client.init_model("en-us", -1, 4, False)
         test_image_path = os.path.join(
             os.path.dirname(__file__),
@@ -191,7 +190,7 @@ class TestOcr(unittest.TestCase):
                 shared_memory_name=data["shared_memory_name"]
             )
             self.assertEqual(400, ret.status_code)
-            print(ret.text)
+            logger.info(ret.text)
             self.assertIn("Bad Request", ret.text)
 
         ret = client.release_shared_memory(shm_name)

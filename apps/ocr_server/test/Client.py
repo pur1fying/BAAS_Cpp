@@ -135,7 +135,6 @@ class BaasOcrClient:
         self.server_process.stdin.write("exit\n")
         self.server_process.stdin.flush()
         return_code = self.server_process.wait(10)
-        print(f"server exit with code {return_code}")
         if return_code != 0:
             raise RuntimeError("Fail to stop server.")
         self.server_process.stdin.close()

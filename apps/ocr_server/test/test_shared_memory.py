@@ -1,22 +1,21 @@
 import sys
 import unittest
 from Client import client
-
+from utils import logger
 
 class TestSharedMemory(unittest.TestCase):
     def setUp(self):
-        print("-------------------------------------------------")
-        print("Start server.")
+        logger.sub_title("Start Server")
         client.start_server()
         if not client.is_server_running():
             raise RuntimeError("Fail to start server.")
 
     def tearDown(self):
-        print("Stop server.")
+        logger.sub_title("Stop Server")
         client.stop_server()
 
     def test_shared_memory_bad_request(self):
-        print("Test shared memory bad request.")
+        logger.hr("Test shared memory bad request.")
         request_data = [
             {
                 "shared_memory_name": "/shm_name1",
@@ -50,7 +49,7 @@ class TestSharedMemory(unittest.TestCase):
                 name=data["shared_memory_name"],
                 size=data["size"]
             )
-            print(ret.text)
+            logger.info(ret.text)
             self.assertEqual(400, ret.status_code)
             self.assertIn("Bad Request", ret.text)
 
