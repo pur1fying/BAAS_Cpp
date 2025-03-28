@@ -25,11 +25,11 @@ public:
 
     size_t size = 0;
 
-    int put_data(const unsigned char *data, size_t sz) const;
+    int put_data(const unsigned char *data, size_t sz) const noexcept;
 
-    void safe_release();
+    void safe_release() noexcept;
 
-    inline unsigned char *get_data() const {
+    inline unsigned char *get_data() const noexcept{
 #ifdef _WIN32
         return (unsigned char *)pBuf;
 #elif UNIX_LIKE_PLATFORM
@@ -67,17 +67,17 @@ public:
             const std::string& name,
             size_t size,
             const unsigned char *data
-    );
+    ) noexcept;
 
-    static int release_shared_memory(const std::string& name);
+    static int release_shared_memory(const std::string& name) noexcept;
 
-    static size_t get_shared_memory_size(const std::string& name);
+    static size_t get_shared_memory_size(const std::string& name) noexcept;
 
     static int get_shared_memory_data(
             const std::string& name,
             unsigned char* put_data_ptr,
             size_t size = 0
-    );
+    ) noexcept;
 
     static unsigned char *get_data_ptr(const std::string &name);
 

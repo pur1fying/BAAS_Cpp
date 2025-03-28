@@ -13,8 +13,6 @@
     #include <sys/mman.h>
     #include <sys/stat.h>
     #include <unistd.h>
-    #include <cstring>
-    #include <cerrno>
 #endif // _WIN32
 
 
@@ -154,7 +152,7 @@ shm_core::shm_core(
 int shm_core::put_data(
         const unsigned char *data,
         size_t sz
-) const
+) const noexcept
 {
     if (sz > size) return -1;
     auto t1 = std::chrono::high_resolution_clock::now();
@@ -169,7 +167,7 @@ int shm_core::put_data(
     return 0;
 }
 
-void shm_core::safe_release()
+void shm_core::safe_release() noexcept
 {
 #ifdef _WIN32
     UnmapViewOfFile(pBuf);
@@ -250,7 +248,7 @@ int Shared_Memory::set_shared_memory_data(
         const std::string &name,
         size_t size,
         const unsigned char *data
-)
+) noexcept
 {
     auto it = shm_map.find(name);
     if (it == shm_map.end()) return 1;
@@ -262,11 +260,11 @@ int Shared_Memory::get_shared_memory_data(
         const std::string &name,
         unsigned char* put_data_ptr,
         size_t size
-)
+) noexcept
 {
     try {
-        auto shared_memory = Shared_Memory(name, size);
-        memcpy(put_data_ptr, shared_memory.get_data(), size);
+        Shared_Memory *shm = static_cast<Shared_Memory *>(get_shared_memory(name));
+        memcpy(put_data_ptr, shm->get_data(), size);
         return 0;
     }
     catch (const std::exception &e) {
@@ -275,7 +273,7 @@ int Shared_Memory::get_shared_memory_data(
     }
 }
 
-int Shared_Memory::release_shared_memory(const std::string &name)
+int Shared_Memory::release_shared_memory(const std::string &name) noexcept
 {
     auto it = shm_map.find(name);
     if (it == shm_map.end()) return 1;
@@ -285,7 +283,7 @@ int Shared_Memory::release_shared_memory(const std::string &name)
     return 0;
 }
 
-size_t Shared_Memory::get_shared_memory_size(const std::string &name)
+size_t Shared_Memory::get_shared_memory_size(const std::string &name) noexcept
 {
     auto it = shm_map.find(name);
     if (it == shm_map.end()) return 0;
