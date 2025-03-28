@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <cassert>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -13,6 +14,8 @@
     #include <sys/mman.h>
     #include <sys/stat.h>
     #include <unistd.h>
+    #include <cerrno>
+    #include <cstring>
 #endif // _WIN32
 
 
@@ -22,15 +25,25 @@ BAAS_NAMESPACE_BEGIN
 #ifdef _WIN32
 size_t query_shm_size(void *p_buf_ptr)
 {
+    assert(p_buf_ptr != nullptr);
     MEMORY_BASIC_INFORMATION mbi;
-    VirtualQuery(p_buf_ptr, &mbi, sizeof(mbi));
+    if(VirtualQuery(p_buf_ptr, &mbi, sizeof(mbi)) == 0)
+    {
+        DWORD err = GetLastError();
+        std::string msg = "Failed to query shared memory size with VirtualQuery. Error code: " + std::to_string(err);
+        throw Shared_Memory_Error(msg.c_str());
+    };
     return mbi.RegionSize;
 }
 #elif UNIX_LIKE_PLATFORM
 size_t query_shm_size(int shm_fd)
 {
     struct stat sb{};
-    fstat(shm_fd, &sb);    
+    if (fstat(shm_fd, &sb))
+    {
+        std::string msg = "Failed to query shared memory size with fstat. Error code: " + std::to_string(errno);
+        throw Shared_Memory_Error(msg.c_str());
+    }
     return sb.st_size;
 }
 
@@ -146,20 +159,26 @@ shm_core::shm_core(
     }
 
 #endif // _WIN32
-    if (data != nullptr) put_data(data, size);
+    if (data != nullptr) put_data(data, size, 0);
 }
+/* Put data into shm
+ * Return:
+ *        -1: shm size not enough
+ *         0: success
+ */
 
 int shm_core::put_data(
         const unsigned char *data,
-        size_t sz
+        size_t sz,
+        size_t offset
 ) const noexcept
 {
-    if (sz > size) return -1;
+    if (offset + sz > size) return -1;
     auto t1 = std::chrono::high_resolution_clock::now();
 #ifdef _WIN32
-    memcpy(pBuf, data, size);
+    memcpy(static_cast<char*>(pBuf) + offset, data, sz);
 #elif UNIX_LIKE_PLATFORM
-    memcpy(shm_address, data, size);
+    memcpy(static_cast<char*>(shm_address) + offset, data, sz);
 #endif // _WIN32
     std::cout << "put data time: " <<
     std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - t1).count()
@@ -179,13 +198,13 @@ void shm_core::safe_release() noexcept
 #endif // _WIN32
 }
 
-
 int Shared_Memory::put_data(
         const unsigned char *data,
-        size_t sz
-)
+        size_t sz,
+        size_t offset
+) const noexcept
 {
-    return shm.put_data(data, sz);
+    return shm.put_data(data, sz, offset);
 }
 
 Shared_Memory::~Shared_Memory()
@@ -202,12 +221,12 @@ Shared_Memory::Shared_Memory(
     shm = shm_core(name, size, data);
 }
 
-unsigned char *Shared_Memory::get_data()
+unsigned char *Shared_Memory::get_data() const noexcept
 {
     return (unsigned char *)(shm.get_data());
 }
 
-void Shared_Memory::release()
+void Shared_Memory::release() noexcept
 {
     shm.safe_release();
 }
@@ -247,30 +266,44 @@ void* Shared_Memory::get_shared_memory(
 int Shared_Memory::set_shared_memory_data(
         const std::string &name,
         size_t size,
-        const unsigned char *data
+        const unsigned char *data,
+        size_t offset
 ) noexcept
 {
     auto it = shm_map.find(name);
     if (it == shm_map.end()) return 1;
-    return it->second->put_data(data, size);
+    return it->second->put_data(data, size, offset);
 
 }
+
+/*
+ * put shared memory data into put_data_ptr
+ * Return:
+ *        -2: shm do not have data size as required
+ *        -1: shm Internal error
+ *         0: success
+ */
 
 int Shared_Memory::get_shared_memory_data(
         const std::string &name,
         unsigned char* put_data_ptr,
-        size_t size
+        size_t size,
+        size_t offset
 ) noexcept
 {
+    Shared_Memory *shm;
     try {
-        Shared_Memory *shm = static_cast<Shared_Memory *>(get_shared_memory(name));
-        memcpy(put_data_ptr, shm->get_data(), size);
-        return 0;
+        shm = static_cast<Shared_Memory *>(get_shared_memory(name));
     }
     catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;
-        return 1;
+        return -1;
     }
+    if (size + offset > shm->shm.size) return -2;
+
+    memcpy(put_data_ptr, shm->get_data() + offset, size);
+    return 0;
+
 }
 
 int Shared_Memory::release_shared_memory(const std::string &name) noexcept
@@ -287,17 +320,17 @@ size_t Shared_Memory::get_shared_memory_size(const std::string &name) noexcept
 {
     auto it = shm_map.find(name);
     if (it == shm_map.end()) return 0;
-    return it->second->get_size();
+    return it->second->shm.size;
 }
 
-unsigned char* Shared_Memory::get_data_ptr(const std::string &name)
+unsigned char* Shared_Memory::get_data_ptr(const std::string &name) noexcept
 {
     auto it = shm_map.find(name);
     if (it == shm_map.end()) return nullptr;
     return it->second->get_data();
 }
 
-void Shared_Memory::release_all()
+void Shared_Memory::release_all() noexcept
 {
     for (auto &it : shm_map) {
         it.second->release();
@@ -305,6 +338,7 @@ void Shared_Memory::release_all()
     }
     shm_map.clear();
 }
+
 
 BAAS_NAMESPACE_END
 

@@ -10,22 +10,22 @@
 #include <memory>
 #include "core_defines.h"
 
-
 BAAS_NAMESPACE_BEGIN
 
 size_t query_shm_size(void *p_buf_ptr);
 
 struct shm_core{    // metadata of shm
+
 public:
     shm_core() = default;
 
     explicit shm_core(const std::string& name, size_t size, const unsigned char *data = nullptr);
 
-    std::string shm_name;
-
-    size_t size = 0;
-
-    int put_data(const unsigned char *data, size_t sz) const noexcept;
+    int put_data(
+            const unsigned char *data,
+            size_t sz,
+            size_t offset = 0
+    ) const noexcept;
 
     void safe_release() noexcept;
 
@@ -35,7 +35,6 @@ public:
 #elif UNIX_LIKE_PLATFORM
         return (unsigned char *)shm_address;
 #endif // _WIN32
-
     }
 #ifdef _WIN32
     void *hMapFile;
@@ -46,15 +45,18 @@ public:
 
     void * shm_address = nullptr;
 #endif // _WIN32
+    std::string shm_name;
 
-
+    size_t size = 0;
 };
+
 /*
  * for BAAS to exchange image data between different processes
  * 1. Every shm is used by one BAAS instance
  * 2. every instance will write into shm in only one thread
  * 3. Max Image Size is fixed, so shm size is fixed
  */
+
 class Shared_Memory {
 public:
     static void * get_shared_memory(
@@ -66,7 +68,8 @@ public:
     static int set_shared_memory_data(
             const std::string& name,
             size_t size,
-            const unsigned char *data
+            const unsigned char *data,
+            size_t offset = 0
     ) noexcept;
 
     static int release_shared_memory(const std::string& name) noexcept;
@@ -76,12 +79,14 @@ public:
     static int get_shared_memory_data(
             const std::string& name,
             unsigned char* put_data_ptr,
-            size_t size = 0
+            size_t size = 0,
+            size_t offset = 0
     ) noexcept;
 
-    static unsigned char *get_data_ptr(const std::string &name);
+    static unsigned char *get_data_ptr(const std::string &name) noexcept;
 
-    static void release_all();
+    static void release_all() noexcept;
+
 private:
     explicit Shared_Memory(
             const std::string &name,
@@ -91,17 +96,13 @@ private:
 
     inline int put_data(
             const unsigned char *data,
-            size_t size
-    );
+            size_t size,
+            size_t offset = 0
+    ) const noexcept;
 
-    inline void release();
+    inline void release() noexcept;
 
-    inline unsigned char *get_data();
-
-    inline size_t get_size() const
-    {
-        return shm.size;
-    }
+    inline unsigned char *get_data() const noexcept;
 
     shm_core shm;
 
@@ -163,7 +164,6 @@ BAAS_API int get_shared_memory_data(
         unsigned char *data,
         size_t size = 0
 );
-
 
 #ifdef __cplusplus
 }
