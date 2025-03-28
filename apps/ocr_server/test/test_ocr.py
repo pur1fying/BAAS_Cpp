@@ -35,6 +35,7 @@ class TestOcr(unittest.TestCase):
 
         post_file_ret_text_list = []
         shared_memory_ret_text_list = []
+        local_file_ret_text_list = []
 
         test_image_path = os.path.join(os.path.dirname(__file__), "test_images", "ocr")
         # pass method shared memory
@@ -94,12 +95,36 @@ class TestOcr(unittest.TestCase):
                 # print(j["str_res"])
                 post_file_ret_text_list.append(j["str_res"])
 
-
+        # pass method local file
+        logger.sub_title("PASS METHOD : LOCAL FILE")
+        for model in models:
+            logger.sub_title(model)
+            _dir = os.path.join(test_image_path, model)
+            num_files = count_files(_dir)
+            for i in range(0, num_files):
+                image_path = os.path.join(test_image_path, model, f"{i}.png")
+                img = cv2.imread(image_path)
+                ret = client.ocr(
+                    language=model,
+                    origin_image=img,
+                    candidates="",
+                    pass_method=1,
+                    ret_options=0b111,
+                    local_path="",
+                )
+                self.assertEqual(200, ret.status_code)
+                j = json.loads(ret.text)
+                time = j["time"]
+                logger.info(f"{i} time : [ {time} ms ]")
+                # print(j["str_res"])
+                local_file_ret_text_list.append(j["str_res"])
 
         # same image same result
         self.assertEqual(len(post_file_ret_text_list), len(shared_memory_ret_text_list))
+        self.assertEqual(len(post_file_ret_text_list), len(local_file_ret_text_list))
         for i in range(len(post_file_ret_text_list)):
             self.assertEqual(post_file_ret_text_list[i], shared_memory_ret_text_list[i])
+            self.assertEqual(post_file_ret_text_list[i], local_file_ret_text_list[i])
 
     def test_ocr_bad_request(self):
         logger.hr("Test OCR Bad Request.")

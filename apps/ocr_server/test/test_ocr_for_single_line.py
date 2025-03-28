@@ -58,6 +58,7 @@ class TestOcrForSingleLine(unittest.TestCase):
 
         post_file_ret_text_list = []
         shared_memory_ret_text_list = []
+        local_file_ret_text_list = []
 
         test_image_path = os.path.join(os.path.dirname(__file__), "test_images", "ocr_for_single_line")
         # pass method post file
@@ -118,11 +119,37 @@ class TestOcrForSingleLine(unittest.TestCase):
         ret = client.release_shared_memory("test")
         self.assertEqual(200, ret.status_code)
         self.assertEqual("Success.", ret.text)
+        
+        # pass method local file
+        logger.sub_title("PASS METHOD : LOCAL FILE")
+        for model in models:
+            logger.sub_title(model)
+            _dir = os.path.join(test_image_path, model)
+            num_files = count_files(_dir)
+            for i in range(0, num_files):
+                image_path = os.path.join(test_image_path, model, f"{i}.png")
+                ret = client.ocr_for_single_line(
+                    language=model,
+                    origin_image=img,
+                    candidates="",
+                    pass_method=2,
+                    local_path=image_path,
+                )
+                self.assertEqual(200, ret.status_code)
+                j = json.loads(ret.text)
+                time = j["time"]
+                logger.info(f"{i} time : [ {time} ms ]")
+                logger.info(j["text"])
+                local_file_ret_text_list.append(j["text"])
+                if str(i) in expected_results[model]:
+                    self.assertEqual(expected_results[model][str(i)], j["text"])
 
         # same image same result
         self.assertEqual(len(post_file_ret_text_list), len(shared_memory_ret_text_list))
+        self.assertEqual(len(post_file_ret_text_list), len(local_file_ret_text_list))
         for i in range(len(post_file_ret_text_list)):
             self.assertEqual(post_file_ret_text_list[i], shared_memory_ret_text_list[i])
+            self.assertEqual(post_file_ret_text_list[i], local_file_ret_text_list[i])
 
     def test_ocr_for_single_line_bad_request(self):
         logger.hr("Test OCR for single line bad request.")
