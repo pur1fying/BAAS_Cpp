@@ -280,7 +280,7 @@ int Shared_Memory::set_shared_memory_data(
  * put shared memory data into put_data_ptr
  * Return:
  *        -2: shm do not have data size as required
- *        -1: shm Internal error
+ *        -1: shm not exists
  *         0: success
  */
 
@@ -291,17 +291,10 @@ int Shared_Memory::get_shared_memory_data(
         size_t offset
 ) noexcept
 {
-    Shared_Memory *shm;
-    try {
-        shm = static_cast<Shared_Memory *>(get_shared_memory(name));
-    }
-    catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
-        return -1;
-    }
-    if (size + offset > shm->shm.size) return -2;
-
-    memcpy(put_data_ptr, shm->get_data() + offset, size);
+    auto it = shm_map.find(name);
+    if (it == shm_map.end()) return 1;
+    if (size + offset > it->second->shm.size) return -2;
+    memcpy(put_data_ptr, it->second->shm.get_data() + offset, size);
     return 0;
 
 }
