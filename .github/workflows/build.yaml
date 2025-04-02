@@ -11,10 +11,10 @@ on:
   push:
     branches:
       - main
-    paths: ['resource/**', 'apps/ocr_server/test/**', '.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp']
+    paths: ['resource/**', 'apps/ocr_server/test/**', '.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp', '**/*.cmake']
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: ['resource/**', 'apps/ocr_server/test/**', '.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp']
+    paths: ['resource/**', 'apps/ocr_server/test/**', '.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp', '**/*.cmake']
 
 
 concurrency:
@@ -180,6 +180,13 @@ jobs:
           if ${{ steps.install_python.outputs.cache-hit }} ;  then echo "::notice::Hitting pip cache, using cached packages may lead to issues.";  fi 
           python -m pip install --upgrade pip
           python -m pip install -r apps/ocr_server/test/requirements.txt
+          
+      - name: Run Test
+        id: run_test
+        run: |
+          python -m unittest discover -s apps/ocr_server/test -p "*.py"
+          rm -r -f ./build/bin/output
+          rm -r -f ./build/bin/config          
 
       - name: Upload artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
@@ -194,15 +201,6 @@ jobs:
         id: copy_bin
         run: |
           cp -a -f ../baas_cpp/build/bin/* .
-          
-      - name: Run Test
-        id: run_test
-        run: |
-          python -m unittest discover -s apps/ocr_server/test -p "*.py"
-          rm -r -f ./build/bin/output
-          rm -r -f ./build/bin/config          
-
-      
   
       - name: Commit and Push
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
