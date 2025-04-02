@@ -8,7 +8,7 @@ target_link_directories(
 
 SET(
         DLL_COMMON
-        libonnxruntime.1.17.1.dylib
+        libonnxruntime.dylib
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -16,7 +16,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(
             DLL_RELEASE
-            libopencv_world.4.9.0.dylib
+            libopencv_world.409.dylib
     )
 endif ()
 
@@ -35,10 +35,24 @@ foreach (DLL ${DLL_RAW})
     message(STATUS "${DLL}")
 endforeach ()
 
-foreach (dll ${DLL_RAW})
+set(
+    DLL_MOVE
+    ${DLL_RAW}
+    libonnxruntime.1.17.1.dylib
+    libopencv_world.4.9.0.dylib
+)
+
+foreach (dll ${DLL_MOVE})
     set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}/${dll})
     file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endforeach ()
+
+# 自动修改 rpath，去掉任何其他路径，改为 @executable_path
+add_custom_command(TARGET BAAS_ocr_server POST_BUILD
+    COMMAND install_name_tool -delete_rpath $<TARGET_FILE_DIR:BAAS_ocr_server> $<TARGET_FILE:BAAS_ocr_server>
+    COMMAND install_name_tool -add_rpath @executable_path $<TARGET_FILE:BAAS_ocr_server>
+    COMMENT "Updating rpath for BAAS_ocr_server"
+)
 
 target_link_libraries(
         BAAS_ocr_server
