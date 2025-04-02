@@ -51,9 +51,9 @@ jobs:
         id: checkout_prebuild
         uses: actions/checkout@v4
         with:
-          repository: "MC-ALL/baas_cpp_prebuild"
+          repository: "pur1fying/LinuxCompiled_baas_ocr_server"
           ref: "linux-x64"
-          token: ${{ secrets.BAAS_CPP_PREBUILD_PAT_1 }}
+          token: ${{ secrets.GHA_TOKEN_SECRET }}
           fetch-depth: 0
           path: "prebuild"
 
@@ -145,9 +145,9 @@ jobs:
         id: checkout_prebuild
         uses: actions/checkout@v4
         with:
-          repository: "MC-ALL/baas_cpp_prebuild"
+          repository: "pur1fying/MacOSCompiled_baas_ocr_server"
           ref: "macos-arm64"
-          token: ${{ secrets.BAAS_CPP_PREBUILD_PAT_1 }}
+          token: ${{ secrets.GHA_TOKEN_SECRET }}
           fetch-depth: 0
           path: "prebuild"
 
@@ -239,9 +239,9 @@ jobs:
         id: checkout_prebuild
         uses: actions/checkout@v4
         with:
-          repository: "MC-ALL/baas_cpp_prebuild"
+          repository: "pur1fying/WindowsCompiled_baas_ocr_server"
           ref: "windows-x64"
-          token: ${{ secrets.BAAS_CPP_PREBUILD_PAT_1 }}
+          token: ${{ secrets.GHA_TOKEN_SECRET }}
           fetch-depth: 0
           path: "prebuild"
 
