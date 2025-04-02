@@ -2,7 +2,7 @@
   "ocr": {
     "gpu_id": -1,
     "num_thread": 4,
-    "EnableCpuMemoryArena": false,
+    "enable_cpu_memory_arena": false,
     "server": {
       "host": "localhost",
       "port": 1145
