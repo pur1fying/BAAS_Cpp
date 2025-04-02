@@ -11,10 +11,10 @@ on:
   push:
     branches:
       - main
-    paths: ['.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp']
+    paths: ['resource/**', 'apps/ocr_server/test/**', '.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp']
   pull_request:
     types: [opened, synchronize, reopened]
-    paths: ['.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp']
+    paths: ['resource/**', 'apps/ocr_server/test/**', '.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp']
 
 
 concurrency:
@@ -35,12 +35,27 @@ jobs:
   Ubuntu-latest-cmake-x64:
     name: 'Build Binary for Linux x64'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./baas_cpp
     steps:
-      - name: Clone
-        id: checkout
+      - name: Clone Source Repo
+        id: checkout_main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          path: "baas_cpp"
+
+      - name: Clone Prebuild Repo
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        id: checkout_prebuild
+        uses: actions/checkout@v4
+        with:
+          repository: "MC-ALL/baas_cpp_prebuild"
+          ref: "linux-x64"
+          token: ${{ secrets.BAAS_CPP_PREBUILD_PAT_1 }}
+          fetch-depth: 0
+          path: "prebuild"
 
       - name: Install Build Dependencies
         id: install_build_depends
@@ -76,34 +91,69 @@ jobs:
         id: run_test
         run: |
           python -m unittest discover -s apps/ocr_server/test -p "*.py"
-
-      - name: Pack Artifacts
-        id: pack_artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          zip -r baas-ocr-bin-ubuntu-x64.zip ./build/bin/*
+          rm -r -f ./build/bin/output
+          rm -r -f ./build/bin/config
 
       - name: Upload Artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          path: baas-ocr-bin-ubuntu-x64.zip
-          name: baas-ocr-bin-ubuntu-x64.zip
+          path: ./baas_cpp/build/bin
+          name: baas-ocr-bin-ubuntu-x64
+
+      - name: Copy Binaries
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        working-directory: ./prebuild
+        id: copy_bin
+        run: |
+          cp -a -f ../baas_cpp/build/bin/* .
+
+      - name: Commit and Push
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        working-directory: ./prebuild
+        continue-on-error: true
+        id: commit_and_push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "New version pushed
+
+          commit sha: ${{ github.sha }}
+          commit msg: ${{ github.event.head_commit.message }}
+          trigger: ${{ github.workflow }} (event: ${{ github.event_name }})
+          build bot: ${{ github.job }} (run id: ${{ github.run_id }})"
+          git push
 
 
   macOS-latest-cmake-arm64:
     name: 'Build Binary for macOS arm64'
     runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ./baas_cpp
     steps:
-      - name: Clone
-        id: checkout
+      - name: Clone Source Repo
+        id: checkout_main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          path: "baas_cpp"
+
+      - name: Clone Prebuild Repo
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        id: checkout_prebuild
+        uses: actions/checkout@v4
+        with:
+          repository: "MC-ALL/baas_cpp_prebuild"
+          ref: "macos-arm64"
+          token: ${{ secrets.BAAS_CPP_PREBUILD_PAT_1 }}
+          fetch-depth: 0
+          path: "prebuild"
 
       - name: Install Build Dependencies
         id: install_build_depends
-        continue-on-error: true
+        # continue-on-error: true
         run: |
           brew update
 
@@ -135,30 +185,65 @@ jobs:
         id: run_test
         run: |
           python -m unittest discover -s apps/ocr_server/test -p "*.py"
-
-      - name: Pack artifacts
-        id: pack_artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          zip -r baas-ocr-bin-macOS-arm64.zip ./build/bin/*
+          rm -r -f ./build/bin/output
+          rm -r -f ./build/bin/config          
 
       - name: Upload artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          path: baas-ocr-bin-macOS-arm64.zip
-          name: baas-ocr-bin-macOS-arm64.zip
+          path: ./baas_cpp/build/bin
+          name: baas-ocr-bin-macOS-arm64
+
+      - name: Copy Binaries
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        working-directory: ./prebuild
+        id: copy_bin
+        run: |
+          cp -a -f ../baas_cpp/build/bin/* .
+  
+      - name: Commit and Push
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        working-directory: ./prebuild
+        continue-on-error: true
+        id: commit_and_push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "New version pushed
+
+          commit sha: ${{ github.sha }}
+          commit msg: ${{ github.event.head_commit.message }}
+          trigger: ${{ github.workflow }} (event: ${{ github.event_name }})
+          build bot: ${{ github.job }} (run id: ${{ github.run_id }})"
+          git push
 
 
   Windows-latest-cmake-x64:
     name: 'Build Binary for Windows x64'
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ./baas_cpp
     steps:
-      - name: Clone
-        id: checkout
+      - name: Clone Source Repo
+        id: checkout_main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          path: "baas_cpp"
+
+      - name: Clone Prebuild Repo
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        id: checkout_prebuild
+        uses: actions/checkout@v4
+        with:
+          repository: "MC-ALL/baas_cpp_prebuild"
+          ref: "windows-x64"
+          token: ${{ secrets.BAAS_CPP_PREBUILD_PAT_1 }}
+          fetch-depth: 0
+          path: "prebuild"
 
       - name: Install Build Dependencies
         id: install_build_depends
@@ -169,6 +254,7 @@ jobs:
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
+
       - name: Build
         id: cmake_build
         run: |
@@ -195,20 +281,38 @@ jobs:
       
       - name: Run Test
         id: run_test
-        continue-on-error: true
         run: |
-          # Write-Output "::warning::Running test on Windows is NOT supported now."
           python -m unittest discover -s .\apps\ocr_server\test -p "*.py"
-
-      - name: Pack artifacts
-        id: pack_artifacts
-        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
-        run: |
-          7z a baas-ocr-bin-windows-x64.zip .\build\bin\*
+          Remove-Item -Path ".\build\bin\output" -Recurse -Force
+          Remove-Item -Path ".\build\bin\config" -Recurse -Force
 
       - name: Upload artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          path: baas-ocr-bin-windows-x64.zip
-          name: baas-ocr-bin-windows-x64.zip
+          path: ./baas_cpp/build/bin
+          name: baas-ocr-bin-windows-x64
+
+      - name: Copy Binaries
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        working-directory: ./prebuild
+        id: copy_bin
+        run: |
+          Copy-Item -Path "..\baas_cpp\build\bin\*" -Destination . -Recurse -Force
+
+      - name: Commit and Push
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        working-directory: ./prebuild
+        continue-on-error: true
+        id: commit_and_push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "New version pushed
+
+          commit sha: ${{ github.sha }}
+          commit msg: ${{ github.event.head_commit.message }}
+          trigger: ${{ github.workflow }} (event: ${{ github.event_name }})
+          build bot: ${{ github.job }} (run id: ${{ github.run_id }})"
+          git push   
