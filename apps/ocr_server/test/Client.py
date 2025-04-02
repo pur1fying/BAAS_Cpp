@@ -6,6 +6,8 @@ import time
 import socket
 import shutil
 import datetime
+
+import psutil
 import requests
 import subprocess
 from multiprocessing import shared_memory
@@ -50,10 +52,10 @@ class BaasOcrClient:
             raise Exception("Didn't find ocr server executable.")
         self.config = ServerConfig()
         self.server_process = None
-        self.kilL_existing_server()
+        self.kill_existing_server()
 
     @staticmethod
-    def kilL_existing_server():
+    def kill_existing_server():
         try:
             if sys.platform == "linux" or sys.platform == "darwin":
                 subprocess.run(["pkill", "-9", BaasOcrClient.executable_name])
@@ -138,7 +140,7 @@ class BaasOcrClient:
         if return_code != 0:
             raise RuntimeError("Fail to stop server.")
         self.server_process.stdin.close()
-        if client.is_server_running():
+        if not client.is_stopped():
             raise RuntimeError("Fail to stop server.")
         self.server_process = None
 
@@ -188,7 +190,8 @@ class BaasOcrClient:
             row = origin_image.shape[0]
             size = col * row * 3
             SharedMemory.set_data(shared_memory_name, origin_image.tobytes(), size)
-            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform != "win32" else shared_memory_name
+            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform != "win32" \
+                                                                        else shared_memory_name
             data["image"]["resolution"] = [col, row]
             return requests.post(url, json=data)
         if pass_method == 1:
@@ -203,14 +206,14 @@ class BaasOcrClient:
             return requests.post(url, json=data)
 
     def ocr_for_single_line(
-                            self,
-                            language: str,
-                            origin_image=None,
-                            candidates: str = "",
-                            pass_method: int = 0,
-                            local_path: str = "",
-                            shared_memory_name: str = ""
-                            ):
+            self,
+            language: str,
+            origin_image=None,
+            candidates: str = "",
+            pass_method: int = 0,
+            local_path: str = "",
+            shared_memory_name: str = ""
+    ):
         url = self.config.base_url + "/ocr_for_single_line"
         data = {
             "language": language,
@@ -226,7 +229,8 @@ class BaasOcrClient:
             row = origin_image.shape[0]
             size = col * row * 3
             SharedMemory.set_data(shared_memory_name, origin_image.tobytes(), size)
-            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform != "win32" else shared_memory_name
+            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform != "win32" \
+                                                                            else shared_memory_name
             data["image"]["resolution"] = [col, row]
             return requests.post(url, json=data)
         elif pass_method == 1:
@@ -256,6 +260,16 @@ class BaasOcrClient:
                 return True
         except ConnectionRefusedError:
             return False
+
+    def is_stopped(self):
+        try:
+            process = psutil.Process(self.server_process.pid)
+            process_status = process.status()
+            return False
+        except psutil.NoSuchProcess:
+            return True
+        except psutil.ZombieProcess:
+            return True
 
 
 class SharedMemory:
@@ -312,6 +326,7 @@ class SharedMemoryError(Exception):
         self.message = message
         super().__init__(self.message)
 
+
 class OcrInternalError(Exception):
     """
         BAAS_ocr_server internal error
@@ -320,5 +335,6 @@ class OcrInternalError(Exception):
     def __init__(self, message="Ocr Internal Error"):
         self.message = message
         super().__init__(self.message)
+
 
 client = BaasOcrClient()
