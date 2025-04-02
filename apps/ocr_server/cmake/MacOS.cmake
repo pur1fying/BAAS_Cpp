@@ -47,9 +47,8 @@ foreach (dll ${DLL_MOVE})
     file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endforeach ()
 
-# 自动修改 rpath，去掉任何其他路径，改为 @executable_path
 add_custom_command(TARGET BAAS_ocr_server POST_BUILD
-    COMMAND install_name_tool -delete_rpath $<TARGET_FILE_DIR:BAAS_ocr_server> $<TARGET_FILE:BAAS_ocr_server>
+    COMMAND install_name_tool -delete_rpath ${BAAS_PROJECT_PATH}/dll/MacOS $<TARGET_FILE:BAAS_ocr_server>
     COMMAND install_name_tool -add_rpath @executable_path $<TARGET_FILE:BAAS_ocr_server>
     COMMENT "Updating rpath for BAAS_ocr_server"
 )
