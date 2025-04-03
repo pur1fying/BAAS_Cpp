@@ -49,6 +49,9 @@ foreach (dll ${DLL_RAW})
     file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endforeach ()
 
+set_target_properties(BAAS_ocr_server PROPERTIES INSTALL_RPATH "$ORIGIN")
+set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+
 target_link_libraries(
         BAAS_ocr_server
         ${DLL_RAW}
