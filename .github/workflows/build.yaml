@@ -34,7 +34,7 @@ env:
 jobs:
   Ubuntu-latest-cmake-x64:
     name: 'Build Binary for Linux x64'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ./baas_cpp
