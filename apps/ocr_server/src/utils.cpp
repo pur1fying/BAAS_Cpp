@@ -63,7 +63,10 @@ void server_thread() {
 void handle_input() {
     std::string input;
     while (true) {
-        std::cin >> input;
+        if (!(std::cin >> input)) { 
+            BAASGlobalLogger->BAASInfo("EOF detected. Exiting...");
+            break;
+        }
         BAASGlobalLogger->BAASInfo("Input : " + input);
         if (input == "exit") {
             break;
