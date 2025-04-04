@@ -65,4 +65,5 @@ target_link_libraries(
         BAAS_ocr_server
         ${DLL_RAW}
         rt
+        pthread
 )
