@@ -222,7 +222,7 @@ jobs:
 
   Windows-latest-cmake-x64:
     name: 'Build Binary for Windows x64'
-    runs-on: windows-2019
+    runs-on: windows-latest
     defaults:
       run:
         working-directory: ./baas_cpp
