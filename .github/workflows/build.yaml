@@ -34,7 +34,7 @@ env:
 jobs:
   Ubuntu-latest-cmake-x64:
     name: 'Build Binary for Linux x64'
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     defaults:
       run:
         working-directory: ./baas_cpp
@@ -222,7 +222,7 @@ jobs:
 
   Windows-latest-cmake-x64:
     name: 'Build Binary for Windows x64'
-    runs-on: windows-2022
+    runs-on: windows-2019
     defaults:
       run:
         working-directory: ./baas_cpp
