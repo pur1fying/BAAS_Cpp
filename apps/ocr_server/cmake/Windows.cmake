@@ -12,7 +12,6 @@ target_link_directories(
         BAAS_ocr_server
         PRIVATE
         ${BAAS_PROJECT_PATH}/lib/${CURRENT_OS_NAME}
-
 )
 
 SET(
@@ -25,6 +24,10 @@ SET(
 SET(
         DLL_COMMON
         onnxruntime
+        concrt140
+        msvcp140
+        vcruntime140
+        vcruntime140_1
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

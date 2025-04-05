@@ -28,10 +28,6 @@ file(
         ${BAAS_PROJECT_PATH}/src/BAASExternalIPC.cpp
 )
 
-if(MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif ()
-
 add_executable(
         BAAS_ocr_server
         baas_ocr_main.cpp
