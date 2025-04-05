@@ -535,9 +535,13 @@ void Server::handle_create_shared_memory(
     void* p = baas::Shared_Memory::get_shared_memory(name, size, nullptr);
     if (p == nullptr) {
         res.status = 400;
-        res.set_content("Failed to create shared memory.", "text/plain");
+        std::string msg = "Failed to create shared memory : " + name;
+        BAASGlobalLogger->BAASError(msg);
+        res.set_content(msg, "text/plain");
         return;
     }
+    BAASGlobalLogger->BAASInfo("Shared Memory [ " + name + " ] actual size : " +
+                                        std::to_string(Shared_Memory::get_shared_memory_size(name)));
     res.status = 200;
     res.set_content("Success.", "text/plain");
 }

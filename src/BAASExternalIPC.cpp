@@ -2,7 +2,6 @@
 // Created by pc on 2024/9/28.
 //
 #include "BAASExternalIPC.h"
-
 #include <iostream>
 #include <chrono>
 #include <cassert>
@@ -71,7 +70,6 @@ shm_core::shm_core(
             std::string msg = "OpenFileMapping failed " + std::to_string(GetLastError());
             throw Shared_Memory_Error(msg.c_str());
         }
-        this->size = query_shm_size(pBuf);  // adjust to actual size
         this->pBuf = MapViewOfFile(
                 hMapFile,
                 FILE_MAP_ALL_ACCESS,
@@ -79,6 +77,7 @@ shm_core::shm_core(
                 0,
                 0   // map whole file
         );
+        this->size = query_shm_size(pBuf);  // adjust to actual size
         if (pBuf == nullptr) {
             std::string msg = "MapViewOfFile failed " + std::to_string(GetLastError());
             throw Shared_Memory_Error(msg.c_str());
@@ -119,15 +118,15 @@ shm_core::shm_core(
             std::string msg = "CreateFileMapping failed " + std::to_string(GetLastError());
             throw Shared_Memory_Error(msg.c_str());
         }
-        this->size = query_shm_size(hMapFile);  
     }
     this->pBuf = MapViewOfFile(
             hMapFile,
             FILE_MAP_ALL_ACCESS,
             0,
             0,
-            this->size
+            0   // map whole file
     );
+    this->size = query_shm_size(pBuf);  // adjust to actual size
     if (pBuf == nullptr) {
         std::string msg = "MapViewOfFile failed " + std::to_string(GetLastError());
         throw Shared_Memory_Error(msg.c_str());
