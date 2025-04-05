@@ -1,29 +1,6 @@
-macro(BAAS_hr_LOG message)
-    set(PAD_LENGTH 60)
+get_filename_component(BAAS_PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 
-    string(LENGTH "${message}" msg_length)
-
-    math(EXPR LEFT_PAD "(${PAD_LENGTH} - ${msg_length}) / 2 - 1 " )
-    math(EXPR RIGHT_PAD "(${PAD_LENGTH} - (${msg_length} + ${LEFT_PAD})) - 2")
-
-    string(REPEAT "-" ${PAD_LENGTH} PADDING)
-    string(REPEAT " " ${LEFT_PAD} LEFT_PADDING)
-    string(REPEAT " " ${RIGHT_PAD} RIGHT_PADDING)
-
-    message(STATUS  "${PADDING}")
-    message(STATUS "|${LEFT_PADDING}${message}${RIGHT_PADDING}|")
-    message(STATUS  "${PADDING}")
-endmacro()
-
-macro(BAAS_sub_title_LOG)
-    string(REPEAT "<" 3 LEFT)
-    string(REPEAT ">" 3 RIGHT)
-    message(STATUS "${LEFT} ${ARGN} ${RIGHT}")
-endmacro()
-
-macro(LOG_LINE)
-    message(STATUS "---------------------------------")
-endmacro()
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake")
 
 BAAS_hr_LOG("PROJECT BAAS")
 
@@ -48,20 +25,42 @@ if ( NOT DEFINED CURRENT_OS_NAME)
     message(FATAL_ERROR "Unknown OS: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-message(STATUS "OS : ${CURRENT_OS_NAME}")
+BAAS_sub_title_LOG("OS : ${CURRENT_OS_NAME}")
 set(BAAS_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${CURRENT_OS_NAME}")
 set(BAAS_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${CURRENT_OS_NAME}")
 
 cmake_minimum_required(VERSION 3.22)
-project(BAAS VERSION 1.0.0)
+
+project(BAAS VERSION 1.1.0)
+
+
+# git configuration
+get_git_info(GIT_BRANCH git rev-parse --abbrev-ref HEAD)
+get_git_info(GIT_COMMIT_HASH  git rev-parse HEAD)
+get_git_info(GIT_COMMIT_AUTHOR git log -1 --format=%an)
+get_git_info(GIT_COMMIT_EMAIL  git log -1 --format=%ae)
+get_git_info(GIT_COMMIT_TITLE  git log -1 --format=%s)
+get_git_info(GIT_COMMIT_BODY   git log -1 --format=%b)
+get_git_info(GIT_COMMIT_DATE   git log -1 --format=%cd --date=iso)
+
+# build time
+string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S" UTC)
+
+BAAS_sub_title_LOG("GIT INFO")
+message(STATUS "Hash        : ${GIT_COMMIT_HASH}")
+message(STATUS "Branch      : ${GIT_BRANCH}")
+message(STATUS "Author      : ${GIT_COMMIT_AUTHOR} <${GIT_COMMIT_EMAIL}>")
+message(STATUS "Commit      : ${GIT_COMMIT_TITLE}")
+message(STATUS "Date        : ${GIT_COMMIT_DATE}")
+message(STATUS "Build time  : ${BUILD_TIME}")
+
 configure_file(
-        version.h.in
-        version.h
+    version.h.in
+    version.h
 )
 
 set(CMAKE_CXX_STANDARD 20)
 
-get_filename_component(BAAS_PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 
 # app options
 option(BUILD_BAAS               "build BAAS app"            OFF)

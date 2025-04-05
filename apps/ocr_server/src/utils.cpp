@@ -22,6 +22,14 @@ void _init()
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
     BAASGlobalLogger->BAASInfo("BAAS     VERSION : " + std::string(BAAS_VERSION));
     BAASGlobalLogger->BAASInfo("BAAS OCR VERSION : " + std::string(BAAS_OCR_VERSION));
+    BAASGlobalLogger->sub_title("Build Info");
+    BAASGlobalLogger->BAASInfo("Branch      : " + std::string(GIT_BRANCH));
+    BAASGlobalLogger->BAASInfo("Hash        : " + std::string(GIT_HASH));
+    BAASGlobalLogger->BAASInfo("Author      : " + std::string(GIT_COMMIT_DATE) +
+                                    " <" + std::string(GIT_COMMIT_AUTHOR) + ">");
+    BAASGlobalLogger->BAASInfo("Commit      : " + std::string(GIT_COMMIT_TITLE));
+    BAASGlobalLogger->BAASInfo("Build time  : " + std::string(BUILD_TIME));
+
     BAASGlobalLogger->Path(BAAS_PROJECT_DIR);
     baas_ocr = BAASOCR::get_instance();
 
