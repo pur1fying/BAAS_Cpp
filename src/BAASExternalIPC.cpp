@@ -126,7 +126,7 @@ shm_core::shm_core(
             FILE_MAP_ALL_ACCESS,
             0,
             0,
-            0
+            this->size
     );
     if (pBuf == nullptr) {
         std::string msg = "MapViewOfFile failed " + std::to_string(GetLastError());
