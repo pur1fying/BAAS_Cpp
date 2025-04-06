@@ -4,7 +4,7 @@
     "num_thread": 4,
     "enable_cpu_memory_arena": false,
     "server": {
-      "host": "localhost",
+      "host": "127.0.0.1",
       "port": 1145
     }
   },
