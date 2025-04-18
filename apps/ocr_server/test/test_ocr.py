@@ -1,10 +1,8 @@
 import os
 import cv2
 import json
-import time
 import random
 import unittest
-import threading
 from utils import logger
 from Client import client
 from utils import count_files

@@ -99,6 +99,12 @@ void OcrLite::get_text_boxes(
     cv::Mat paddingSrc = makePadding(originSrc, padding);
     ScaleParam scale = getScaleParam(paddingSrc, resize);
     result = dbNet->getTextBoxes(paddingSrc, scale, boxScoreThresh, boxThresh, unClipRatio);
+    for (auto &textBox: result) {
+        for (auto &point: textBox.boxPoint) {
+            point.x = (std::min)((std::max)(int(point.x - padding), 0), originSrc.cols - 1);
+            point.y = (std::min)((std::max)(int(point.y - padding), 0), originSrc.rows - 1);
+        }
+    }
 }
 
 

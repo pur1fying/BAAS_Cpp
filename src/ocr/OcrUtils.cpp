@@ -24,22 +24,24 @@ void to_json(
     j = nlohmann::json::array({p.x, p.y});
 }
 
-void to_json(nlohmann::json& j, const TextBox& box) {
+void to_json(
+        nlohmann::json& j,
+        const TextBox& box
+)
+{
     assert(box.boxPoint.size() == 4);
 
-    nlohmann::json position_j = nlohmann::json::array();
+    j = nlohmann::json::array();
     nlohmann::json temp;
     to_json(temp, box.boxPoint[0]);
-    position_j.push_back(temp);
+    j.push_back(temp);
     to_json(temp, box.boxPoint[1]);
-    position_j.push_back(temp);
+    j.push_back(temp);
     to_json(temp, box.boxPoint[2]);
-    position_j.push_back(temp);
+    j.push_back(temp);
     to_json(temp, box.boxPoint[3]);
-    position_j.push_back(temp);
-
-    j["position"] = position_j;
-    j["score"] = box.score;
+    j.push_back(temp);
+    j.push_back(box.score);
 }
 
 void from_json(
@@ -47,18 +49,14 @@ void from_json(
         TextBox &box
 )
 {
-    nlohmann::json position_j = j.at("position");
-    assert (position_j.is_array());
-    assert (position_j.size() == 4);
-
-    box.boxPoint.clear();
+    assert (j.is_array());
+    assert (j.size() == 5);
     box.boxPoint.resize(4);
-    from_json(position_j.at(0), box.boxPoint[0]);
-    from_json(position_j.at(1), box.boxPoint[1]);
-    from_json(position_j.at(2), box.boxPoint[2]);
-    from_json(position_j.at(3), box.boxPoint[3]);
-    
-    box.score = j["score"].get<float>();
+    from_json(j.at(0), box.boxPoint[0]);
+    from_json(j.at(1), box.boxPoint[1]);
+    from_json(j.at(2), box.boxPoint[2]);
+    from_json(j.at(3), box.boxPoint[3]);
+    box.score = j.at(4).get<float>();
 }
 
 

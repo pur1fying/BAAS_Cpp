@@ -51,7 +51,7 @@ class TestOcrForSingleLine(unittest.TestCase):
                 "0": "我爱爱丽丝",
             },
             "zh-tw": {
-            #     "0": "我愛愛麗絲",
+                "0": "我愛愛麗絲",
             },
         }
         models = list(expected_results.keys())

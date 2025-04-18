@@ -7,6 +7,7 @@
 
 #include "BAASLogger.h"
 #include "ocr/BAASOCR.h"
+#include "ocr/OcrUtils.h"
 #include "BAASExternalIPC.h"
 #include "config/BAASGlobalSetting.h"
 
@@ -299,7 +300,19 @@ void Server::handle_get_text_boxes(
     try{
         long long t_start = BAASUtil::getCurrentTimeMS();
         BAASGlobalLogger->sub_title("Get Text Boxes");
-        BAASConfig temp = BAASConfig(nlohmann::json::parse(req.body), (BAASLogger*)BAASGlobalLogger);
+        BAASConfig temp;
+        if (req.has_file("data")){
+            temp =  BAASConfig(
+                    nlohmann::json::parse(req.get_file_value("data").content),
+                    (BAASLogger*)BAASGlobalLogger
+            );
+        }
+        else{
+            temp = BAASConfig(
+                    nlohmann::json::parse(req.body),
+                    (BAASLogger*)BAASGlobalLogger
+            );
+        }
         out_req_params(temp.get_config());
 
         if (!temp.contains("language")){
@@ -335,10 +348,7 @@ void Server::handle_get_text_boxes(
         // return
         nlohmann::json j_ret;
         nlohmann::json box;
-        for (auto &i: result){
-            
-            j_ret["text_boxes"].push_back(box);
-        }
+        for (auto &i: result) j_ret["text_boxes"].push_back(i);
         j_ret["time"] = int(t_end - t_start);
 
         res.status = 200;
@@ -347,8 +357,6 @@ void Server::handle_get_text_boxes(
         set_error_response(res, std::string(e.what()));
     }
 }
-
-
 
 void Server::out_req_params(const httplib::Request &req)
 {

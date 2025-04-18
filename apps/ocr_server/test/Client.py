@@ -183,27 +183,69 @@ class BaasOcrClient:
             },
             "ret_options": ret_options
         }
-        if pass_method == 0:
-            if not SharedMemory.shm_exists(shared_memory_name):
-                raise SharedMemoryError(f"Shared memory {shared_memory_name} not found, you should create it first.")
-            col = origin_image.shape[1]
-            row = origin_image.shape[0]
-            size = col * row * 3
-            SharedMemory.set_data(shared_memory_name, origin_image.tobytes(), size)
-            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform != "win32" \
-                                                                        else shared_memory_name
-            data["image"]["resolution"] = [col, row]
+        self.get_request_data(data, pass_method, origin_image, local_path, shared_memory_name)
+        if pass_method in [0, 2]:
             return requests.post(url, json=data)
-        if pass_method == 1:
+        elif pass_method == 1:
             image_bytes = self.get_image_bytes(origin_image)
             files = {
                 "data": (None, json.dumps(data), "application/json"),
                 "image": ("image.png", image_bytes, "image/png")
             }
             return requests.post(url, files=files)
-        if pass_method == 2:
-            data["image"]["local_path"] = local_path
+        else:
+            raise OcrInternalError(f"Invalid pass_method {pass_method}")
+
+    def get_text_boxes(
+            self,
+            language: str,
+            origin_image=None,
+            pass_method: int = 0,
+            local_path: str = "",
+            shared_memory_name: str = ""
+    ):
+        url = self.config.base_url + "/get_text_boxes"
+        data = {
+            "language": language,
+            "image": {
+                "pass_method": pass_method,
+            },
+        }
+        self.get_request_data(data, pass_method, origin_image, local_path, shared_memory_name)
+        if pass_method in [0, 2]:
             return requests.post(url, json=data)
+        elif pass_method == 1:
+            image_bytes = self.get_image_bytes(origin_image)
+            files = {
+                "data": (None, json.dumps(data), "application/json"),
+                "image": ("image.png", image_bytes, "image/png")
+            }
+            return requests.post(url, files=files)
+        else:
+            raise OcrInternalError(f"Invalid pass_method {pass_method}")
+
+    @staticmethod
+    def get_request_data(
+            data,
+            pass_method,
+            origin_image=None,
+            local_path: str = "",
+            shared_memory_name: str = ""
+    ):
+        if pass_method == 0:
+            col = origin_image.shape[1]
+            row = origin_image.shape[0]
+            size = col * row * 3
+            SharedMemory.set_data(shared_memory_name, origin_image.tobytes(), size)
+            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform != "win32" \
+                else shared_memory_name
+            data["image"]["resolution"] = [col, row]
+        elif pass_method == 1:
+            pass
+        elif pass_method == 2:
+            data["image"]["local_path"] = local_path
+        else:
+            raise OcrInternalError(f"Invalid pass_method {pass_method}")
 
     def ocr_for_single_line(
             self,
@@ -222,16 +264,8 @@ class BaasOcrClient:
                 "pass_method": pass_method,
             },
         }
-        if pass_method == 0:
-            if not SharedMemory.shm_exists(shared_memory_name):
-                raise SharedMemoryError(f"Shared memory {shared_memory_name} not found, you should create it first.")
-            col = origin_image.shape[1]
-            row = origin_image.shape[0]
-            size = col * row * 3
-            SharedMemory.set_data(shared_memory_name, origin_image.tobytes(), size)
-            data["image"]["shared_memory_name"] = "/" + shared_memory_name if sys.platform != "win32" \
-                                                                            else shared_memory_name
-            data["image"]["resolution"] = [col, row]
+        self.get_request_data(data, pass_method, origin_image, local_path, shared_memory_name)
+        if pass_method in [0, 2]:
             return requests.post(url, json=data)
         elif pass_method == 1:
             image_bytes = self.get_image_bytes(origin_image)
@@ -240,9 +274,6 @@ class BaasOcrClient:
                 "image": ("image.png", image_bytes, "image/png")
             }
             return requests.post(url, files=files)
-        elif pass_method == 2:
-            data["image"]["local_path"] = local_path
-            return requests.post(url, json=data)
         else:
             raise OcrInternalError(f"Invalid pass_method {pass_method}")
 
@@ -264,11 +295,9 @@ class BaasOcrClient:
     def is_stopped(self):
         try:
             process = psutil.Process(self.server_process.pid)
-            process_status = process.status()
+            process.status()
             return False
         except psutil.NoSuchProcess:
-            return True
-        except psutil.ZombieProcess:
             return True
 
 
@@ -338,3 +367,23 @@ class OcrInternalError(Exception):
 
 
 client = BaasOcrClient()
+
+if __name__ == "__main__":
+    client.start_server()
+    client.enable_thread_pool(4)
+    client.init_model(["en-us"], gpu_id=-1, num_thread=4)
+    # test ocr
+    image = cv2.imread("apps/ocr_server/test/test_images/ocr/ja-jp/1.png")
+    ret = client.get_text_boxes("en-us", image, pass_method=1)
+    print(ret.status_code)
+    j = json.loads(ret.text)
+    # p1, p2, p3, p4
+    for i in j["text_boxes"]:
+        cv2.line(image, (i[0][0], i[0][1]), (i[1][0], i[1][1]), (0, 255, 0), 2)
+        cv2.line(image, (i[1][0], i[1][1]), (i[2][0], i[2][1]), (0, 255, 0), 2)
+        cv2.line(image, (i[2][0], i[2][1]), (i[3][0], i[3][1]), (0, 255, 0), 2)
+        cv2.line(image, (i[3][0], i[3][1]), (i[0][0], i[0][1]), (0, 255, 0), 2)
+    cv2.imshow("image", image)
+    cv2.waitKey(0)
+    client.release_all()
+    client.stop_server()
