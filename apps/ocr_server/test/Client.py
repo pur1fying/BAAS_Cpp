@@ -282,9 +282,6 @@ class BaasOcrClient:
         _, encoded_image = cv2.imencode('.png', image)
         return encoded_image.tobytes()
 
-    def get_text_box(self):
-        pass
-
     def is_server_running(self, timeout=3):
         try:
             with socket.create_connection((self.config.host, self.config.port), timeout) as s:

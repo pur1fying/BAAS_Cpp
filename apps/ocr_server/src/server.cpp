@@ -347,7 +347,6 @@ void Server::handle_get_text_boxes(
         BAASGlobalLogger->BAASInfo("Get text boxes time : " + std::to_string(text_boxes_time) + "ms");
         // return
         nlohmann::json j_ret;
-        nlohmann::json box;
         for (auto &i: result) j_ret["text_boxes"].push_back(i);
         j_ret["time"] = int(t_end - t_start);
 
