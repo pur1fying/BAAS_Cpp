@@ -193,8 +193,6 @@ class BaasOcrClient:
                 "image": ("image.png", image_bytes, "image/png")
             }
             return requests.post(url, files=files)
-        else:
-            raise OcrInternalError(f"Invalid pass_method {pass_method}")
 
     def get_text_boxes(
             self,
@@ -221,8 +219,6 @@ class BaasOcrClient:
                 "image": ("image.png", image_bytes, "image/png")
             }
             return requests.post(url, files=files)
-        else:
-            raise OcrInternalError(f"Invalid pass_method {pass_method}")
 
     @staticmethod
     def get_request_data(
@@ -274,8 +270,6 @@ class BaasOcrClient:
                 "image": ("image.png", image_bytes, "image/png")
             }
             return requests.post(url, files=files)
-        else:
-            raise OcrInternalError(f"Invalid pass_method {pass_method}")
 
     @staticmethod
     def get_image_bytes(image):
