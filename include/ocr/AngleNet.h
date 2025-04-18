@@ -15,7 +15,7 @@ public:
             int gpu_id = -1,
             int num_thread = 4,
             bool enable_cpu_memory_arena = false
-            );
+    );
 
     static bool try_release_net(const std::string &model_path);
 

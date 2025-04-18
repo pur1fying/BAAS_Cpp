@@ -7,7 +7,6 @@ int main()
 {
     BAAS_OCR::_init();
     std::thread server_thread(BAAS_OCR::server_thread);
-
     BAAS_OCR::handle_input();
     BAAS_OCR::server.stop();
 

@@ -6,6 +6,62 @@
 
 BAAS_NAMESPACE_BEGIN
 
+
+void from_json(
+        const nlohmann::json &j,
+        cv::Point &point
+)
+{
+    point.x = j.at(0).get<int>();
+    point.y = j.at(1).get<int>();
+}
+
+void to_json(
+    nlohmann::json& j, 
+    const cv::Point& p
+) 
+{
+    j = nlohmann::json::array({p.x, p.y});
+}
+
+void to_json(nlohmann::json& j, const TextBox& box) {
+    assert(box.boxPoint.size() == 4);
+
+    nlohmann::json position_j = nlohmann::json::array();
+    nlohmann::json temp;
+    to_json(temp, box.boxPoint[0]);
+    position_j.push_back(temp);
+    to_json(temp, box.boxPoint[1]);
+    position_j.push_back(temp);
+    to_json(temp, box.boxPoint[2]);
+    position_j.push_back(temp);
+    to_json(temp, box.boxPoint[3]);
+    position_j.push_back(temp);
+
+    j["position"] = position_j;
+    j["score"] = box.score;
+}
+
+void from_json(
+        const nlohmann::json &j,
+        TextBox &box
+)
+{
+    nlohmann::json position_j = j.at("position");
+    assert (position_j.is_array());
+    assert (position_j.size() == 4);
+
+    box.boxPoint.clear();
+    box.boxPoint.resize(4);
+    from_json(position_j.at(0), box.boxPoint[0]);
+    from_json(position_j.at(1), box.boxPoint[1]);
+    from_json(position_j.at(2), box.boxPoint[2]);
+    from_json(position_j.at(3), box.boxPoint[3]);
+    
+    box.score = j["score"].get<float>();
+}
+
+
 double getCurrentTime()
 {
     return (static_cast<double>(cv::getTickCount())) / cv::getTickFrequency() * 1000;//单位毫秒

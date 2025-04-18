@@ -46,12 +46,19 @@ public:
 
     void test_ocr();
 
+    void get_text_boxes(
+        const std::string &language,
+        const cv::Mat &img,
+        std::vector<TextBox> &result
+    );
+
     void ocr(
             const std::string &language,
             const cv::Mat &img,
             OcrResult &result,
             BAASLogger *logger = nullptr,
-            const std::string &candidates = std::string());
+            const std::string &candidates = std::string()
+    );
 
     void ocr_for_single_line(
             const std::string &language,
@@ -59,7 +66,8 @@ public:
             TextLine &result,
             const std::string &log_content = "",
             BAASLogger *logger = nullptr,
-            const std::string &candidates = std::string());
+            const std::string &candidates = std::string()
+    );
 
     static void ocrResult2json(
             OcrResult &result,
@@ -75,8 +83,7 @@ public:
     static std::string REGEX_UTF8PATTERN;
 
 private:
-    int init
-    (
+    int init(
             const std::string &language,
             int gpu_id,
             int num_thread,

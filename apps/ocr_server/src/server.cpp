@@ -6,9 +6,9 @@
 #include <thread>
 
 #include "BAASLogger.h"
-#include "config/BAASGlobalSetting.h"
 #include "ocr/BAASOCR.h"
 #include "BAASExternalIPC.h"
+#include "config/BAASGlobalSetting.h"
 
 using namespace baas;
 
@@ -52,6 +52,9 @@ void Server::start()
     });
     svr.Post("/disable_thread_pool", [](const httplib::Request &req, httplib::Response &res) {
         BAAS_OCR::Server::handle_disable_thread_pool(req, res);
+    });
+    svr.Post("/get_text_boxes", [](const httplib::Request &req, httplib::Response &res) {
+        BAAS_OCR::Server::handle_get_text_boxes(req, res);
     });
     svr.Post("/test", [](const httplib::Request &req, httplib::Response &res) {
         BAAS_OCR::Server::handler_test(req, res);
@@ -285,6 +288,63 @@ void Server::handle_ocr_for_single_line(
     } catch (std::exception &e){
         set_error_response(res, std::string(e.what()));
         return;
+    }
+}
+
+void Server::handle_get_text_boxes(
+        const httplib::Request &req,
+        httplib::Response &res
+)
+{
+    try{
+        long long t_start = BAASUtil::getCurrentTimeMS();
+        BAASGlobalLogger->sub_title("Get Text Boxes");
+        BAASConfig temp = BAASConfig(nlohmann::json::parse(req.body), (BAASLogger*)BAASGlobalLogger);
+        out_req_params(temp.get_config());
+
+        if (!temp.contains("language")){
+            set_error_response(res, "Request must contains 'language' key.");
+            return;
+        }
+        if(temp.value_type("language") != nlohmann::detail::value_t::string){
+            set_error_response(res, "Value type of 'language' must be string.");
+            return;
+        }
+        std::string language = temp.getString("language");
+        if (!baas_ocr->language_inited(language)){
+            set_error_response(res, "Language [ " + language + " ] not inited.");
+            return;
+        }
+
+        // get img
+        cv::Mat image;
+        BAASConfig image_info;
+        temp.getBAASConfig("image", image_info);
+
+        if (req_get_image(req, image_info, image)) {
+            set_error_response(res, "Failed to get image.");
+            return;
+        }
+
+        // get text boxes
+        std::vector<TextBox> result;
+        baas_ocr->get_text_boxes(language, image, result);
+        auto t_end = BAASUtil::getCurrentTimeMS();
+        int text_boxes_time = int(t_end - t_start);
+        BAASGlobalLogger->BAASInfo("Get text boxes time : " + std::to_string(text_boxes_time) + "ms");
+        // return
+        nlohmann::json j_ret;
+        nlohmann::json box;
+        for (auto &i: result){
+            
+            j_ret["text_boxes"].push_back(box);
+        }
+        j_ret["time"] = int(t_end - t_start);
+
+        res.status = 200;
+        res.set_content(j_ret.dump(), "application/json");
+    } catch (std::exception &e){
+        set_error_response(res, std::string(e.what()));
     }
 }
 

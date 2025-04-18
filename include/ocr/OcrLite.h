@@ -26,6 +26,11 @@ public:
             bool enable_cpu_memory_arena=false
     );
 
+    void get_text_boxes(
+            const cv::Mat &img,
+            std::vector<TextBox> &result
+    );
+
     OcrResult detect(
             const cv::Mat &mat,
             int padding,
@@ -35,12 +40,14 @@ public:
             float unClipRatio,
             bool doAngle,
             bool mostAngle,
-            const std::vector<std::string> &candidates = std::vector<std::string>());
+            const std::vector<std::string> &candidates = std::vector<std::string>()
+    );
 
     void ocr_for_single_line(
             const cv::Mat &img,
             TextLine &text,
-            const std::vector<std::string> &candidates = std::vector<std::string>());
+            const std::vector<std::string> &candidates = std::vector<std::string>()
+    );
 
     OcrResult detectImageBytes(
             const uint8_t *data,

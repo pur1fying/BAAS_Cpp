@@ -3,9 +3,9 @@
 //
 
 #include "ocr/BAASOCR.h"
-#include "config/BAASStaticConfig.h"
 #include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
+#include "config/BAASStaticConfig.h"
 #include "config/BAASGlobalSetting.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -95,11 +95,26 @@ int BAASOCR::init(
             gpu_id,
             num_thread,
             enable_cpu_memory_arena
-            );
+        );
 
     ocr_map[language] = ocr;
     return 1;
 }
+
+void BAASOCR::get_text_boxes(
+        const std::string &language,
+        const cv::Mat &img,
+        std::vector<TextBox> &result
+)
+{
+    auto res = ocr_map.find(language);
+    if (res == ocr_map.end()) {
+        BAASGlobalLogger->BAASError("OCR for" + language + " not init");
+        return;
+    }
+    res->second->get_text_boxes(img, result);
+}
+
 
 void BAASOCR::ocr(
         const std::string &language,
@@ -133,7 +148,7 @@ void BAASOCR::ocr(
             res->second->doAngle,
             res->second->mostAngle,
             unique_candidates
-            );
+        );
 
 }
 

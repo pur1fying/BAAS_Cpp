@@ -45,6 +45,8 @@ public:
 
     static void handle_ocr_for_single_line(const httplib::Request &req, httplib::Response &res);
 
+    static void handle_get_text_boxes(const httplib::Request &req, httplib::Response &res);
+
     static void out_req_params(const httplib::Request &req);
 
     static void out_req_params(const nlohmann::json &j);

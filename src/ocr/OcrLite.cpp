@@ -81,6 +81,26 @@ OcrResult OcrLite::detectBitmap(
     return result;
 }
 
+void OcrLite::get_text_boxes(
+        const cv::Mat &img,
+        std::vector<TextBox> &result
+)
+{
+    cv::Mat originSrc = img;
+    int originMaxSide = (std::max)(originSrc.cols, originSrc.rows);
+    int resize;
+    if (maxSideLen <= 0 || maxSideLen > originMaxSide) {
+        resize = originMaxSide;
+    } else {
+        resize = maxSideLen;
+    }
+    resize += 2 * padding;
+    cv::Rect paddingRect(padding, padding, originSrc.cols, originSrc.rows);
+    cv::Mat paddingSrc = makePadding(originSrc, padding);
+    ScaleParam scale = getScaleParam(paddingSrc, resize);
+    result = dbNet->getTextBoxes(paddingSrc, scale, boxScoreThresh, boxThresh, unClipRatio);
+}
+
 
 OcrResult OcrLite::detect(
         const cv::Mat &mat,

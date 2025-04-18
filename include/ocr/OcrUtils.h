@@ -1,13 +1,37 @@
 #ifndef BAAS_OCR_UTILS_H_
 #define BAAS_OCR_UTILS_H_
 
-#include "opencv2/core.hpp"
-#include "OcrStruct.h"
-#include "onnxruntime/onnxruntime_cxx_api.h"
 #include <numeric>
 #include <sys/stat.h>
 
+#include <opencv2/core.hpp>
+#include <nlohmann/json.hpp>
+#include <onnxruntime/onnxruntime_cxx_api.h>
+
+#include "OcrStruct.h"
+
 BAAS_NAMESPACE_BEGIN
+
+void to_json(
+        nlohmann::json &j,
+        const cv::Point &point
+);
+
+void from_json(
+        const nlohmann::json &j,
+        cv::Point &point
+);
+
+void to_json(
+        nlohmann::json &j,
+        const TextBox &box
+);
+
+void from_json(
+        const nlohmann::json &j,
+        TextBox &box
+);
+
 
 template<typename T, typename... Ts>
 static std::unique_ptr<T> makeUnique(Ts &&... params)

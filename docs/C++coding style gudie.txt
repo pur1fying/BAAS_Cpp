@@ -70,9 +70,10 @@ c++标头
 
 4.前向声明
 不要使用前向声明，使用include  [ Avoid using forward declarations where possible .Instead, include the headers you need. ]
+使用include 时仅包含你需要使用的符号所在的头文件, 不要包含多余头文件
 
 5.命名空间 namespace
 
-
-
+6.代码字符集
+推荐仅使用ASCII字符编辑代码
 

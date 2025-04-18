@@ -55,6 +55,8 @@ struct OcrResult {
     std::string strRes;
 };
 
+
+
 BAAS_NAMESPACE_END
 
 #endif //BAAS_OCR_STRUCT_H_
