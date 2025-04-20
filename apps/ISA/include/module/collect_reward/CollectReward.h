@@ -29,7 +29,6 @@ public:
     static void collect(baas::BAAS *baas);
 };
 
-}
 
 ISA_NAMESPACE_END
 

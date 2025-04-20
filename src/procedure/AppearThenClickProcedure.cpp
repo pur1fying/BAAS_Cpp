@@ -2,7 +2,6 @@
 // Created by pc on 2024/8/10.
 //
 
-#if defined(BAAS_APP_BUILD_FEATURE) && defined(BAAS_APP_BUILD_PROCEDURE)
 
 #include "BAAS.h"
 #include "procedure/AppearThenClickProcedure.h"
@@ -275,4 +274,3 @@ void AppearThenClickProcedure::clear_resource()
 
 BAAS_NAMESPACE_END
 
-#endif  //BAAS_APP_BUILD_FEATURE && BAAS_APP_BUILD_PROCEDURE

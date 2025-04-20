@@ -2,7 +2,6 @@
 // Created by pc on 2024/8/6.
 //
 
-#ifdef BAAS_APP_BUILD_FEATURE
 
 #include "feature/MatchTemplateFeature.h"
 
@@ -175,4 +174,3 @@ double MatchTemplateFeature::self_average_cost(
 
 BAAS_NAMESPACE_END
 
-#endif //BAAS_APP_BUILD_FEATURE

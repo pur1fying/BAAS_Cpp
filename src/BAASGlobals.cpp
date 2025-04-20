@@ -1,12 +1,8 @@
 //
 // Created by pc on 2024/4/12.
 //
-#include "ocr/BAASOCR.h"
 #include "BAASGlobals.h"
-#include "config.h"
 #include "version.h"
-#include "feature/BAASFeature.h"
-#include "procedure/BAASProcedure.h"
 
 using namespace std::filesystem;
 using namespace std;
@@ -43,44 +39,7 @@ std::filesystem::path DEVELOPER_PROJECT_DIR;
 
 std::string CURRENT_TIME_STRING;
 
-void init_globals()
-{
-    if (inited) {
-        return;
-    }
-    inited = true;
-    BAASUtil::initWinsock();
-    init_path();
 
-    BAASGlobalLogger = GlobalLogger::getGlobalLogger();
-    BAASGlobalLogger->BAASInfo("BAAS VERSION : " + std::string(BAAS_VERSION));
-    BAASGlobalLogger->Path(BAAS_PROJECT_DIR);
-    baas_ocr = BAASOCR::get_instance();
-    static_config = BAASStaticConfig::getStaticConfig();
-#ifdef BAAS_APP_BUILD_FEATURE
-    baas_features = BAASFeature::get_instance();
-#endif // BAAS_APP_BUILD_FEATURE
-
-#if defined(BAAS_APP_BUILD_FEATURE) || defined(BAAS_APP_BUILD_PROCEDURE)
-    baas_procedures = BAASProcedure::get_instance();
-#endif // defined(BAAS_APP_BUILD_FEATURE) || defined(BAAS_APP_BUILD_PROCEDURE)
-
-    GameServer::init();
-
-    config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);
-    config_template = new BAASUserConfig(CONFIG_TYPE_DEFAULT_CONFIG);
-    default_global_setting = new BAASConfig(CONFIG_TYPE_DEFAULT_GLOBAL_SETTING);
-
-    // check config dir
-    BAASGlobalLogger->sub_title("Config Dir");
-    BAASGlobalLogger->Path(BAAS_CONFIG_DIR);
-    if (!std::filesystem::exists(BAAS_CONFIG_DIR)) {
-        BAASGlobalLogger->sub_title("Create Config Dir");
-        std::filesystem::create_directory(BAAS_CONFIG_DIR);
-    }
-    BAASGlobalSetting::check_global_setting_exist();
-    global_setting = BAASGlobalSetting::getGlobalSetting();
-}
 
 void init_path() {
     BAAS_PROJECT_DIR = std::filesystem::current_path();

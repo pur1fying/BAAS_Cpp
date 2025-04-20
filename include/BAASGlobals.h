@@ -48,12 +48,7 @@ extern std::string CURRENT_TIME_STRING;
  *           -- resource (developer need to modify resource in this directory)
  *
  */
-
-void init_globals();
-
 void init_path();
-
-static bool inited = false;
 
 BAAS_NAMESPACE_END
 

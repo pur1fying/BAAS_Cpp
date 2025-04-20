@@ -6,7 +6,6 @@
  *  This class is bound to define any feature you want, use json as in/out to ensure flexibility.
  *  this feature can be image, ocr result, or deep learning model.
  */
-#ifdef BAAS_APP_BUILD_FEATURE
 
 #ifndef BAAS_FEATURE_BAASFEATURE_H_
 #define BAAS_FEATURE_BAASFEATURE_H_
@@ -96,4 +95,3 @@ BAAS_NAMESPACE_END
 
 #endif //BAAS_FEATURE_BAASFEATURE_H_
 
-#endif //BAAS_APP_BUILD_FEATURE

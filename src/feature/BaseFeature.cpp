@@ -1,7 +1,6 @@
 //
 // Created by pc on 2024/8/7.
 //
-#ifdef BAAS_APP_BUILD_FEATURE
 
 #include <stdexcept>
 
@@ -100,4 +99,3 @@ void BaseFeature::get_image(
 
 BAAS_NAMESPACE_END
 
-#endif //BAAS_APP_BUILD_FEATURE

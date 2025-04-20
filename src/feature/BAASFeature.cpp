@@ -1,7 +1,6 @@
 //
 // Created by pc on 2024/8/6.
 
-#ifdef BAAS_APP_BUILD_FEATURE
 
 #include "feature/BAASFeature.h"
 #include "feature/MatchTemplateFeature.h"
@@ -300,4 +299,3 @@ bool BAASFeature::feature_appear(BAAS* baas, const string &feature_name)
 
 BAAS_NAMESPACE_END
 
-#endif //BAAS_APP_BUILD_FEATURE
