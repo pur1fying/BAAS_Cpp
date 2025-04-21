@@ -22,6 +22,34 @@ bool BAASUtil::initWinsock()
 #endif // _WIN32
     return false;
 }
+#ifdef _WIN32
+
+string BAASUtil::executeCommandAndGetOutput(const string &command)
+{
+    FILE * stream = _popen(command.c_str(), "rb");
+    if (stream == nullptr) {
+        throw RuntimeError("Failed to execute command");
+    }
+    string output = getStreamOutput(stream);
+    _pclose(stream);
+    return output;
+}
+
+string BAASUtil::executeCommandAndGetOutput(
+        const vector<string> &commandList,
+        int n
+)
+{
+    string command;
+    BAASUtil::stringJoin(commandList, " ", command);
+    return executeCommandAndGetOutput(command);
+}
+
+FILE *BAASUtil::executeCommand(const string &command)
+{
+    return _popen(command.c_str(), "rb");
+}
+#endif // _WIN32
 
 string BAASUtil::int2hex(int a)
 {

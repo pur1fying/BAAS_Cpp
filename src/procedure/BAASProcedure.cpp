@@ -2,7 +2,6 @@
 // Created by pc on 2024/8/10.
 //
 
-#if defined(BAAS_APP_BUILD_FEATURE) && defined(BAAS_APP_BUILD_PROCEDURE)
 
 #include "procedure/BAASProcedure.h"
 #include "BAASGlobals.h"
@@ -147,113 +146,6 @@ BaseProcedure *BAASProcedure::create_procedure(BAASConfig *config)
 }
 
 
-void BAASProcedure::solve_procedure(const string &name)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    solve_procedure(name, output);
-}
 
-void BAASProcedure::solve_procedure(
-        const string &name,
-        BAASConfig &output
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASProcedure::implement(this, name, output);
-}
-
-void BAASProcedure::solve_procedure(
-        const string &name,
-        const bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    solve_procedure(name, output, skip_first_screenshot);
-}
-
-void BAASProcedure::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        const bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    json j;
-    j["skip_first_screenshot"] = skip_first_screenshot;
-    BAASConfig patch(j, logger);
-    BAASProcedure::implement(this, name, patch, output);
-}
-
-void BAASProcedure::solve_procedure(
-        const string &name,
-        json &patch
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    BAASConfig p(patch, logger);
-    solve_procedure(name, output, p);
-}
-
-void BAASProcedure::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        json &patch
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig p(patch, logger);
-    solve_procedure(name, output, p);
-}
-
-void BAASProcedure::solve_procedure(
-        const string &name,
-        json &patch,
-        const bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    BAASConfig p(patch, logger);
-    solve_procedure(name, output, p, skip_first_screenshot);
-}
-
-void BAASProcedure::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        json &patch,
-        bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig p(patch, logger);
-    p.update("skip_first_screenshot", skip_first_screenshot);
-    solve_procedure(name, output, p);
-}
-
-void BAASProcedure::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        BAASConfig &patch
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASProcedure::implement(this, name, patch, output);
-}
-
-void BAASProcedure::solve_procedure(
-        const string &name,
-        BAASConfig &output,
-        BAASConfig &patch,
-        const bool skip_first_screenshot
-)
-{
-    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    patch.update("skip_first_screenshot", skip_first_screenshot);
-    BAASProcedure::implement(this, name, patch, output);
-}
 BAAS_NAMESPACE_END
 
-#endif //BAAS_APP_BUILD_FEATURE && BAAS_APP_BUILD_PROCEDURE

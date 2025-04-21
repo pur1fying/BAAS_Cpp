@@ -71,6 +71,15 @@ public:
             int n
     );
 
+    static std::string executeCommandAndGetOutput(const std::string &command);
+
+    static std::string executeCommandAndGetOutput(
+            const std::vector<std::string> &commandList,
+            int n
+    );
+
+    static FILE *executeCommand(const std::string &command);
+
     static std::string changeEndian(int a);
 
     static int getCurrentTimeStamp();

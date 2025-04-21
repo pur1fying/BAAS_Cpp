@@ -1,3 +1,8 @@
+if (NOT ${CURRENT_OS_NAME} STREQUAL "Windows")
+    message(STATUS "BAAS APP only support Windows")
+    return()
+endif ()
+
 BAAS_hr_LOG("APP BAAS")
 
 project(BAAS_APP VERSION 1.0.0)
@@ -6,13 +11,6 @@ configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/version.h.in
         ${CMAKE_BINARY_DIR}/BAAS_Version.h
 )
-# core build options
-option(BAAS_APP_BUILD_FEATURE       "build image compare fuc"   ON)
-option(BAAS_APP_BUILD_PROCEDURE     "build procedure methods"   ON)
-option(BAAS_APP_BUILD_OCR           "build basic ocr fuc"       ON)
-option(BAAS_APP_BUILD_USER_CONFIG   "need user config class"    ON)
-option(BAAS_APP_BUILD_STATIC_CONFIG "need static config class"  ON)
-option(BAAS_APP_BUILD_GLOBAL_CONFIG "need global config class"  ON)
 
 set(BIN_RESOURCE_REQUIRED               ON PARENT_SCOPE)
 set(ADB_BINARY_RESOURCE_REQUIRED        ON PARENT_SCOPE)
@@ -65,11 +63,12 @@ endif()
 target_link_directories(
         BAAS_APP
         PRIVATE
-        ${BAAS_PROJECT_PATH}/lib
+        ${BAAS_PROJECT_PATH}/lib/${CURRENT_OS_NAME}
 )
 
 target_include_directories(
-        BAAS_APP PRIVATE
+        BAAS_APP
+        PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include
         ${BAAS_PROJECT_PATH}/external
         ${BAAS_PROJECT_PATH}include
@@ -87,16 +86,16 @@ target_compile_definitions(
 SET(
         LIB_COMMON
         avcodec
-        avdevice
-        avfilter
-        avformat
+#        avdevice
+#        avfilter
+#        avformat
         avutil
         liblz4
         onnxruntime
         onnxruntime_providers_cuda
         onnxruntime_providers_shared
-        postproc
-        swresample
+#        postproc
+#        swresample
         swscale
         ws2_32
         shlwapi
@@ -105,15 +104,15 @@ SET(
 SET(
         DLL_COMMON
         avcodec-60
-        avdevice-60
-        avfilter-9
-        avformat-60
+#        avdevice-60
+#        avfilter-9
+#        avformat-60
         avutil-58
         liblz4
         onnxruntime
         onnxruntime_providers_cuda
-        postproc-57
-        swresample-4
+#        postproc-57
+#        swresample-4
         swscale-7
 )
 
@@ -170,8 +169,8 @@ endforeach ()
 
 # get dll full path and copy to binary dir
 foreach (dll ${DLL_RAW})
-    set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${dll}.dll)
-    file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR})
+    set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}/${dll}.dll)
+    file(COPY ${FULL_PATH} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endforeach ()
 
 target_link_libraries(

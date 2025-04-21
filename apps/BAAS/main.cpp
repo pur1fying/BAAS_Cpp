@@ -1,16 +1,10 @@
-#include "opencv2/opencv.hpp"
-#include <iostream>
 #include "BAAS.h"
-#include "httplib.h"
-#include "BAASGlobals.h"
+#include "utils.h"
 
 #pragma comment(lib, "ws2_32.lib")
-#include "BAASExternalIPC.h"
 using namespace cv;
 using namespace std;
 using json = nlohmann::json;
-#include "device/BAASLdopengl.h"
-#include "benchmark/benchmark.h"
 
 int main(int argc, char **argv) {
     system("chcp 65001");
@@ -19,32 +13,8 @@ int main(int argc, char **argv) {
     try{
         baas::init_globals();
         filesystem::path curr = filesystem::current_path();
-        cout <<shared_memory_exists("test") << endl;
-//        img = cv::imread("game_update.png");
-        auto sm = (baas::Shared_Memory*)get_shared_memory("test", 1280*720*3, img.data);
-        auto t1 = std::chrono::high_resolution_clock::now();
-        img = cv::Mat(720, 1280, CV_8UC3, sm->get_data());
-//        cv::imshow("img", img);
-//        cv::waitKey(0);
-////        Shared_Memory* sm = new Shared_Memory("test", 1280*720*3);
-//        auto t1 = std::chrono::high_resolution_clock::now();
-//        img = cv::Mat(720, 1280, CV_8UC3, sm->get_data());
-//
-//        cout << "time: " << std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - t1).count() << "us" << endl;
-//        cv::imshow("img", img);
-//        cv::waitKey(0);
-//        system("pause");
-//        img = cv::Mat(720, 1280, CV_8UC3, get_shared_memory_data(sm));
-//        cout << "time: " << BAASUtil::getCurrentTimeMS() - t1 << endl;
-//        cv::imshow("img", img);
-//        cv::waitKey(0);
-//        return 0;
-//        system("pause");
         baas::BAAS::check_config(config_name);
         baas::BAAS baas(config_name);
-//        return 0;
-        baas::BAASConfig config;
-//        img = cv::imread("1.png");
         baas::global_setting->show();
 //        BAASConnection* conn = baas.get_connection();
 //        baas.update_screenshot_array();
@@ -60,20 +30,17 @@ int main(int argc, char **argv) {
 //        string name = "rank-down";
 //        BAASRectangle region = {100, 291, 650, 363};
 //        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {200, 200, 200}, {255, 255, 255});
-        baas.solve("restart");
-        baas.solve("collect_activity_fee");
-        baas.solve("mail");
-        baas.solve("work");
-        baas.solve("competition");
-        baas.solve("collect_reward");
 //        cv::imshow("img", img);
-//        cv::waitKey(0
-        baas::baas_ocr->init("zh-cn");
-        baas::baas_ocr->init("zh-tw");
-        baas::baas_ocr->init("en-us");
-        baas::baas_ocr->init("ja-jp");
-        baas::baas_ocr->init("ko-kr");
-        baas::baas_ocr->init("ru-ru");
+//        cv::waitKey(0)
+        std::vector<std::string> languages = {
+                "zh-cn",
+                "zh-tw",
+                "en-us",
+                "ja-jp",
+                "ko-kr",
+                "ru-ru"
+        };
+        baas::baas_ocr->init(languages);
 //        baas_ocr->test_images();
         baas::OcrResult result;
         baas::TextLine result2;
@@ -86,8 +53,6 @@ int main(int argc, char **argv) {
         json j;
 //        BAASOCR::ocrResult2json(result, j);
 //        cout << j.dump(4) << endl;
-//        cv::imshow("img", result.boxImg);
-        cv::waitKey(0);
 //            BAASUtil::stringReplace("/", "_", result2.text);
 //            cv::imwrite(result2.text + ".png", img);
             }

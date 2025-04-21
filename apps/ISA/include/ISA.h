@@ -18,7 +18,7 @@ public:
 
     static void init_implement_funcs();
 
-    static std::map<std::string, bool (*)(ISA *)> implement_funcs;
+    static std::map<std::string, bool (*)(baas::BAAS *)> implement_funcs;
 
     bool solve(const std::string &task);
 

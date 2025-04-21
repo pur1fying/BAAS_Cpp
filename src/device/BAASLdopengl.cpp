@@ -31,7 +31,7 @@ void BAASLdopengl::detect_ldplayer_instance()
 {
     pair<string, string> serial_emu_pair;
     BAASConnection::port_emu_pair_serial(serial);
-    instance_id = BAASUtil::LDPlayer_serial2instance_id(serial);
+    instance_id = BAASConnectionAttr::LDPlayer_serial2instance_id(serial);
     logger->BAASInfo("LDPlayer instance id : " + to_string(instance_id));
 
     if (instance_id == -1) {

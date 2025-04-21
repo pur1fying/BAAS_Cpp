@@ -44,8 +44,6 @@ void BAASDevelopUtils::extract_image_rgb_range(
     Mat im = img.clone();
     BAASImageUtil::filter_region_rgb(im, r, min_, max_);
     BAASRectangle region = r;
-    imshow("origin", im);
-    cv::waitKey(0);
     if (cut_edge) {
         vector<int> rg;
         BAASImageUtil::crop_edge(im, 0b1111, rg, {0, 0, 0}, {0, 0, 0}, im);
@@ -66,9 +64,7 @@ void BAASDevelopUtils::extract_image_rgb_range(
                        + to_string(region.lr.x) + ", " + to_string(region.lr.y
             ));
     BAASGlobalLogger->BAASInfo("shape: " + to_string(im.cols) + "x" + to_string(im.rows));
-    cv::imshow(name, im);
     imwrite(name + ".png", im);
-    cv::waitKey(0);
 }
 
 BAAS_NAMESPACE_END

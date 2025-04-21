@@ -30,7 +30,6 @@ public:
 
     static void write_all_default_config(const std::filesystem::path& dir);
 
-
     explicit BAAS(std::string &config_name);
 
     void update_screenshot_array();

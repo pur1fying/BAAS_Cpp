@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "device/BAASConnection.h"
 #include "device/BAASConnectionAttr.h"
 
 using namespace std;
@@ -78,8 +79,9 @@ void BAASConnectionAttr::revise_serial()
 int BAASConnectionAttr::LDPlayer_serial2instance_id(const string &serial)
 {
     pair<string, string> pair_serial = BAASConnection::port_emu_pair_serial(serial);
-    int port = serial2port(pair_serial.first);
+    int port = BAASUtil::serial2port(pair_serial.first);
     if (5555 <= port && port <= 5555 + 32) return int((port - 5555) / 2);
     return -1;
 }
+
 BAAS_NAMESPACE_END

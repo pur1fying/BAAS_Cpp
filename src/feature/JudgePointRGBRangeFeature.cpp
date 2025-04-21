@@ -1,7 +1,6 @@
 //
 // Created by pc on 2024/8/13.
 //
-#ifdef BAAS_APP_BUILD_FEATURE
 
 #include "feature/JudgePointRGBRangeFeature.h"
 /*  example
@@ -125,4 +124,3 @@ double JudgePointRGBRangeFeature::self_average_cost(
 
 BAAS_NAMESPACE_END
 
-#endif //BAAS_APP_BUILD_FEATURE

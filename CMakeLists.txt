@@ -117,6 +117,7 @@ file(
         USER_CONFIG_FILE
         ${CMAKE_CURRENT_LIST_DIR}/resource/user_setting.json
         ${CMAKE_CURRENT_LIST_DIR}/resource/default_config.json
+        ${CMAKE_CURRENT_LIST_DIR}/resource/config_name_change.json
 )
 file(
         GLOB
@@ -154,7 +155,7 @@ if (ADB_BINARY_RESOURCE_REQUIRED)
     file(
             COPY
             ${ADB_BINARY}
-            DESTINATION ${CMAKE_BINARY_DIR}
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     )
 endif ()
 
@@ -162,7 +163,7 @@ if (GLOBAL_CONFIG_RESOURCE_REQUIRED)
     file(
             COPY
             ${GLOBAL_CONFIG_FILE}
-            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -170,7 +171,7 @@ if (USER_CONFIG_RESOURCE_REQUIRED)
     file(
             COPY
             ${USER_CONFIG_FILE}
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -178,7 +179,7 @@ if (STATIC_CONFIG_RESOURCE_REQUIRED)
     file(
             COPY
             ${STATIC_CONFIG_FILE}
-            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -186,7 +187,7 @@ if(BAAS_IMAGE_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/image
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif()
 
@@ -194,7 +195,7 @@ if (BIN_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/bin
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -202,7 +203,7 @@ if (BAAS_FEATURE_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/features
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -210,7 +211,7 @@ if (BAAS_PROCEDURE_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/procedure
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -218,6 +219,6 @@ if (OCR_MODEL_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/ocr_models
-            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
