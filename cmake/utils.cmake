@@ -39,3 +39,18 @@ function(get_git_info OUTPUT_VAR)
     )
     set(${OUTPUT_VAR} "${_git_output}" PARENT_SCOPE)
 endfunction()
+
+function(check_app_options)
+    set(true_count 0)
+
+    foreach(option_name IN LISTS ARGN)
+        if(${option_name})
+            BAAS_sub_title_LOG("Option ${option_name} True")
+            math(EXPR true_count "${true_count} + 1")
+            if (${true_count} GREATER 1)
+                message(FATAL_ERROR "You Can Build One App At a Time.")
+            endif ()
+        endif()
+    endforeach()
+
+endfunction()

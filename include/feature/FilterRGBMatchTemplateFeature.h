@@ -16,22 +16,29 @@ class FilterRGBMatchTemplateFeature : public BaseFeature {
 public:
     explicit FilterRGBMatchTemplateFeature(BAASConfig *config);
 
-    static bool compare(
-            BAASConfig *parameter,
-            const cv::Mat &image,
+    bool appear(
+            const BAAS *baas,
             BAASConfig &output
     );
 
     [[nodiscard]] double self_average_cost(
-            const cv::Mat &image,
-            const std::string &server,
-            const std::string &language
+            const BAAS* baas
     ) override;
 
-private:
 
+    inline void get_template_image(const BAAS* baas, BAASImage& out) {
+        std::string resource_ptr = baas->image_resource_prefix + group_name;
+        if (resource->is_loaded(resource_ptr)) {
+            resource->get(resource_ptr, out);
+            return;
+        }
+        resource->get(resource_ptr, out);
+    }
+
+private:
     std::map<std::string, std::optional<double>> self_average_cost_map;
 
+    std::string template_group, template_name, group_name;
 };
 
 BAAS_NAMESPACE_END

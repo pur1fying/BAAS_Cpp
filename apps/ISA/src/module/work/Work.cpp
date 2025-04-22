@@ -4,15 +4,16 @@
 
 #include "module/work/Work.h"
 
-ISA_NAMESPACE_BEGIN
+BAAS_NAMESPACE_BEGIN
 
-bool Work::implement(baas::BAAS *baas)
+bool Work::implement(BAAS *baas)
 {
-    baas::BAASConfig config;
+    BAASConfig config;
     baas->solve_procedure("UI-GO-TO_work_menu", config, true);
 
     return true;
 }
 
-ISA_NAMESPACE_END
+BAAS_NAMESPACE_END
+
 

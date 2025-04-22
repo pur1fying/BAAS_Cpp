@@ -40,14 +40,8 @@ extern std::filesystem::path DEVELOPER_PROJECT_DIR;
 
 extern std::string CURRENT_TIME_STRING;
 
+void log_git_info();
 
-/*
- *  BAAS_CPP --
- *           -- cmake-build-debug (this is BAAS_PROJECT_DIR)
- *              -- resource
- *           -- resource (developer need to modify resource in this directory)
- *
- */
 void init_path();
 
 BAAS_NAMESPACE_END

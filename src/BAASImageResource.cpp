@@ -46,9 +46,10 @@ std::string BAASImage::get_size() const
 
 std::string BAASImage::gen_info() const
 {
-    string info =
-            "Region : [ " + to_string(region.ul.x) + ", " + to_string(region.ul.y) + " ] [ " + to_string(region.lr.x) +
-            ", " + to_string(region.lr.y) + " ]";
+    string info = "Region : [ " + to_string(region.ul.x) + ", " +
+                                  to_string(region.ul.y) + " ] [ " +
+                                  to_string(region.lr.x) + ", " +
+                                  to_string(region.lr.y) + " ]";
     info += " Direction : " + to_string(direction);
     info += " Resolution : " + get_size();
     return info;
@@ -64,47 +65,25 @@ BAASImageResource *BAASImageResource::get_instance()
 }
 
 void BAASImageResource::get(
-        const string &server,
-        const string &language,
-        const string &task,
-        const string &name,
-        cv::Mat &out
-)
-{
-    if (!is_loaded(server, language, task, name))
-        throw GetResourceError(
-                "Image Resource [ " + resource_pointer(server, language, task, name) + " ] not loaded"
-        );
-    lock_guard<mutex> lock(resource_mutex);
-    out = images[server][language][task][name].image;
-}
-
-void BAASImageResource::get(
-        const string &server,
-        const string &language,
-        const string &task,
-        const string &name,
-        BAASImage &out
-)
-{
-    if (!is_loaded(server, language, task, name))
-        throw GetResourceError(
-                "Image Resource [ " + resource_pointer(server, language, task, name) + " ] not loaded"
-        );
-    lock_guard<mutex> lock(resource_mutex);
-    out = images[server][language][task][name];
-}
-
-void BAASImageResource::get(
         const string &resource_pointer,
         cv::Mat &out
 )
 {
-    vector<string> tokens;
-    BAASUtil::stringSplit(resource_pointer, ".", tokens);
-    if (tokens.size() != 4)throw GetResourceError("Resource pointer [ " + resource_pointer + " ]  format error");
-    get(tokens[0], tokens[1], tokens[2], tokens[3], out);
+    auto it = images.find(resource_pointer);
+    if (it == images.end()) throw GetResourceError("Image Resource [ " + resource_pointer + " ] not exist.");
+    lock_guard<mutex> lock(resource_mutex);
+    out = images[resource_pointer].image; // Don't need clone since template will not be revised.
+}
 
+void BAASImageResource::get(
+        const string &resource_pointer,
+        BAASImage &out
+)
+{
+    auto it = images.find(resource_pointer);
+    if (it == images.end()) throw GetResourceError("Image Resource [ " + resource_pointer + " ] not exist.");
+    lock_guard<mutex> lock(resource_mutex);
+    out = images[resource_pointer];
 }
 
 void BAASImageResource::set(
@@ -116,7 +95,7 @@ void BAASImageResource::set(
 )
 {
     lock_guard<mutex> lock(resource_mutex);
-    images[server][language][group][name] = res;
+    images[get_resource_pointer(server, language, group, name)] = res;
 }
 
 bool BAASImageResource::remove(const string &key)
@@ -135,14 +114,9 @@ void BAASImageResource::clear()
 
 void BAASImageResource::show()
 {
-    BAASGlobalLogger->hr("Image Resource");
+    BAASGlobalLogger->hr("List Loaded Image Resource");
     for (auto &i: images)
-        for (auto &j: i.second)
-            for (auto &k: j.second)
-                for (auto &l: k.second)
-                    BAASGlobalLogger->BAASInfo(
-                            "Image [ " + resource_pointer(i.first, j.first, k.first, l.first) + " ]\n" +
-                            l.second.gen_info());
+        BAASGlobalLogger->BAASInfo("Image [ " +  i.first + " ]\n" +i.second.gen_info());
 }
 
 bool BAASImageResource::is_loaded(const string &key)
@@ -160,21 +134,20 @@ void BAASImageResource::keys(std::vector<std::string> &out)
     }
 }
 
-void BAASImageResource::load(const BAASConnection *conn)
-{
-    load(conn->get_server(), conn->get_language());
-}
-
 void BAASImageResource::load(
         const string &server,
         const string &language
 )
 {
     BAASGlobalLogger->BAASInfo("Load Image Resource Server : [ " + server + " ] Language : [ " + language + " ]");
-    if (is_loaded(server, language)) {
+    std::string resource_load_checker = resource_pointer(server, language, "", "");
+    if (is_loaded(resource_load_checker)) {
         BAASGlobalLogger->BAASInfo("Image Resource [ " + server + " ] [ " + language + " ] already loaded");
         return;
     }
+
+    images[resource_load_checker] = BAASImage();
+
     std::filesystem::path info_path;
     resource_path(server, language, "image_info", info_path);
     if (!filesystem::exists(info_path)) {
@@ -203,21 +176,7 @@ bool BAASImageResource::is_loaded(
         const string &name
 )
 {
-    auto it1 = images.find(server);
-    if (it1 == images.end()) return false;
-    if (language.empty()) return true;
-
-    auto it2 = it1->second.find(language);
-    if (it2 == it1->second.end()) return false;
-    if (group.empty()) return true;
-
-    auto it3 = it2->second.find(group);
-    if (it3 == it2->second.end()) return false;
-    if (name.empty()) return true;
-
-    auto it4 = it3->second.find(name);
-    if (it4 == it3->second.end()) return false;
-    return true;
+    return is_loaded(get_resource_pointer(server, language, group, name));
 }
 
 int BAASImageResource::load_from_json(
@@ -243,8 +202,8 @@ int BAASImageResource::load_from_json(
         image_path = group_path / (name + ".png");
         if (!BAASImageUtil::load(image_path.string(), image.image)) {
             BAASGlobalLogger->BAASError(
-                    "Image [ " + resource_pointer(server, language, group, name) +
-                    " ] load failed, reason : not exist or broken"
+                    "Image [ " + get_resource_pointer(server, language, group, name) +" ] load failed, "
+                                                                                      "reason : not exist or broken"
             );
             continue;
         }
@@ -255,9 +214,9 @@ int BAASImageResource::load_from_json(
     return successfully_loaded_cnt;
 }
 
-inline void BAASImageResource::resource_path(
-        const string &server,
-        const string &language,
+void BAASImageResource::resource_path(
+        const std::string &server,
+        const std::string &language,
         const std::string &suffix,
         std::filesystem::path &out
 )

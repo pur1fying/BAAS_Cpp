@@ -6,11 +6,12 @@
 
 using namespace std;
 
-ISA_NAMESPACE_BEGIN
+BAAS_NAMESPACE_BEGIN
 
-bool Mail::implement(baas::BAAS *baas)
+
+bool Mail::implement(BAAS *baas)
 {
-    baas::BAASLogger *logger = baas->get_logger();
+    BAASLogger *logger = baas->get_logger();
     baas->solve_procedure("UI-GO-TO_mail_general", true);
     if (baas->feature_appear("mail_collect-button-bright_appear")) {
         logger->sub_title("Collect Mail Reward.");
@@ -21,4 +22,4 @@ bool Mail::implement(baas::BAAS *baas)
     return true;
 }
 
-ISA_NAMESPACE_END
+BAAS_NAMESPACE_END

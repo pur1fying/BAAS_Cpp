@@ -6,14 +6,14 @@
 
 using namespace std;
 
-ISA_NAMESPACE_BEGIN
+BAAS_NAMESPACE_BEGIN
 
-bool CollectActivityFee::implement(baas::BAAS *baas)
+bool CollectActivityFee::implement(BAAS *baas)
 {
-    baas::BAASConfig config;
+    BAASConfig config;
     baas->solve_procedure("COLLECT_ACTIVITY_FEE", config);
     string end = config.getString("end");
-    baas::BAASLogger *logger = baas->get_logger();
+    BAASLogger *logger = baas->get_logger();
     if (end == "activity_fee_unable-to-collect_appear") logger->BAASInfo("Activity fee is not able to collect.");
     else if (end == "UI-AT_activity_fee") {
         logger->BAASInfo("Activity fee collected.");
@@ -23,4 +23,4 @@ bool CollectActivityFee::implement(baas::BAAS *baas)
     return true;
 }
 
-ISA_NAMESPACE_END
+BAAS_NAMESPACE_END

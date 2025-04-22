@@ -1,9 +1,12 @@
 #include "BAAS.h"
 #include "utils.h"
 
+#include "BAAS_Cpp.h"
+
 #pragma comment(lib, "ws2_32.lib")
 using namespace cv;
 using namespace std;
+using namespace baas;
 using json = nlohmann::json;
 
 int main(int argc, char **argv) {
@@ -11,11 +14,11 @@ int main(int argc, char **argv) {
     string config_name = "default_config";
     cv::Mat img;
     try{
-        baas::init_globals();
+        init_globals();
         filesystem::path curr = filesystem::current_path();
         baas::BAAS::check_config(config_name);
-        baas::BAAS baas(config_name);
-        baas::global_setting->show();
+        BAAS baas(config_name);
+        global_setting->show();
 //        BAASConnection* conn = baas.get_connection();
 //        baas.update_screenshot_array();
 //        baas.get_latest_screenshot(img);
@@ -40,15 +43,15 @@ int main(int argc, char **argv) {
                 "ko-kr",
                 "ru-ru"
         };
-        baas::baas_ocr->init(languages);
+        baas_ocr->init(languages);
 //        baas_ocr->test_images();
-        baas::OcrResult result;
-        baas::TextLine result2;
+        OcrResult result;
+        TextLine result2;
         std::string a = "1234567890/";
         baas.update_screenshot_array();
-        baas::BAASRectangle region_ap = {345, 32, 452, 53};
+        BAASRectangle region_ap = {345, 32, 452, 53};
         baas.ocr_for_single_line("zh-cn", result2, region_ap, "AP", a);
-        baas::BAASRectangle region_diamond = {549, 30, 663, 63};
+        BAASRectangle region_diamond = {549, 30, 663, 63};
         baas.ocr_for_single_line("zh-cn", result2, region_diamond, "Diamond", "1234567890,");
         json j;
 //        BAASOCR::ocrResult2json(result, j);
@@ -72,7 +75,7 @@ int main(int argc, char **argv) {
 //
 //        }
             catch (const std::exception& e){
-                baas::BAASGlobalLogger->BAASInfo(e.what());
+                BAASGlobalLogger->BAASInfo(e.what());
             }
 
             return 0;

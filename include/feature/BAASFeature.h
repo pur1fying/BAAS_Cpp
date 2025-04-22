@@ -13,6 +13,7 @@
 #include <functional>
 
 #include "feature/BaseFeature.h"
+#include "BAAS.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -20,32 +21,18 @@ class BAAS;
 
 class BAASFeature {
 public:
+    static void init_feature_ptr();
+
     static BAASFeature *get_instance();
 
     static void show();
 
-    static bool appear(
-            BAASConnection *connection,
-            const std::string &name,
-            const cv::Mat &image,
-            BAASConfig &output,
-            bool show_log = false
-    );
-
-    static bool appear(
-            const std::string &server,
-            const std::string &language,
-            const std::string &name,
-            const cv::Mat &image,
-            BAASConfig &output,
-            bool show_log = false
-    );
-
-    static void reset_feature( const std::string &name);
-
     static BaseFeature *get_feature(const std::string &name);
 
-    static bool reset_then_feature_appear(BAAS* baas, const std::string &feature_name);
+    static bool reset_then_feature_appear(
+            BAAS* baas,
+            const std::string &feature_name
+    );
 
     static bool feature_appear(
             BAAS* baas,
@@ -54,14 +41,8 @@ public:
             bool show_log = false
     );
 
-    static bool feature_appear(
-            BAAS* baas,
-            const std::string &feature_name
-    );
-
+    static std::vector<std::string> get_feature_list();
 private:
-
-    static void init_funcs();
 
     static void load();
 
@@ -69,14 +50,7 @@ private:
 
     BAASFeature();
 
-    // parameters, image from emulator, output, return means the feature is found or not
-    static std::vector<std::function<bool(
-            BAASConfig *parameters,
-            const cv::Mat &image,
-            BAASConfig &output
-    )>> compare_functions;
-
-    static std::map<std::string, BaseFeature *> features;
+    static std::map<std::string, std::unique_ptr<BaseFeature>> features;
 
     static BAASFeature *instance;
 };

@@ -16,19 +16,26 @@ class MatchTemplateFeature : public BaseFeature {
 public:
     explicit MatchTemplateFeature(BAASConfig *config);
 
-    static bool compare(
-            BAASConfig *parameter,
-            const cv::Mat &image,
+    bool appear(
+            const BAAS *baas,
             BAASConfig &output
-    );
-
-    [[nodiscard]] double self_average_cost(
-            const cv::Mat &image,
-            const std::string &server,
-            const std::string &language
     ) override;
 
+    [[nodiscard]] double self_average_cost(
+            const BAAS * baas
+    ) override;
+
+    inline void get_template_image(const BAAS* baas, BAASImage& out) {
+        std::string resource_ptr = baas->image_resource_prefix + group_name;
+        if (resource->is_loaded(resource_ptr)) {
+            resource->get(resource_ptr, out);
+            return;
+        }
+        resource->get(resource_ptr, out);
+    }
 private:
+
+    std::string template_group, template_name, group_name;
 
     std::map<std::string, std::optional<double>> self_average_cost_map;
 };

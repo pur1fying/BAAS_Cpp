@@ -1,0 +1,20 @@
+{
+    "name": "新的配置",
+    "script_type": "BAAS",
+    "general": {
+      "last_refresh_config_time": 0
+    },
+    "emulator": {
+      "serial": "auto",
+      "control_method": "adb",
+      "screenshot_method": "adb",
+      "server": "官服",
+      "package_name": "auto",
+      "language": "auto",
+      "emulator_folder_path": ""
+    },
+    "script": {
+      "screenshot_interval": 0.3,
+      "show_image_compare_log": false
+    }
+}

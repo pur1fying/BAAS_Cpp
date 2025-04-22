@@ -5,6 +5,9 @@ endif ()
 
 BAAS_hr_LOG("APP BAAS")
 
+option(WITH_BAAS "Build Script BAAS  "    OFF)
+option(WITH_ISA  "Build Script ISA   "    OFF)
+
 project(BAAS_APP VERSION 1.0.0)
 
 configure_file(
@@ -18,9 +21,33 @@ set(OCR_MODEL_RESOURCE_REQUIRED         ON PARENT_SCOPE)
 set(USER_CONFIG_RESOURCE_REQUIRED       ON PARENT_SCOPE)
 set(STATIC_CONFIG_RESOURCE_REQUIRED     ON PARENT_SCOPE)
 set(GLOBAL_CONFIG_RESOURCE_REQUIRED     ON PARENT_SCOPE)
-set(BAAS_FEATURE_RESOURCE_REQUIRED      ON PARENT_SCOPE)
-set(BAAS_PROCEDURE_RESOURCE_REQUIRED    ON PARENT_SCOPE)
-set(BAAS_IMAGE_RESOURCE_REQUIRED        ON PARENT_SCOPE)
+
+file(
+        GLOB
+        USER_CONFIG_FILES
+        ${CMAKE_CURRENT_LIST_DIR}/resource/config/*.json
+)
+
+file(
+        COPY
+        ${USER_CONFIG_FILES}
+        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
+)
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/image
+        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
+)
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/features
+        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
+)
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/procedure
+        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
+)
 
 if (MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
@@ -178,3 +205,4 @@ target_link_libraries(
         BAAS_ipc
         ${LIB_RAW}
 )
+

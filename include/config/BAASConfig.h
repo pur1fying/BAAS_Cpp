@@ -302,13 +302,65 @@ public:
         replace(key, value);
         save();
     }
-
-    /*
+/*
     * update value,if the key not exist, create it(add)
     * else replace it (replace)
     */
     template<typename T>
     void update(
+            const std::string &key,
+            T value
+    )
+    {
+        assert(!key.empty());
+        if (key[0] != '/') {
+            auto it = config.find(key);
+            if (it == config.end()) {            // not exist, create it
+                std::string log = "create key [ " + key + " ]";
+                if (!path.empty()) log += " \" in config file : [ " + path.string() + " ]";
+                logger->BAASInfo(log);
+                config[key] = value;
+                modified.push_back(
+                        {{"op",    "add"},
+                         {"path",  "/" + key},
+                         {"value", value}}
+                );
+            } else if (*it != value) {             // exist but not equal, replace it
+                modified.push_back(
+                        {{"op",    "replace"},
+                         {"path",  "/" + key},
+                         {"value", value}}
+                );
+                *it = value;
+            }
+            return;
+        }
+        try {
+            nlohmann::json &j = config.at(nlohmann::json::json_pointer(key));
+            if (j != value) {
+                modified.push_back(
+                        {{"op",    "replace"},
+                         {"path",  key},
+                         {"value", value}}
+                );
+                j = value;
+            }
+        }
+        catch (std::exception &e) {
+            config[nlohmann::json::json_pointer(key)] = value;
+            modified.push_back(
+                    {{"op",    "add"},
+                     {"path",  key},
+                     {"value", value}}
+            );
+        }
+    }
+    /*
+    * update value,if the key not exist, create it(add)
+    * else replace it (replace)
+    */
+    template<typename T>
+    void update_reference(
             const std::string &key,
             T &value
     )
@@ -361,7 +413,7 @@ public:
     {
         for (auto &i: patch->get_config()
                            .items())
-            update(i.key(), i.value());
+            update_reference(i.key(), i.value());
     }
 
     template<typename T>
@@ -370,7 +422,7 @@ public:
             T &value
     )
     {
-        update(key, value);
+        update_reference(key, value);
         save();
     }
 

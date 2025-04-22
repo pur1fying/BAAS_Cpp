@@ -39,7 +39,16 @@ std::filesystem::path DEVELOPER_PROJECT_DIR;
 
 std::string CURRENT_TIME_STRING;
 
-
+void log_git_info() {
+    BAASGlobalLogger->BAASInfo("BAAS     VERSION : " + std::string(BAAS_VERSION));
+    BAASGlobalLogger->sub_title("Build Info");
+    BAASGlobalLogger->BAASInfo("Branch      : " + std::string(GIT_BRANCH));
+    BAASGlobalLogger->BAASInfo("Hash        : " + std::string(GIT_HASH));
+    BAASGlobalLogger->BAASInfo("Author      : " + std::string(GIT_COMMIT_DATE) +
+                               " <" + std::string(GIT_COMMIT_AUTHOR) + ">");
+    BAASGlobalLogger->BAASInfo("Commit      : " + std::string(GIT_COMMIT_TITLE));
+    BAASGlobalLogger->BAASInfo("Build time  : " + std::string(BUILD_TIME));
+}
 
 void init_path() {
     BAAS_PROJECT_DIR = std::filesystem::current_path();

@@ -107,15 +107,13 @@ void AppearThenClickProcedure::implement(
         if (!skip_first_screenshot)wait_loading();
         else skip_first_screenshot = false;
 
-        for (auto &i: end_feature_names) BAASFeature::reset_feature(i);
-        for (auto &i: possibles_feature_names) BAASFeature::reset_feature(i);
+        for (auto &i: end_feature_names) baas->reset_feature(i);
+        for (auto &i: possibles_feature_names) baas->reset_feature(i);
 
 
         for (int i = 0; i < end_feature_names.size(); ++i) {
             current_comparing_feature_name = end_feature_names[i];
-            if (BAASFeature::appear(
-                    baas->connection, current_comparing_feature_name, baas->latest_screenshot, temp_output, show_log
-            )) {
+            if (baas->feature_appear(current_comparing_feature_name, temp_output, show_log)) {
                 logger->BAASInfo("End [ " + current_comparing_feature_name + " ]. ");
                 output.insert("end", current_comparing_feature_name);
                 return;
@@ -124,9 +122,7 @@ void AppearThenClickProcedure::implement(
 
         for (int i = 0; i < possibles.size(); i++) {
             current_comparing_feature_name = possibles_feature_names[i];
-            if (BAASFeature::appear(
-                    baas->connection, possibles_feature_names[i], baas->latest_screenshot, temp_output, show_log
-            )) {
+            if (baas->feature_appear(current_comparing_feature_name, temp_output, show_log)) {
                 logger->BAASInfo("Feature [ " + possibles_feature_names[i] + " ] appeared. ");
                 last_appeared_feature_name = possibles_feature_names[i];
                 last_appeared_time = BAASUtil::getCurrentTimeStamp();

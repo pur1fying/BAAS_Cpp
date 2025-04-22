@@ -10,9 +10,9 @@
 #include "module/collect_reward/CollectReward.h"
 #include "module/mail/Mail.h"
 
-ISA_NAMESPACE_BEGIN
+BAAS_NAMESPACE_BEGIN
 
-static std::map<std::string, std::function<bool(baas::BAAS *)>> implement_funcs;
+std::map<std::string, bool (*)(BAAS *)> ISA::implement_funcs;
 
 bool ISA::solve(const std::string &task)
 {
@@ -23,7 +23,7 @@ bool ISA::solve(const std::string &task)
     }
     try {
         logger->hr(task);
-        return it->second(this);
+        return it->second(this->baas);
     } catch (std::exception &e) {
         logger->BAASError("Error in solve task: [ " + task + " ] " + e.what());
         return false;
@@ -40,10 +40,10 @@ void ISA::init_implement_funcs()
     implement_funcs["mail"] = Mail::implement;
 }
 
-ISA::ISA(baas::BAAS *baas)
+ISA::ISA(BAAS *baas)
 {
+    this->baas = baas;
     this->logger = baas->get_logger();
 }
 
-ISA_NAMESPACE_END
-
+BAAS_NAMESPACE_END

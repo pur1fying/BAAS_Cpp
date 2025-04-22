@@ -206,7 +206,60 @@ public:
             const BAASRectangle &region = {0, 0, 1280, 720},
             const std::string &candidates = std::string());
 
+    bool feature_appear(
+            const std::string &feature_name,
+            BAASConfig &output,
+            bool show_log = false
+    );
+
+    bool feature_appear(const std::string &feature_name);
+
+    void solve_procedure(
+            const std::string &procedure_name
+    );
+    void solve_procedure(
+            const std::string &procedure_name,
+            bool skip_first_screenshot
+    );
+    void solve_procedure(
+            const std::string &procedure_name,
+            const BAASConfig &output
+    );
+    void solve_procedure(
+            const std::string &procedure_name,
+            const BAASConfig &output,
+            bool skip_first_screenshot
+    );
+    void solve_procedure(
+            const std::string &procedure_name,
+            const BAASConfig &output,
+            const BAASConfig &patch
+    );
+
+    inline void reset_feature(const std::string& name) {
+        auto it = feature_state_map.find(name);
+        if(it != feature_state_map.end()) it->second.round_feature_appear_state.reset();
+    }
+
+    inline void reset_all_feature() {
+        for (auto &i: feature_state_map)
+            i.second.round_feature_appear_state.reset();
+    }
+
+    [[nodiscard]] inline const std::string get_image_resource_prefix() const
+    {
+        return image_resource_prefix;
+    }
+
+    [[nodiscard]] inline const std::string get_rgb_feature_key() const
+    {
+        return rgb_feature_key;
+    }
 private:
+    std::string image_resource_prefix;
+
+    std::string rgb_feature_key;
+
     bool script_show_image_compare_log;
 
     bool flag_run;
@@ -225,7 +278,29 @@ private:
 
     BAASControl *control;
 
+    struct feature_state {
+        // record if a feature is check in screenshot, when screenshot update ,state should be reset.
+        std::optional<bool> round_feature_appear_state;
+
+        // time cost for a image feature to detect
+        double feature_average_cost;
+
+        void reset() {
+            round_feature_appear_state.reset();
+        }
+    };
+
+    std::map<std::string, feature_state> feature_state_map;
+
+    void init_feature_state_map();
+
     friend class BAASFeature;
+
+    friend class FilterRGBMatchTemplateFeature;
+
+    friend class MatchTemplateFeature;
+
+    friend class JudgePointRGBRangeFeature;
 
     friend class AppearThenDoProcedure;
 

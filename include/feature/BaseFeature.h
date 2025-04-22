@@ -12,6 +12,7 @@
 
 #include "config/BAASConfig.h"
 #include "BAASImageResource.h"
+#include "BAAS.h"
 
 // used to create different feature and combine them
 
@@ -19,34 +20,45 @@ BAAS_NAMESPACE_BEGIN
 
 class BaseFeature {
 public:
+    inline std::vector<std::string> get_and_features() {
+        return this->config->get<std::vector<std::string>>("and_features", {});
+    }
+
+    inline std::vector<std::string> get_or_features() {
+        return this->config->get<std::vector<std::string>>("or_features", {});
+    }
+
     explicit BaseFeature() = default;
 
     explicit BaseFeature(BAASConfig *config);
 
     inline bool is_primitive()
     {
-        return and_features.empty() && or_features.empty();
+        return _is_primitive;
     }
 
-    // used to judge the compare order of feature
-    virtual double self_average_cost(
-            const cv::Mat &image,
-            const std::string &server,
-            const std::string &language
-    );
+    std::vector<BaseFeature *> get_and_feature_ptr();
 
-    std::vector<std::string> get_and_features();
-
-    std::vector<std::string> get_or_features();
+    std::vector<BaseFeature *> get_or_feature_ptr();
 
     bool has_and_feature();
 
     bool has_or_feature();
 
+    // compare func
+    virtual bool appear(
+            const BAAS *baas,
+            BAASConfig &output
+    );
+
+    // used to judge the compare order of feature
+
+    virtual double self_average_cost(
+            const BAAS* baas
+    );
+
     [[nodiscard]] double all_average_cost(
-            const cv::Mat &image,
-            const std::string &server,
-            const std::string &language
+            const BAAS* baas
     );
 
     [[nodiscard]] inline BAASConfig *get_config()
@@ -54,36 +66,9 @@ public:
         return config;
     }
 
-    static void get_image(
-            BAASConfig *parameter,
-            BAASImage &image
-    );
-
-    inline bool get_this_round_result()
+    inline void set_path(const std::string &_path)
     {
-        assert(this_round_result.has_value());
-        return this_round_result.value();
-    }
-
-    inline bool is_checked_this_round()
-    {
-        return this_round_result.has_value();
-    }
-
-    inline bool set_checked_this_round(bool result)
-    {
-        this_round_result = result;
-        return result;
-    }
-
-    inline void reset_checked()
-    {
-        this_round_result.reset();
-    }
-
-    inline void set_path(const std::string &path)
-    {
-        this->path = path;
+        this->path = _path;
     }
 
     inline const std::string &get_path()
@@ -91,20 +76,13 @@ public:
         return path;
     }
 
-    inline void set_enabled(const bool enabled)
-    {
-        is_enabled = enabled;
-    }
-
-    inline bool get_enabled()
-    {
-        return is_enabled;
-    }
 
 protected:
-    std::vector<std::string> or_features;
+    bool _is_primitive;
 
-    std::vector<std::string> and_features;
+    std::vector<BaseFeature*> and_feature_ptr;
+
+    std::vector<BaseFeature*> or_feature_ptr;
 
     BAASConfig *config;
 
@@ -112,7 +90,7 @@ protected:
 
     std::string path;
 
-    bool is_enabled;
+    friend class BAASFeature;
 };
 
 BAAS_NAMESPACE_END

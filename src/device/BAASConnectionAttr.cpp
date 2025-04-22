@@ -50,7 +50,7 @@ void BAASConnectionAttr::serial_check()
     revise_serial();
     if (old != serial) {
         logger->BAASWarn("Serial [ " + old + " ] is revised to [ " + serial + " ]");
-        config->update("/emulator/serial", serial);
+        config->update_reference("/emulator/serial", serial);
     }
     logger->BAASInfo("Serial : " + serial);
 

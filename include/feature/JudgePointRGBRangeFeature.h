@@ -15,23 +15,18 @@ class JudgePointRGBRangeFeature : public BaseFeature {
 public:
     explicit JudgePointRGBRangeFeature(BAASConfig *config);
 
-    static bool compare(
-            BAASConfig *parameter,
-            const cv::Mat &image,
+    bool appear(
+            const BAAS *baas,
             BAASConfig &output
-    );
-
-    [[nodiscard]] double self_average_cost(
-            const cv::Mat &image,
-            const std::string &server,
-            const std::string &language
     ) override;
 
+    [[nodiscard]] double self_average_cost(
+            const BAAS* baas
+    ) override;
 private:
-    std::map<std::string, std::optional<double>> self_average_cost_map;
-
     std::map<std::string, std::vector<std::pair<int, int>>> position;
     std::map<std::string, std::vector<std::vector<int>>> rgb_range;
+
 };
 
 class JudgePointRGBRangeFeatureError : public std::exception {

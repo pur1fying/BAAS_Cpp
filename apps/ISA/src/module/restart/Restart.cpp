@@ -5,12 +5,12 @@
 
 using namespace std;
 
-ISA_NAMESPACE_BEGIN
+BAAS_NAMESPACE_BEGIN
 
-bool Restart::implement(baas::BAAS *baas)
+bool Restart::implement(BAAS *baas)
 {
-    baas::BAASConnection *connection = baas->get_connection();
-    baas::BAASLogger *logger = baas->get_logger();
+    BAASConnection *connection = baas->get_connection();
+    BAASLogger *logger = baas->get_logger();
     string package, activity;
     int pid;
     connection->current_app(package, activity, pid);
@@ -22,15 +22,15 @@ bool Restart::implement(baas::BAAS *baas)
                 " ]"
         );
         logger->BAASInfo("Clear google store cache");
-        connection->clear_cache(baas::static_config->getString("google_store_package_name"));
+        connection->clear_cache(static_config->getString("google_store_package_name"));
         logger->BAASInfo("Start app : " + expected_package);
         connection->start_self();
-        baas::BAASConfig output;
+        BAASConfig output;
         baas->solve_procedure("UI-GO-TO_restart_login", output);
         try {
             baas->solve_procedure("UI-GO-TO_main_page", output, true);
         }
-        catch (const baas::GameStuckError &e) {
+        catch (const GameStuckError &e) {
             logger->BAASError("Game stuck when go to [ main_page ].");
             logger->BAASError(e.what());
             logger->BAASError(
@@ -42,4 +42,4 @@ bool Restart::implement(baas::BAAS *baas)
     return true;
 }
 
-ISA_NAMESPACE_END
+BAAS_NAMESPACE_END

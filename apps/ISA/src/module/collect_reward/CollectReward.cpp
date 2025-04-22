@@ -4,11 +4,12 @@
 
 #include "module/collect_reward/CollectReward.h"
 
-ISA_NAMESPACE_BEGIN
+BAAS_NAMESPACE_BEGIN
 
-bool CollectReward::implement(baas::BAAS *baas)
+
+bool CollectReward::implement(BAAS *baas)
 {
-    baas::BAASConfig output;
+    BAASConfig output;
     baas->solve_procedure("UI-GO-TO_collect_reward_menu", output, true);
     collect_daily_reward(baas);
     collect_weekly_reward(baas);
@@ -18,7 +19,7 @@ bool CollectReward::implement(baas::BAAS *baas)
     return true;
 }
 
-void CollectReward::collect_daily_reward(baas::BAAS *baas)
+void CollectReward::collect_daily_reward(BAAS *baas)
 {
     baas->get_logger()
         ->sub_title("Daily Reward");
@@ -26,7 +27,7 @@ void CollectReward::collect_daily_reward(baas::BAAS *baas)
     collect(baas);
 }
 
-void CollectReward::collect_weekly_reward(baas::BAAS *baas)
+void CollectReward::collect_weekly_reward(BAAS *baas)
 {
     baas->get_logger()
         ->sub_title("Weekly Reward");
@@ -34,7 +35,7 @@ void CollectReward::collect_weekly_reward(baas::BAAS *baas)
     collect(baas);
 }
 
-void CollectReward::collect_achievement_reward(baas::BAAS *baas)
+void CollectReward::collect_achievement_reward(BAAS *baas)
 {
     baas->get_logger()
         ->sub_title("Achievement Reward");
@@ -42,15 +43,15 @@ void CollectReward::collect_achievement_reward(baas::BAAS *baas)
     collect(baas);
 }
 
-void CollectReward::collect_pass_reward(baas::BAAS *baas)
+void CollectReward::collect_pass_reward(BAAS *baas)
 {
-    baas::BAASLogger *logger = baas->get_logger();
+    BAASLogger *logger = baas->get_logger();
     logger->sub_title("Pass Reward");
     baas->solve_procedure("UI-GO-TO_collect-reward-pass", true);
-    std::vector<baas::BAASPoint> points;
-    nlohmann::json patch;
-    patch["/possibles/0/2"] = 0;
-    baas::BAASConfig output;
+    std::vector<BAASPoint> points;
+    BAASConfig patch;
+    patch.update("/possibles/0/2", 0);
+    BAASConfig output;
     bool first_round = true;
     while (baas->is_running()) {
         get_pass_reward_position(baas, points);
@@ -70,34 +71,33 @@ void CollectReward::collect_pass_reward(baas::BAAS *baas)
         logger->BAASInfo("[ " + std::to_string(points.size()) + " ] Pass Reward Found.");
         for (auto &p: points) {
             logger->BAASInfo("Collect Pass Reward At : ( " + std::to_string(p.x) + ", " + std::to_string(p.y) + " )");
-            patch["/possibles/0/2"] = p.y;
-            baas->solve_procedure("COLLECT_PASS_REWARD", patch, true);
+            patch.update("/possibles/0/2", p.y);
+            baas->solve_procedure("COLLECT_PASS_REWARD",BAASConfig() ,patch);
             baas->solve_procedure("UI-GO-TO_collect-reward-pass", true);
         }
     }
 }
 
-void CollectReward::collect(baas::BAAS *baas)
+void CollectReward::collect(BAAS *baas)
 {
-    baas::BAASLogger *logger = baas->get_config()
-                             ->get_logger();
-    if (baas->reset_then_feature_appear("collect_reward_collect-reward-bright_appear")) {
-        logger->BAASInfo("Collect Reward [ Bright ]");
-        baas->solve_procedure("COLLECT_REWARD", true);
-    } else if (baas->reset_then_feature_appear("collect_reward_collect-reward-grey_appear")) {
-        logger->BAASInfo("Collect Reward [ Grey ]");
-    } else {
-        logger->BAASError("Collect Reward Status Unknown");
-    }
+    BAASLogger *logger = baas->get_config()->get_logger();
+//    if (baas->reset_then_feature_appear("collect_reward_collect-reward-bright_appear")) {
+//        logger->BAASInfo("Collect Reward [ Bright ]");
+//        baas->solve_procedure("COLLECT_REWARD", true);
+//    } else if (baas->reset_then_feature_appear("collect_reward_collect-reward-grey_appear")) {
+//        logger->BAASInfo("Collect Reward [ Grey ]");
+//    } else {
+//        logger->BAASError("Collect Reward Status Unknown");
+//    }
 }
 
 void CollectReward::get_pass_reward_position(
-        baas::BAAS *baas,
-        std::vector<baas::BAASPoint> &points
+        BAAS *baas,
+        std::vector<BAASPoint> &points
 )
 {
     points.clear();
-    baas::BAASPoint p(272, 326);
+    BAASPoint p(272, 326);
     cv::Mat screenshot;
     cv::Vec3b min_ = {245, 8, 63}, max_ = {255, 28, 83};
     while (p.y <= 872) {
@@ -108,4 +108,4 @@ void CollectReward::get_pass_reward_position(
     }
 }
 
-ISA_NAMESPACE_END
+BAAS_NAMESPACE_END

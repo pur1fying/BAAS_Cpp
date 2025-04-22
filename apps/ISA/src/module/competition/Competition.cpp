@@ -6,12 +6,12 @@
 
 using namespace std;
 
-ISA_NAMESPACE_BEGIN
+BAAS_NAMESPACE_BEGIN
 
-bool Competition::implement(baas::BAAS *baas)
+bool Competition::implement(BAAS *baas)
 {
-    baas::BAASConfig config;
-    baas::BAASLogger *logger = baas->get_logger();
+    BAASConfig config;
+    BAASLogger *logger = baas->get_logger();
     baas->solve_procedure("UI-GO-TO_main_page_competition");
     baas->solve_procedure("UI-GO-TO_competition_menu", config, true);
     string end = config.getString("end");
@@ -25,4 +25,4 @@ bool Competition::implement(baas::BAAS *baas)
     return true;
 }
 
-ISA_NAMESPACE_END
+BAAS_NAMESPACE_END

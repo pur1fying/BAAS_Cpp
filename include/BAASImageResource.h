@@ -40,36 +40,22 @@ struct BAASImage {
     [[nodiscard]] std::string gen_info() const;
 };
 
-typedef std::map<std::string, BAASImage> BAASNameImageMap;
-typedef std::map<std::string, BAASNameImageMap> BAASGroupImageMap;
-typedef std::map<std::string, BAASGroupImageMap> BAASLanguageImageMap;
-typedef std::map<std::string, BAASLanguageImageMap> BAASServerImageMap;
+typedef std::map<std::string, BAASImage> BAASImageMap;
 
-// <server>.<language>.<group>.<name>
+// {server}.{language}.{group}.{name}
 
 class BAASImageResource {
 public:
     static BAASImageResource *get_instance();
 
     void get(
-            const std::string &server,
-            const std::string &language,
-            const std::string &task,
-            const std::string &name,
+            const std::string &resource_pointer,
             cv::Mat &out
-    );
-
-    void get(
-            const std::string &server,
-            const std::string &language,
-            const std::string &task,
-            const std::string &name,
-            BAASImage &out
     );
 
     void get(
             const std::string &resource_pointer,
-            cv::Mat &out
+            BAASImage &out
     );
 
     void set(
@@ -79,6 +65,16 @@ public:
             const std::string &name,
             const BAASImage &res
     );
+
+    static inline std::string get_resource_pointer(
+            const std::string &server,
+            const std::string &language,
+            const std::string &group,
+            const std::string &name
+    )
+    {
+        return server + "." + language + "." + group + "." + name;
+    }
 
     bool remove(const std::string &key);
 
@@ -90,8 +86,6 @@ public:
 
     void keys(std::vector<std::string> &out);
 
-    void load(const BAASConnection *conn);
-
     void load(
             const std::string &server,
             const std::string &language
@@ -99,9 +93,9 @@ public:
 
     bool is_loaded(
             const std::string &server,
-            const std::string &language = "",
-            const std::string &group = "",
-            const std::string &name = ""
+            const std::string &language,
+            const std::string &group,
+            const std::string &name
     );
 
     int load_from_json(
@@ -137,7 +131,7 @@ private:
 
     BAASImageResource();
 
-    BAASServerImageMap images;
+    BAASImageMap images;
 
     std::mutex resource_mutex;
 };

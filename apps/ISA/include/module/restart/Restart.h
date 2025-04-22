@@ -7,13 +7,15 @@
 
 #include "ISA.h"
 
-ISA_NAMESPACE_BEGIN
+BAAS_NAMESPACE_BEGIN
+
 
 class Restart {
 public:
-    static bool implement(baas::BAAS *baas);
+    static bool implement(BAAS *baas);
 
 };
 
-ISA_NAMESPACE_END
+BAAS_NAMESPACE_END
+
 #endif //BAAS_APP_MODULE_RESTART_RESTART_H_

@@ -11,6 +11,22 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
+bool BAAS::feature_appear(
+        const string &feature_name,
+        BAASConfig &output,
+        bool show_log
+)
+{
+    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+
+    return BAASFeature::feature_appear(this, feature_name, output, show_log);
+}
+
+bool BAAS::feature_appear(const string &feature_name)
+{
+    BAASConfig output;
+    return feature_appear(feature_name, output, script_show_image_compare_log);
+}
 
 BAAS::BAAS(std::string &config_name)
 {
@@ -28,7 +44,6 @@ BAAS::BAAS(std::string &config_name)
 
     flag_run = true;
 
-
     script_show_image_compare_log = config->script_show_image_compare_log();
 
     logger->BAASInfo("Show compare image log: " + to_string(script_show_image_compare_log));
@@ -40,6 +55,12 @@ BAAS::BAAS(std::string &config_name)
     screen_ratio = screenshot->get_screen_ratio();
 
     control = new BAASControl(config->control_method(), screen_ratio, connection);
+
+    image_resource_prefix = connection->get_server() + "." + connection->get_language() + ".";
+
+    rgb_feature_key = connection->get_server() + "_" + connection->get_language();
+
+    init_feature_state_map();
 }
 
 void BAAS::update_screenshot_array()
@@ -252,7 +273,49 @@ void BAAS::check_user_config(const string &config_name)
     }
 }
 
+void BAAS::init_feature_state_map()
+{
+    std::vector<std::string> feature_list = BAASFeature::get_feature_list();
+    for (const auto &feature: feature_list)
+        feature_state_map[feature] = {
+            nullopt,
+            BAASFeature::get_feature(feature)->all_average_cost(this)
+        };
+}
 
+void BAAS::solve_procedure(
+        const string &procedure_name,
+        const BAASConfig &output
+)
+{
 
+}
+
+void BAAS::solve_procedure(
+        const string &procedure_name,
+        const BAASConfig &output,
+        bool skip_first_screenshot
+)
+{
+
+}
+
+void BAAS::solve_procedure(
+        const string &procedure_name,
+        const BAASConfig &output,
+        const BAASConfig &patch
+)
+{
+
+}
+
+void BAAS::solve_procedure(const string &procedure_name)
+{
+
+}
+void BAAS::solve_procedure(const string &procedure_name, bool skip_first_screenshot)
+{
+
+}
 
 BAAS_NAMESPACE_END

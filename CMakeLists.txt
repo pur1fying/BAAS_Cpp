@@ -61,12 +61,15 @@ configure_file(
 
 set(CMAKE_CXX_STANDARD 20)
 
-
 # app options
-option(BUILD_BAAS               "build BAAS app"            OFF)
-option(BUILD_BAAS_OCR           "build the ocr server app"  ON)
-option(BUILD_TEST               "build the test"            OFF)
+option(BUILD_APP_BAAS               "build BAAS app          "  OFF)
+option(BUILD_APP_ISA                "Build ISA  app          "  OFF)
 
+check_app_options(BUILD_APP_BAAS BUILD_APP_ISA)
+
+# other
+option(BUILD_BAAS_OCR           "build the ocr server app"  ON)
+option(BUILD_TEST               "build the test          "  OFF)
 
 set(BIN_RESOURCE_REQUIRED OFF)
 set(ADB_BINARY_RESOURCE_REQUIRED OFF)
@@ -98,7 +101,6 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
-
 file(
         GLOB
         ADB_BINARY
@@ -112,13 +114,7 @@ file(
         GLOBAL_CONFIG_FILE
         ${CMAKE_CURRENT_LIST_DIR}/resource/global_setting.json
 )
-file(
-        GLOB
-        USER_CONFIG_FILE
-        ${CMAKE_CURRENT_LIST_DIR}/resource/user_setting.json
-        ${CMAKE_CURRENT_LIST_DIR}/resource/default_config.json
-        ${CMAKE_CURRENT_LIST_DIR}/resource/config_name_change.json
-)
+
 file(
         GLOB
         STATIC_CONFIG_FILE
@@ -133,13 +129,20 @@ file(
 )
 
 # --------------  BAAS APP  ------------------
-if (BUILD_BAAS)
+if (BUILD_APP_BAAS)
     add_subdirectory(apps/BAAS)
 endif()
+
+# --------------  ISA APP  -------------------
+if (BUILD_APP_ISA)
+    add_subdirectory(apps/ISA)
+endif()
+
 # --------------  OCR SERVER  ----------------
 if (BUILD_BAAS_OCR)
     add_subdirectory(apps/ocr_server)
 endif()
+
 # --------------  TEST  ----------------------
 if (BUILD_TEST)
     add_subdirectory(apps/test)
@@ -183,34 +186,10 @@ if (STATIC_CONFIG_RESOURCE_REQUIRED)
     )
 endif ()
 
-if(BAAS_IMAGE_RESOURCE_REQUIRED)
-    file(
-            COPY
-            ${CMAKE_CURRENT_LIST_DIR}/resource/image
-            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
-    )
-endif()
-
 if (BIN_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/bin
-            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
-    )
-endif ()
-
-if (BAAS_FEATURE_RESOURCE_REQUIRED)
-    file(
-            COPY
-            ${CMAKE_CURRENT_LIST_DIR}/resource/features
-            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
-    )
-endif ()
-
-if (BAAS_PROCEDURE_RESOURCE_REQUIRED)
-    file(
-            COPY
-            ${CMAKE_CURRENT_LIST_DIR}/resource/procedure
             DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
