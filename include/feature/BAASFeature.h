@@ -21,11 +21,12 @@ class BAAS;
 
 class BAASFeature {
 public:
+
+    static void show();
+
     static void init_feature_ptr();
 
     static BAASFeature *get_instance();
-
-    static void show();
 
     static BaseFeature *get_feature(const std::string &name);
 

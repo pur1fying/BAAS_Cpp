@@ -29,8 +29,7 @@ bool JudgePointRGBRangeFeature::appear(
 )
 {
     vector<string> log;
-    log.emplace_back("Compare Method :[ JudgePointRGBRangeFeature ].");
-    log.push_back("Parameters : " + config->get_config().dump(4));
+    log.emplace_back("Compare Method : [ JudgePointRGBRangeFeature ].");
 
     cv::Mat image = baas->latest_screenshot;
 
@@ -50,18 +49,28 @@ bool JudgePointRGBRangeFeature::appear(
         return false;
     }
 
-    string server = config->getString("server");
-    string language = config->getString("language");
-    string server_language = server + "_" + language;
-    auto positions = config->get<vector<pair<int, int>>>("/rgb_range/" + server_language + "/positions");
-    auto ranges = config->get<vector<vector<uint8_t>>>("/rgb_range/" + server_language + "/range");
+    auto it = rgb_info.find(baas->rgb_feature_key);
+    if (it == rgb_info.end()) {
+        log.emplace_back("RGB Range not found, Quit.");
+        output.insert("log", log);
+        return false;
+    }
+
     bool check_around = config->getBool("check_around", false);
     int around_range = config->getInt("around_range", 0);
-
-    for (int i = 0; i < positions.size(); i++) {
-        positions[i].first = int(positions[i].first * ratio);
-        positions[i].second = int(positions[i].second * ratio);
-        if (!BAASImageUtil::judge_rgb_range(image, positions[i], ranges[i], check_around, around_range)) {
+    for (int i = 0; i < it->second.size(); i++) {
+        if (!BAASImageUtil::judge_rgb_range(
+                    image,
+                    it->second[i].x,
+                    it->second[i].y,
+                    it->second[i].r_min,
+                    it->second[i].r_max,
+                    it->second[i].g_min,
+                    it->second[i].g_max,
+                    it->second[i].b_min,
+                    baas->screen_ratio,
+                    check_around,
+                    around_range)) {
             log.emplace_back("Position " + to_string(i) + " not match, Quit.");
             output.insert("log", log);
             return false;
@@ -78,38 +87,78 @@ JudgePointRGBRangeFeature::JudgePointRGBRangeFeature(BAASConfig *config) : BaseF
     if (!j.is_object() || !j.contains("rgb_range") || !j["rgb_range"].is_object()) {
         throw JudgePointRGBRangeFeatureError("rgb_range Feature format error");
     }
-    vector<pair<int, int>> temp_position;
-    vector<vector<int>> temp_range;
-    int size1, size2;
-    vector<int> temp;
+    vector<RGBInfo> temp_rgb_info_vec;
     for (auto &i: j["rgb_range"].items()) {
-        size1 = size2 = 0;
-        for (auto &_p: i.value()["positions"]) {
-            if (!_p.is_array() || _p.size() != 2)
-                throw JudgePointRGBRangeFeatureError(
-                        "Feature format error, position size should be 2"
-                );
-            temp_position.emplace_back(_p[0],_p[1]);
-            size1++;
-        }
-        for (auto &_r: i.value()["range"]) {
-            if (!_r.is_array() || _r.size() != 6)
-                throw JudgePointRGBRangeFeatureError("Feature format error range size should be 6");
-            temp = {_r[0], _r[1], _r[2], _r[3], _r[4], _r[5]};
-            temp_range.emplace_back(temp);
-            size2++;
-        }
-        if (size1 != size2)throw JudgePointRGBRangeFeatureError("Feature format error, size not match");
-        position[i.key()] = temp_position;
-        rgb_range[i.key()] = temp_range;
+        decode_single_rgb_info(i.value(), temp_rgb_info_vec);
+        rgb_info[i.key()] = temp_rgb_info_vec;
     }
 }
 
 double JudgePointRGBRangeFeature::self_average_cost(const baas::BAAS *baas)
 {
     string server_language = baas->rgb_feature_key;
-    auto it = position.find(server_language);
+    auto it = rgb_info.find(server_language);
     return 1.0 * double(it->second.size() * 8);
+}
+
+void JudgePointRGBRangeFeature::show()
+{
+    BAASGlobalLogger->sub_title("JudgePointRGBRangeFeature");
+    BAASGlobalLogger->BAASInfo("is_primitive        : [ " + std::to_string(_is_primitive) + " ]");
+    BAASGlobalLogger->BAASInfo("and_feature_count   : [ " + std::to_string(and_feature_ptr.size()) + " ]");
+    BAASGlobalLogger->BAASInfo("or_feature_count    : [ " + std::to_string(or_feature_ptr.size()) + " ]");
+    for (const auto &i: rgb_info) {
+        BAASGlobalLogger->BAASInfo("Server Language : " + i.first);
+        for (const auto &j: i.second) {
+            BAASGlobalLogger->BAASInfo("Position            : " + to_string(j.x) + ", " + to_string(j.y));
+            BAASGlobalLogger->BAASInfo("Range               : " + to_string(j.r_min) + ", " + to_string(j.r_max) + ", "
+                                       + to_string(j.g_min) + ", " + to_string(j.g_max) + ", "
+                                       + to_string(j.b_min) + ", " + to_string(j.b_max));
+        }
+    }
+}
+
+void JudgePointRGBRangeFeature::decode_single_rgb_info(
+        const nlohmann::json& j,
+        vector <RGBInfo>& out
+)
+{
+    if (!j.is_object()) {
+        throw JudgePointRGBRangeFeatureError("Single rgb_info should be object position type.");
+    }
+    if (!j.contains("positions") || !j.contains("range")) {
+        throw JudgePointRGBRangeFeatureError("'position' and 'range' should be in rgb_info");
+    }
+    if (!j["positions"].is_array() || !j["range"].is_array()) {
+        throw JudgePointRGBRangeFeatureError("'position' and 'range' should be array");
+    }
+    if (j["positions"].size() != j["range"].size()) {
+        throw JudgePointRGBRangeFeatureError("'position' and 'range' length not match");
+    }
+    out.clear();
+    unsigned int size = j["positions"].size();
+    out.resize(size);
+    int count = 0;
+    for (auto &_p: j["positions"]) {
+        if (!_p.is_array() || _p.size() != 2)
+            throw JudgePointRGBRangeFeatureError("single position length should be 2");
+        out[count].x = _p[0];
+        out[count].y = _p[1];
+        count++;
+    }
+    count = 0;
+    for (auto &_r: j["range"]) {
+        if (!_r.is_array() || _r.size() != 6)
+            throw JudgePointRGBRangeFeatureError("single range length should be 6");
+        out[count].r_min = _r[0];
+        out[count].r_max = _r[1];
+        out[count].g_min = _r[2];
+        out[count].g_max = _r[3];
+        out[count].b_min = _r[4];
+        out[count].b_max = _r[5];
+        count ++;
+    }
+
 }
 
 

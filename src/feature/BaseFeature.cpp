@@ -73,6 +73,13 @@ std::vector<BaseFeature *> BaseFeature::get_or_feature_ptr()
     return or_feature_ptr;
 }
 
+void BaseFeature::show()
+{
+    BAASGlobalLogger->sub_title("BaseFeature");
+    BAASGlobalLogger->BAASInfo("is_primitive        : [ " + std::to_string(_is_primitive) + " ]");
+    BAASGlobalLogger->BAASInfo("and_feature_count   : [ " + std::to_string(and_feature_ptr.size()) + " ]");
+    BAASGlobalLogger->BAASInfo("or_feature_count    : [ " + std::to_string(or_feature_ptr.size()) + " ]");
+}
 
 BAAS_NAMESPACE_END
 

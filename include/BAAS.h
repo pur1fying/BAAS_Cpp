@@ -260,6 +260,10 @@ private:
 
     std::string rgb_feature_key;
 
+    std::string server;
+
+    std::string language;
+
     bool script_show_image_compare_log;
 
     bool flag_run;

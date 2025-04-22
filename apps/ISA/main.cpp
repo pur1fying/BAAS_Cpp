@@ -3,6 +3,8 @@
 
 #include "ISA.h"
 
+#include "feature/BAASFeature.h"
+
 #pragma comment(lib, "ws2_32.lib")
 using namespace cv;
 using namespace std;
@@ -15,7 +17,7 @@ int main(int argc, char **argv) {
     cv::Mat img;
     try{
         init_globals();
-        filesystem::path curr = filesystem::current_path();
+        BAASFeature::show();
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
         global_setting->show();

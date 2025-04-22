@@ -16,6 +16,8 @@ class MatchTemplateFeature : public BaseFeature {
 public:
     explicit MatchTemplateFeature(BAASConfig *config);
 
+    void show();
+
     bool appear(
             const BAAS *baas,
             BAASConfig &output
@@ -34,10 +36,27 @@ public:
         resource->get(resource_ptr, out);
     }
 private:
-
     std::string template_group, template_name, group_name;
 
-    std::map<std::string, std::optional<double>> self_average_cost_map;
+    cv::Vec3b mean_rgb_diff;
+
+    double threshold;
+
+    bool check_mean_rgb = false;
+};
+
+
+class  MatchTemplateError : public std::exception {
+public:
+    explicit MatchTemplateError(const std::string &message) : message(message) {}
+
+    [[nodiscard]] const char *what() const noexcept override
+    {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
 };
 
 BAAS_NAMESPACE_END

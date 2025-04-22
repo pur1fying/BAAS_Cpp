@@ -32,7 +32,7 @@ public:
 
     explicit BaseFeature(BAASConfig *config);
 
-    inline bool is_primitive()
+    [[nodiscard]] inline bool is_primitive() const
     {
         return _is_primitive;
     }
@@ -44,6 +44,8 @@ public:
     bool has_and_feature();
 
     bool has_or_feature();
+
+    virtual void show();
 
     // compare func
     virtual bool appear(

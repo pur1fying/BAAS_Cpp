@@ -29,12 +29,43 @@ BAAS_NAMESPACE_BEGIN
 
 MatchTemplateFeature::MatchTemplateFeature(BAASConfig *config) : BaseFeature(config)
 {
-    self_average_cost_map.clear();
     template_group = config->getString("group");
     assert(!template_group.empty());
     template_name = config->getString("name");
     assert(!template_name.empty());
+    if(config->contains("mean_rgb_diff")) {
+        if(config->value_type("mean_rgb_diff") != json::value_t::array) {
+            throw MatchTemplateError("parma mean_rgb_diff should be array");
+        }
+        unsigned char size = config->get_array_size("mean_rgb_diff");
+        if (size != 3) {
+            throw MatchTemplateError("length of mean_rgb_diff should be 3 , get " + to_string(size));
+        }
+        for (int i = 0; i < 3; i++) {
+            if(config->value_type("/mean_rgb_diff/" + to_string(i)) != json::value_t::number_unsigned) {
+                throw MatchTemplateError("mean_rgb_diff value should be unsigned int");
+            }
+            mean_rgb_diff[i] = config->getUInt8("/mean_rgb_diff/" + to_string(i));
+        }
+    }
+    else {
+        mean_rgb_diff[0] = 10;
+        mean_rgb_diff[1] = 10;
+        mean_rgb_diff[2] = 10;
+    }
+
+    if(config->contains("threshold")) {
+        if(config->value_type("threshold") != json::value_t::number_float) {
+            throw MatchTemplateError("parma threshold should be float");
+        }
+        threshold = config->getDouble("threshold");
+    }
+    else {
+        threshold = 0.8;
+    }
     group_name = template_name + "." + template_group;
+
+
 }
 
 bool MatchTemplateFeature::appear(
@@ -43,8 +74,7 @@ bool MatchTemplateFeature::appear(
 )
 {
     vector<string> log;
-    log.emplace_back("Compare Method :[ MatchTemplateFeature ].");
-    log.push_back("Parameters : " + config->get_config().dump(4));
+    log.emplace_back("Compare Method : [ MatchTemplateFeature ].");
     BAASImage template_image;
 
     get_template_image(baas, template_image);
@@ -79,7 +109,7 @@ bool MatchTemplateFeature::appear(
         else BAASImageUtil::resize(temp, temp, 720, 1280);
     }
 
-    if (config->getBool("check_mean_rgb", true)) {
+    if (check_mean_rgb) {
         Vec3b cropped_diff = BAASImageUtil::getRegionMeanRGB(temp, template_image.region);
         Vec3b template_diff = BAASImageUtil::getRegionMeanRGB(template_image.image);
         log.push_back(
@@ -91,8 +121,7 @@ bool MatchTemplateFeature::appear(
                 " ,\t" + to_string(template_diff[2]) + " ]"
         );
         Vec3b diff = BAASImageUtil::calc_abs_diff(cropped_diff, template_diff);
-        auto diff_para = config->template get<vector<int>>("mean_rgb_diff", {10, 10, 10});
-        if (diff[0] > diff_para[0] || diff[1] > diff_para[1] || diff[2] > diff_para[2]) {
+        if (diff[0] > mean_rgb_diff[0] || diff[1] > mean_rgb_diff[1] || diff[2] > mean_rgb_diff[2]) {
             log.emplace_back("RGB diff too large, Quit.");
             output.insert("log", log);
             return false;
@@ -111,18 +140,9 @@ bool MatchTemplateFeature::appear(
     log.emplace_back("Match Template Result : ");
     log.push_back("Max Similarity : " + to_string(maxVal));
 
-    double threshold_min, threshold_max;
-    try {
-        threshold_min = config->get<double>("/threshold/0");
-        threshold_max = config->get<double>("/threshold/1");
-    } catch (KeyError &e) {
-        threshold_min = config->getDouble("threshold", 0.8);
-        threshold_max = 1.0;
-    }
-    if (maxVal < threshold_min || maxVal > threshold_max) {
-        log.emplace_back(
-                "maxVal not in range [" + to_string(threshold_min) + ", " + to_string(threshold_max) + "], Quit."
-        );
+
+    if (maxVal < threshold) {
+        log.emplace_back("maxVal < threshold " + to_string(threshold) + " , Quit.");
         output.insert("log", log);
         return false;
     }
@@ -146,6 +166,19 @@ double MatchTemplateFeature::self_average_cost(const BAAS *baas)
     resource->get(image_key, template_image);
     double average_cost = 1.0 * template_image.image.rows * template_image.image.cols;
     return average_cost;
+}
+
+void MatchTemplateFeature::show()
+{
+    BAASGlobalLogger->sub_title("MatchTemplateFeature");
+    BAASGlobalLogger->BAASInfo("is_primitive        : [ " + std::to_string(_is_primitive) + " ]");
+    BAASGlobalLogger->BAASInfo("and_feature_count   : [ " + std::to_string(and_feature_ptr.size()) + " ]");
+    BAASGlobalLogger->BAASInfo("or_feature_count    : [ " + std::to_string(or_feature_ptr.size()) + " ]");
+    BAASGlobalLogger->BAASInfo("Group_name          : [ " + group_name + " ]");
+    BAASGlobalLogger->BAASInfo("Check mean_rgb      : [ " + to_string(check_mean_rgb) + " ]");
+    BAASGlobalLogger->BAASInfo("RGB_diff            : [ " + to_string(mean_rgb_diff[0]) + " , " +
+                               to_string(mean_rgb_diff[1]) + " , " + to_string(mean_rgb_diff[2]) + " ]");
+    BAASGlobalLogger->BAASInfo("Threshold           : [ " + to_string(threshold) + " ]");
 }
 
 

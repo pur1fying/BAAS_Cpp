@@ -56,6 +56,30 @@ public:
 
     void save();
 
+    inline unsigned int get_array_size(const std::string& key) const
+    {
+        assert(!key.empty());
+        if (key[0] != '/') {
+            auto it = config.find(key);
+            if (it == config.end()) throwKeyError("Key [ " + key + " ] not found.");
+            if (!it->is_array()) {
+                throwKeyError("Value of [ " + key + " ] is not an array.");
+            }
+            return it->size();
+        }
+        nlohmann::json j;
+        try {
+            j = config.at(nlohmann::json::json_pointer(key));
+        }
+        catch (std::exception &e) {
+            throwKeyError("Key [ " + key + " ] not found.");
+        }
+        if (!j.is_array()) {
+            throwKeyError("Value of [ " + key + " ] is not an array.");
+        }
+        return j.size();
+    }
+
     inline nlohmann::json::value_t value_type(const std::string &key) const
     {
         assert(!key.empty());

@@ -56,9 +56,13 @@ BAAS::BAAS(std::string &config_name)
 
     control = new BAASControl(config->control_method(), screen_ratio, connection);
 
-    image_resource_prefix = connection->get_server() + "." + connection->get_language() + ".";
+    server = connection->get_server();
 
-    rgb_feature_key = connection->get_server() + "_" + connection->get_language();
+    language = connection->get_language();
+
+    image_resource_prefix = server + "." + language + ".";
+
+    rgb_feature_key = server + "_" + language;
 
     init_feature_state_map();
 }

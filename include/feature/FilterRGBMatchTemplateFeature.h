@@ -21,10 +21,11 @@ public:
             BAASConfig &output
     );
 
+    void show() override;
+
     [[nodiscard]] double self_average_cost(
             const BAAS* baas
     ) override;
-
 
     inline void get_template_image(const BAAS* baas, BAASImage& out) {
         std::string resource_ptr = baas->image_resource_prefix + group_name;
@@ -36,11 +37,27 @@ public:
     }
 
 private:
-    std::map<std::string, std::optional<double>> self_average_cost_map;
-
     std::string template_group, template_name, group_name;
+
+    cv::Vec3b mean_rgb_diff;
+
+    double threshold;
+
+    bool check_mean_rgb = false;
 };
 
+class  FilterRGBMatchTemplateError : public std::exception {
+public:
+    explicit FilterRGBMatchTemplateError(const std::string &message) : message(message) {}
+
+    [[nodiscard]] const char *what() const noexcept override
+    {
+        return message.c_str();
+    }
+
+private:
+    std::string message;
+};
 BAAS_NAMESPACE_END
 
 #endif //BAAS_FEATURE_FILTERRGBMATCHTEMPLATEFEATURE_H_

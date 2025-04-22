@@ -104,9 +104,11 @@ int BAASFeature::load_from_json(const string &path)
 
 void BAASFeature::show()
 {
-    for (auto &i: features)
-        BAASGlobalLogger->BAASInfo("Feature [ " + i.first + " ]\n" + i.second->get_config()->get_config().dump(4));
-
+    BAASGlobalLogger->hr("Show All Feature Param.");
+    for (auto &i: features) {
+        BAASGlobalLogger->BAASInfo("[ " + i.first + " ]");
+        i.second->show();
+    }
 }
 
 

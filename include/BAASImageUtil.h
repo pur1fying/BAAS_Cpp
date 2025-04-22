@@ -299,7 +299,7 @@ inline std::istream &operator>>(
     return is;
 }
 
-class BAASImageUtil {
+class   BAASImageUtil {
 public:
     static bool load(
             const std::string &path,
@@ -454,8 +454,15 @@ public:
 
     static bool judge_rgb_range(
             const cv::Mat &target,
-            const std::pair<int, int> &position,
-            const std::vector<uint8_t> &range,
+            int x,
+            int y,
+            u_char r_min,
+            u_char r_max,
+            u_char g_min,
+            u_char g_max,
+            u_char b_min,
+            u_char b_max,
+            double ratio,
             bool checkAround,
             int aroundRange = 1
     );

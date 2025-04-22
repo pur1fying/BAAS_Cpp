@@ -310,32 +310,23 @@ bool BAASImageUtil::judge_rgb_range(
 
 bool BAASImageUtil::judge_rgb_range(
         const Mat &target,
-        const pair<int, int> &position,
-        const vector<uint8_t> &range,
+        int x,
+        int y,
+        u_char r_min,
+        u_char r_max,
+        u_char g_min,
+        u_char g_max,
+        u_char b_min,
+        u_char b_max,
+        double ratio,
         bool checkAround,
         int aroundRange
 )
 {
-    Vec3b pixel = target.at<Vec3b>(position.second, position.first);
-    if (range.size() != 6) throw ValueError("judgeRGBRange Invalid range size");
-    Vec3b min_ = {range[0], range[2], range[4]};
-    Vec3b max_ = {range[1], range[3], range[5]};
-    if (checkAround) {
-        int x_min = max(0, position.first - aroundRange);
-        int x_max = min(target.cols, position.first + aroundRange);
-        int y_min = max(0, position.second - aroundRange);
-        int y_max = min(target.rows, position.second + aroundRange);
-        for (int i = x_min; i <= x_max; i++)
-            for (int j = y_min; j <= y_max; j++) {
-                pixel = target.at<Vec3b>(j, i);
-                if (judge_rgb_range(pixel, min_, max_))
-                    return true;
-            }
-        return false;
-    }
-
-    if (judge_rgb_range(target, {position.first, position.second}, min_, max_)) return true;
-    return false;
+    BAASPoint temp = {int(x * ratio), int(y * ratio)};
+    Vec3b min_ = {b_min, g_min, r_min};
+    Vec3b max_ = {b_max, g_max, r_max};
+    return judge_rgb_range(target, temp, min_, max_, checkAround, aroundRange);
 }
 
 Vec3b BAASImageUtil::getRegionMeanRGB(
@@ -344,14 +335,11 @@ Vec3b BAASImageUtil::getRegionMeanRGB(
 )
 {
     return getRegionMeanRGB(
-            target, Rect(
-                    region.ul
-                          .x, region.ul
-                                    .y, region.lr
-                                              .x - region.ul
-                                                         .x, region.lr
-                                                                   .y - region.ul
-                                                                              .y
+            target,
+            Rect(region.ul.x,
+                 region.ul.y,
+                 region.lr.x - region.ul.x,
+                 region.lr.y - region.ul.y
             ));
 }
 
@@ -442,15 +430,14 @@ cv::Vec3b BAASImageUtil::get_region_not_black_mean_rgb(
 )
 {
     return get_region_not_black_mean_rgb(
-            target, Rect(
-                    region.ul
-                          .x, region.ul
-                                    .y, region.lr
-                                              .x - region.ul
-                                                         .x, region.lr
-                                                                   .y - region.ul
-                                                                              .y
-            ));
+            target,
+            Rect(
+                    region.ul.x,
+                    region.ul.y,
+                    region.lr.x - region.ul.x,
+                    region.lr.y - region.ul.y
+            )
+   );
 }
 
 cv::Vec3b BAASImageUtil::get_region_not_black_mean_rgb(
@@ -518,6 +505,7 @@ void BAASImageUtil::pixel2string(
 {
     str = "[ " + to_string(pixel[2]) + ", " + to_string(pixel[1]) + ", " + to_string(pixel[0]) + " ]";
 }
+
 
 
 BAASPoint::BAASPoint(

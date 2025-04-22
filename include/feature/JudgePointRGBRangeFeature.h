@@ -12,8 +12,23 @@
 BAAS_NAMESPACE_BEGIN
 
 class JudgePointRGBRangeFeature : public BaseFeature {
+private:
+    struct RGBInfo{
+        int x;
+        int y;
+        u_char r_min;
+        u_char r_max;
+        u_char g_min;
+        u_char g_max;
+        u_char b_min;
+        u_char b_max;
+    };
 public:
     explicit JudgePointRGBRangeFeature(BAASConfig *config);
+
+    static void decode_single_rgb_info(const nlohmann::json& j, std::vector<RGBInfo>& out);
+
+    void show() override;
 
     bool appear(
             const BAAS *baas,
@@ -24,9 +39,8 @@ public:
             const BAAS* baas
     ) override;
 private:
-    std::map<std::string, std::vector<std::pair<int, int>>> position;
-    std::map<std::string, std::vector<std::vector<int>>> rgb_range;
 
+    std::map<std::string, std::vector<RGBInfo>> rgb_info;
 };
 
 class JudgePointRGBRangeFeatureError : public std::exception {
