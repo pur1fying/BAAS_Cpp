@@ -1,8 +1,6 @@
 #include "BAAS.h"
 #include "utils.h"
 
-#include "BAAS_Cpp.h"
-
 #pragma comment(lib, "ws2_32.lib")
 using namespace cv;
 using namespace std;
@@ -15,10 +13,11 @@ int main(int argc, char **argv) {
     cv::Mat img;
     try{
         init_globals();
-        filesystem::path curr = filesystem::current_path();
+        std::vector<std::string> languages = {"en-us"};
+        baas_ocr->init(languages);
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
-        global_setting->show();
+
 //        BAASConnection* conn = baas.get_connection();
 //        baas.update_screenshot_array();
 //        baas.get_latest_screenshot(img);
@@ -35,15 +34,11 @@ int main(int argc, char **argv) {
 //        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {200, 200, 200}, {255, 255, 255});
 //        cv::imshow("img", img);
 //        cv::waitKey(0)
-        std::vector<std::string> languages = {
-                "zh-cn",
-                "zh-tw",
-                "en-us",
-                "ja-jp",
-                "ko-kr",
-                "ru-ru"
-        };
-        baas_ocr->init(languages);
+        register_baas_module(&baas);
+        baas.solve("AutoFight");
+
+        return 0;
+
 //        baas_ocr->test_images();
         OcrResult result;
         TextLine result2;
@@ -59,9 +54,6 @@ int main(int argc, char **argv) {
 //            BAASUtil::stringReplace("/", "_", result2.text);
 //            cv::imwrite(result2.text + ".png", img);
             }
-//        for(int i = 1; i <= 10; ++i) {
-//        }
-
 //        for (int i = 1; i<=10; ++i) {
 //            baas_ocr->ocr("en-us", img, result);
 //        }

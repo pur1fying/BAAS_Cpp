@@ -11,6 +11,8 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
+std::map<std::string, std::function<bool(BAAS *)>> BAAS::module_implement_funcs;
+
 bool BAAS::feature_appear(
         const string &feature_name,
         BAASConfig &output,
@@ -320,6 +322,32 @@ void BAAS::solve_procedure(const string &procedure_name)
 void BAAS::solve_procedure(const string &procedure_name, bool skip_first_screenshot)
 {
 
+}
+
+bool BAAS::solve(const string &module_name)
+{
+    auto it = module_implement_funcs.find(module_name);
+    if (it == module_implement_funcs.end()) {
+        throw runtime_error("Module [ " + module_name + " ] not found");
+    }
+    auto func = it->second;
+    try {
+        return func(this);
+    } catch (const std::exception &e) {
+        BAASGlobalLogger->BAASError("Module [ " + module_name + " ] error: " + string(e.what()));
+        return false;
+    }
+}
+
+void BAAS::register_module_implement_func(
+        const string &module_name,
+        std::function<bool(BAAS *)> func
+)
+{
+    if (module_implement_funcs.find(module_name) != module_implement_funcs.end()) {
+        throw runtime_error("Module [ " + module_name + " ] already registered");
+    }
+    module_implement_funcs[module_name] = func;
 }
 
 BAAS_NAMESPACE_END

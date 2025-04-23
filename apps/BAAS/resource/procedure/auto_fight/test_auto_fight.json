@@ -1,0 +1,30 @@
+{
+  "name": "Special-Task-L Aris Maid Workflow",
+  "formation": {
+    "front": ["Aris (Maid)", "Wakamo", "Kayoko (New Year)", "Ui"],
+    "back": ["Ako", "Himari"],
+    "initial_skills": ["Wakamo", "Ako", "Himari"],
+    "all_appeared_skills": [
+      "Aris (Maid)",
+      "Wakamo",
+      "Kayoko (New Year)",
+      "Ui",
+      "Ako",
+      "Himari"
+    ],
+    "borrow": ""
+  },
+  "battle": {
+    "boss_max_health": {
+      "phase1": 188796,
+      "phase2": 224756,
+      "phase3": 260729,
+      "phase4": 287696,
+      "phase5": 323657
+    }
+  },
+  "start_state": [
+
+  ]
+
+}

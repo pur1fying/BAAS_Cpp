@@ -7,14 +7,11 @@
 
 #include "BAASUtil.h"
 #include "BAASLogger.h"
-#include "BAASExceptionHandler.h"
 
 #include "device/screenshot/BAASScreenshot.h"
 #include "device/control/BAASControl.h"
 
 #include "BAASGlobals.h"
-
-#include "BAASAutoFight.h"
 #include "BAASImageUtil.h"
 #include "BAASDevelopUtils.h"
 #include "BAASImageResource.h"
@@ -24,6 +21,14 @@ BAAS_NAMESPACE_BEGIN
 
 class BAAS {
 public:
+
+    void register_module_implement_func(
+            const std::string &module_name,
+            std::function<bool(BAAS *)> module
+    );
+
+    bool solve(const std::string &module_name);
+
     static void check_config(std::string &config_name);
 
     static void check_user_config(const std::string &config_name);
@@ -256,6 +261,8 @@ public:
         return rgb_feature_key;
     }
 private:
+    static std::map<std::string, std::function<bool(BAAS *)>> module_implement_funcs;
+
     std::string image_resource_prefix;
 
     std::string rgb_feature_key;

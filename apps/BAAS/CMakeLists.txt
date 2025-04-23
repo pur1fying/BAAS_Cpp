@@ -40,7 +40,7 @@ file(
 )
 file(
         COPY
-        ${CMAKE_CURRENT_LIST_DIR}/resource/features
+        ${CMAKE_CURRENT_LIST_DIR}/resource/feature
         DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
 )
 file(
@@ -73,20 +73,6 @@ add_executable(
         ${BAAS_MODULE_RESOURCE}
 )
 
-if(BAAS_APP_BUILD_FEATURE)
-    target_compile_definitions(
-        BAAS_APP PRIVATE
-        BAAS_APP_BUILD_FEATURE
-    )
-endif()
-
-if(BAAS_APP_BUILD_PROCEDURE)
-    target_compile_definitions(
-        BAAS_APP PRIVATE
-        BAAS_APP_BUILD_PROCEDURE
-    )
-endif()
-
 target_link_directories(
         BAAS_APP
         PRIVATE
@@ -108,7 +94,6 @@ target_compile_definitions(
         BAAS_BUILD_DLL
         BENCHMARK_STATIC_DEFINE
 )
-
 
 SET(
         LIB_COMMON

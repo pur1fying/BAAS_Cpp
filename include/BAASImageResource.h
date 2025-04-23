@@ -40,8 +40,6 @@ struct BAASImage {
     [[nodiscard]] std::string gen_info() const;
 };
 
-typedef std::map<std::string, BAASImage> BAASImageMap;
-
 // {server}.{language}.{group}.{name}
 
 class BAASImageResource {
@@ -131,7 +129,7 @@ private:
 
     BAASImageResource();
 
-    BAASImageMap images;
+    std::map<std::string, BAASImage> images;
 
     std::mutex resource_mutex;
 };

@@ -5,12 +5,16 @@
 #ifndef BAAS_APP_UTILS_H_
 #define BAAS_APP_UTILS_H_
 
-#include "core_defines.h"
+#include "BAAS.h"
 #include "BAASLogger.h"
+#include "core_defines.h"
+
 
 BAAS_NAMESPACE_BEGIN
 
 void init_globals();
+
+void register_baas_module(BAAS* baas);
 
 BAAS_NAMESPACE_END
 

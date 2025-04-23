@@ -1,4 +1,24 @@
 {
+  "BAAS": {
+    "auto_fight": {
+        "cost" :{
+          "one_cost_dealt_x": 31.7,
+          "recognize_region": [820, 681, 1141, 696]
+        },
+        "skill_slot": {
+          "center": [
+            [883,  621],
+            [985,  621],
+            [1087, 621]
+          ],
+          "match_template_regions": [
+            [839, 594, 982, 670],
+            [940, 594, 1032, 670],
+            [1041, 594, 1133, 670]
+          ]
+       }
+    }
+  },
   "emulator_types" : {
     "mumu": "MuMu模拟器",
     "bluestacks_nxt_cn": "蓝叠模拟器",
@@ -39,7 +59,7 @@
   "server_language_choice": {
     "JP": ["ja-jp"],
     "CN": ["zh-cn"],
-    "Global": ["en-us", "ko-kr", "ru-ru", "zh-tw"]
+    "Global": ["en-us"]
   },
   "activity_name": {
     "com.bandainamcoent.idolmaster_gakuen" : "com.google.firebase.MessagingUnityPlayerActivity",

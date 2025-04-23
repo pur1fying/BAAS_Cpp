@@ -52,5 +52,4 @@ function(check_app_options)
             endif ()
         endif()
     endforeach()
-
 endfunction()

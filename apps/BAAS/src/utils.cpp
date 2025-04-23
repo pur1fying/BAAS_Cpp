@@ -10,6 +10,8 @@
 #include "feature/BAASFeature.h"
 #include "procedure/BAASProcedure.h"
 
+#include "module/auto_fight/auto_fight.h"
+
 BAAS_NAMESPACE_BEGIN
 
 void init_globals()
@@ -22,6 +24,7 @@ void init_globals()
 
     BAASGlobalLogger->Path(BAAS_PROJECT_DIR);
     baas_ocr = BAASOCR::get_instance();
+    resource = BAASImageResource::get_instance();
     static_config = BAASStaticConfig::getStaticConfig();
     baas_features = BAASFeature::get_instance();
     baas_procedures = BAASProcedure::get_instance();
@@ -40,6 +43,10 @@ void init_globals()
     }
     BAASGlobalSetting::check_global_setting_exist();
     global_setting = BAASGlobalSetting::getGlobalSetting();
+}
+
+void register_baas_module(BAAS* baas) {
+    baas->register_module_implement_func("AutoFight", baas::AutoFight::implement);
 }
 
 BAAS_NAMESPACE_END

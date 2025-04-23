@@ -121,8 +121,9 @@ void BAASImageResource::show()
 
 bool BAASImageResource::is_loaded(const string &key)
 {
+    BAASGlobalLogger->BAASInfo(to_string(images.size()) + " images loaded");
     auto it = images.find(key);
-    if (it == images.end())return false;
+    if (it == images.end()) return false;
     return true;
 }
 

@@ -1,0 +1,19 @@
+{
+    "emulator": {
+        "control_method": "nemu",
+        "emulator_folder_path": "H:\\MuMuPlayer-12.0",
+        "language": "auto",
+        "package_name": "com.nexon.bluearchive",
+        "screenshot_method": "nemu",
+        "serial": "127.0.0.1:16384",
+        "server": "官服"
+    },
+    "general": {
+        "last_refresh_config_time": 0
+    },
+    "name": "新的配置",
+    "script": {
+        "screenshot_interval": 0.0,
+        "show_image_compare_log": false
+    }
+}
