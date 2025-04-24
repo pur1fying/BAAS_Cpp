@@ -8,10 +8,12 @@ using namespace cv;
 
 BAAS_NAMESPACE_BEGIN
 
-BAASAutoFight::BAASAutoFight(BAAS *baas)
+bool BAASAutoFight::implement(BAAS *baas)
 {
-    this->baas = baas;
+    BAASGlobalLogger->sub_title("Auto Fight");
+    return true;
 }
+
 //
 //BAASRectangle BAASAutoFight::costRegion = {820, 681, 1141, 696};
 //

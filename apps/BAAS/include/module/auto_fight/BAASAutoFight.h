@@ -10,20 +10,16 @@
 #include "BAAS.h"
 #include "BAASImageUtil.h"
 #include "BAASImageResource.h"
-#include "screenshot_data_recoder.h"
 
 BAAS_NAMESPACE_BEGIN
 
 class BAASAutoFight {
 public:
-    BAASAutoFight(BAAS* baas);
-
-
-
+    static bool implement(BAAS* baas);
 
 private:
 
-    BAAS* baas;
+
 
 };
 

@@ -15,5 +15,10 @@
     "script": {
       "screenshot_interval": 0.0,
       "show_image_compare_log": false
+    },
+    "auto_fight": {
+      "workflow_name": "Special-Task-L_Aris_Maid",
+      "data_update_thread": 4
     }
+
 }

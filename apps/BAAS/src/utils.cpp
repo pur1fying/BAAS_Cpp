@@ -10,7 +10,7 @@
 #include "feature/BAASFeature.h"
 #include "procedure/BAASProcedure.h"
 
-#include "module/auto_fight/auto_fight.h"
+#include "module/auto_fight/BAASAutoFight.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -46,7 +46,7 @@ void init_globals()
 }
 
 void register_baas_module(BAAS* baas) {
-    baas->register_module_implement_func("AutoFight", baas::AutoFight::implement);
+    baas->register_module_implement_func("AutoFight", baas::BAASAutoFight::implement);
 }
 
 BAAS_NAMESPACE_END

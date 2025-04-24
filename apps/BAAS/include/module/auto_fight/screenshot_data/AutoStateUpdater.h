@@ -1,0 +1,8 @@
+//
+// Created by pc on 2025/4/24.
+//
+
+#ifndef MAIL_H_AUTOSTATEUPDATER_H
+#define MAIL_H_AUTOSTATEUPDATER_H
+
+#endif //MAIL_H_AUTOSTATEUPDATER_H
