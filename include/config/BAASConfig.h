@@ -17,8 +17,9 @@
 
 #include "nlohmann/json.hpp"
 
-#include "BAASLogger.h"
 #include "BAASUtil.h"
+#include "BAASLogger.h"
+#include "BAASImageUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -153,6 +154,87 @@ public:
         return get<uint8_t>(key, default_value);
     }
 
+    inline cv::Vec3b getVec3b(
+            const std::string &key,
+            const cv::Vec3b &default_value = {0, 0, 0}
+    )   const
+    {
+        if (contains(key)) {
+            nlohmann::json it;
+            try{
+                it = config.at(nlohmann::json::json_pointer(key));
+            }
+            catch (std::exception &e) {
+                return default_value;
+            }
+            if (!it.is_array() or it.size() != 3) { return default_value; }
+            try {
+                return {
+                        it[0].get<uint8_t>(),
+                        it[1].get<uint8_t>(),
+                        it[2].get<uint8_t>()
+                };
+            } catch (std::exception &e) {
+                return default_value;
+            }
+        }
+        return default_value;
+    }
+
+    inline BAASPoint get_point(
+            const std::string &key,
+            const BAASPoint &default_value = {0, 0}
+    )   const
+    {
+        if (contains(key)) {
+            nlohmann::json it;
+            try{
+                it = config.at(nlohmann::json::json_pointer(key));
+            }
+            catch (std::exception &e) {
+                return default_value;
+            }
+            if (!it.is_array() or it.size() != 2) { return default_value; }
+            try {
+                return {
+                        it[0].get<int>(),
+                        it[1].get<int>()
+                };
+            } catch (std::exception &e) {
+                return default_value;
+            }
+        }
+        return default_value;
+    }
+
+    inline BAASRectangle get_rect(
+            const std::string &key,
+            const BAASRectangle &default_value = {0, 0, 0, 0}
+    )   const
+    {
+        if (contains(key)) {
+            nlohmann::json it;
+            try{
+                it = config.at(nlohmann::json::json_pointer(key));
+            }
+            catch (std::exception &e) {
+                return default_value;
+            }
+            if (!it.is_array() or it.size() != 4) { return default_value; }
+            try {
+                return {
+                        it[0].get<int>(),
+                        it[1].get<int>(),
+                        it[2].get<int>(),
+                        it[3].get<int>()
+                };
+            } catch (std::exception &e) {
+                return default_value;
+            }
+        }
+        return default_value;
+    }
+
     inline long getLong(
             const std::string &key,
             long default_value = 0
@@ -233,7 +315,7 @@ public:
     inline T get(
             const std::string &key,
             T default_value
-    )   const
+    )   const noexcept
     {
         assert(!key.empty());
         if (key[0] != '/') {
@@ -255,6 +337,7 @@ public:
         }
     }
 
+    // will throw exception if key not exist or data type mismatch
     template<typename T>
     inline T get(const std::string &key) const
     {

@@ -35,7 +35,7 @@ file(
 )
 file(
         COPY
-        ${CMAKE_CURRENT_LIST_DIR}/resource/features
+        ${CMAKE_CURRENT_LIST_DIR}/resource/feature
         DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
 )
 file(

@@ -1,6 +1,8 @@
 #include "BAAS.h"
 #include "utils.h"
+#include "module/auto_fight/auto_fight.h"
 
+#include "feature/BAASFeature.h"
 #pragma comment(lib, "ws2_32.lib")
 using namespace cv;
 using namespace std;
@@ -13,27 +15,45 @@ int main(int argc, char **argv) {
     cv::Mat img;
     try{
         init_globals();
-        std::vector<std::string> languages = {"en-us"};
+        BAASFeature::show();
+        std::vector<std::string> languages = {"en-us", "zh-cn"};
         baas_ocr->init(languages);
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
 
-//        BAASConnection* conn = baas.get_connection();
-//        baas.update_screenshot_array();
-//        baas.get_latest_screenshot(img);
+        AutoFight fight(&baas);
+        fight.set_data_updater_mask(0b11);
+
+        auto start = BAASUtil::getCurrentTimeMS();
+        int frame_count = 0;
+        while (1) {
+            baas.update_screenshot_array();
+//            fight.update_screenshot();
+            fight.update_data();
+            fight.display_data();
+            frame_count++;
+            if (BAASUtil::getCurrentTimeMS() - start > 1000) {
+                start = BAASUtil::getCurrentTimeMS();
+                baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
+                frame_count = 0;
+            }
+        }
+
+
+        return 0;
+        baas.update_screenshot_array();
+        baas.get_latest_screenshot(img);
 
 //        cv::imshow("img", img);
 //        cv::waitKey(0);
 
-//        cv::imwrite("1.png", img);
+//        string name = "pause-button";
+//        BAASRectangle region = {1215, 29, 1251, 65};
+//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {255, 255, 255});
 //        cv::imshow("img", img);
-//          img = cv::imread("NUM.png");
 //        cv::waitKey(0);
-//        string name = "rank-down";
-//        BAASRectangle region = {100, 291, 650, 363};
-//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {200, 200, 200}, {255, 255, 255});
-//        cv::imshow("img", img);
-//        cv::waitKey(0)
+//        return 0;
+
         register_baas_module(&baas);
         baas.solve("AutoFight");
 

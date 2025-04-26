@@ -2,8 +2,15 @@
   "BAAS": {
     "auto_fight": {
         "cost" :{
-          "one_cost_dealt_x": 31.7,
-          "recognize_region": [820, 681, 1141, 696]
+          "increase_1_dealt_x": 31.7,
+          "recognize_region": [820, 681, 1141, 696],
+          "target_pixel_rgb": {
+            "min": [250, 250, 250],
+            "max": [255, 255, 255]
+          }
+        },
+        "BossHealth": {
+          "ocr_region": [587, 47, 734, 64]
         },
         "skill_slot": {
           "center": [

@@ -14,13 +14,19 @@ class BaseDataUpdater {
 public:
     explicit BaseDataUpdater(BAAS* baas, screenshot_data* data);
 
-    virtual bool update();
+    bool at_fight_page();
+
+    virtual void update();
 
     virtual double estimated_time_cost();
 
     virtual constexpr std::string data_name();
 
+    virtual void display_data();
+
 protected:
+    BAASLogger* logger;
+
     BAAS* baas;
 
     screenshot_data* data;

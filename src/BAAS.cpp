@@ -75,10 +75,16 @@ void BAAS::update_screenshot_array()
     screenshot->screenshot(latest_screenshot);
 }
 
-void BAAS::get_latest_screenshot(cv::Mat &img)
+void BAAS::get_latest_screenshot_clone(cv::Mat &img)
 {
     if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
     img = latest_screenshot.clone();
+}
+
+void BAAS::get_latest_screenshot(Mat &img)
+{
+    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+    img = latest_screenshot;
 }
 
 void BAAS::get_latest_screenshot(
@@ -349,5 +355,7 @@ void BAAS::register_module_implement_func(
     }
     module_implement_funcs[module_name] = func;
 }
+
+
 
 BAAS_NAMESPACE_END

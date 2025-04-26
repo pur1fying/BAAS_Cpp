@@ -248,13 +248,29 @@ struct BAASRectangle {
             BAASPoint p2
     );
 
-    [[nodiscard]] bool contains(BAASPoint p) const;
+    [[nodiscard]] inline bool contains(BAASPoint p) const {
+        return (p.x > ul.x && p.x < lr.x) && (p.y > ul.y && p.y < lr.y);
+    }
 
-    [[nodiscard]] bool empty() const;
+    [[nodiscard]] inline bool empty() const{
+        return ul.x >= lr.x || ul.y >= lr.y;
+    }
 
-    [[nodiscard]] int width() const;
+    [[nodiscard]] inline int width() const{
+        return lr.x - ul.x;
+    }
 
-    [[nodiscard]] int height() const;
+    [[nodiscard]] inline int height() const{
+        return lr.y - ul.y;
+    }
+
+    [[nodiscard]] inline int size() const {
+        return (lr.x - ul.x) * (lr.y - ul.y);
+    }
+
+    [[nodiscard]] inline BAASPoint center() const {
+        return {(ul.x + lr.x) / 2, (ul.y + lr.y) / 2};
+    }
 };
 
 inline bool operator<=(

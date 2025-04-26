@@ -129,9 +129,8 @@ void BAASOCR::ocr(
         if (logger != nullptr) logger->BAASError("OCR for" + language + " not init");
         return;
     }
-    std::string candidates_cpy = candidates;
     std::vector<std::string> unique_candidates;
-    string_unique_utf8_characters(candidates_cpy, unique_candidates);
+    string_unique_utf8_characters(candidates, unique_candidates);
 
     if (logger != nullptr and !candidates.empty()) {
         std::string temp;
@@ -164,12 +163,11 @@ void BAASOCR::ocr_for_single_line(
 {
     auto res = ocr_map.find(language);
     if (res == ocr_map.end()) {
-        if (logger != nullptr) logger->BAASError("OCR for" + language + " not init");
+        if (logger != nullptr) logger->BAASError("OCR language [ " + language + " ] not init.");
         return;
     }
-    std::string candidates_cpy = candidates;
     std::vector<std::string> unique_candidates;
-    string_unique_utf8_characters(candidates_cpy, unique_candidates);
+    string_unique_utf8_characters(candidates, unique_candidates);
     if (logger != nullptr and !candidates.empty()) {
         std::string temp;
         BAASUtil::stringJoin(unique_candidates, "", temp);

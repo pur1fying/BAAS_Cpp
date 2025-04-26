@@ -1,11 +1,15 @@
 {
+    "auto_fight": {
+        "d_update_max_thread": 4,
+        "workflow_name": "Special-Task-L_Aris_Maid"
+    },
     "emulator": {
         "control_method": "nemu",
         "emulator_folder_path": "H:\\MuMuPlayer-12.0",
         "language": "auto",
-        "package_name": "com.nexon.bluearchive",
+        "package_name": "com.RoamingStar.BlueArchive",
         "screenshot_method": "nemu",
-        "serial": "127.0.0.1:16384",
+        "serial": "127.0.0.1:16512",
         "server": "官服"
     },
     "general": {

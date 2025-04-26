@@ -24,7 +24,6 @@ void NemuScreenshot::screenshot(cv::Mat &output)
     nemu_connection->screenshot(image);
     auto t2 = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-    logger->BAASInfo("Screenshot Time : " + std::to_string(duration) + "us");
     output = image.clone();
 }
 

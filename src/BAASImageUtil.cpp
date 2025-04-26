@@ -25,21 +25,10 @@ Mat BAASImageUtil::crop(
     if (!(region.ul < region.lr)) {
         throw ValueError("Invalid Crop Image Region, ul should be smaller than lr");
     }
-    if (region.lr
-              .x > src.cols || region.lr
-                                     .y > src.rows) {
+    if (region.lr.x > src.cols || region.lr.y > src.rows) {
         throw ValueError("Invalid Crop Image Region, out of bound");
     }
-    return src(
-            Range(
-                    region.ul
-                          .y, region.lr
-                                    .y
-            ), Range(
-                    region.ul
-                          .x, region.lr
-                                    .x
-            ));
+    return src(Range(region.ul.y, region.lr.y), Range(region.ul.x, region.lr.x));
 }
 
 Mat BAASImageUtil::crop(
@@ -560,26 +549,6 @@ BAASRectangle::BAASRectangle(
 {
     ul = p1;
     lr = p2;
-}
-
-inline bool BAASRectangle::contains(BAASPoint p) const
-{
-    return (p.x > ul.x && p.x < lr.x) && (p.y > ul.y && p.y < lr.y);
-}
-
-bool BAASRectangle::empty() const
-{
-    return ul.x >= lr.x || ul.y >= lr.y;
-}
-
-int BAASRectangle::width() const
-{
-    return lr.x - ul.x;
-}
-
-int BAASRectangle::height() const
-{
-    return lr.y - ul.y;
 }
 
 BAAS_NAMESPACE_END

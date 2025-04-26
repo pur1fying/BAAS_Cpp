@@ -49,6 +49,10 @@ public:
     : m_threads(std::vector<std::thread>(n_threads)), m_shutdown(false) {
   }
 
+  ~ThreadPool() {
+      shutdown();
+  }
+
   ThreadPool(const ThreadPool &) = delete;
   ThreadPool(ThreadPool &&) = delete;
 

@@ -3,7 +3,7 @@
         "flush_interval": 1000
     },
     "ocr": {
-        "enable_cpu_memory_arena": false,
+        "enable_cpu_memory_arena": true,
         "gpu_id": -1,
         "num_thread": 4,
         "server": {

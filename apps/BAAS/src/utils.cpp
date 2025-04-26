@@ -26,6 +26,7 @@ void init_globals()
     baas_ocr = BAASOCR::get_instance();
     resource = BAASImageResource::get_instance();
     static_config = BAASStaticConfig::getStaticConfig();
+    BAASOCR::update_valid_languages();
     baas_features = BAASFeature::get_instance();
     baas_procedures = BAASProcedure::get_instance();
     GameServer::init();

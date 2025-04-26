@@ -1,0 +1,10 @@
+{
+  "group": "fight",
+  "path": "fight",
+  "image": {
+    "pause-button": {
+      "direction": 0,
+      "region": [1215, 29, 1251, 65]
+    }
+  }
+}

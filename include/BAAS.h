@@ -39,6 +39,8 @@ public:
 
     void update_screenshot_array();
 
+    void get_latest_screenshot_clone(cv::Mat &img);
+
     void get_latest_screenshot(cv::Mat &img);
 
     void get_latest_screenshot(

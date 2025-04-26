@@ -77,8 +77,6 @@ public:
     {
         return path;
     }
-
-
 protected:
     bool _is_primitive;
 

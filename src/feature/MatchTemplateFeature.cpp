@@ -63,8 +63,7 @@ MatchTemplateFeature::MatchTemplateFeature(BAASConfig *config) : BaseFeature(con
     else {
         threshold = 0.8;
     }
-    group_name = template_name + "." + template_group;
-
+    group_name = template_group + "." + template_name;
 
 }
 

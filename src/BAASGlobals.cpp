@@ -56,12 +56,10 @@ void init_path() {
     BAAS_CONFIG_DIR = BAAS_PROJECT_DIR / "config";
     BAAS_IMAGE_RESOURCE_DIR = BAAS_PROJECT_DIR / "resource" / "image";
 
-    BAAS_FEATURE_DIR = BAAS_PROJECT_DIR / "resource" / "features";
+    BAAS_FEATURE_DIR = BAAS_PROJECT_DIR / "resource" / "feature";
     BAAS_PROCEDURE_DIR = BAAS_PROJECT_DIR / "resource" / "procedure";
     BAAS_OCR_MODEL_DIR = BAAS_PROJECT_DIR / "resource" / "ocr_models";
-    DEVELOPER_PROJECT_DIR = BAAS_PROJECT_DIR.parent_path()
-                                            .parent_path()
-                                            .string();
+    DEVELOPER_PROJECT_DIR = BAAS_PROJECT_DIR.parent_path().parent_path().string();
     scrcpyJarName = "scrcpy-server.jar";
     scrcpyJarPath = BAAS_PROJECT_DIR / "resource" / "bin" / "scrcpy" / scrcpyJarName;
     scrcpyJar_REMOTE_DIR = "/data/local/tmp" / scrcpyJarName;

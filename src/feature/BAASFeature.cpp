@@ -76,19 +76,19 @@ int BAASFeature::load_from_json(const string &path)
             continue;
         }
         int tp = temp->getInt("feature_type", -1);
-        std::unique_ptr<BaseFeature> f = nullptr;
+        BaseFeature* f = nullptr;
         switch (tp) {
             case -1:
-                features[i.key()] = make_unique<BaseFeature> (temp);
+                f = new BaseFeature(temp);
                 break;
             case BAAS_MATCH_TEMPLATE_FEATURE:
-                features[i.key()] = make_unique<MatchTemplateFeature> (temp);
+                f = new MatchTemplateFeature(temp);
                 break;
             case BAAS_FILTER_RGB_MATCH_TEMPLATE_FEATURE:
-                features[i.key()] = make_unique<FilterRGBMatchTemplateFeature> (temp);
+                f = new FilterRGBMatchTemplateFeature(temp);
                 break;
             case BAAS_JUDGE_POINT_RGB_RANGE_FEATURE:
-                features[i.key()] = make_unique<JudgePointRGBRangeFeature> (temp);
+                f = new JudgePointRGBRangeFeature(temp);
                 break;
             default:
                 BAASGlobalLogger->BAASError("Feature Type [ " + to_string(tp) + " ] not found");
@@ -96,6 +96,7 @@ int BAASFeature::load_from_json(const string &path)
         }
         if (f != nullptr) {
             f->set_path(path);
+            features[i.key()] = std::unique_ptr<BaseFeature>(f);
             loaded++;
         }
     }
@@ -136,8 +137,6 @@ bool BAASFeature::feature_appear(
         bool show_log
 )
 {
-    if (!baas->flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-
     auto feature = features.find(feature_name);
 
     auto feature_state = baas->feature_state_map.find(feature_name);

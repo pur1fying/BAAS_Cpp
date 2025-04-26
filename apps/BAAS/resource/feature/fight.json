@@ -1,0 +1,7 @@
+{
+  "fight_pause-button_appear":{
+    "feature_type": 0,
+    "group": "fight",
+    "name": "pause-button"
+  }
+}

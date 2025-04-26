@@ -14,6 +14,10 @@ BAAS_NAMESPACE_BEGIN
 struct slot_skill{
     std::optional<std::string> name;    // skill name
     std::optional<int>         cost;    // skill real cost
+    void reset() noexcept {
+        name.reset();
+        cost.reset();
+    }
 };
 
 struct screenshot_data {
@@ -30,6 +34,18 @@ struct screenshot_data {
     std::optional<double>    fight_left_time;     // fight auto over time
     std::optional<int>       room_left_time;      // room close time
 
+    void reset_all() noexcept {
+        cost.reset();
+        auto_state.reset();
+        room_left_time.reset();
+        boss_max_health.reset();
+        fight_left_time.reset();
+        acceleration_state.reset();
+        boss_current_health.reset();
+        for (auto& skill : skills) {
+            skill.reset();
+        }
+    }
 };
 
 BAAS_NAMESPACE_END

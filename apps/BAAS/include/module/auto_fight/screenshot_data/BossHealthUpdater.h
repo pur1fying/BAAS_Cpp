@@ -2,7 +2,33 @@
 // Created by pc on 2025/4/24.
 //
 
-#ifndef MAIL_H_BOSSHEALTHUPDATER_H
-#define MAIL_H_BOSSHEALTHUPDATER_H
+#ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_BOSSHEALTHUPDATER_H_
+#define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_BOSSHEALTHUPDATER_H_
 
-#endif //MAIL_H_BOSSHEALTHUPDATER_H
+#include "BaseDataUpdater.h"
+
+BAAS_NAMESPACE_BEGIN
+
+class BossHealthUpdater : public BaseDataUpdater {
+
+public:
+    explicit BossHealthUpdater(BAAS *baas, screenshot_data *data);
+
+    void update() override;
+
+    double estimated_time_cost() override;
+
+    constexpr std::string data_name() override;
+
+    void display_data() override;
+
+    void ocr_result_to_boss_health();
+private:
+    BAASRectangle ocr_region;
+    cv::Mat origin_screenshot, cropped_image;
+    TextLine ocr_result;
+};
+
+BAAS_NAMESPACE_END
+
+#endif //BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_BOSSHEALTHUPDATER_H_
