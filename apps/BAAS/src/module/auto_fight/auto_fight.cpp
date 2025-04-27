@@ -58,11 +58,15 @@ void AutoFight::update_data()
 
     // put updater in queue into thread pool
     for (int i = 0; i < d_wait_to_update_idx.size(); ++i) {
-        std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
-        d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
-            return d_updater_running_thread_count < d_update_max_thread;
-        });
-        ++d_updater_running_thread_count;
+        if (d_updater_running_thread_count < d_update_max_thread) ++d_updater_running_thread_count;
+        else {
+            std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
+            d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
+                return d_updater_running_thread_count < d_update_max_thread;
+            });
+            // condition judgement
+        }
+        
         d_update_thread_pool->submit([this]() {
             submit_data_updater_task(this);
         });
