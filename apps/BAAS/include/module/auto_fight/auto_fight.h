@@ -54,7 +54,7 @@ BEGIN_AUTO_FIGHT_DATA_UPDATE
     int d_update_max_thread;
 
     // data update occurs in multiple threads
-    std::unique_ptr<ThreadPool> pool;
+    std::unique_ptr<ThreadPool> d_update_thread_pool;
 
     std::mutex d_update_thread_mutex;
 
@@ -74,6 +74,8 @@ BEGIN_AUTO_FIGHT_DATA_UPDATE
 
     // max len : 64 ( 2^6 )
     std::vector<std::unique_ptr<BaseDataUpdater>> d_updaters;
+
+    std::vector<uint8_t> d_wait_to_update_idx;
 
     std::queue<uint8_t> d_updater_queue;
 

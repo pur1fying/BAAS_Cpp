@@ -34,36 +34,36 @@ void AutoFight::init_data_updater()
 
 void AutoFight::update_data()
 {
-    std::vector<uint8_t> data_wait_to_update_idx;
+    d_wait_to_update_idx.clear();
 
     for (int i = 0; i < d_updaters.size(); ++i) {
         if((1LL << i) & d_updater_mask) {
-            data_wait_to_update_idx.push_back(i);
+            d_wait_to_update_idx.push_back(i);
         }
     }
 
-    if (data_wait_to_update_idx.empty()) {
+    if (d_wait_to_update_idx.empty()) {
         return;
     }
 
     // sort by cost
-    std::sort(data_wait_to_update_idx.begin(),data_wait_to_update_idx.end(), [this](auto a, auto b) {
+    std::sort(d_wait_to_update_idx.begin(),d_wait_to_update_idx.end(), [this](auto a, auto b) {
         return d_updaters[a]->estimated_time_cost() < d_updaters[b]->estimated_time_cost();
     });
 
 
-    for (auto idx : data_wait_to_update_idx) {
+    for (auto idx : d_wait_to_update_idx) {
         d_updater_queue.push(idx);
     }
 
     // put updater in queue into thread pool
-    for (int i = 0; i < data_wait_to_update_idx.size(); ++i) {
+    for (int i = 0; i < d_wait_to_update_idx.size(); ++i) {
         std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
         d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
             return d_updater_running_thread_count < d_update_max_thread;
         });
         ++d_updater_running_thread_count;
-        pool->submit([this]() {
+        d_update_thread_pool->submit([this]() {
             submit_data_updater_task(this);
         });
     }
