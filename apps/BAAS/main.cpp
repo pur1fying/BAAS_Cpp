@@ -26,8 +26,13 @@ int main(int argc, char **argv) {
 
         auto start = BAASUtil::getCurrentTimeMS();
         int frame_count = 0;
+        fight.set_boss_health_update_flag(0b111);
         while (1) {
+            fight.reset_data();
             baas.update_screenshot_array();
+            baas.reset_all_feature();
+            baas.feature_appear("fight_pause-button_appear");
+
 //            fight.update_screenshot();
             fight.update_data();
             fight.display_data();

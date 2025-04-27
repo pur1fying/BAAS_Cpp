@@ -57,10 +57,11 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
 endif()
 
-option(USE_CUDA "Use CUDA" OFF)
-message(STATUS "USE_CUDA: ${USE_CUDA}")
+option(BAAS_APP_USE_CUDA "BAAS_APP Use CUDA" OFF)
+message(STATUS "BAAS_APP Use CUDA: ${USE_CUDA}")
 
-file(
+
+    file(
         GLOB_RECURSE
         BAAS_MODULE_RESOURCE
         ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
@@ -88,12 +89,31 @@ target_include_directories(
         ${CMAKE_BINARY_DIR}
 )
 
+
 target_compile_definitions(
         BAAS_APP PRIVATE
-        __CUDA__
         BAAS_BUILD_DLL
         BENCHMARK_STATIC_DEFINE
 )
+
+
+if (BAAS_APP_USE_CUDA)
+    target_compile_definitions(
+            BAAS_APP
+            PRIVATE
+            __CUDA__
+    )
+    set(
+            LIB_ONNXRUNTIME_CUDA
+            onnxruntime_providers_cuda
+            onnxruntime_providers_shared
+    )
+    set(
+            DLL_ONNXRUNTIME_CUDA
+            onnxruntime_providers_cuda
+            onnxruntime_providers_shared
+    )
+endif ()
 
 SET(
         LIB_COMMON
@@ -104,8 +124,6 @@ SET(
         avutil
         liblz4
         onnxruntime
-        onnxruntime_providers_cuda
-        onnxruntime_providers_shared
 #        postproc
 #        swresample
         swscale
@@ -122,7 +140,6 @@ SET(
         avutil-58
         liblz4
         onnxruntime
-        onnxruntime_providers_cuda
 #        postproc-57
 #        swresample-4
         swscale-7
@@ -158,6 +175,7 @@ set(
         ${LIB_COMMON}
         ${LIB_DEBUG}
         ${LIB_RELEASE}
+        ${LIB_ONNXRUNTIME_CUDA}
 )
 
 set(
@@ -165,6 +183,7 @@ set(
         ${DLL_COMMON}
         ${DLL_DEBUG}
         ${DLL_RELEASE}
+        ${DLL_ONNXRUNTIME_CUDA}
 )
 
 

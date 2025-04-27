@@ -23,10 +23,10 @@ Mat BAASImageUtil::crop(
 )
 {
     if (!(region.ul < region.lr)) {
-        throw ValueError("Invalid Crop Image Region, ul should be smaller than lr");
+        throw ValueError("Invalid Crop Image Region " + region.to_string()  + " , ul should be smaller than lr");
     }
     if (region.lr.x > src.cols || region.lr.y > src.rows) {
-        throw ValueError("Invalid Crop Image Region, out of bound");
+        throw ValueError("Invalid Crop Image Region " + region.to_string() + " , out of image size");
     }
     return src(Range(region.ul.y, region.lr.y), Range(region.ul.x, region.lr.x));
 }

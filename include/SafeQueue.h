@@ -1,7 +1,13 @@
-#pragma once
+
+#ifndef BAAS_SAFEQUEUE_H_
+#define BAAS_SAFEQUEUE_H_
 
 #include <mutex>
 #include <queue>
+
+#include "core_defines.h"
+
+BAAS_NAMESPACE_BEGIN
 
 // Thread safe implementation of a Queue using an std::queue
 template <typename T>
@@ -50,3 +56,7 @@ public:
     return true;
   }
 };
+
+BAAS_NAMESPACE_END
+
+#endif // BAAS_SAFEQUEUE_H_

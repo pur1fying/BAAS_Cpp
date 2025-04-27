@@ -9,7 +9,7 @@
 #define END_AUTO_FIGHT_DATA_UPDATE
 
 
-#include <ThreadPool.h>
+#include "ThreadPool.h"
 
 #include "BAAS.h"
 #include "screenshot_data/screenshot_data_recoder.h"
@@ -40,6 +40,10 @@ public:
         baas->update_screenshot_array();
         auto t_end = BAASUtil::getCurrentTimeMS();
         logger->BAASInfo("[ Screenshot ] update | Time: " + std::to_string(t_end - t_start) + "ms");
+    }
+
+    inline void set_boss_health_update_flag(uint8_t flag) {
+        latest_screenshot_d.boss_health_update_flag = flag;
     }
 
 private:

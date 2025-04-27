@@ -10,7 +10,9 @@
           }
         },
         "BossHealth": {
-          "ocr_region": [587, 47, 734, 64]
+          "current_ocr_region": [549, 47, 656, 64],
+          "max_ocr_region": [666, 47, 775, 64],
+          "ocr_region": [549, 47, 775, 64]
         },
         "skill_slot": {
           "center": [

@@ -33,6 +33,7 @@ MatchTemplateFeature::MatchTemplateFeature(BAASConfig *config) : BaseFeature(con
     assert(!template_group.empty());
     template_name = config->getString("name");
     assert(!template_name.empty());
+    check_mean_rgb = config->getBool("check_mean_rgb", true);
     if(config->contains("mean_rgb_diff")) {
         if(config->value_type("mean_rgb_diff") != json::value_t::array) {
             throw MatchTemplateError("parma mean_rgb_diff should be array");
@@ -53,7 +54,6 @@ MatchTemplateFeature::MatchTemplateFeature(BAASConfig *config) : BaseFeature(con
         mean_rgb_diff[1] = 10;
         mean_rgb_diff[2] = 10;
     }
-
     if(config->contains("threshold")) {
         if(config->value_type("threshold") != json::value_t::number_float) {
             throw MatchTemplateError("parma threshold should be float");

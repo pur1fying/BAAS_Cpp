@@ -26,6 +26,12 @@ struct BAASPoint {
             int yy
     );
 
+    [[nodiscard]] std::string to_string() const {
+        std::ostringstream oss;
+        oss << "(" << std::setw(4) << std::setfill(' ') << x << ", " << std::setw(4) << std::setfill(' ') << y<< ")";
+        return oss.str();
+    }
+
     // circle point with center : point , radius : r
     [[nodiscard]] BAASPoint rotate(
             int r,
@@ -214,8 +220,8 @@ inline std::ostream &operator<<(
         const BAASPoint &point
 )
 {
-    os << "(" << std::setw(4) << std::setfill(' ') << point.x << ", " << std::setw(4) << std::setfill(' ') << point.y
-       << ")";
+    os << "(" << std::setw(4) << std::setfill(' ') << point.x << ", " <<
+                std::setw(4) << std::setfill(' ') << point.y << ")";
     return os;
 }
 
@@ -247,6 +253,12 @@ struct BAASRectangle {
             BAASPoint p1,
             BAASPoint p2
     );
+
+    [[nodiscard]] std::string to_string() const {
+        std::ostringstream oss;
+        oss << "[" << ul << ", \t" << lr << "]";
+        return oss.str();
+    }
 
     [[nodiscard]] inline bool contains(BAASPoint p) const {
         return (p.x > ul.x && p.x < lr.x) && (p.y > ul.y && p.y < lr.y);
@@ -302,7 +314,7 @@ inline std::ostream &operator<<(
         const BAASRectangle &rect
 )
 {
-    os << "[" << rect.ul << ", \t" << rect.lr << ")";
+    os << "[" << rect.ul << ", " << rect.lr << ")";
     return os;
 }
 

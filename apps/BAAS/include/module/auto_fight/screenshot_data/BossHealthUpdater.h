@@ -22,10 +22,17 @@ public:
 
     void display_data() override;
 
-    void ocr_result_to_boss_health();
 private:
-    BAASRectangle ocr_region;
+    void _update_all();
+
+    void _update_current_health();
+
+    void _update_max_health();
+
+    BAASRectangle ocr_region, current_ocr_region, max_ocr_region;
+
     cv::Mat origin_screenshot, cropped_image;
+
     TextLine ocr_result;
 };
 

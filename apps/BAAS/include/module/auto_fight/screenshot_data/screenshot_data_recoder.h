@@ -22,17 +22,34 @@ struct slot_skill{
 
 struct screenshot_data {
 
+    // boss health
     std::optional<long long> boss_current_health;
     std::optional<long long> boss_max_health;
 
-    std::optional<uint8_t>   acceleration_state;  // phase 1, 2, 3
-    std::optional<bool>      auto_state;          // auto on / off
+    std::uint8_t boss_health_update_flag = 0b010;
+    /*
+     * 0b010: update current health
+     * 0b001: update max health
+     * 0b100: update both
+     */
 
-    std::optional<double>    cost;                // cost able to release skill
-    std::vector<slot_skill>  skills;              // use vector since has skill with count 6
 
-    std::optional<double>    fight_left_time;     // fight auto over time
-    std::optional<int>       room_left_time;      // room close time
+    // phase 1, 2, 3
+    std::optional<uint8_t>   acceleration_state;
+    // auto on / off
+    std::optional<bool>      auto_state;
+
+    // cost able to release skill
+    std::optional<double>    cost;
+
+    // use vector since has skill with count 6
+    std::vector<slot_skill>  skills;
+
+    // fight auto over time
+    std::optional<double>    fight_left_time;
+
+    // room close time
+    std::optional<int>       room_left_time;
 
     void reset_all() noexcept {
         cost.reset();

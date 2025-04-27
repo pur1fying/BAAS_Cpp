@@ -59,11 +59,8 @@ void BAASDevelopUtils::extract_image_rgb_range(
         region.lr
               .y -= rg[1];
     }
-    BAASGlobalLogger->BAASInfo(
-            "region: " + to_string(region.ul.x) + ", " + to_string(region.ul.y) + ", "
-                       + to_string(region.lr.x) + ", " + to_string(region.lr.y
-            ));
-    BAASGlobalLogger->BAASInfo("shape: " + to_string(im.cols) + "x" + to_string(im.rows));
+    BAASGlobalLogger->BAASInfo("Region: " + region.to_string());
+    BAASGlobalLogger->BAASInfo("Shape: " + to_string(im.cols) + "x" + to_string(im.rows));
     imwrite(name + ".png", im);
 }
 

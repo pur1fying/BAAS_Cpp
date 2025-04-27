@@ -31,7 +31,7 @@ FilterRGBMatchTemplateFeature::FilterRGBMatchTemplateFeature(BAASConfig *config)
     assert(!template_group.empty());
     template_name = config->getString("name");
     assert(!template_name.empty());
-    check_mean_rgb = config->getBool("check_mean_rgb", false);
+    check_mean_rgb = config->getBool("check_mean_rgb", true);
     if(config->contains("mean_rgb_diff")) {
         if(config->value_type("mean_rgb_diff") != json::value_t::array) {
             throw FilterRGBMatchTemplateError("parma mean_rgb_diff should be array");

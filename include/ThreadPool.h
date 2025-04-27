@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BAAS_THREADPOOL_H_
+#define BAAS_THREADPOOL_H_
 
 #include <functional>
 #include <future>
@@ -9,6 +10,8 @@
 #include <vector>
 
 #include "SafeQueue.h"
+
+BAAS_NAMESPACE_BEGIN
 
 class ThreadPool {
 private:
@@ -101,3 +104,7 @@ public:
     return task_ptr->get_future();
   }
 };
+
+BAAS_NAMESPACE_END
+
+#endif // BAAS_THREADPOOL_H_

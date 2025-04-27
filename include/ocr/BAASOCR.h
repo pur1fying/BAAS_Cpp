@@ -9,7 +9,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
-#include <ThreadPool.h>
+#include "ThreadPool.h"
 
 #include "ocr/OcrStruct.h"
 #include "ocr/OcrLite.h"

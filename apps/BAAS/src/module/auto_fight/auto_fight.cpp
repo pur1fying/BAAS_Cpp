@@ -15,8 +15,8 @@ AutoFight::AutoFight(BAAS *baas)
     this->config = baas->get_config();
     logger = baas->get_logger();
     d_update_max_thread = config->getInt("/auto_fight/d_update_max_thread");
-    pool = std::make_unique<ThreadPool>(d_update_max_thread);
-    pool->init();
+    d_update_thread_pool = std::make_unique<ThreadPool>(d_update_max_thread);
+    d_update_thread_pool->init();
     init_data_updater();
 }
 
@@ -81,7 +81,12 @@ void AutoFight::submit_data_updater_task(AutoFight *self)
 
     auto idx = self->d_updater_queue.front();
     self->d_updater_queue.pop();
-    self->d_updaters[idx]->update();
+    try {
+        self->d_updaters[idx]->update();
+    }
+    catch (const std::exception &e) {
+        self->logger->BAASError("In [ " + self->d_updaters[idx]->data_name() + " ] update | Error: " + e.what());
+    }
 
     self->notify_d_update_thread_end();
 
@@ -104,7 +109,7 @@ AutoFight::~AutoFight()
         updater.reset();
     }
     d_updaters.clear();
-    pool->shutdown();
+    d_update_thread_pool->shutdown();
 }
 
 

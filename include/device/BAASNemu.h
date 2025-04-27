@@ -170,8 +170,6 @@ private:
 
     std::vector<unsigned char> pixels;
 
-    std::mutex imageOpMutex;
-
     bool alive = false;
 
     static std::map<int, BAASNemu *> connections;

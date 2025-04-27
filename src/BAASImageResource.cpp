@@ -46,10 +46,7 @@ std::string BAASImage::get_size() const
 
 std::string BAASImage::gen_info() const
 {
-    string info = "Region : [ " + to_string(region.ul.x) + ", " +
-                                  to_string(region.ul.y) + " ] [ " +
-                                  to_string(region.lr.x) + ", " +
-                                  to_string(region.lr.y) + " ]";
+    string info = "Region : " + region.to_string();
     info += " Direction : " + to_string(direction);
     info += " Resolution : " + get_size();
     return info;
