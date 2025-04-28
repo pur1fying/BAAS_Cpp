@@ -24,7 +24,13 @@
             [839, 594, 982, 670],
             [940, 594, 1032, 670],
             [1041, 594, 1133, 670]
-          ]
+          ],
+          "skill_templates": {
+            "Ui": {
+              "active": ["active"],
+              "inactive": ["l_inactive", "r_inactive"]
+            }
+          }
        }
     }
   },

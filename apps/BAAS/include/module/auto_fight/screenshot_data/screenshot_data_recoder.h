@@ -7,18 +7,30 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <opencv2/opencv.hpp>
 
 #include "core_defines.h"
+
 BAAS_NAMESPACE_BEGIN
 
 struct slot_skill{
-    std::optional<std::string> name;    // skill name
-    std::optional<int>         cost;    // skill real cost
+    std::optional<int>         index;     // skill index
+    std::optional<int>         cost;      // skill real cost
+    std::optional<bool>        is_active; // skill active state
+
     void reset() noexcept {
         name.reset();
         cost.reset();
     }
 };
+
+struct skill_template {
+    std::string name;    // skill name
+
+    std::vector<cv::Mat> skill_active_templates;
+    std::vector<cv::Mat> skill_inactive_templates;
+
+}
 
 struct screenshot_data {
 
@@ -42,8 +54,11 @@ struct screenshot_data {
     // cost able to release skill
     std::optional<double>    cost;
 
-    // use vector since has skill with count 6
+    // use vector since there is fight with 6 skills
     std::vector<slot_skill>  skills;
+    std::vector<std::vector<int>> each_slot_possible_templates; 
+    std::vector<skill_template> all_possible_skills
+
 
     // fight auto over time
     std::optional<double>    fight_left_time;
