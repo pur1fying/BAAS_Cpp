@@ -1,20 +1,21 @@
 {
   "BAAS": {
     "auto_fight": {
-        "cost" :{
-          "increase_1_dealt_x": 31.7,
-          "recognize_region": [820, 681, 1141, 696],
-          "target_pixel_rgb": {
-            "min": [250, 250, 250],
-            "max": [255, 255, 255]
-          }
-        },
-        "BossHealth": {
-          "current_ocr_region": [549, 47, 656, 64],
-          "max_ocr_region": [666, 47, 775, 64],
-          "ocr_region": [549, 47, 775, 64]
-        },
-        "skill_slot": {
+      "cost" :{
+        "increase_1_dealt_x": 31.7,
+        "recognize_region": [820, 681, 1141, 696],
+        "target_pixel_rgb": {
+          "min": [250, 250, 250],
+          "max": [255, 255, 255]
+         }
+      },
+      "BossHealth": {
+        "current_ocr_region": [549, 47, 656, 64],
+        "max_ocr_region": [666, 47, 775, 64],
+        "ocr_region": [549, 47, 775, 64]
+      },
+      "Skill": {
+        "slot": {
           "center": [
             [883,  621],
             [985,  621],
@@ -25,13 +26,19 @@
             [940, 594, 1032, 670],
             [1041, 594, 1133, 670]
           ],
-          "skill_templates": {
-            "Ui": {
-              "active": ["active"],
-              "inactive": ["l_inactive", "r_inactive"]
-            }
+          "cost_ocr_regions": [
+            [839, 594, 982, 670],
+            [940, 594, 1032, 670],
+            [1041, 594, 1133, 670]
+          ]
+        },
+        "templates": {
+          "Ui": {
+            "active": ["active"],
+            "inactive": ["l_inactive", "r_inactive"]
           }
-       }
+        }
+      }
     }
   },
   "emulator_types" : {
