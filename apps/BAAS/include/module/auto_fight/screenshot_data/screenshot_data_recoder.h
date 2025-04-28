@@ -57,7 +57,8 @@ struct screenshot_data {
     // use vector since there is fight with 6 skills
     std::vector<slot_skill>  skills;
     std::vector<std::vector<int>> each_slot_possible_templates; 
-    std::vector<skill_template> all_possible_skills
+    std::vector<skill_template> all_possible_skills;
+    uint32_t skill_cost_update_flag = 0b000000; // max skill is 6
 
 
     // fight auto over time
