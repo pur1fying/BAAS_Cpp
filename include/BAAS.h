@@ -5,17 +5,9 @@
 #ifndef BAAS_BAAS_H_
 #define BAAS_BAAS_H_
 
-#include "BAASUtil.h"
-#include "BAASLogger.h"
-
 #include "device/screenshot/BAASScreenshot.h"
 #include "device/control/BAASControl.h"
-
-#include "BAASGlobals.h"
-#include "BAASImageUtil.h"
-#include "BAASDevelopUtils.h"
-#include "BAASImageResource.h"
-#include "ocr/BAASOCR.h"
+#include "ocr/OcrStruct.h"
 
 BAAS_NAMESPACE_BEGIN
 

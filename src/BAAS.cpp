@@ -3,6 +3,7 @@
 //
 
 #include "BAAS.h"
+#include "ocr/BAASOCR.h"
 #include "procedure/BAASProcedure.h"
 
 using namespace std;

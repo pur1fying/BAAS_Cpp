@@ -3,6 +3,7 @@
 //
 
 #include "module/auto_fight/screenshot_data/BossHealthUpdater.h"
+#include "ocr/BAASOCR.h"
 
 BAAS_NAMESPACE_BEGIN
 

@@ -1,9 +1,13 @@
 #include "BAAS.h"
 #include "utils.h"
 #include "module/auto_fight/auto_fight.h"
-
+#include "ocr/BAASOCR.h"
 #include "feature/BAASFeature.h"
+
+#include "BAASDevelopUtils.h"
+
 #pragma comment(lib, "ws2_32.lib")
+
 using namespace cv;
 using namespace std;
 using namespace baas;
@@ -15,12 +19,33 @@ int main(int argc, char **argv) {
     cv::Mat img;
     try{
         init_globals();
+
+
+        std::vector<std::string> names = {
+                "Ui",
+                "Nagisa",
+                "Himari"
+        };
+        std::vector<BAASRectangle> regions = {
+                SKILL1_LEFT,
+                SKILL2_LEFT,
+                SKILL3_LEFT
+        };
+        std::vector<int> type = {
+                SKILL_LEFT,
+                SKILL_LEFT,
+                SKILL_LEFT
+        };
         BAASFeature::show();
-        std::vector<std::string> languages = {"en-us", "zh-cn"};
-        baas_ocr->init(languages);
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
+        for (int i = 0; i < names.size(); ++i) {
+            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
+        }
 
+        return 0;
+        std::vector<std::string> languages = {"en-us", "zh-cn"};
+        baas_ocr->init(languages);
         AutoFight fight(&baas);
         fight.set_data_updater_mask(0b11);
 

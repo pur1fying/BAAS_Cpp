@@ -19,8 +19,9 @@ struct slot_skill{
     std::optional<bool>        is_active; // skill active state
 
     void reset() noexcept {
-        name.reset();
+        index.reset();
         cost.reset();
+        is_active.reset();
     }
 };
 
@@ -30,7 +31,7 @@ struct skill_template {
     std::vector<cv::Mat> skill_active_templates;
     std::vector<cv::Mat> skill_inactive_templates;
 
-}
+};
 
 struct screenshot_data {
 
