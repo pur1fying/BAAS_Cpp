@@ -12,6 +12,8 @@
 
 BAAS_NAMESPACE_BEGIN
 
+extern std::filesystem::path BAAS_AUTO_FIGHT_WORKFLOW_DIR;
+
 void init_globals();
 
 void register_baas_module(BAAS* baas);

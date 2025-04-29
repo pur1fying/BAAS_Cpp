@@ -14,6 +14,8 @@ extern std::filesystem::path BAAS_PROJECT_DIR;
 
 extern std::filesystem::path BAAS_CONFIG_DIR;
 
+extern std::filesystem::path BAAS_RESOURCE_DIR;
+
 extern std::filesystem::path BAAS_IMAGE_RESOURCE_DIR;
 
 extern std::filesystem::path BAAS_FEATURE_DIR;

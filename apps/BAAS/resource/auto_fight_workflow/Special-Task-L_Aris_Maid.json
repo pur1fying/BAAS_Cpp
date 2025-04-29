@@ -4,6 +4,7 @@
     "front": ["Aris (Maid)", "Wakamo", "Kayoko (New Year)", "Ui"],
     "back": ["Ako", "Himari"],
     "initial_skills": ["Wakamo", "Ako", "Himari"],
+    "slot_count": 3,
     "all_appeared_skills": [
       "Aris (Maid)",
       "Wakamo",

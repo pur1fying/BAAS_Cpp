@@ -41,10 +41,10 @@ double BossHealthUpdater::estimated_time_cost()
 
 void BossHealthUpdater::display_data()
 {
-    if(!data->boss_current_health.has_value()) logger->BAASInfo("Boss_C_Health: No Value.");
+    if(!data->boss_current_health.has_value()) logger->BAASInfo("Boss_C_Health : No Value.");
     else logger->BAASInfo("Boss_C_Health : [ " + std::to_string(data->boss_current_health.value()) + " ]");
 
-    if(!data->boss_max_health.has_value()) logger->BAASInfo("Boss_M_Health: No Value.");
+    if(!data->boss_max_health.has_value()) logger->BAASInfo("Boss_M_Health : No Value.");
     else logger->BAASInfo("Boss_M_Health : [ " + std::to_string(data->boss_max_health.value()) + " ]");
 }
 
@@ -56,7 +56,6 @@ constexpr std::string BossHealthUpdater::data_name()
 void BossHealthUpdater::_update_current_health()
 {
     cropped_image = BAASImageUtil::crop(origin_screenshot, current_ocr_region);
-    cv::imwrite("current_health.png", cropped_image);
     baas_ocr->ocr_for_single_line(
             "zh-cn",
             cropped_image,
@@ -71,7 +70,6 @@ void BossHealthUpdater::_update_current_health()
 void BossHealthUpdater::_update_max_health()
 {
     cropped_image = BAASImageUtil::crop(origin_screenshot, max_ocr_region);
-    cv::imwrite("max_health.png", cropped_image);
     baas_ocr->ocr_for_single_line(
             "zh-cn",
             cropped_image,
@@ -86,7 +84,6 @@ void BossHealthUpdater::_update_max_health()
 void BossHealthUpdater::_update_all()
 {
     cropped_image = BAASImageUtil::crop(origin_screenshot, ocr_region);
-    cv::imwrite("all_health.png", cropped_image);
     baas_ocr->ocr_for_single_line(
             "zh-cn",
             cropped_image,

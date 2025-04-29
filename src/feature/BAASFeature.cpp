@@ -137,6 +137,18 @@ bool BAASFeature::feature_appear(
         bool show_log
 )
 {
+    /*
+     *
+     * self true
+     * self false
+     * self true and
+     * self false and
+     * self true or
+     * self false or
+     * self true and or
+     * self false and or
+     *
+    */
     auto feature = features.find(feature_name);
 
     auto feature_state = baas->feature_state_map.find(feature_name);
@@ -160,7 +172,6 @@ bool BAASFeature::feature_appear(
                 feature->second->get_config()->get_config(),
                 (BAASLogger *) BAASGlobalLogger
         );
-
         try {
             result = feature->second->appear(baas, output);
             feature_state->second.round_feature_appear_state = result;
@@ -168,12 +179,18 @@ bool BAASFeature::feature_appear(
                 auto log = output.template get<vector<string>>("log", {});
                 BAASGlobalLogger->BAASInfo(log);
             }
+            if (feature->second->is_primitive()
+            or ( result and feature->second->has_or_feature()  and !feature->second->has_and_feature())
+            or (!result and feature->second->has_and_feature() and !feature->second->has_or_feature()))
+                return result;
+
         } catch (json::exception &e) {
             BAASGlobalLogger->BAASError("Feature [ " + feature_name + " ] compare error : " + e.what());
             throw BAASFeatureError("Feature [ " + feature_name + " ] compare error : " + e.what());
         }
     }
 
+    // check and/or features
     vector<pair<double, pair<BaseFeature*, bool>>> feature_queue;     // <cost, <name, is_or>>
     vector<BaseFeature*> bundle = feature->second->or_feature_ptr;
 

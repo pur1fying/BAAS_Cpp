@@ -62,9 +62,9 @@ public:
         assert(!key.empty());
         if (key[0] != '/') {
             auto it = config.find(key);
-            if (it == config.end()) throwKeyError("Key [ " + key + " ] not found.");
+            if (it == config.end()) throw_key_error("Key [ " + key + " ] not found.");
             if (!it->is_array()) {
-                throwKeyError("Value of [ " + key + " ] is not an array.");
+                throw_key_error("Value of [ " + key + " ] is not an array.");
             }
             return it->size();
         }
@@ -73,10 +73,10 @@ public:
             j = config.at(nlohmann::json::json_pointer(key));
         }
         catch (std::exception &e) {
-            throwKeyError("Key [ " + key + " ] not found.");
+            throw_key_error("Key [ " + key + " ] not found.");
         }
         if (!j.is_array()) {
-            throwKeyError("Value of [ " + key + " ] is not an array.");
+            throw_key_error("Value of [ " + key + " ] is not an array.");
         }
         return j.size();
     }
@@ -86,14 +86,14 @@ public:
         assert(!key.empty());
         if (key[0] != '/') {
             auto it = config.find(key);
-            if (it == config.end()) throwKeyError("Key [ " + key + " ] not found.");
+            if (it == config.end()) throw_key_error("Key [ " + key + " ] not found.");
             return it->type();
         }
         try {
             return config.at(nlohmann::json::json_pointer(key)).type();
         }
         catch (std::exception &e) {
-            throwKeyError("Key [ " + key + " ] not found.");
+            throw_key_error("Key [ " + key + " ] not found.");
         }
     }
 
@@ -117,7 +117,7 @@ public:
         if (key[0] != '/') {
             auto it = config.find(key);
             if (it == config.end()) {
-                throwKeyError("Key [ " + key + " ] not found.");
+                throw_key_error("Key [ " + key + " ] not found.");
             }
             output = BAASConfig(*it, logger);
             return;
@@ -126,7 +126,7 @@ public:
             output = BAASConfig(config.at(nlohmann::json::json_pointer(key)), logger);
         }
         catch (std::exception &e) {
-            throwKeyError("Key [ " + key + " ] not found.");
+            throw_key_error("Key [ " + key + " ] not found.");
         }
     }
 
@@ -186,25 +186,7 @@ public:
             const BAASPoint &default_value = {0, 0}
     )   const
     {
-        if (contains(key)) {
-            nlohmann::json it;
-            try{
-                it = config.at(nlohmann::json::json_pointer(key));
-            }
-            catch (std::exception &e) {
-                return default_value;
-            }
-            if (!it.is_array() or it.size() != 2) { return default_value; }
-            try {
-                return {
-                        it[0].get<int>(),
-                        it[1].get<int>()
-                };
-            } catch (std::exception &e) {
-                return default_value;
-            }
-        }
-        return default_value;
+        return get<BAASPoint>(key, default_value);
     }
 
     inline BAASRectangle get_rect(
@@ -212,27 +194,7 @@ public:
             const BAASRectangle &default_value = {0, 0, 0, 0}
     )   const
     {
-        if (contains(key)) {
-            nlohmann::json it;
-            try{
-                it = config.at(nlohmann::json::json_pointer(key));
-            }
-            catch (std::exception &e) {
-                return default_value;
-            }
-            if (!it.is_array() or it.size() != 4) { return default_value; }
-            try {
-                return {
-                        it[0].get<int>(),
-                        it[1].get<int>(),
-                        it[2].get<int>(),
-                        it[3].get<int>()
-                };
-            } catch (std::exception &e) {
-                return default_value;
-            }
-        }
-        return default_value;
+        return get<BAASRectangle>(key, default_value);
     }
 
     inline long getLong(
@@ -345,11 +307,11 @@ public:
         assert(!key.empty());
         if (key[0] != '/') {
             auto it = config.find(key);
-            if (it == config.end()) throwKeyError("Key [ " + key + " ] not found.");
+            if (it == config.end()) throw_key_error("Key [ " + key + " ] not found.");
             try {
                 return *it;
             } catch (std::exception &e) {
-                throwKeyError(
+                throw_type_error(
                         "Value With Key [ " + key + " ] Type Error. Real : " + std::string(it->type_name()) +
                         " .Expected : " + typeid(default_value).name());
             }
@@ -357,8 +319,13 @@ public:
         try {
             return config.at(nlohmann::json::json_pointer(key));
         }
-        catch (std::exception &e) {
-            throwKeyError("Key [ " + key + " ] not found.");
+        // key incorrect / out_of_range / value type mismatch
+        catch (nlohmann::json::out_of_range& e) {
+            throw_key_error("Key [ " + key + " ] not found." + e.what());
+        }
+        catch (nlohmann::json::type_error& e) {
+            throw_type_error("Value With Key [ " + key + " ] Type Error. Real : " + std::string(config.type_name()) +
+                    " .Expected : " + typeid(default_value).name());
         }
     }
 
@@ -396,7 +363,7 @@ public:
             }
         }
         catch (std::exception &e) {
-            throwKeyError("Key [ " + key + " ] not found : " + e.what());
+            throw_key_error("Key [ " + key + " ] not found : " + e.what());
         }
     }
 
@@ -613,7 +580,7 @@ protected:
     inline nlohmann::json::iterator findByKey(const std::string &key)
     {
         nlohmann::json::iterator it = config.find(key);
-        if (it == config.end()) throwKeyError("Key [ " + key + " ] not found.");
+        if (it == config.end()) throw_key_error("Key [ " + key + " ] not found.");
         return it;
     }
 
@@ -664,12 +631,20 @@ protected:
             nlohmann::json &value
     );
 
-    inline void throwKeyError(const std::string &desc)  const
+    inline void throw_key_error(const std::string &desc)  const
     {
         std::string msg;
         if (!path.empty()) msg = "In Config file : [ " + path.string() + " ] : \n";
         msg += desc;
         throw KeyError(msg);
+    }
+
+    inline void throw_type_error(const std::string &desc) const
+    {
+        std::string msg;
+        if (!path.empty()) msg = "In Config file : [ " + path.string() + " ] : \n";
+        msg += desc;
+        throw TypeError(msg);
     }
 
     inline void save_modify_history()

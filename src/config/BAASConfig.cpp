@@ -116,8 +116,6 @@ BAASConfig::BAASConfig(const int config_type)
     }
 }
 
-
-
 BAASConfig::BAASConfig(const string &path)
 {
     // path : "name/config.json"
@@ -285,25 +283,25 @@ void BAASConfig::remove(const string &key)
             if (tar.is_object()) {
                 auto it = tar.find(keys[i]);
                 if (it != tar.end())tar = *it;
-                else throwKeyError("Key : [ " + key + " ] not fount.");
+                else throw_key_error("Key : [ " + key + " ] not fount.");
             } else if (tar.is_array()) {
                 try {
                     int idx = stoi(keys[i]);
                     tar = tar.at(idx);
-                } catch (exception &e) { throwKeyError(e.what()); }
-            } else throwKeyError("key : [ " + key + " ] not found.");
+                } catch (exception &e) { throw_key_error(e.what()); }
+            } else throw_key_error("key : [ " + key + " ] not found.");
 
         }
 
         if (tar.is_object()) {
             if (tar.contains(keys[siz])) tar.erase(keys[siz]);
-            else throwKeyError("key : [ " + key + " ] not found.");
+            else throw_key_error("key : [ " + key + " ] not found.");
         } else if (tar.is_array()) {
             try {
                 int idx = stoi(keys[siz]);
                 tar.erase(idx);
-            } catch (exception &e) { throwKeyError(e.what()); }
-        } else throwKeyError("key : [ " + key + " ] not found.");
+            } catch (exception &e) { throw_key_error(e.what()); }
+        } else throw_key_error("key : [ " + key + " ] not found.");
     }
     modified.push_back(
             {{"op",   "remove"},

@@ -6,6 +6,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "BAAS.h"
 #include "BAASImageUtil.h"
 #include "BAASGlobals.h"
 #include "config/BAASConfig.h"
@@ -15,8 +16,9 @@ BAAS_NAMESPACE_BEGIN
 
 struct BAASImage {
     BAASRectangle region;
-    uint8_t direction = {};  // some app rotates the screen
+    uint8_t direction = 0;  // some app rotates the screen
     cv::Mat image;
+    cv::Vec3b mean_rgb;
 
     explicit BAASImage(
             int ulx,
@@ -80,20 +82,26 @@ public:
 
     void show();
 
-    bool is_loaded(const std::string &key);
-
-    void keys(std::vector<std::string> &out);
-
-    void load(
-            const std::string &server,
-            const std::string &language
-    );
+    bool is_loaded(
+            const BAAS* baas,
+            const std::string &group,
+            const std::string &name
+    ) const;
 
     bool is_loaded(
             const std::string &server,
             const std::string &language,
             const std::string &group,
             const std::string &name
+    ) const;
+
+    bool is_loaded(const std::string &key) const;
+
+    void keys(std::vector<std::string> &out);
+
+    void load(
+            const std::string &server,
+            const std::string &language
     );
 
     int load_from_json(
@@ -107,7 +115,19 @@ public:
             const std::string &language,
             const std::string &group,
             const std::string &name
-    );
+    )
+    {
+        return server + "." + language + "." + group + "." + name;
+    }
+
+    inline static std::string resource_pointer(
+            const BAAS* baas,
+            const std::string &group,
+            const std::string &name
+    )
+    {
+        return baas->get_image_resource_prefix() + group + "." + name;
+    }
 
     static void resource_path(
             const std::string &server,

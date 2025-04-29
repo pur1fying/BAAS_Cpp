@@ -23,7 +23,7 @@ public:
     void display_data() override;
 
 private:
-    void init_static_value();
+    void _init_static_value();
 
     // static value
     cv::Vec3b  cost_pixel_min_rgb, cost_pixel_max_rgb;

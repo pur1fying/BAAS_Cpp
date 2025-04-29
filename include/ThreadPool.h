@@ -33,7 +33,7 @@ private:
           if (m_pool->m_queue.empty()) {
             m_pool->m_conditional_lock.wait(lock);
           }
-          dequeued = m_pool->m_queue.dequeue(func);
+          dequeued = m_pool->m_queue.pop(func);
         }
         if (dequeued) {
           func();
@@ -95,7 +95,7 @@ public:
     };
 
     // Enqueue generic wrapper function
-    m_queue.enqueue(wrapper_func);
+      m_queue.push(wrapper_func);
 
     // Wake up one thread if its waiting
     m_conditional_lock.notify_one();

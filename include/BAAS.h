@@ -62,27 +62,27 @@ public:
         return flag_run;
     }
 
-    inline BAASConnection *get_connection()
+    inline BAASConnection *get_connection() const
     {
         return connection;
     }
 
-    inline BAASUserConfig *get_config()
+    inline BAASUserConfig *get_config() const
     {
         return config;
     }
 
-    inline BAASLogger *get_logger()
+    inline BAASLogger *get_logger() const
     {
         return logger;
     }
 
-    inline BAASScreenshot *get_screenshot()
+    inline BAASScreenshot *get_screenshot() const
     {
         return screenshot;
     }
 
-    inline BAASControl *get_control()
+    inline BAASControl *get_control() const
     {
         return control;
     }

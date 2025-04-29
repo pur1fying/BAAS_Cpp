@@ -13,6 +13,8 @@ std::filesystem::path BAAS_PROJECT_DIR;
 
 std::filesystem::path BAAS_CONFIG_DIR;
 
+std::filesystem::path BAAS_RESOURCE_DIR;
+
 std::filesystem::path BAAS_IMAGE_RESOURCE_DIR;
 
 std::filesystem::path BAAS_FEATURE_DIR;
@@ -54,17 +56,19 @@ void init_path() {
     BAAS_PROJECT_DIR = std::filesystem::current_path();
     BAAS_OUTPUT_DIR = BAAS_PROJECT_DIR / "output";
     BAAS_CONFIG_DIR = BAAS_PROJECT_DIR / "config";
-    BAAS_IMAGE_RESOURCE_DIR = BAAS_PROJECT_DIR / "resource" / "image";
+    BAAS_RESOURCE_DIR = BAAS_PROJECT_DIR / "resource";
 
-    BAAS_FEATURE_DIR = BAAS_PROJECT_DIR / "resource" / "feature";
-    BAAS_PROCEDURE_DIR = BAAS_PROJECT_DIR / "resource" / "procedure";
-    BAAS_OCR_MODEL_DIR = BAAS_PROJECT_DIR / "resource" / "ocr_models";
+    BAAS_IMAGE_RESOURCE_DIR = BAAS_RESOURCE_DIR / "image";
+
+    BAAS_FEATURE_DIR = BAAS_RESOURCE_DIR / "feature";
+    BAAS_PROCEDURE_DIR = BAAS_RESOURCE_DIR / "procedure";
+    BAAS_OCR_MODEL_DIR = BAAS_RESOURCE_DIR / "ocr_models";
     DEVELOPER_PROJECT_DIR = BAAS_PROJECT_DIR.parent_path().parent_path().string();
     scrcpyJarName = "scrcpy-server.jar";
-    scrcpyJarPath = BAAS_PROJECT_DIR / "resource" / "bin" / "scrcpy" / scrcpyJarName;
+    scrcpyJarPath = BAAS_RESOURCE_DIR / "bin" / "scrcpy" / scrcpyJarName;
     scrcpyJar_REMOTE_DIR = "/data/local/tmp" / scrcpyJarName;
 
-    ASCREENCAP_BIN_DIR = BAAS_PROJECT_DIR / "resource" / "bin" / "ascreencap";
+    ASCREENCAP_BIN_DIR = BAAS_RESOURCE_DIR / "bin" / "ascreencap";
     ASCREENCAP_REMOTE_DIR = "/data/local/tmp/ascreencap";
 }
 

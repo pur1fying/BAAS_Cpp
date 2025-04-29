@@ -11,24 +11,21 @@ CostUpdater::CostUpdater(
         screenshot_data *data
 ) : BaseDataUpdater(baas, data)
 {
-    init_static_value();
+    _init_static_value();
 }
 
 void CostUpdater::update()
 {
-    if (!at_fight_page()) {
-        data->cost = std::nullopt;
-        return;
-    }
-
     current_cost = 0;
     baas->get_latest_screenshot(screenshot);
+    logger->BAASInfo("Shot shape : " + std::to_string(screenshot.cols) + " " + std::to_string(screenshot.rows) + " " +
+                     std::to_string(screenshot.channels()));
     for(int i = cost_recognize_region.lr.x; i >= cost_recognize_region.ul.x; --i){
         for(int j = cost_recognize_region.ul.y; j <= cost_recognize_region.lr.y; ++j){
             if(BAASImageUtil::judge_rgb_range(screenshot, {i, j}, cost_pixel_min_rgb, cost_pixel_max_rgb)){
                 int x = i - (cost_recognize_region.ul.x + (cost_recognize_region.lr.y - j) / 5);
                 int integer = int(double(x) * 1.0 / cost_increase_1_dealt_x);
-                double decimal = double((x - integer * 32 )) * 1.0 / 28;
+                double decimal = double((x - integer * 32)) * 1.0 / 28;
                 if(decimal < 0) decimal = 0;
                 current_cost = integer + decimal;
                 current_cost = current_cost > 10.0 ? 10.0 : current_cost;
@@ -49,7 +46,7 @@ constexpr std::string CostUpdater::data_name()
     return "Cost";
 }
 
-void CostUpdater::init_static_value()
+void CostUpdater::_init_static_value()
 {
     cost_increase_1_dealt_x = static_config->getDouble("/BAAS/auto_fight/cost/increase_1_dealt_x");
     cost_pixel_min_rgb = static_config->getVec3b("/BAAS/auto_fight/cost/target_pixel_rgb/min");

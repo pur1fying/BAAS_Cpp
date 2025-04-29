@@ -8,10 +8,9 @@
 #define BEGIN_AUTO_FIGHT_DATA_UPDATE
 #define END_AUTO_FIGHT_DATA_UPDATE
 
+#include <ThreadPool.h>
+#include <BAAS.h>
 
-#include "ThreadPool.h"
-
-#include "BAAS.h"
 #include "screenshot_data/screenshot_data_recoder.h"
 #include "screenshot_data/BaseDataUpdater.h"
 
@@ -21,11 +20,25 @@ class AutoFight{
 public:
     explicit AutoFight(BAAS* baas);
 
+    void init_workflow(const std::filesystem::path& p="");
+
     ~AutoFight();
 
     void update_data();
 
     void display_data();
+
+    void init_data_updaters();
+
+    void set_slot_possible_skill_idx(
+            int slot_idx,
+            const std::vector<int>& possible_skill_idx
+    );
+
+    void set_skill_slot_possible_templates(
+            int skill_idx,
+            const std::vector<int>& possible_templates
+    );
 
     inline void reset_data() {
         latest_screenshot_d.reset_all();
@@ -46,7 +59,12 @@ public:
         latest_screenshot_d.boss_health_update_flag = flag;
     }
 
+    const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
+
+    const static std::string template_j_ptr_prefix;
 private:
+
+    void _init_single_skill_template(std::string &skill_name);
 
     std::atomic<bool> flag_run;
 
@@ -66,8 +84,6 @@ BEGIN_AUTO_FIGHT_DATA_UPDATE
 
     std::condition_variable d_update_thread_finish_notifier;
 
-    void init_data_updater();
-
     static void submit_data_updater_task(AutoFight* self);
 
     inline void notify_d_update_thread_end() {
@@ -81,14 +97,17 @@ BEGIN_AUTO_FIGHT_DATA_UPDATE
 
     std::vector<uint8_t> d_wait_to_update_idx;
 
-    std::queue<uint8_t> d_updater_queue;
+    SafeQueue<uint8_t> d_updater_queue;
 
     std::map<std::string, uint64_t> d_updater_map;
 
     uint64_t d_updater_mask = 0;
 
     screenshot_data latest_screenshot_d;
+
 END_AUTO_FIGHT_DATA_UPDATE
+
+    std::filesystem::path workflow_path;
 
     std::string workflow_name;
 

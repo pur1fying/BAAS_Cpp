@@ -186,50 +186,6 @@ void BAASImageUtil::imagePaste(
     dst.copyTo(src(Rect(point.x, point.y, dst.cols, dst.rows)));
 }
 
-BAASPoint BAASImageUtil::imageSearch(
-        const Mat &screenshot,
-        const Mat &templateImage,
-        BAASRectangle region,
-        double threshold,
-        bool toGrey
-)
-{
-    Mat inputCopy = screenshot, templateCopy = templateImage;
-    if (toGrey || region.ul
-                        .x != -1) {
-        inputCopy = screenshot.clone();
-    }
-    if (region.ul
-              .x != -1) {
-        inputCopy = crop(inputCopy, region);
-    }
-    if (toGrey) {
-        templateCopy = templateImage.clone();
-        cvtColor(inputCopy, inputCopy, COLOR_BGR2GRAY);
-        cvtColor(templateCopy, templateCopy, COLOR_BGR2GRAY);
-        // don't use src directly to avoid changing the original image
-    }
-
-    int result_cols = inputCopy.cols - templateCopy.cols + 1;
-    int result_rows = inputCopy.rows - templateCopy.rows + 1;
-    Mat result(result_rows, result_cols, CV_32FC1);
-    matchTemplate(inputCopy, templateCopy, result, TM_CCOEFF_NORMED);
-    double minVal, maxVal;
-    Point minLoc, maxLoc;
-    minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc);
-    if (maxVal < threshold) {
-        return {-1, -1};
-    }
-    if (region.ul
-              .x != -1) {
-        maxLoc.x += region.ul
-                          .x;
-        maxLoc.y += region.ul
-                          .y;
-    }
-    return {maxLoc.x + templateImage.cols / 2, maxLoc.y + templateImage.rows / 2};
-}
-
 int BAASImageUtil::pointDistance(
         const BAASPoint &p1,
         const BAASPoint &p2
@@ -318,21 +274,22 @@ bool BAASImageUtil::judge_rgb_range(
     return judge_rgb_range(target, temp, min_, max_, checkAround, aroundRange);
 }
 
-Vec3b BAASImageUtil::getRegionMeanRGB(
+Vec3b BAASImageUtil::get_region_mean_rgb(
         const Mat &target,
         const BAASRectangle &region
 )
 {
-    return getRegionMeanRGB(
+    return get_region_mean_rgb(
             target,
-            Rect(region.ul.x,
-                 region.ul.y,
-                 region.lr.x - region.ul.x,
-                 region.lr.y - region.ul.y
+            Rect(
+                    region.ul.x,
+                    region.ul.y,
+                    region.lr.x - region.ul.x,
+                    region.lr.y - region.ul.y
             ));
 }
 
-Vec3b BAASImageUtil::getRegionMeanRGB(
+Vec3b BAASImageUtil::get_region_mean_rgb(
         const Mat &target,
         const Rect &region
 )
@@ -372,12 +329,6 @@ void BAASImageUtil::filter_region_rgb(
 {
     src = crop(src, region);
     filter_rgb(src, min_scalar, max_scalar);
-}
-
-cv::Vec3b BAASImageUtil::getRegionMeanRGB(const Mat &target)
-{
-    Scalar m = mean(target);
-    return Vec3b{(unsigned char) m[2], (unsigned char) m[1], (unsigned char) m[0]};
 }
 
 cv::Vec3b BAASImageUtil::calc_abs_diff(

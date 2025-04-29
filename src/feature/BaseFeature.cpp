@@ -19,16 +19,6 @@ BaseFeature::BaseFeature(BAASConfig *config)
     this->config = config;
 }
 
-bool BaseFeature::has_and_feature()
-{
-    return and_feature_ptr.empty();
-}
-
-bool BaseFeature::has_or_feature()
-{
-    return or_feature_ptr.empty();
-}
-
 bool BaseFeature::appear(
         const BAAS *baas,
         BAASConfig &output

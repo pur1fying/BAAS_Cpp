@@ -109,17 +109,17 @@ bool MatchTemplateFeature::appear(
     }
 
     if (check_mean_rgb) {
-        Vec3b cropped_diff = BAASImageUtil::getRegionMeanRGB(temp, template_image.region);
-        Vec3b template_diff = BAASImageUtil::getRegionMeanRGB(template_image.image);
+        Vec3b cropped_diff = BAASImageUtil::get_region_mean_rgb(temp, template_image.region);
         log.push_back(
                 "Screenshot Mean RGB  : [\t" + to_string(cropped_diff[0]) + " ,\t" + to_string(cropped_diff[1]) +
                 " ,\t" + to_string(cropped_diff[2]) + " ]"
         );
         log.push_back(
-                "Template   Mean RGB  : [\t" + to_string(template_diff[0]) + " ,\t" + to_string(template_diff[1]) +
-                " ,\t" + to_string(template_diff[2]) + " ]"
+                "Template   Mean RGB  : [\t" + to_string(template_image.mean_rgb[0]) + ""
+                                      " ,\t" + to_string(template_image.mean_rgb[1]) +
+                                      " ,\t" + to_string(template_image.mean_rgb[2]) + " ]"
         );
-        Vec3b diff = BAASImageUtil::calc_abs_diff(cropped_diff, template_diff);
+        Vec3b diff = BAASImageUtil::calc_abs_diff(cropped_diff, template_image.mean_rgb);
         if (diff[0] > mean_rgb_diff[0] || diff[1] > mean_rgb_diff[1] || diff[2] > mean_rgb_diff[2]) {
             log.emplace_back("RGB diff too large, Quit.");
             output.insert("log", log);

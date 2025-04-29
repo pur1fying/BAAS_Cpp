@@ -15,6 +15,8 @@
         "ocr_region": [549, 47, 775, 64]
       },
       "Skill": {
+        "threshold": 0.8,
+        "rgb_diff": 10,
         "slot": {
           "center": [
             [883,  621],
@@ -22,7 +24,7 @@
             [1087, 621]
           ],
           "match_template_regions": [
-            [839, 594, 982, 670],
+            [839, 594, 936, 670],
             [940, 594, 1032, 670],
             [1041, 594, 1133, 670]
           ],
@@ -34,8 +36,8 @@
         },
         "templates": {
           "Ui": {
-            "active": ["active"],
-            "inactive": ["l_inactive", "r_inactive"]
+            "active": ["skill_active"],
+            "inactive": ["skill_l_inactive", "skill_r_inactive"]
           }
         }
       }

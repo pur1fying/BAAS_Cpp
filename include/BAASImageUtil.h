@@ -7,6 +7,8 @@
 #include <filesystem>
 
 #include <opencv2/opencv.hpp>
+#include <nlohmann/json.hpp>
+#include <nlohmann/detail/string_concat.hpp>
 
 #include "BAASLogger.h"
 #include "BAASExceptions.h"
@@ -25,6 +27,32 @@ struct BAASPoint {
             int xx,
             int yy
     );
+
+    friend void to_json(
+            nlohmann::json &j,
+            const BAASPoint &point
+    )
+    {
+        j = nlohmann::json::array({point.x, point.y});
+    }
+
+    friend void from_json(
+            const nlohmann::json &j,
+            BAASPoint &point
+    )
+    {
+        if (!j.is_array()) {
+            throw nlohmann::json::type_error::create(302,
+                                    nlohmann::detail::concat("type must be array, but is ", j.type_name()), &j);
+        }
+        if (j.size() != 2) {
+            throw nlohmann::json::out_of_range::create(401,
+                                    nlohmann::detail::concat("Invalid json size for BAASPoint : [ ",
+                                    std::to_string(j.size()), " ] , expected : [ 2 ]."), &j);
+        }
+        point.x = j[0].get<int>();
+        point.y = j[1].get<int>();
+    }
 
     [[nodiscard]] std::string to_string() const {
         std::ostringstream oss;
@@ -240,6 +268,39 @@ struct BAASRectangle {
 
     BAASPoint lr;               // lower right
 
+    friend void to_json(
+            nlohmann::json &j,
+            const BAASRectangle &rect
+    )
+    {
+        j = nlohmann::json::array({
+                rect.ul.x,
+                rect.ul.y,
+                rect.lr.x,
+                rect.lr.y
+        });
+    }
+
+    friend void from_json(
+            const nlohmann::json &j,
+            BAASRectangle &rect
+    )
+    {
+        if (!j.is_array()) {
+            throw nlohmann::json::type_error::create(302,
+                                    nlohmann::detail::concat("type must be array, but is ", j.type_name()), &j);
+        }
+        if (j.size() != 4) {
+            throw nlohmann::json::out_of_range::create(401,
+                                    nlohmann::detail::concat("Invalid json size for BAASRectangle : [ ",
+                                    std::to_string(j.size()), " ] , expected : [ 4 ]."), &j);
+        }
+        rect.ul.x = j[0].get<int>();
+        rect.ul.y = j[1].get<int>();
+        rect.lr.x = j[2].get<int>();
+        rect.lr.y = j[3].get<int>();
+    }
+
     BAASRectangle();
 
     BAASRectangle(
@@ -436,14 +497,6 @@ public:
             std::string &str
     );
 
-    static BAASPoint imageSearch(
-            const cv::Mat &screenshot,
-            const cv::Mat &templateImage,
-            BAASRectangle region = {-1, -1, -1, -1},
-            double threshold = 0.7,
-            bool toGrey = false
-    );
-
     static int pointDistance(
             const BAASPoint &p1,
             const BAASPoint &p2
@@ -495,12 +548,12 @@ public:
             int aroundRange = 1
     );
 
-    static cv::Vec3b getRegionMeanRGB(
+    static cv::Vec3b get_region_mean_rgb(
             const cv::Mat &target,
             const BAASRectangle &region
     );
 
-    static cv::Vec3b getRegionMeanRGB(
+    static cv::Vec3b get_region_mean_rgb(
             const cv::Mat &target,
             const cv::Rect &region
     );
@@ -522,7 +575,10 @@ public:
             const cv::Vec3b &b
     );
 
-    static cv::Vec3b getRegionMeanRGB(const cv::Mat &target);
+    inline static cv::Vec3b get_mean_rgb(const cv::Mat &target) {
+        cv::Scalar m = mean(target);
+        return cv::Vec3b{(unsigned char) m[2], (unsigned char) m[1], (unsigned char) m[0]};
+    }
 
     static bool isLargerRGB(
             const cv::Vec3b &a,

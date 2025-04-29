@@ -14,14 +14,9 @@ BAASNemu *BAASNemu::get_instance(BAASConnection *connection)
     string mm_path = connection->emulator_folder_path();
     int id = BAASUtil::MuMu_serial2instance_id(connection->get_serial());
     for (auto &conn: connections)
-        if (conn.second
-                ->mumu_install_path == mm_path && conn.second
-                                                      ->instance_id == id) {
-            connection->get_logger()
-                      ->BAASInfo(
-                              "Nemu path [ " + conn.second
-                                                   ->mumu_install_path + " ], instance : " + to_string(id) +
-                              " already exist, use it."
+        if (conn.second->mumu_install_path == mm_path && conn.second->instance_id == id) {
+            connection->get_logger()->BAASInfo("Nemu path [ " + conn.second->mumu_install_path + " ], "
+                                                "instance : " + to_string(id) + " already exist, use it."
                       );
             return conn.second;
         }

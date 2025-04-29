@@ -3,7 +3,7 @@
 #include "module/auto_fight/auto_fight.h"
 #include "ocr/BAASOCR.h"
 #include "feature/BAASFeature.h"
-
+#include "queue"
 #include "BAASDevelopUtils.h"
 
 #pragma comment(lib, "ws2_32.lib")
@@ -19,46 +19,57 @@ int main(int argc, char **argv) {
     cv::Mat img;
     try{
         init_globals();
-
-
-        std::vector<std::string> names = {
-                "Ui",
-                "Nagisa",
-                "Himari"
-        };
-        std::vector<BAASRectangle> regions = {
-                SKILL1_LEFT,
-                SKILL2_LEFT,
-                SKILL3_LEFT
-        };
-        std::vector<int> type = {
-                SKILL_LEFT,
-                SKILL_LEFT,
-                SKILL_LEFT
-        };
+        BAAS baas(config_name);
         BAASFeature::show();
         baas::BAAS::check_config(config_name);
-        BAAS baas(config_name);
-        for (int i = 0; i < names.size(); ++i) {
-            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
-        }
 
-        return 0;
+//        std::vector<std::string> names = {
+//                "Ui",
+//                "Nagisa",
+//                "Himari"
+//        };
+//        std::vector<BAASRectangle> regions = {
+//                SKILL1_LEFT,
+//                SKILL2_LEFT,
+//                SKILL3_LEFT
+//        };
+//        std::vector<int> type = {
+//                SKILL_LEFT,
+//                SKILL_LEFT,
+//                SKILL_LEFT
+//        };
+//
+//        for (int i = 0; i < names.size(); ++i) {
+//            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
+//        }
+//        return 0;
         std::vector<std::string> languages = {"en-us", "zh-cn"};
         baas_ocr->init(languages);
         AutoFight fight(&baas);
-        fight.set_data_updater_mask(0b11);
+        fight.init_workflow();
+        fight.init_data_updaters();
+        fight.set_data_updater_mask(0b111);
 
+//        fight.set_skill_slot_possible_templates(0, {5, 4, 3, 2, 1, 0});
+//        fight.set_skill_slot_possible_templates(1, {5, 4, 3, 2, 0, 1});
+//        fight.set_skill_slot_possible_templates(2, {5, 4, 3, 1, 0, 2});
+        fight.set_skill_slot_possible_templates(0, {0, 1, 2});
+        fight.set_skill_slot_possible_templates(1, {0, 1, 2});
+        fight.set_skill_slot_possible_templates(2, {0, 1 ,2});
         auto start = BAASUtil::getCurrentTimeMS();
         int frame_count = 0;
-        fight.set_boss_health_update_flag(0b111);
-        while (1) {
-            fight.reset_data();
-            baas.update_screenshot_array();
-            baas.reset_all_feature();
-            baas.feature_appear("fight_pause-button_appear");
 
-//            fight.update_screenshot();
+        fight.set_boss_health_update_flag(0b100);
+        while (1) {
+//            baas.update_screenshot_array();
+
+            baas.reset_all_feature();
+            fight.update_screenshot();
+//            if (!baas.feature_appear("fight_pause-button_appear")) {
+//                continue;
+//            }
+
+            fight.reset_data();
             fight.update_data();
             fight.display_data();
             frame_count++;

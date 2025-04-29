@@ -9,6 +9,8 @@
 #include <vector>
 #include <opencv2/opencv.hpp>
 
+#include <config/BAASConfig.h>
+
 #include "core_defines.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -25,12 +27,18 @@ struct slot_skill{
     }
 };
 
+struct template_info {
+    cv::Mat template_image;
+    cv::Vec3b mean_rgb;
+    // time cost in each slot
+    std::vector<double> estimated_match_template_time_cost;
+};
+
 struct skill_template {
     std::string name;    // skill name
 
-    std::vector<cv::Mat> skill_active_templates;
-    std::vector<cv::Mat> skill_inactive_templates;
-
+    std::vector<template_info> skill_active_templates;
+    std::vector<template_info> skill_inactive_templates;
 };
 
 struct screenshot_data {
@@ -46,7 +54,6 @@ struct screenshot_data {
      * 0b100: update both
      */
 
-
     // phase 1, 2, 3
     std::optional<uint8_t>   acceleration_state;
     // auto on / off
@@ -60,13 +67,16 @@ struct screenshot_data {
     std::vector<std::vector<int>> each_slot_possible_templates; 
     std::vector<skill_template> all_possible_skills;
     uint32_t skill_cost_update_flag = 0b000000; // max skill is 6
-
+    std::map<std::string, int> skill_name_to_index_map;
+    int slot_count;
 
     // fight auto over time
     std::optional<double>    fight_left_time;
 
     // room close time
     std::optional<int>       room_left_time;
+
+    BAASConfig d_fight;
 
     void reset_all() noexcept {
         cost.reset();

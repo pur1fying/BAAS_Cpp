@@ -41,9 +41,13 @@ public:
 
     std::vector<BaseFeature *> get_or_feature_ptr();
 
-    bool has_and_feature();
+    inline bool has_and_feature() {
+        return !and_feature_ptr.empty();
+    }
 
-    bool has_or_feature();
+    inline bool has_or_feature() {
+        return !or_feature_ptr.empty();
+    }
 
     virtual void show();
 

@@ -116,7 +116,7 @@ void BAASImageResource::show()
         BAASGlobalLogger->BAASInfo("Image [ " +  i.first + " ]\n" +i.second.gen_info());
 }
 
-bool BAASImageResource::is_loaded(const string &key)
+bool BAASImageResource::is_loaded(const string &key) const
 {
     auto it = images.find(key);
     if (it == images.end()) return false;
@@ -171,7 +171,7 @@ bool BAASImageResource::is_loaded(
         const string &language,
         const string &group,
         const string &name
-)
+) const
 {
     return is_loaded(get_resource_pointer(server, language, group, name));
 }
@@ -190,7 +190,7 @@ int BAASImageResource::load_from_json(
     json j = info.get(json_ptr, json());
     std::filesystem::path group_path;
     std::filesystem::path image_path;
-    resource_path(server, language, group, group_path);
+    resource_path(server, language, path, group_path);
     for (auto &it: j.items()) {
         const string &name = it.key();
         vector<int> region = info.get(json_ptr + "/" + name + "/region", vector<int>{-1, -1, -1, -1});
@@ -205,6 +205,7 @@ int BAASImageResource::load_from_json(
             continue;
         }
         if (!check_shape(image, server, language, group, name)) continue;
+        image.mean_rgb = BAASImageUtil::get_mean_rgb(image.image);
         successfully_loaded_cnt++;
         set(server, language, group, name, image);
     }
@@ -221,15 +222,6 @@ void BAASImageResource::resource_path(
     out = BAAS_IMAGE_RESOURCE_DIR / server / language / suffix;
 }
 
-std::string BAASImageResource::resource_pointer(
-        const string &server,
-        const string &language,
-        const string &group,
-        const string &name
-)
-{
-    return server + "." + language + "." + group + "." + name;
-}
 
 inline bool BAASImageResource::check_shape(
         const BAASImage &image,
@@ -257,5 +249,17 @@ BAASImageResource::BAASImageResource()
 {
     images.clear();
 }
+
+bool BAASImageResource::is_loaded(
+        const BAAS *baas,
+        const string &group,
+        const string &name
+) const
+{
+    return is_loaded(baas->get_image_resource_prefix() + group + "." + name);
+}
+
+
+
 
 BAAS_NAMESPACE_END

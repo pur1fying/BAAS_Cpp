@@ -14,10 +14,14 @@
 
 BAAS_NAMESPACE_BEGIN
 
+std::filesystem::path BAAS_AUTO_FIGHT_WORKFLOW_DIR;
+
 void init_globals()
 {
     BAASUtil::initWinsock();
     init_path();
+
+    BAAS_AUTO_FIGHT_WORKFLOW_DIR = BAAS_RESOURCE_DIR / "auto_fight_workflow";
 
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
     log_git_info();

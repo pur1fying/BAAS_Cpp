@@ -64,7 +64,6 @@ private:
     std::string message;
 };
 
-
 class RuntimeError : public std::exception {
 public:
     explicit RuntimeError(const std::string &msg)
