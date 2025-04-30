@@ -10,26 +10,25 @@ using namespace cv;
 BAAS_NAMESPACE_BEGIN
 
 void BAASDevelopUtils::shotStudentSkill(
+        BAAS* baas,
         const string &name,
         const BAASRectangle &r,
         const int type
 )
 {
-    string MuMuPlayerPath = "H:\\MuMuPlayer-12.0";
-    auto *nemu = new BAASNemu(MuMuPlayerPath);
-    std::filesystem::path temp = BAAS_PROJECT_DIR / "resource" / "image" / "CN";
+    std::filesystem::path temp = "C:\\Users\\pc\\Desktop\\work\\c\\BAAS_Cpp\\apps\\BAAS\\resource\\image\\CN\\zh-cn\\skill";
     if (type == SKILL_FULL) {
-        temp = temp / "skill_icon_bright";
+        temp = temp / "active";
     } else if (type == SKILL_LEFT) {
-        temp = temp / "skill_icon_left_black";
+        temp = temp / "l_inactive";
     } else if (type == SKILL_RIGHT) {
-        temp = temp / "skill_icon_right_grey";
+        temp = temp / "r_inactive";
     }
     Mat image;
-    nemu->screenshot(image);
+    baas->update_screenshot_array();
+    baas->get_latest_screenshot(image);
     Mat im = BAASImageUtil::crop(image, r);
     BAASImageUtil::save(im, name, temp.string(), true);
-    delete nemu;
 }
 
 void BAASDevelopUtils::extract_image_rgb_range(

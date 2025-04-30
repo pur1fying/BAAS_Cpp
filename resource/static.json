@@ -16,7 +16,7 @@
       },
       "Skill": {
         "threshold": 0.8,
-        "rgb_diff": 10,
+        "rgb_diff": 20,
         "slot": {
           "center": [
             [883,  621],

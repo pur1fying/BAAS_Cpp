@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
         AutoFight fight(&baas);
         fight.init_workflow();
         fight.init_data_updaters();
-        fight.set_data_updater_mask(0b111);
+        fight.set_data_updater_mask(0b110);
 
 //        fight.set_skill_slot_possible_templates(0, {5, 4, 3, 2, 1, 0});
 //        fight.set_skill_slot_possible_templates(1, {5, 4, 3, 2, 0, 1});

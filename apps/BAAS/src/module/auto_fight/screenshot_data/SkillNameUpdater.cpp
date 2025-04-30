@@ -92,16 +92,16 @@ constexpr std::string SkillNameUpdater::data_name()
 
 void SkillNameUpdater::display_data()
 {
-    for (int i = 0; i < data->skills.size(); ++i) {
-        if (!data->skills[i].index.has_value()) {
-            logger->BAASInfo("Slot [ " + std::to_string(i + 1) + " ] : No Value.");
+    logger->sub_title("Slot State");
+    for (auto & skill : data->skills) {
+        if (!skill.index.has_value()) {
+            logger->BAASInfo("[ No Value ]");
             continue;
         }
-        logger->BAASInfo("Slot [ " + std::to_string(i + 1) + " ]");
-        if (data->skills[i].is_active.value())
-            logger->BAASInfo(data->all_possible_skills[data->skills[i].index.value()].name + " [ Active ]");
+        if (skill.is_active.value())
+            logger->BAASInfo("[  Active  ] " + data->all_possible_skills[skill.index.value()].name);
         else
-            logger->BAASInfo(data->all_possible_skills[data->skills[i].index.value()].name + " [ Inactive ]");
+            logger->BAASInfo("[ InActive ] " + data->all_possible_skills[skill.index.value()].name);
     }
 }
 

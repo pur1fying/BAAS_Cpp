@@ -206,6 +206,10 @@ int BAASImageResource::load_from_json(
         }
         if (!check_shape(image, server, language, group, name)) continue;
         image.mean_rgb = BAASImageUtil::get_mean_rgb(image.image);
+        BAASGlobalLogger->BAASInfo(
+                "Image [ " + group + "." + name + " ] loaded, " + "mean_rgb : [ " + std::to_string(image.mean_rgb[0]) + " , " +
+                std::to_string(image.mean_rgb[1]) + " , " + std::to_string(image.mean_rgb[2]) + " ]"
+        );
         successfully_loaded_cnt++;
         set(server, language, group, name, image);
     }

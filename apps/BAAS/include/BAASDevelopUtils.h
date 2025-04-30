@@ -30,6 +30,7 @@ enum {
 class BAASDevelopUtils {
 public:
     static void shotStudentSkill(
+            BAAS* baas,
             const std::string &name = "student",
             const BAASRectangle &r = SKILL1_FULL,
             const int type = SKILL_FULL
