@@ -84,7 +84,7 @@ BEGIN_AUTO_FIGHT_DATA_UPDATE
 
     std::condition_variable d_update_thread_finish_notifier;
 
-    static void submit_data_updater_task(AutoFight* self);
+    static void submit_data_updater_task(AutoFight* self, unsigned char idx);
 
     inline void notify_d_update_thread_end() {
         std::lock_guard<std::mutex> lock(d_update_thread_mutex);
@@ -97,7 +97,7 @@ BEGIN_AUTO_FIGHT_DATA_UPDATE
 
     std::vector<uint8_t> d_wait_to_update_idx;
 
-    SafeQueue<uint8_t> d_updater_queue;
+    std::queue<uint8_t> d_updater_queue;
 
     std::map<std::string, uint64_t> d_updater_map;
 

@@ -88,9 +88,11 @@ void AutoFight::update_data()
             });
             // condition judgement
         }
-        
-        d_update_thread_pool->submit([this]() {
-            submit_data_updater_task(this);
+
+        unsigned char idx = d_updater_queue.front();
+        d_updater_queue.pop();
+        d_update_thread_pool->submit([this, idx]() {
+            submit_data_updater_task(this, idx);
         });
     }
 
@@ -98,22 +100,23 @@ void AutoFight::update_data()
     int start_running_t, initial_t_count = d_updater_running_thread_count;
     for (int i = 1; i <= initial_t_count; ++i) {
         std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
+        if (d_updater_running_thread_count == 0) break;
         start_running_t = d_updater_running_thread_count;
-        if (start_running_t == 0) break;
+        logger->BAASInfo("Start Running Threads : " + std::to_string(start_running_t));
         d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
             return d_updater_running_thread_count < start_running_t;
         });
         // condition judgement
+        logger->BAASInfo("Running Threads : " + std::to_string(d_updater_running_thread_count));
     }
+
+    logger->BAASInfo("End Running Threads : " + std::to_string(d_updater_running_thread_count));
     assert(d_updater_running_thread_count == 0);
 }
 
-void AutoFight::submit_data_updater_task(AutoFight *self)
+void AutoFight::submit_data_updater_task(AutoFight *self, unsigned char idx)
 {
     auto start_t = BAASUtil::getCurrentTimeMS();
-
-    auto idx = self->d_updater_queue.front();
-    self->d_updater_queue.pop();
     try {
         self->d_updaters[idx]->update();
     }
@@ -124,8 +127,8 @@ void AutoFight::submit_data_updater_task(AutoFight *self)
     self->notify_d_update_thread_end();
 
     auto end_t = BAASUtil::getCurrentTimeMS();
-    self->logger->BAASInfo("[ " + self->d_updaters[idx]->data_name() + " ] update | Time: " +
-                                                                    std::to_string(end_t - start_t) + "ms");
+    self->logger->BAASInfo("[ " + self->d_updaters[idx]->data_name() + " ] "
+                            "update | Time: " + std::to_string(end_t - start_t) + "ms");
 }
 
 void AutoFight::display_data()
