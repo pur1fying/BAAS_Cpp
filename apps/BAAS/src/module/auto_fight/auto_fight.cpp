@@ -96,19 +96,15 @@ void AutoFight::update_data()
 
     // all updater submitted
     int start_running_t, initial_t_count = d_updater_running_thread_count;
-    logger->BAASInfo("Start Running Threads : " + std::to_string(d_updater_running_thread_count));
     for (int i = 1; i <= initial_t_count; ++i) {
-        start_running_t = d_updater_running_thread_count;
         std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
+        start_running_t = d_updater_running_thread_count;
+        if (start_running_t == 0) break;
         d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
             return d_updater_running_thread_count < start_running_t;
         });
         // condition judgement
-        logger->BAASInfo("Running Threads : " + std::to_string(d_updater_running_thread_count));
-        if (d_updater_running_thread_count == 0) break;
     }
-
-    logger->BAASInfo("End Running Threads : " + std::to_string(d_updater_running_thread_count));
     assert(d_updater_running_thread_count == 0);
 }
 

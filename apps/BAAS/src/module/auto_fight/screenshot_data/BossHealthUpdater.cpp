@@ -88,8 +88,8 @@ void BossHealthUpdater::_update_all()
             "zh-cn",
             cropped_image,
             ocr_result,
-            "",
-            nullptr,
+            "All",
+            logger,
             "0123456789/"
     );
     std::string text = ocr_result.text;
