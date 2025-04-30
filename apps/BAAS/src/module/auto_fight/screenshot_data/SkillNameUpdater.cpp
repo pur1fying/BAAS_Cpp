@@ -31,10 +31,10 @@ void SkillNameUpdater::update()
     appeared_skill_idx.clear();
     baas->get_latest_screenshot(origin_screenshot);
     for (int i = 0; i < data->each_slot_possible_templates.size(); i++) {
+        logger->BAASInfo("Detect Slot [ " + std::to_string(i + 1) + " ]");
         screenshot_crop_img = BAASImageUtil::crop(origin_screenshot, each_skill_match_template_region[i]);
         _find = false;
         for (auto& _tmp_idx : data->each_slot_possible_templates[i]) {
-            if (_find) break;
             if (appeared_skill_idx.contains(_tmp_idx)) continue;
 
             for (auto& _active_template : data->all_possible_skills[_tmp_idx].skill_active_templates) {
@@ -46,6 +46,7 @@ void SkillNameUpdater::update()
                     break;
                 }
             }
+            if (_find) break;
 
             for (auto& _inactive_template : data->all_possible_skills[_tmp_idx].skill_inactive_templates) {
                 if(_template_appear(_inactive_template)) {
@@ -56,6 +57,8 @@ void SkillNameUpdater::update()
                     break;
                 }
             }
+
+            if (_find) break;
         }
     }
 }
@@ -90,12 +93,12 @@ constexpr std::string SkillNameUpdater::data_name()
 void SkillNameUpdater::display_data()
 {
     for (int i = 0; i < data->skills.size(); ++i) {
-        logger->BAASInfo("Slot [ " + std::to_string(i + 1) + " ]");
         if (!data->skills[i].index.has_value()) {
-            logger->BAASInfo("No Value.");
+            logger->BAASInfo("Slot [ " + std::to_string(i + 1) + " ] : No Value.");
             continue;
         }
-        if (data->skills[i].is_active)
+        logger->BAASInfo("Slot [ " + std::to_string(i + 1) + " ]");
+        if (data->skills[i].is_active.value())
             logger->BAASInfo(data->all_possible_skills[data->skills[i].index.value()].name + " [ Active ]");
         else
             logger->BAASInfo(data->all_possible_skills[data->skills[i].index.value()].name + " [ Inactive ]");
@@ -143,15 +146,15 @@ bool SkillNameUpdater::_template_appear(const template_info& _tmp)
             &_minLoc,
             &_maxLoc
     );
-
+    logger->BAASInfo("Max Similarity : " + std::to_string(_maxVal));
     if (_maxVal < _threshold) return false;
 
     // check mean rgb
     matched_region_roi = cv::Rect(_maxLoc.x, _maxLoc.y, _tmp.template_image.cols, _tmp.template_image.rows);
     cv::Vec3b matched_region_mean_rgb = BAASImageUtil::get_region_mean_rgb(screenshot_crop_img, matched_region_roi);
-    if(matched_region_mean_rgb[0] - _tmp.mean_rgb[0] > _rgb_diff ||
-       matched_region_mean_rgb[1] - _tmp.mean_rgb[1] > _rgb_diff ||
-       matched_region_mean_rgb[2] - _tmp.mean_rgb[2] > _rgb_diff  )  return false;
+    if(abs(matched_region_mean_rgb[0] - _tmp.mean_rgb[0]) > _rgb_diff ||
+       abs(matched_region_mean_rgb[1] - _tmp.mean_rgb[1]) > _rgb_diff ||
+       abs(matched_region_mean_rgb[2] - _tmp.mean_rgb[2]) > _rgb_diff  )  return false;
 
 
     return true;

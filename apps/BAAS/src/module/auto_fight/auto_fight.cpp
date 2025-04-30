@@ -94,10 +94,9 @@ void AutoFight::update_data()
         });
     }
 
-    // wait for all threads to finish
-    int start_running_t, ini;
-    logger->BAASInfo("Running Threads : " + std::to_string(d_updater_running_thread_count));
-    int initial_t_count = d_updater_running_thread_count;
+    // all updater submitted
+    int start_running_t, initial_t_count = d_updater_running_thread_count;
+    logger->BAASInfo("Start Running Threads : " + std::to_string(d_updater_running_thread_count));
     for (int i = 1; i <= initial_t_count; ++i) {
         start_running_t = d_updater_running_thread_count;
         std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
@@ -205,9 +204,7 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
     BAASImage _img;
     for (const auto &group : temp) {
         res_ptr = BAASImageResource::resource_pointer(baas, group, skill_name);
-        if(resource->is_loaded(res_ptr)) {
-            resource->get(res_ptr, _img);
-        }
+        if(resource->is_loaded(res_ptr)) resource->get(res_ptr, _img);
         else {
             logger->BAASWarn("Image Resource [ " + res_ptr + " ] not find.");
             continue;
@@ -224,13 +221,13 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
 
     for (const auto &group : temp) {
         res_ptr = BAASImageResource::resource_pointer(baas, group, skill_name);
-        if(resource->is_loaded(res_ptr)) {
-            resource->get(res_ptr, _t_info.template_image);
-        }
+        if(resource->is_loaded(res_ptr)) resource->get(res_ptr, _img);
         else {
             logger->BAASWarn("Image Resource [ " + res_ptr + " ] not find.");
             continue;
         }
+        _t_info.template_image = _img.image;
+        _t_info.mean_rgb = _img.mean_rgb;
         _template.skill_inactive_templates.push_back(_t_info);
     }
 
