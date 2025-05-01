@@ -595,4 +595,14 @@ void BAASUtil::calc_swipe_params(
     }
 }
 
+bool BAASUtil::count_bit(int num)
+{
+    int count = 0;
+    while (num) {
+        num &= (num - 1);
+        count++;
+    }
+    return count;
+}
+
 BAAS_NAMESPACE_END

@@ -246,6 +246,8 @@ public:
         }
     }
 
+    static bool count_bit(int num);
+
     // from tinyObjLoader
     // See
     // http://stackoverflow.com/questions/6089231/getting-std-ifstream-to-handle-lf-cr-and-crlf

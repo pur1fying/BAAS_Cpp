@@ -25,6 +25,14 @@ public:
 
     void display_data() override;
 
+private:
+    std::string ocr_model_name, filtered_text;
+
+    cv::Mat origin_screenshot, cropped_image;
+
+    std::vector<BAASRectangle> skill_cost_ocr_region;
+
+    TextLine ocr_result;
 };
 
 

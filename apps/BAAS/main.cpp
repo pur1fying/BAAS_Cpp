@@ -43,12 +43,12 @@ int main(int argc, char **argv) {
 //            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
 //        }
 //        return 0;
-        std::vector<std::string> languages = {"en-us", "zh-cn"};
-        baas_ocr->init(languages);
+//        std::vector<std::string> languages = {"en-us", "zh-cn"};
+//        baas_ocr->init(languages);
         AutoFight fight(&baas);
         fight.init_workflow();
         fight.init_data_updaters();
-        fight.set_data_updater_mask(0b110);
+        fight.set_data_updater_mask(0b111111);
 
 //        fight.set_skill_slot_possible_templates(0, {5, 4, 3, 2, 1, 0});
 //        fight.set_skill_slot_possible_templates(1, {5, 4, 3, 2, 0, 1});
@@ -60,9 +60,12 @@ int main(int argc, char **argv) {
         int frame_count = 0;
 
         fight.set_boss_health_update_flag(0b100);
-        while (1) {
-//            baas.update_screenshot_array();
+        fight.set_skill_cost_update_flag(0b111);
+        cv::Mat img;
 
+        for (int i =1; i <= 10; ++i) {
+//            baas.update_screenshot_array();
+            auto st = BAASUtil::getCurrentTimeMS();
             baas.reset_all_feature();
             fight.update_screenshot();
 //            if (!baas.feature_appear("fight_pause-button_appear")) {
@@ -71,14 +74,20 @@ int main(int argc, char **argv) {
 
             fight.reset_data();
             fight.update_data();
+            auto end = BAASUtil::getCurrentTimeMS();
+            baas.get_logger()->BAASInfo("Shot And Update data time: " + std::to_string(end - st) + "ms");
             fight.display_data();
+
+            baas.get_latest_screenshot(img);
             frame_count++;
             if (BAASUtil::getCurrentTimeMS() - start > 1000) {
                 start = BAASUtil::getCurrentTimeMS();
                 baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
                 frame_count = 0;
             }
+            cv::imwrite("img.png", img);
         }
+        system("pause");
 
 
         return 0;
@@ -129,6 +138,8 @@ int main(int argc, char **argv) {
 //        }
             catch (const std::exception& e){
                 BAASGlobalLogger->BAASInfo(e.what());
+
+                system("pause");
             }
 
             return 0;

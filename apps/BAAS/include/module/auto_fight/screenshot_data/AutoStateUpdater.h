@@ -4,6 +4,7 @@
 
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_AUTOSTATEUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_AUTOSTATEUPDATER_H_
+#include <feature/BAASFeature.h>
 
 #include "BaseDataUpdater.h"
 
@@ -22,6 +23,15 @@ public:
 
     void display_data() override;
 
+private:
+
+    BAASConfig feature_appear_output;
+
+    double _time_cost;
+
+    std::vector<BaseFeature*> auto_feature_ptrs;
+
+    cv::Mat origin_screenshot;
 
 };
 

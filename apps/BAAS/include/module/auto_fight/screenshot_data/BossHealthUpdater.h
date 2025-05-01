@@ -29,6 +29,8 @@ private:
 
     void _update_max_health();
 
+    std::string ocr_model_name;
+
     BAASRectangle ocr_region, current_ocr_region, max_ocr_region;
 
     cv::Mat origin_screenshot, cropped_image;

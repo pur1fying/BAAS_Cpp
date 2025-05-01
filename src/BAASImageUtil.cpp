@@ -209,11 +209,11 @@ bool BAASImageUtil::judge_rgb_range(
 bool BAASImageUtil::judge_rgb_range(
         const Mat &target,
         const BAASPoint &position,
-        const Vec3b &min,
+        const Vec3b &min,   // rgb
         const Vec3b &max
 )
 {
-    Vec3b pixel = target.at<Vec3b>(position.y, position.x);
+    Vec3b pixel = target.at<Vec3b>(position.y, position.x);     // bgr
     if (pixel[0] >= min[2] && pixel[0] <= max[2] && pixel[1] >= min[1] && pixel[1] <= max[1] && pixel[2] >= min[0] &&
         pixel[2] <= max[0])
         return true;
@@ -269,9 +269,7 @@ bool BAASImageUtil::judge_rgb_range(
 )
 {
     BAASPoint temp = {int(x * ratio), int(y * ratio)};
-    Vec3b min_ = {b_min, g_min, r_min};
-    Vec3b max_ = {b_max, g_max, r_max};
-    return judge_rgb_range(target, temp, min_, max_, checkAround, aroundRange);
+    return judge_rgb_range(target, temp, {r_min, g_min, b_min}, {r_max, g_max, b_max}, checkAround, aroundRange);
 }
 
 Vec3b BAASImageUtil::get_region_mean_rgb(

@@ -96,6 +96,7 @@ int BAASFeature::load_from_json(const string &path)
         }
         if (f != nullptr) {
             f->set_path(path);
+            f->set_name(i.key());
             features[i.key()] = std::unique_ptr<BaseFeature>(f);
             loaded++;
         }
@@ -113,10 +114,10 @@ void BAASFeature::show()
 }
 
 
-BaseFeature *BAASFeature::get_feature(const string &name)
+BaseFeature *BAASFeature::get_feature_ptr(const std::string &feature_name)
 {
-    auto it = features.find(name);
-    if (it == features.end()) throw BAASFeatureError("Feature [ " + name + " ] not found");
+    auto it = features.find(feature_name);
+    if (it == features.end()) throw BAASFeatureError("Feature [ " + feature_name + " ] not found");
     return it->second.get();
 }
 

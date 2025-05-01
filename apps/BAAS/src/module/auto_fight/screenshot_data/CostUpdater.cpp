@@ -17,12 +17,10 @@ CostUpdater::CostUpdater(
 void CostUpdater::update()
 {
     current_cost = 0;
-    baas->get_latest_screenshot(screenshot);
-    logger->BAASInfo("Shot shape : " + std::to_string(screenshot.cols) + " " + std::to_string(screenshot.rows) + " " +
-                     std::to_string(screenshot.channels()));
+    baas->get_latest_screenshot(origin_screenshot);
     for(int i = cost_recognize_region.lr.x; i >= cost_recognize_region.ul.x; --i){
         for(int j = cost_recognize_region.ul.y; j <= cost_recognize_region.lr.y; ++j){
-            if(BAASImageUtil::judge_rgb_range(screenshot, {i, j}, cost_pixel_min_rgb, cost_pixel_max_rgb)){
+            if(BAASImageUtil::judge_rgb_range(origin_screenshot, {i, j}, cost_pixel_min_rgb, cost_pixel_max_rgb)){
                 int x = i - (cost_recognize_region.ul.x + (cost_recognize_region.lr.y - j) / 5);
                 int integer = int(double(x) * 1.0 / cost_increase_1_dealt_x);
                 double decimal = double((x - integer * 32)) * 1.0 / 28;

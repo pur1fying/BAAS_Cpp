@@ -29,6 +29,8 @@ public:
 
     static void update_valid_languages();
 
+    static bool is_valid_language(const std::string& language);
+
     bool language_inited(const std::string &language);
 
     std::vector<int> init(

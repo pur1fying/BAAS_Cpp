@@ -33,17 +33,11 @@ bool JudgePointRGBRangeFeature::appear(
 
     cv::Mat image = baas->latest_screenshot;
 
-    int col = max(image.cols, image.rows);
-    double ratio = double(col) * 1.0 / 1280;
-
-    log.emplace_back("Screenshot Info : ");
-    log.push_back("Image size : " + to_string(image.cols) + "x" + to_string(image.rows));
-    log.push_back("Image ratio : " + to_string(ratio));
     int dir = 1;
     if (image.cols > image.rows) dir = 0;
     log.push_back("Image direction : " + to_string(dir));
-    int feature_dir = config->getInt("direction", 1);  // 720x1280
-    if (dir != feature_dir) {
+
+    if (dir != feature_direction) {
         log.emplace_back("Screenshot direction not match, Quit.");
         output.insert("log", log);
         return false;
@@ -68,9 +62,12 @@ bool JudgePointRGBRangeFeature::appear(
                     it->second[i].g_min,
                     it->second[i].g_max,
                     it->second[i].b_min,
+                    it->second[i].b_max,
                     baas->screen_ratio,
                     check_around,
-                    around_range)) {
+                    around_range)
+        )
+        {
             log.emplace_back("Position " + to_string(i) + " not match, Quit.");
             output.insert("log", log);
             return false;
@@ -89,9 +86,12 @@ JudgePointRGBRangeFeature::JudgePointRGBRangeFeature(BAASConfig *config) : BaseF
     }
     vector<RGBInfo> temp_rgb_info_vec;
     for (auto &i: j["rgb_range"].items()) {
-        decode_single_rgb_info(i.value(), temp_rgb_info_vec);
+        _decode_single_rgb_info(i.value(), temp_rgb_info_vec);
         rgb_info[i.key()] = temp_rgb_info_vec;
     }
+
+    feature_direction = config->getInt("direction", 0);  // 720x1280
+
 }
 
 double JudgePointRGBRangeFeature::self_average_cost(const baas::BAAS *baas)
@@ -118,9 +118,9 @@ void JudgePointRGBRangeFeature::show()
     }
 }
 
-void JudgePointRGBRangeFeature::decode_single_rgb_info(
+void JudgePointRGBRangeFeature::_decode_single_rgb_info(
         const nlohmann::json& j,
-        vector <RGBInfo>& out
+        std::vector<RGBInfo> &out
 )
 {
     if (!j.is_object()) {

@@ -13,6 +13,7 @@
   },
   "restart_login-bonus_not-white-place" : {
     "feature_type": 2,
+    "direction": 1,
     "rgb_range": {
       "JP_ja-jp": {
         "positions": [[154, 130], [157, 160]],

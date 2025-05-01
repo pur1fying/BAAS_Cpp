@@ -12,9 +12,16 @@ BossHealthUpdater::BossHealthUpdater(
         screenshot_data *data
 ) : BaseDataUpdater(baas, data)
 {
-    ocr_region = static_config->get_rect("/BAAS/auto_fight/BossHealth/ocr_region");
-    current_ocr_region = static_config->get_rect("/BAAS/auto_fight/BossHealth/current_ocr_region");
-    max_ocr_region = static_config->get_rect("/BAAS/auto_fight/BossHealth/max_ocr_region");
+    ocr_region = static_config->get<BAASRectangle>("/BAAS/auto_fight/BossHealth/ocr_region");
+    current_ocr_region = static_config->get<BAASRectangle>("/BAAS/auto_fight/BossHealth/current_ocr_region");
+    max_ocr_region = static_config->get<BAASRectangle>("/BAAS/auto_fight/BossHealth/max_ocr_region");
+    ocr_model_name = static_config->get<std::string>("/BAAS/auto_fight/BossHealth/ocr_model_name");
+    if (!BAASOCR::is_valid_language(ocr_model_name)) {
+        logger->BAASInfo("BossHealth ocr_model_name [ " + ocr_model_name + " ] Invalid.");
+        throw ValueError("Invalid ocr language");
+    }
+    logger->BAASInfo("BossHealth Ocr Model Name : [ " + ocr_model_name + " ].");
+    baas_ocr->init({ocr_model_name});
 }
 
 void BossHealthUpdater::update()
@@ -57,7 +64,7 @@ void BossHealthUpdater::_update_current_health()
 {
     cropped_image = BAASImageUtil::crop(origin_screenshot, current_ocr_region);
     baas_ocr->ocr_for_single_line(
-            "zh-cn",
+            ocr_model_name,
             cropped_image,
             ocr_result,
             "",
@@ -71,7 +78,7 @@ void BossHealthUpdater::_update_max_health()
 {
     cropped_image = BAASImageUtil::crop(origin_screenshot, max_ocr_region);
     baas_ocr->ocr_for_single_line(
-            "zh-cn",
+            ocr_model_name,
             cropped_image,
             ocr_result,
             "",
@@ -85,11 +92,11 @@ void BossHealthUpdater::_update_all()
 {
     cropped_image = BAASImageUtil::crop(origin_screenshot, ocr_region);
     baas_ocr->ocr_for_single_line(
-            "zh-cn",
+            ocr_model_name,
             cropped_image,
             ocr_result,
-            "All",
-            logger,
+            "",
+            nullptr,
             "0123456789/"
     );
     std::string text = ocr_result.text;

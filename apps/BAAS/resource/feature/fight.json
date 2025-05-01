@@ -3,5 +3,59 @@
     "feature_type": 0,
     "group": "fight",
     "name": "pause-button"
+  },
+  "fight_acc_phase1": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1180, 621], [1250, 621]],
+        "range": [[195, 225, 195, 225, 195, 225], [195, 225, 195, 225, 195, 225]]
+      }
+    }
+  },
+  "fight_acc_phase2": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1180, 621], [1250, 621]],
+        "range": [[100, 150, 200, 255, 200, 255], [100, 150, 200, 255, 200, 255]]
+      }
+    }
+  },
+  "fight_acc_phase3": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1180, 621], [1250, 621]],
+        "range": [[200, 255, 180, 255, 0, 80], [200, 255, 180, 255, 0, 80]]
+      }
+    }
+  },
+  "fight_auto_off": {
+  "feature_type": 2,
+  "rgb_range": {
+    "CN_zh-cn": {
+      "positions": [[1250, 677], [1170, 677]],
+      "range": [[195, 225, 195, 225, 195, 225], [195, 225, 195, 225, 195, 225]]
+    }
+  }
+},
+  "fight_auto_on": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1250, 677], [1170, 677]],
+        "range": [[200, 255, 180, 240, 0, 80], [200, 255, 180, 240, 0, 80]]
+      }
+    }
+  },
+  "fight_auto_off2on": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1250, 677], [1170, 677]],
+        "range": [[235, 255, 235, 255, 235, 255], [235, 255, 235, 255, 235, 255]]
+      }
+    }
   }
 }

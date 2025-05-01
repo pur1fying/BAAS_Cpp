@@ -28,7 +28,7 @@ public:
 
     static BAASFeature *get_instance();
 
-    static BaseFeature *get_feature(const std::string &name);
+    static BaseFeature *get_feature_ptr(const std::string &feature_name);
 
     static bool reset_then_feature_appear(
             BAAS* baas,
@@ -43,6 +43,11 @@ public:
     );
 
     static std::vector<std::string> get_feature_list();
+
+    inline static bool contains(const std::string& feature_name) {
+        return !(features.find(feature_name) == features.end());
+    }
+
 private:
 
     static void load();

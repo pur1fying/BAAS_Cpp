@@ -37,6 +37,7 @@
   },
   "navigation-bar_not-white-place": {
     "feature_type": 2,
+    "direction": 1,
     "rgb_range": {
       "JP_ja-jp": {
         "positions": [[53, 1220], [150, 1187], [332, 1210]],

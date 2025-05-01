@@ -33,7 +33,7 @@ private:
 
     // change in runtime
     double current_cost;
-    cv::Mat screenshot;
+    cv::Mat origin_screenshot;
 };
 
 BAAS_NAMESPACE_END

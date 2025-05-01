@@ -23,10 +23,11 @@ private:
         u_char b_min;
         u_char b_max;
     };
+
+    static void _decode_single_rgb_info(const nlohmann::json& j, std::vector<RGBInfo> &out);
+
 public:
     explicit JudgePointRGBRangeFeature(BAASConfig *config);
-
-    static void decode_single_rgb_info(const nlohmann::json& j, std::vector<RGBInfo>& out);
 
     void show() override;
 
@@ -39,6 +40,8 @@ public:
             const BAAS* baas
     ) override;
 private:
+
+    int feature_direction;
 
     std::map<std::string, std::vector<RGBInfo>> rgb_info;
 };

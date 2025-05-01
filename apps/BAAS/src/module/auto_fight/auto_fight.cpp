@@ -6,11 +6,13 @@
 
 #include <BAASImageResource.h>
 
+#include "utils.h"
 #include "module/auto_fight/screenshot_data/CostUpdater.h"
 #include "module/auto_fight/screenshot_data/SkillCostUpdater.h"
 #include "module/auto_fight/screenshot_data/SkillNameUpdater.h"
 #include "module/auto_fight/screenshot_data/BossHealthUpdater.h"
-#include "utils.h"
+#include "module/auto_fight/screenshot_data/AccelerationStateUpdater.h"
+#include "module/auto_fight/screenshot_data/AutoStateUpdater.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -37,21 +39,36 @@ AutoFight::AutoFight(BAAS *baas)
 // Add data updaters here
 void AutoFight::init_data_updaters()
 {
+    // BIT [ 1 ]
     // cost
     d_updaters.push_back(std::make_unique<CostUpdater>(baas, &latest_screenshot_d));
     d_updater_map["cost"] = 1LL << 0;
 
+    // BIT [ 2 ]
     // boss health
     d_updaters.push_back(std::make_unique<BossHealthUpdater>(baas, &latest_screenshot_d));
     d_updater_map["boss_health"] = 1LL << 1;
 
+    // BIT [ 3 ]
     // skill name
     d_updaters.push_back(std::make_unique<SkillNameUpdater>(baas, &latest_screenshot_d));
     d_updater_map["skill_name"] = 1LL << 2;
 
-//     skill cost
-//    d_updaters.push_back(std::make_unique<SkillCostUpdater>(baas, &latest_screenshot_d));
-//    d_updater_map["skill_cost"] = 1LL << 3;
+    // BIT [ 4 ]
+    // skill cost
+    d_updaters.push_back(std::make_unique<SkillCostUpdater>(baas, &latest_screenshot_d));
+    d_updater_map["skill_cost"] = 1LL << 3;
+
+    // BIT [ 5 ]
+    // acc phase
+    d_updaters.push_back(std::make_unique<AccelerationPhaseUpdater>(baas, &latest_screenshot_d));
+    d_updater_map["acc_phase"] = 1LL << 4;
+
+    // BIT [ 6 ]
+    // auto state
+    d_updaters.push_back(std::make_unique<AutoStateUpdater>(baas, &latest_screenshot_d));
+    d_updater_map["auto_state"] = 1LL << 5;
+
 }
 
 void AutoFight::update_data()
@@ -80,15 +97,14 @@ void AutoFight::update_data()
 
     // put updater in queue into thread pool
     for (int i = 0; i < d_wait_to_update_idx.size(); ++i) {
-        if (d_updater_running_thread_count < d_update_max_thread) ++d_updater_running_thread_count;
-        else {
+        if (d_updater_running_thread_count >= d_update_max_thread){
             std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
             d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
                 return d_updater_running_thread_count < d_update_max_thread;
             });
             // condition judgement
         }
-
+        ++d_updater_running_thread_count;
         unsigned char idx = d_updater_queue.front();
         d_updater_queue.pop();
         d_update_thread_pool->submit([this, idx]() {
@@ -102,15 +118,15 @@ void AutoFight::update_data()
         std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
         if (d_updater_running_thread_count == 0) break;
         start_running_t = d_updater_running_thread_count;
-        logger->BAASInfo("Start Running Threads : " + std::to_string(start_running_t));
+//        logger->BAASInfo("Start Running Threads : " + std::to_string(start_running_t));
         d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
             return d_updater_running_thread_count < start_running_t;
         });
         // condition judgement
-        logger->BAASInfo("Running Threads : " + std::to_string(d_updater_running_thread_count));
+//        logger->BAASInfo("Running Threads : " + std::to_string(d_updater_running_thread_count));
     }
 
-    logger->BAASInfo("End Running Threads : " + std::to_string(d_updater_running_thread_count));
+//    logger->BAASInfo("End Running Threads : " + std::to_string(d_updater_running_thread_count));
     assert(d_updater_running_thread_count == 0);
 }
 
@@ -133,9 +149,9 @@ void AutoFight::submit_data_updater_task(AutoFight *self, unsigned char idx)
 
 void AutoFight::display_data()
 {
-    for (auto &updater : d_updaters) {
-        updater->display_data();
-    }
+    for (int i = 0; i <= d_updaters.size(); ++i)
+        if ((1LL << i) & d_updater_mask)
+            d_updaters[i]->display_data();
 }
 
 
@@ -174,6 +190,7 @@ void AutoFight::init_workflow(const std::filesystem::path &name)
     latest_screenshot_d.d_fight = BAASConfig(workflow_path, logger);
 
     // Skill
+    logger->sub_title("All Appeared Skills");
     auto skill_names = latest_screenshot_d.d_fight.get<std::vector<std::string>>("/formation/all_appeared_skills");
     for (int i = 0; i < skill_names.size(); ++i) {
         latest_screenshot_d.skill_name_to_index_map[skill_names[i]] = i;

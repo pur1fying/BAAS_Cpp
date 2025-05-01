@@ -59,6 +59,10 @@ public:
         latest_screenshot_d.boss_health_update_flag = flag;
     }
 
+    inline void set_skill_cost_update_flag(uint32_t flag) {
+        latest_screenshot_d.skill_cost_update_flag = flag;
+    }
+
     const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
 
     const static std::string template_j_ptr_prefix;

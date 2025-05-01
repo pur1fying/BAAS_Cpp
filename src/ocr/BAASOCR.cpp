@@ -158,7 +158,6 @@ void BAASOCR::ocr_for_single_line(
         const std::string &log_content,
         BAASLogger *logger,
         const std::string &candidates
-
 )
 {
     auto res = ocr_map.find(language);
@@ -329,6 +328,12 @@ void BAASOCR::update_valid_languages()
     }
 }
 
+bool BAASOCR::is_valid_language(const std::string &language)
+{
+    for (auto& _lang : valid_languages) if(language == _lang) return true;
+    return false;
+}
+
 void BAASOCR::release_all()
 {
     BAASGlobalLogger->sub_title("OCR Lite Release All");
@@ -399,6 +404,8 @@ void BAASOCR::disable_thread_pool()
         pool.reset();
     }
 }
+
+
 
 
 BAAS_NAMESPACE_END

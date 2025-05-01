@@ -18,20 +18,21 @@ SkillNameUpdater::SkillNameUpdater(
         logger->BAASError("SkillNameUpdater: each_skill_match_template_region size not match");
         return;
     }
-
     _threshold = static_config->getDouble("/BAAS/auto_fight/Skill/threshold");
-
     _rgb_diff = static_config->getUInt("/BAAS/auto_fight/Skill/rgb_diff");
-
     _init_skill_estimated_match_template_cost();
 }
 
 void SkillNameUpdater::update()
 {
     appeared_skill_idx.clear();
+    for (const auto& skill: data->skills)
+        if (skill.index.has_value())
+            appeared_skill_idx.insert(skill.index.value()); // insert existing skill into appeared
+
     baas->get_latest_screenshot(origin_screenshot);
     for (int i = 0; i < data->each_slot_possible_templates.size(); i++) {
-        logger->BAASInfo("Detect Slot [ " + std::to_string(i + 1) + " ]");
+        if (data->skills[i].index.has_value()) continue;    // skip slot with skill
         screenshot_crop_img = BAASImageUtil::crop(origin_screenshot, each_skill_match_template_region[i]);
         _find = false;
         for (auto& _tmp_idx : data->each_slot_possible_templates[i]) {
@@ -81,7 +82,6 @@ double SkillNameUpdater::estimated_time_cost()
                 cost += _template.estimated_match_template_time_cost[i] * (d_tmp_cnt - j) / d_tmp_cnt;
         }
     }
-
     return cost;
 }
 
@@ -92,7 +92,7 @@ constexpr std::string SkillNameUpdater::data_name()
 
 void SkillNameUpdater::display_data()
 {
-    logger->sub_title("Slot State");
+    logger->sub_title("Slot Skill Name State");
     for (auto & skill : data->skills) {
         if (!skill.index.has_value()) {
             logger->BAASInfo("[ No Value ]");
@@ -146,7 +146,6 @@ bool SkillNameUpdater::_template_appear(const template_info& _tmp)
             &_minLoc,
             &_maxLoc
     );
-    logger->BAASInfo("Max Similarity : " + std::to_string(_maxVal));
     if (_maxVal < _threshold) return false;
 
     // check mean rgb
@@ -155,7 +154,6 @@ bool SkillNameUpdater::_template_appear(const template_info& _tmp)
     if(abs(matched_region_mean_rgb[0] - _tmp.mean_rgb[0]) > _rgb_diff ||
        abs(matched_region_mean_rgb[1] - _tmp.mean_rgb[1]) > _rgb_diff ||
        abs(matched_region_mean_rgb[2] - _tmp.mean_rgb[2]) > _rgb_diff  )  return false;
-
 
     return true;
 }

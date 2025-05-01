@@ -292,7 +292,7 @@ void BAAS::init_feature_state_map()
     for (const auto &feature: feature_list)
         feature_state_map[feature] = {
             nullopt,
-            BAASFeature::get_feature(feature)->all_average_cost(this)
+            BAASFeature::get_feature_ptr(feature)->all_average_cost(this)
         };
 }
 

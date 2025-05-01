@@ -77,6 +77,16 @@ public:
         this->path = _path;
     }
 
+    inline void set_name(const std::string &_name)
+    {
+        this->name = _name;
+    }
+
+    inline const std::string &get_name()
+    {
+        return name;
+    }
+
     inline const std::string &get_path()
     {
         return path;
@@ -92,7 +102,7 @@ protected:
 
     std::optional<bool> this_round_result;
 
-    std::string path;
+    std::string path, name;
 
     friend class BAASFeature;
 };

@@ -12,27 +12,49 @@ AutoStateUpdater::AutoStateUpdater(
         screenshot_data *data
 ) : BaseDataUpdater(baas, data)
 {
-
+    std::vector<std::string> feature_names = {
+            "fight_auto_off",
+            "fight_auto_on",
+            "fight_auto_off2on"
+    };
+    _time_cost = 0.0;
+    for (const auto &feature_name : feature_names) {
+        if (!BAASFeature::contains(feature_name)) {
+            logger->BAASError("AutoStateUpdater Required Feature [ " + feature_name + " ] not exist.");
+            throw ValueError("Required Feature [ " + feature_name + " ] not exist." );
+        }
+        auto_feature_ptrs.push_back(BAASFeature::get_feature_ptr(feature_name));
+        _time_cost += auto_feature_ptrs.back()->self_average_cost(baas);
+    }
 }
 
 void AutoStateUpdater::update()
 {
-    BaseDataUpdater::update();
+    for (int i = 0; i < auto_feature_ptrs.size(); ++i) {
+        feature_appear_output.clear();
+        if (auto_feature_ptrs[i]->appear(baas, feature_appear_output)) {
+            data->auto_state = i;
+            return;
+        }
+    }
+    data->auto_state = std::nullopt;
 }
 
 double AutoStateUpdater::estimated_time_cost()
 {
-    return BaseDataUpdater::estimated_time_cost();
+    return _time_cost;
 }
 
 constexpr std::string AutoStateUpdater::data_name()
 {
-    return "Auto_phase";
+    return "Auto_State";
 }
 
 void AutoStateUpdater::display_data()
 {
-    BaseDataUpdater::display_data();
+    if (!data->auto_state.has_value()) logger->BAASInfo("Auto      : [ No Value ]");
+    else if (data->auto_state.value()) logger->BAASInfo("Auto      : [    On    ]");
+    else                               logger->BAASInfo("Auto      : [    OFF   ]");
 }
 
 
