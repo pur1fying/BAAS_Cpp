@@ -139,16 +139,16 @@ SET(
 
 SET(
         DLL_COMMON
-        avcodec-60
-#        avdevice-60
-#        avfilter-9
-#        avformat-60
-        avutil-58
+        avcodec-62
+#        avdevice-62
+#        avfilter-11
+#        avformat-62
+        avutil-60
         liblz4
         onnxruntime
-#        postproc-57
-#        swresample-4
-        swscale-7
+#        postproc-59
+        swresample-6
+        swscale-9
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
