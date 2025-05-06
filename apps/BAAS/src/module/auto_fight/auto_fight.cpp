@@ -11,7 +11,7 @@
 #include "module/auto_fight/screenshot_data/SkillCostUpdater.h"
 #include "module/auto_fight/screenshot_data/SkillNameUpdater.h"
 #include "module/auto_fight/screenshot_data/BossHealthUpdater.h"
-#include "module/auto_fight/screenshot_data/AccelerationStateUpdater.h"
+#include "module/auto_fight/screenshot_data/AccelerationPhaseUpdater.h"
 #include "module/auto_fight/screenshot_data/AutoStateUpdater.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -283,6 +283,21 @@ void AutoFight::set_slot_possible_skill_idx(
         }
     }
     latest_screenshot_d.each_slot_possible_templates[slot_idx] = possible_skill_idx;
+}
+
+void AutoFight::_init_conditions() {
+
+
+}
+
+bool AutoFight::condition_appear(int idx)
+{
+    return false;
+}
+
+bool AutoFight::condition_appear(const std::string &name)
+{
+    return false;
 }
 
 

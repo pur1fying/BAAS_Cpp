@@ -71,5 +71,10 @@ void BaseFeature::show()
     BAASGlobalLogger->BAASInfo("or_feature_count    : [ " + std::to_string(or_feature_ptr.size()) + " ]");
 }
 
+BaseFeature::~BaseFeature()
+{
+    delete config;
+}
+
 BAAS_NAMESPACE_END
 

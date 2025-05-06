@@ -22,6 +22,8 @@ class BaseProcedure {
 public:
     explicit BaseProcedure(BAASConfig *possible_feature);
 
+    virtual ~BaseProcedure();
+
     virtual void implement(
             BAAS *baas,
             BAASConfig &output

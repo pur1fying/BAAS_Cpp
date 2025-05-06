@@ -5,6 +5,8 @@
 #include "feature/BAASFeature.h"
 #include "queue"
 #include "BAASDevelopUtils.h"
+#include <windows.h>
+#include <iostream>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -18,10 +20,15 @@ int main(int argc, char **argv) {
     string config_name = "default_config";
     cv::Mat img;
     try{
+//        auto hDll = LoadLibraryA("D:\\github\\BAAS_Cpp\\dll\\Windows\\onnxruntime_providers_cuda.dll");
+//        if (hDll == NULL) {
+//            std::cerr << "无法加载DLL: " << GetLastError() << std::endl;
+//            return 1;
+//        }
         init_globals();
-        BAAS baas(config_name);
         BAASFeature::show();
         baas::BAAS::check_config(config_name);
+        BAAS baas(config_name);
 
 //        std::vector<std::string> names = {
 //                "Ui",
@@ -63,7 +70,7 @@ int main(int argc, char **argv) {
         fight.set_skill_cost_update_flag(0b111);
         cv::Mat img;
 
-        for (int i =1; i <= 10; ++i) {
+        while(1){
 //            baas.update_screenshot_array();
             auto st = BAASUtil::getCurrentTimeMS();
             baas.reset_all_feature();
@@ -85,7 +92,6 @@ int main(int argc, char **argv) {
                 baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
                 frame_count = 0;
             }
-            cv::imwrite("img.png", img);
         }
         system("pause");
 

@@ -3,7 +3,7 @@
 //
 
 
-#include "module/auto_fight/screenshot_data/AccelerationStateUpdater.h"
+#include "module/auto_fight/screenshot_data/AccelerationPhaseUpdater.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -51,8 +51,8 @@ constexpr std::string AccelerationPhaseUpdater::data_name()
 
 void AccelerationPhaseUpdater::display_data()
 {
-    if (!data->acceleration_state.has_value()) logger->BAASInfo("Acc_State : [ Unknown ]");
-    else  logger->BAASInfo("Acc_State : [    " + std::string(1, '0' + data->acceleration_state.value()) + "    ]");
+    if (!data->acceleration_state.has_value()) logger->BAASInfo("Acc_State : [  Unknown ]");
+    else  logger->BAASInfo("Acc_State : [    " + std::string(1, '0' + data->acceleration_state.value()) + "     ]");
 }
 
 

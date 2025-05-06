@@ -372,7 +372,7 @@ std::pair<std::string, std::string> BAASUtil::serialToHostPort(const std::string
 long long BAASUtil::getCurrentTimeMS()
 {
     std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
-    std::chrono::milliseconds duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
     return duration.count();
 }
 

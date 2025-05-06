@@ -25,4 +25,9 @@ void BaseProcedure::clear_resource()
     throw std::runtime_error("BaseProcedure::clear_resource() should not be called");
 }
 
+BaseProcedure::~BaseProcedure()
+{
+    delete possible_feature;
+}
+
 BAAS_NAMESPACE_END

@@ -43,14 +43,16 @@ public:
             BAASLogger *logger
     );
 
-    /* special config files which are read only
-    *  use global logger
-    */
+    /*
+     * special config files which are read only
+     *  use global logger
+     */
     explicit BAASConfig(const int config_type);
 
-    /* config_name / config.json or event.json
-    *  create a config with unique logger for it
-    */
+    /*
+     * config_name / config.json or event.json
+     *  create a config with unique logger for it
+     */
     explicit BAASConfig(const std::string &path);
 
     void load();

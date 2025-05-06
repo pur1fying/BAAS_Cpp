@@ -5,8 +5,6 @@ endif ()
 
 BAAS_hr_LOG("APP BAAS")
 
-option(WITH_BAAS "Build Script BAAS  "    OFF)
-option(WITH_ISA  "Build Script ISA   "    OFF)
 
 project(BAAS_APP VERSION 1.0.0)
 
@@ -118,6 +116,7 @@ if (BAAS_APP_USE_CUDA)
             DLL_ONNXRUNTIME_CUDA
             onnxruntime_providers_cuda
             onnxruntime_providers_shared
+            zlibwapi
     )
 endif ()
 

@@ -32,6 +32,8 @@ public:
 
     explicit BaseFeature(BAASConfig *config);
 
+    virtual ~BaseFeature();
+
     [[nodiscard]] inline bool is_primitive() const
     {
         return _is_primitive;

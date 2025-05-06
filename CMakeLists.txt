@@ -62,7 +62,7 @@ configure_file(
 set(CMAKE_CXX_STANDARD 20)
 
 # app options
-option(BUILD_APP_BAAS               "build BAAS app          "  OFF)
+option(BUILD_APP_BAAS               "Build BAAS app          "  OFF)
 option(BUILD_APP_ISA                "Build ISA  app          "  OFF)
 
 check_app_options(BUILD_APP_BAAS BUILD_APP_ISA)

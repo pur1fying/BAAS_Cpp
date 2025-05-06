@@ -2,17 +2,21 @@
 // Created by pc on 2025/4/23.
 //
 
-#ifndef BAAS_MODULE_AUTO_FIGHT_AUTO_FIGHT_H_
-#define BAAS_MODULE_AUTO_FIGHT_AUTO_FIGHT_H_
+#ifndef BAAS_CPP_MODULE_AUTO_FIGHT_AUTO_FIGHT_H_
+#define BAAS_CPP_MODULE_AUTO_FIGHT_AUTO_FIGHT_H_
 
 #define BEGIN_AUTO_FIGHT_DATA_UPDATE
 #define END_AUTO_FIGHT_DATA_UPDATE
+
+#define BEGIN_AUTO_FIGHT_CONDITIONS
+#define END_AUTO_FIGHT_CONDITIONS
 
 #include <ThreadPool.h>
 #include <BAAS.h>
 
 #include "screenshot_data/screenshot_data_recoder.h"
 #include "screenshot_data/BaseDataUpdater.h"
+#include "conditions/BaseCondition.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -63,9 +67,14 @@ public:
         latest_screenshot_d.skill_cost_update_flag = flag;
     }
 
+    bool condition_appear(int idx);
+
+    bool condition_appear(const std::string& name);
+
     const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
 
     const static std::string template_j_ptr_prefix;
+
 private:
 
     void _init_single_skill_template(std::string &skill_name);
@@ -111,6 +120,18 @@ BEGIN_AUTO_FIGHT_DATA_UPDATE
 
 END_AUTO_FIGHT_DATA_UPDATE
 
+BEGIN_AUTO_FIGHT_CONDITIONS
+
+    void _init_conditions();
+
+    std::vector<std::unique_ptr<BaseCondition>> all_conditions;
+
+    // name to index in all_conditions
+    std::map<std::string, uint64_t> condition_name_map;
+
+
+END_AUTO_FIGHT_CONDITIONS
+
     std::filesystem::path workflow_path;
 
     std::string workflow_name;
@@ -122,4 +143,4 @@ END_AUTO_FIGHT_DATA_UPDATE
 BAAS_NAMESPACE_END
 
 
-#endif //BAAS_MODULE_AUTO_FIGHT_AUTO_FIGHT_H_
+#endif //BAAS_CPP_MODULE_AUTO_FIGHT_AUTO_FIGHT_H_
