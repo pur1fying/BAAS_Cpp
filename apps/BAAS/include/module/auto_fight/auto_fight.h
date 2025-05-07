@@ -122,7 +122,9 @@ END_AUTO_FIGHT_DATA_UPDATE
 
 BEGIN_AUTO_FIGHT_CONDITIONS
 
-    void _init_conditions();
+    void _init_cond_ptr();
+
+    void _init_cond_timeout();
 
     std::vector<std::unique_ptr<BaseCondition>> all_conditions;
 

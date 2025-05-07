@@ -32,29 +32,38 @@
     }
   },
   "fight_auto_off": {
-  "feature_type": 2,
-  "rgb_range": {
-    "CN_zh-cn": {
-      "positions": [[1250, 677], [1170, 677]],
-      "range": [[195, 225, 195, 225, 195, 225], [195, 225, 195, 225, 195, 225]]
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1170, 677]],
+        "range": [[195, 255, 195, 255, 195, 234]]
+      }
     }
-  }
-},
+  },
   "fight_auto_on": {
     "feature_type": 2,
     "rgb_range": {
       "CN_zh-cn": {
-        "positions": [[1250, 677], [1170, 677]],
-        "range": [[200, 255, 180, 240, 0, 80], [200, 255, 180, 240, 0, 80]]
+        "positions": [[1170, 677]],
+        "range": [[200, 255, 180, 255, 0, 150]]
       }
     }
   },
-  "fight_auto_off2on": {
+  "fight_auto_off2on_r_white": {
     "feature_type": 2,
     "rgb_range": {
       "CN_zh-cn": {
-        "positions": [[1250, 677], [1170, 677]],
-        "range": [[235, 255, 235, 255, 235, 255], [235, 255, 235, 255, 235, 255]]
+        "positions": [[1250, 677]],
+        "range": [[235, 255, 235, 255, 235, 255]]
+      }
+    }
+  },
+  "fight_auto_off2on_l_white": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1170, 677]],
+        "range": [[235, 255, 235, 255, 235, 255]]
       }
     }
   }

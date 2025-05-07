@@ -40,6 +40,9 @@ public:
             const BAAS* baas
     ) override;
 private:
+    bool check_around;
+
+    int around_range;
 
     int feature_direction;
 

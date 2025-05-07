@@ -15,7 +15,8 @@ AutoStateUpdater::AutoStateUpdater(
     std::vector<std::string> feature_names = {
             "fight_auto_off",
             "fight_auto_on",
-            "fight_auto_off2on"
+            "fight_auto_off2on_r_white",
+            "fight_auto_off2on_l_white"
     };
     _time_cost = 0.0;
     for (const auto &feature_name : feature_names) {
@@ -30,10 +31,11 @@ AutoStateUpdater::AutoStateUpdater(
 
 void AutoStateUpdater::update()
 {
+    feature_appear_output.clear();
     for (int i = 0; i < auto_feature_ptrs.size(); ++i) {
-        feature_appear_output.clear();
         if (auto_feature_ptrs[i]->appear(baas, feature_appear_output)) {
-            data->auto_state = i;
+            logger->BAASInfo(auto_feature_ptrs[i]->get_name() + "  matched");
+            data->auto_state = bool(i);
             return;
         }
     }
@@ -52,7 +54,7 @@ constexpr std::string AutoStateUpdater::data_name()
 
 void AutoStateUpdater::display_data()
 {
-    if (!data->auto_state.has_value()) logger->BAASInfo("Auto      : [ No Value ]");
+    if (!data->auto_state.has_value()) logger->BAASInfo("Auto      : [  UnKnown ]");
     else if (data->auto_state.value()) logger->BAASInfo("Auto      : [    On    ]");
     else                               logger->BAASInfo("Auto      : [    OFF   ]");
 }

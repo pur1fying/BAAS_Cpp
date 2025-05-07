@@ -49,9 +49,6 @@ bool JudgePointRGBRangeFeature::appear(
         output.insert("log", log);
         return false;
     }
-
-    bool check_around = config->getBool("check_around", false);
-    int around_range = config->getInt("around_range", 0);
     for (int i = 0; i < it->second.size(); i++) {
         if (!BAASImageUtil::judge_rgb_range(
                     image,
@@ -81,6 +78,8 @@ bool JudgePointRGBRangeFeature::appear(
 JudgePointRGBRangeFeature::JudgePointRGBRangeFeature(BAASConfig *config) : BaseFeature(config)
 {
     json j = config->get_config();
+    check_around = config->getBool("check_around", false);
+    around_range = config->getInt("around_range", 0);
     if (!j.is_object() || !j.contains("rgb_range") || !j["rgb_range"].is_object()) {
         throw JudgePointRGBRangeFeatureError("rgb_range Feature format error");
     }

@@ -285,19 +285,27 @@ void AutoFight::set_slot_possible_skill_idx(
     latest_screenshot_d.each_slot_possible_templates[slot_idx] = possible_skill_idx;
 }
 
-void AutoFight::_init_conditions() {
-
-
-}
 
 bool AutoFight::condition_appear(int idx)
 {
+
     return false;
 }
 
 bool AutoFight::condition_appear(const std::string &name)
 {
+
     return false;
+}
+
+void AutoFight::_init_cond_ptr()
+{
+
+}
+
+void AutoFight::_init_cond_timeout()
+{
+
 }
 
 
