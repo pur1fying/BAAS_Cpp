@@ -28,8 +28,9 @@ private:
     // static value
     cv::Vec3b  cost_pixel_min_rgb, cost_pixel_max_rgb;
     BAASRectangle cost_recognize_region;
-    double cost_increase_1_dealt_x ;
+    double cost_increase_1_dealt_x;
     double average_cost;
+    double _t_x;
 
     // change in runtime
     double current_cost;

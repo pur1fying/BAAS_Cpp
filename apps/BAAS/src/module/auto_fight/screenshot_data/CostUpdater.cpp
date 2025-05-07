@@ -22,8 +22,9 @@ void CostUpdater::update()
         for(int j = cost_recognize_region.ul.y; j <= cost_recognize_region.lr.y; ++j){
             if(BAASImageUtil::judge_rgb_range(origin_screenshot, {i, j}, cost_pixel_min_rgb, cost_pixel_max_rgb)){
                 int x = i - (cost_recognize_region.ul.x + (cost_recognize_region.lr.y - j) / 5);
-                int integer = int(double(x) * 1.0 / cost_increase_1_dealt_x);
-                double decimal = double((x - integer * 32)) * 1.0 / 28;
+                _t_x = double(x);
+                int integer = int(_t_x / cost_increase_1_dealt_x);
+                double decimal = (_t_x - double(integer) * cost_increase_1_dealt_x) / 28;
                 if(decimal < 0) decimal = 0;
                 current_cost = integer + decimal;
                 current_cost = current_cost > 10.0 ? 10.0 : current_cost;
