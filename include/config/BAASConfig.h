@@ -277,8 +277,8 @@ public:
     */
     template<typename T>
     inline T get(
-            const std::string &key,
-            T default_value
+            const std::string& key,
+            const T& default_value
     )   const noexcept
     {
         assert(!key.empty());
@@ -289,14 +289,14 @@ public:
             }
             try {
                 return *it;
-            } catch (std::exception &e) {
+            } catch (std::exception& e) {
                 return default_value;
             }
         }
         try {
             return config.at(nlohmann::json::json_pointer(key));
         }
-        catch (std::exception &e) {
+        catch (std::exception& e) {
             return default_value;
         }
     }
@@ -312,7 +312,7 @@ public:
             if (it == config.end()) throw_key_error("Key [ " + key + " ] not found.");
             try {
                 return *it;
-            } catch (std::exception &e) {
+            } catch (std::exception& e) {
                 throw_type_error(
                         "Value With Key [ " + key + " ] Type Error. Real : " + std::string(it->type_name()) +
                         " .Expected : " + typeid(default_value).name());
@@ -364,7 +364,7 @@ public:
                 j = value;
             }
         }
-        catch (std::exception &e) {
+        catch (std::exception& e) {
             throw_key_error("Key [ " + key + " ] not found : " + e.what());
         }
     }
@@ -422,7 +422,7 @@ public:
                 j = value;
             }
         }
-        catch (std::exception &e) {
+        catch (std::exception& e) {
             config[nlohmann::json::json_pointer(key)] = value;
             modified.push_back(
                     {{"op",    "add"},
@@ -437,8 +437,8 @@ public:
     */
     template<typename T>
     void update_reference(
-            const std::string &key,
-            T &value
+            const std::string& key,
+            const T& value
     )
     {
         assert(!key.empty());
@@ -487,15 +487,14 @@ public:
 
     void update(const BAASConfig *patch)
     {
-        for (auto &i: patch->get_config()
-                           .items())
+        for (auto &i: patch->get_config().items())
             update_reference(i.key(), i.value());
     }
 
     template<typename T>
     inline void update_and_save(
             const std::string &key,
-            T &value
+            const T& value
     )
     {
         update_reference(key, value);
@@ -504,8 +503,8 @@ public:
 
     template<typename T>
     inline void insert(
-            const std::string &key,
-            T &value
+            const std::string& key,
+            const T& value
     )
     {
         assert(!key.empty());
@@ -515,9 +514,9 @@ public:
     /*
     * remove "A" or "/A/B/C" "
     */
-    void remove(const std::string &key);
+    void remove(const std::string& key);
 
-    inline void remove_and_save(const std::string &key)
+    inline void remove_and_save(const std::string& key)
     {
         remove(key);
         save();
@@ -526,14 +525,14 @@ public:
     void my_flatten();
 
     void flatten(
-            std::string &jp,
-            nlohmann::json &tar,
-            nlohmann::json &result
+            std::string& jp,
+            nlohmann::json& tar,
+            nlohmann::json& result
     );
 
     void my_unflatten();
 
-    static void unflatten(nlohmann::json &value);
+    static void unflatten(nlohmann::json& value);
 
     void show(
             int indent = 4,
@@ -543,43 +542,43 @@ public:
     void show_modify_history();
 
     void diff(
-            nlohmann::json &j,
-            nlohmann::json &result
+            nlohmann::json& j,
+            nlohmann::json& result
     );
 
     // clear and replace_all do not change modify history
     void clear() noexcept;
 
-    void replace_all(nlohmann::json &new_config);
+    void replace_all(nlohmann::json& new_config);
 
-    static inline void parent_pointer(std::string &ptr)
+    static inline void parent_pointer(std::string& ptr)
     {
         if (!ptr.empty()) ptr = ptr.substr(0, ptr.find_last_of('/'));
     }
 
-    [[nodiscard]] inline const std::string &get_config_name() const
+    [[nodiscard]] inline const std::string& get_config_name() const
     {
         return config_name;
     }
 
-    [[nodiscard]] inline BAASLogger *get_logger() const
+    [[nodiscard]] inline BAASLogger* get_logger() const
     {
         return logger;
     }
 
-    [[nodiscard]] inline const std::filesystem::path &get_path() const
+    [[nodiscard]] inline const std::filesystem::path& get_path() const
     {
         return path;
     }
 
-    [[nodiscard]] inline const nlohmann::json &get_config() const
+    [[nodiscard]] inline const nlohmann::json& get_config() const
     {
         return config;
     }
 
 protected:
     // findByKey key must exist
-    inline nlohmann::json::iterator findByKey(const std::string &key)
+    inline nlohmann::json::iterator findByKey(const std::string& key)
     {
         nlohmann::json::iterator it = config.find(key);
         if (it == config.end()) throw_key_error("Key [ " + key + " ] not found.");
@@ -588,8 +587,8 @@ protected:
 
     template<typename T>
     inline void updateByKey(
-            const std::string &key,
-            T &value
+            const std::string& key,
+            T& value
     )
     {
         if (config.contains(key)) {
@@ -611,7 +610,7 @@ protected:
         }
     }
 
-    inline void removeByKey(const std::string &key)
+    inline void removeByKey(const std::string& key)
     {
         if (config.contains(key)) {
             modified.push_back(
@@ -629,11 +628,11 @@ protected:
     }
 
     void preprocess(
-            std::string &jp,
-            nlohmann::json &value
+            std::string& jp,
+            nlohmann::json& value
     );
 
-    inline void throw_key_error(const std::string &desc)  const
+    inline void throw_key_error(const std::string& desc)  const
     {
         std::string msg;
         if (!path.empty()) msg = "In Config file : [ " + path.string() + " ] : \n";
@@ -641,7 +640,7 @@ protected:
         throw KeyError(msg);
     }
 
-    inline void throw_type_error(const std::string &desc) const
+    inline void throw_type_error(const std::string& desc) const
     {
         std::string msg;
         if (!path.empty()) msg = "In Config file : [ " + path.string() + " ] : \n";
@@ -666,14 +665,14 @@ protected:
         modified.clear();
     }
 
-    BAASLogger *logger;
+    BAASLogger* logger;
     nlohmann::json config, modified;
     std::filesystem::path path, modify_history_path;
     std::string config_name;
 };
 
-extern BAASConfig *config_name_change;
-extern BAASConfig *default_global_setting;
+extern BAASConfig* config_name_change;
+extern BAASConfig* default_global_setting;
 
 BAAS_NAMESPACE_END
 
