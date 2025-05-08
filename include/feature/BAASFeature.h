@@ -52,7 +52,7 @@ private:
 
     static void load();
 
-    static int load_from_json(const std::string &path);
+    static int load_from_json(const std::filesystem::path &json_path);
 
     BAASFeature();
 

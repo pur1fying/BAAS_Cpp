@@ -107,7 +107,7 @@ public:
     int load_from_json(
             const std::string &server,
             const std::string &language,
-            const std::string &json_path
+            const std::filesystem::path &json_path
     );
 
     static std::string resource_pointer(

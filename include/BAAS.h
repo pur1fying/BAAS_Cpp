@@ -15,39 +15,39 @@ class BAAS {
 public:
 
     void register_module_implement_func(
-            const std::string &module_name,
-            std::function<bool(BAAS *)> module
+            const std::string&module_name,
+            std::function<bool(BAAS*)> module
     );
 
-    bool solve(const std::string &module_name);
+    bool solve(const std::string& module_name);
 
-    static void check_config(std::string &config_name);
+    static void check_config(std::string& config_name);
 
-    static void check_user_config(const std::string &config_name);
+    static void check_user_config(const std::string& config_name);
 
     static void write_all_default_config(const std::filesystem::path& dir);
 
-    explicit BAAS(std::string &config_name);
+    explicit BAAS(std::string& config_name);
 
     void update_screenshot_array();
 
-    void get_latest_screenshot_clone(cv::Mat &img);
+    void get_latest_screenshot_clone(cv::Mat& img);
 
-    void get_latest_screenshot(cv::Mat &img);
+    void get_latest_screenshot(cv::Mat& img);
 
     void get_latest_screenshot(
-            cv::Mat &img,
-            const BAASRectangle &region
+            cv::Mat& img,
+            const BAASRectangle& region
     );
 
     void get_each_round_type(std::vector<int> &round_type);
 
-    std::optional<int> point2type(const BAASPoint &point);
+    std::optional<int> point2type(const BAASPoint& point);
 
     bool judge_rgb_range(
-            const BAASPoint &point,
-            const cv::Vec3b &min,
-            const cv::Vec3b &max
+            const BAASPoint& point,
+            const cv::Vec3b& min,
+            const cv::Vec3b& max
     );
 
     inline bool has_screenshot()
@@ -62,27 +62,27 @@ public:
         return flag_run;
     }
 
-    inline BAASConnection *get_connection() const
+    inline BAASConnection* get_connection() const
     {
         return connection;
     }
 
-    inline BAASUserConfig *get_config() const
+    inline BAASUserConfig* get_config() const
     {
         return config;
     }
 
-    inline BAASLogger *get_logger() const
+    inline BAASLogger* get_logger() const
     {
         return logger;
     }
 
-    inline BAASScreenshot *get_screenshot() const
+    inline BAASScreenshot* get_screenshot() const
     {
         return screenshot;
     }
 
-    inline BAASControl *get_control() const
+    inline BAASControl* get_control() const
     {
         return control;
     }
@@ -96,7 +96,7 @@ public:
             BAASPoint point,
             uint8_t type = 1,
             int offset = 5,
-            const std::string &description = ""
+            const std::string& description = ""
     )
     {
         if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
@@ -111,7 +111,7 @@ public:
             double interval = 0.0,
             double pre_wait = 0.0,
             double post_wait = 0.0,
-            const std::string &description = ""
+            const std::string& description = ""
     )
     {
         if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
@@ -127,7 +127,7 @@ public:
             double interval = 0.0,
             double pre_wait = 0.0,
             double post_wait = 0.0,
-            const std::string &description = ""
+            const std::string& description = ""
     )
     {
         if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
@@ -180,7 +180,7 @@ public:
     }
 
     void wait_region_static(
-            const BAASRectangle &region,
+            const BAASRectangle& region,
             double frame_diff_ratio = 0.8,
             double min_static_time = 2,
             int min_frame_cnt = 5,
@@ -188,51 +188,51 @@ public:
     );
 
     void screenshot_cut(
-            const BAASRectangle &region,
-            cv::Mat &output
+            const BAASRectangle& region,
+            cv::Mat& output
     );
 
     void ocr_for_single_line(
-            const std::string &language,
-            TextLine &result,
-            const BAASRectangle &region = {0, 0, 1280, 720},
-            const std::string &log_content = std::string(),
-            const std::string &candidates = std::string());
+            const std::string& language,
+            TextLine& result,
+            const BAASRectangle& region = {0, 0, 1280, 720},
+            const std::string& log_content = std::string(),
+            const std::string& candidates = std::string());
 
     void ocr(
-            const std::string &language,
-            OcrResult &result,
-            const BAASRectangle &region = {0, 0, 1280, 720},
-            const std::string &candidates = std::string());
+            const std::string& language,
+            OcrResult& result,
+            const BAASRectangle& region = {0, 0, 1280, 720},
+            const std::string& candidates = std::string());
 
     bool feature_appear(
-            const std::string &feature_name,
-            BAASConfig &output,
+            const std::string& feature_name,
+            BAASConfig& output,
             bool show_log = false
     );
 
-    bool feature_appear(const std::string &feature_name);
+    bool feature_appear(const std::string& feature_name);
 
     void solve_procedure(
-            const std::string &procedure_name
+            const std::string& procedure_name
     );
     void solve_procedure(
-            const std::string &procedure_name,
+            const std::string& procedure_name,
             bool skip_first_screenshot
     );
     void solve_procedure(
-            const std::string &procedure_name,
-            const BAASConfig &output
+            const std::string& procedure_name,
+            const BAASConfig& output
     );
     void solve_procedure(
-            const std::string &procedure_name,
-            const BAASConfig &output,
+            const std::string& procedure_name,
+            const BAASConfig& output,
             bool skip_first_screenshot
     );
     void solve_procedure(
-            const std::string &procedure_name,
-            const BAASConfig &output,
-            const BAASConfig &patch
+            const std::string& procedure_name,
+            const BAASConfig& output,
+            const BAASConfig& patch
     );
 
     inline void reset_feature(const std::string& name) {

@@ -27,20 +27,22 @@ class BAASConfig {
 public:
     explicit BAASConfig() = default;
 
+    // init with raw json data
     explicit BAASConfig(
-            const nlohmann::json &j,
-            BAASLogger *logger
+            const nlohmann::json& j,
+            BAASLogger* logger
     );
 
+    // init with json path
     explicit BAASConfig(
-            const std::filesystem::path &path,
-            BAASLogger *logger
+            const std::filesystem::path& path,
+            BAASLogger* logger
     );
 
     // create a simple json read and write config with json path and logger
     explicit BAASConfig(
-            const std::string &path,
-            BAASLogger *logger
+            const std::string& path,
+            BAASLogger* logger
     );
 
     /*
@@ -53,9 +55,9 @@ public:
      * config_name / config.json or event.json
      *  create a config with unique logger for it
      */
-    explicit BAASConfig(const std::string &path);
+    explicit BAASConfig(const std::string& path);
 
-    void load();
+    explicit BAASConfig(const std::filesystem::path& path);
 
     void save();
 
@@ -110,8 +112,8 @@ public:
     }
 
     inline void getBAASConfig(
-            const std::string &key,
-            BAASConfig &output,
+            const std::string& key,
+            BAASConfig& output,
             BAASLogger* logger = (BAASLogger*)(BAASGlobalLogger)
     )   const
     {
@@ -303,7 +305,7 @@ public:
 
     // will throw exception if key not exist or data type mismatch
     template<typename T>
-    inline T get(const std::string &key) const
+    inline T get(std::string key) const
     {
         T default_value;
         assert(!key.empty());
@@ -577,6 +579,15 @@ public:
     }
 
 protected:
+
+    void _check_p(const std::filesystem::path &_p);
+
+    void _get_logger();
+
+    void _init_config();
+
+    void _init_modify_history();
+
     // findByKey key must exist
     inline nlohmann::json::iterator findByKey(const std::string& key)
     {
@@ -621,13 +632,13 @@ protected:
         }
     }
 
-    inline void preProcessValue()
+    inline void _preprocess_value()
     {
         std::string jp;
-        preprocess(jp, config);
+        _preprocess(jp, config);
     }
 
-    void preprocess(
+    void _preprocess(
             std::string& jp,
             nlohmann::json& value
     );
@@ -668,7 +679,7 @@ protected:
     BAASLogger* logger;
     nlohmann::json config, modified;
     std::filesystem::path path, modify_history_path;
-    std::string config_name;
+    std::string config_name, config_type;
 };
 
 extern BAASConfig* config_name_change;

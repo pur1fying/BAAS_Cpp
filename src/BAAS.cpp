@@ -31,7 +31,7 @@ bool BAAS::feature_appear(const string &feature_name)
     return feature_appear(feature_name, output, script_show_image_compare_log);
 }
 
-BAAS::BAAS(std::string &config_name)
+BAAS::BAAS(std::string& config_name)
 {
     logger = BAASLogger::get(config_name);
     logger->hr("BAAS Instance [ " + config_name + " ]");
@@ -39,7 +39,7 @@ BAAS::BAAS(std::string &config_name)
     std::filesystem::path temp = config_name;
     temp =  temp / "config.json";
 
-    config = new BAASUserConfig(temp.string());
+    config = new BAASUserConfig(temp);
     config->update_name();
     config->config_update();
     config->save();

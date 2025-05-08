@@ -43,12 +43,11 @@ void BAASFeature::load()
     }
     // load from image_info folder
     // data stored in json and load
-    string temp_path;
+    filesystem::path temp_path;
     int total_loaded = 0;
     for (const auto &entry: filesystem::recursive_directory_iterator(BAAS_FEATURE_DIR)) {
-        temp_path = entry.path()
-                         .string();
-        if (filesystem::is_regular_file(entry) && temp_path.ends_with(".json"))
+        temp_path = entry.path().string();
+        if (filesystem::is_regular_file(entry) && temp_path.extension().string() == ".json")
             total_loaded += load_from_json(temp_path);
     }
     BAASGlobalLogger->BAASInfo("Totally loaded [ " + to_string(total_loaded) + " ] features");
@@ -60,7 +59,7 @@ BAASFeature::BAASFeature()
     init_feature_ptr();
 }
 
-int BAASFeature::load_from_json(const string &path)
+int BAASFeature::load_from_json(const std::filesystem::path &path)
 {
     BAASConfig _feature(path, (BAASLogger *) BAASGlobalLogger);
     json j = _feature.get_config();
@@ -95,7 +94,7 @@ int BAASFeature::load_from_json(const string &path)
                 break;
         }
         if (f != nullptr) {
-            f->set_path(path);
+            f->set_path(path.string());
             f->set_name(i.key());
             features[i.key()] = std::unique_ptr<BaseFeature>(f);
             loaded++;

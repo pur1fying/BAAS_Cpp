@@ -62,22 +62,22 @@ void BAASProcedure::load()
     BAASGlobalLogger->BAASInfo("Totally loaded [ " + to_string(total_loaded) + " ] procedures");
 }
 
-int BAASProcedure::load_from_json(const std::string &path)
+int BAASProcedure::load_from_json(const std::filesystem::path& json_path)
 {
-    BAASConfig _feature(path, (BAASLogger *) BAASGlobalLogger);
+    BAASConfig _feature(json_path, (BAASLogger *) BAASGlobalLogger);
     json j = _feature.get_config();
     assert(j.is_object());
     BAASConfig *temp;
     int loaded = 0;
     for (auto &i: j.items()) {
-        temp = new BAASConfig(i.value(), (BAASLogger *) BAASGlobalLogger);
+        temp = new BAASConfig(i.value(), (BAASLogger*) BAASGlobalLogger);
         auto it = procedures.find(i.key());
         if (it != procedures.end()) {
             BAASGlobalLogger->BAASError("Procedure [ " + i.key() + " ] already exists");
             delete temp;
             continue;
         }
-        BaseProcedure *p = create_procedure(temp);
+        BaseProcedure* p = create_procedure(temp);
         if (p != nullptr) {
             procedures[i.key()] = p;
             loaded++;

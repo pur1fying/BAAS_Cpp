@@ -16,7 +16,12 @@ public:
 
     }
 
-    explicit BAASUserConfig(const std::string &path) : BAASConfig(path)
+    explicit BAASUserConfig(const std::string& path) : BAASConfig(path)
+    {
+
+    }
+
+    explicit BAASUserConfig(const std::filesystem::path& path) : BAASConfig(path)
     {
 
     }

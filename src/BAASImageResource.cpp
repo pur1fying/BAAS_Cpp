@@ -153,11 +153,11 @@ void BAASImageResource::load(
     }
     // load from image_info folder
     // data stored in json and load
-    string temp_path;
+    filesystem::path temp_path;
     int total_loaded = 0;
     for (const auto &entry: filesystem::recursive_directory_iterator(info_path)) {
         temp_path = entry.path().string();
-        if (filesystem::is_regular_file(entry) && temp_path.ends_with(".json"))
+        if (filesystem::is_regular_file(entry) && (temp_path.extension().string() == ".json"))
             total_loaded += load_from_json(server, language, temp_path);
     }
 
@@ -179,7 +179,7 @@ bool BAASImageResource::is_loaded(
 int BAASImageResource::load_from_json(
         const string &server,
         const string &language,
-        const string &json_path
+        const filesystem::path &json_path
 )
 {
     int successfully_loaded_cnt = 0;
