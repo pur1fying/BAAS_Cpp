@@ -7,19 +7,22 @@
 BAAS_NAMESPACE_BEGIN
 
 const std::map<std::string, BaseCondition::ConditionType> BaseCondition::condition_type_map = {
-        {"combined", COMBINED},
-        {"cost", COST},
-        {"skill_name", SKILL_NAME},
-        {"skill_cost", SKILL_COST},
-        {"acc_phase", ACC_PHASE},
-        {"auto_state", AUTO_STATE},
-        {"boss_health", BOSS_HEALTH}
+        {"combined"   ,  COMBINED},
+        {"cost"       ,  COST},
+        {"skill_name" ,  SKILL_NAME},
+        {"skill_cost" ,  SKILL_COST},
+        {"acc_phase"  ,  ACC_PHASE},
+        {"auto_state" ,  AUTO_STATE},
+        {"boss_health",  BOSS_HEALTH}
 };
 
-BaseCondition::BaseCondition(BAAS *baas, screenshot_data *data, const BAASConfig &config)
+BaseCondition::BaseCondition(BAAS* baas, screenshot_data* data, const BAASConfig& config)
 {
     this->config = BAASConfig(config.get_config(), baas->get_logger());
     this->data = data;
+    this->timeout = config.getLLong("timeout", BAAS_AUTO_FIGHT_CONDITION_DEFAULT_TIMEOUT);
+    this->baas = baas;
+    this->logger = baas->get_logger();
 }
 
 BaseCondition::~BaseCondition()

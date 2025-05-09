@@ -14,6 +14,8 @@
 #include "module/auto_fight/screenshot_data/AccelerationPhaseUpdater.h"
 #include "module/auto_fight/screenshot_data/AutoStateUpdater.h"
 
+#include "module/auto_fight/conditions/CostCondition.h"
+
 BAAS_NAMESPACE_BEGIN
 
 // Default skill recognition template
@@ -166,41 +168,9 @@ AutoFight::~AutoFight()
 
 void AutoFight::init_workflow(const std::filesystem::path &name)
 {
-
-    // consider chinese name
-    if(name.empty())  {
-        workflow_name = config->getString("/auto_fight/workflow_name");
-        workflow_path = config->getPath("/auto_fight/workflow_name").replace_extension(".json");
-    }
-    else {
-        std::filesystem::path temp = name;
-        workflow_name = name.string();
-        workflow_path = temp.replace_extension(".json");
-    }
-
-    workflow_path = BAAS_AUTO_FIGHT_WORKFLOW_DIR / workflow_path;
-    if(!std::filesystem::exists(workflow_path)) {
-        logger->BAASCritical("Workflow [ " + workflow_name + " ] do not exist. Please check your config.");
-        throw PathError("WorkFlow do not exist.");
-    }
-
-    logger->hr("Load WorkFlow");
-    logger->BAASInfo("Name : " + workflow_name);
-    logger->BAASInfo("Path : " + workflow_path.string());
-    latest_screenshot_d.d_fight = BAASConfig(workflow_path, logger);
-
-    // Skill
-    logger->sub_title("All Appeared Skills");
-    auto skill_names = latest_screenshot_d.d_fight.get<std::vector<std::string>>("/formation/all_appeared_skills");
-    for (int i = 0; i < skill_names.size(); ++i) {
-        latest_screenshot_d.skill_name_to_index_map[skill_names[i]] = i;
-        _init_single_skill_template(skill_names[i]);
-    }
-    latest_screenshot_d.slot_count = latest_screenshot_d.d_fight.getInt("/formation/slot_count", 3);
-    logger->BAASInfo("Slot Count : [ " + std::to_string(latest_screenshot_d.slot_count) + " ]");
-
-    latest_screenshot_d.skills.resize(latest_screenshot_d.slot_count);
-    latest_screenshot_d.each_slot_possible_templates.resize(latest_screenshot_d.slot_count);
+    _init_d_fight(name);
+    _init_skills();
+    _init_all_cond();
 }
 
 void AutoFight::_init_single_skill_template(std::string &skill_name)
@@ -285,17 +255,10 @@ void AutoFight::set_slot_possible_skill_idx(
     latest_screenshot_d.each_slot_possible_templates[slot_idx] = possible_skill_idx;
 }
 
-
-bool AutoFight::condition_appear(int idx)
+std::optional<uint64_t> AutoFight::cond_appear()
 {
 
-    return false;
-}
-
-bool AutoFight::condition_appear(const std::string &name)
-{
-
-    return false;
+    return std::nullopt;
 }
 
 void AutoFight::_init_cond_ptr()
@@ -306,6 +269,113 @@ void AutoFight::_init_cond_ptr()
 void AutoFight::_init_cond_timeout()
 {
 
+}
+
+void AutoFight::_init_d_fight(const std::filesystem::path &name)
+{
+    // consider chinese name
+    if(name.empty())  {
+        workflow_name = config->getString("/auto_fight/workflow_name");
+        workflow_path = config->getPath("/auto_fight/workflow_name").replace_extension(".json");
+    }
+    else {
+        std::filesystem::path temp = name;
+        workflow_name = name.string();
+        workflow_path = temp.replace_extension(".json");
+    }
+
+    workflow_path = BAAS_AUTO_FIGHT_WORKFLOW_DIR / workflow_path;
+    if(!std::filesystem::exists(workflow_path)) {
+        logger->BAASCritical("Workflow [ " + workflow_name + " ] do not exist. Please check your config.");
+        throw PathError("WorkFlow do not exist.");
+    }
+
+    logger->hr("Load WorkFlow");
+    logger->BAASInfo("Name : " + workflow_name);
+    logger->BAASInfo("Path : " + workflow_path.string());
+    latest_screenshot_d.d_fight = BAASConfig(workflow_path, logger);
+}
+
+void AutoFight::_init_skills()
+{
+    // Skill
+    logger->sub_title("Skills");
+    auto skill_names = latest_screenshot_d.d_fight.get<std::vector<std::string>>("/formation/all_appeared_skills");
+    for (int i = 0; i < skill_names.size(); ++i) {
+        latest_screenshot_d.skill_name_to_index_map[skill_names[i]] = i;
+        _init_single_skill_template(skill_names[i]);
+    }
+    latest_screenshot_d.slot_count = latest_screenshot_d.d_fight.getInt("/formation/slot_count", 3);
+    logger->BAASInfo("Slot Count : [ " + std::to_string(latest_screenshot_d.slot_count) + " ]");
+
+    latest_screenshot_d.skills.resize(latest_screenshot_d.slot_count);
+    latest_screenshot_d.each_slot_possible_templates.resize(latest_screenshot_d.slot_count);
+}
+
+void AutoFight::_init_all_cond()
+{
+    // Condition
+    logger->sub_title("Conditions");
+
+    _init_self_cond();
+}
+
+void AutoFight::_init_self_cond()
+{
+    // condition in this json file
+    BAASConfig all_conditions;
+    latest_screenshot_d.d_fight.getBAASConfig("/conditions", all_conditions, logger);
+    if(!all_conditions.get_config().is_object()) {
+        logger->BAASError("Elements of [ Conditions ] must be object.");
+        throw TypeError("Workflow file [ Conditions ] must be object.");
+    }
+    int suc_cnt = 0;
+    bool ret;
+    for (auto &cond : all_conditions.get_config().items()) {
+        ret = _init_single_cond(BAASConfig(cond.value(), logger));
+        if (ret) ++suc_cnt;
+    }
+
+    logger->BAASInfo("Successfully Load [ " + std::to_string(suc_cnt) + " ] Conditions");
+}
+
+bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
+{
+    if(!d_cond.contains("type")) {
+        logger->BAASInfo("Condition must contains [ type ].");
+        return false;
+    }
+    if(d_cond.value_type("type") != nlohmann::detail::value_t::string) {
+        logger->BAASInfo("[ type ] must be string.");
+        return false;
+    }
+
+    _cond_type = d_cond.getString("type");
+    if(!BaseCondition::is_condition_valid(_cond_type)) {
+        logger->BAASInfo("Invalid condition type [ " + _cond_type + " ]");
+        return false;
+    }
+
+    BaseCondition::ConditionType tp = BaseCondition::type_st_to_idx(_cond_type);
+    switch (tp) {
+        case BaseCondition::ConditionType::COST:
+            all_cond.push_back(std::make_unique<CostCondition>(baas, &latest_screenshot_d, d_cond));
+            break;
+        case BaseCondition::ConditionType::SKILL_COST:
+            break;
+        case BaseCondition::ConditionType::BOSS_HEALTH:
+            break;
+        case BaseCondition::ConditionType::ACC_PHASE:
+            break;
+        case BaseCondition::ConditionType::AUTO_STATE:
+            break;
+        case BaseCondition::COMBINED:
+            break;
+        case BaseCondition::SKILL_NAME:
+            break;
+    }
+
+    return true;
 }
 
 

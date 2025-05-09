@@ -69,10 +69,10 @@ int BAASOCR::init(
     }
 
     std::string key = "/ocr_model_name/" + language + "/";
-    std::string det = static_config->get(key + "det", std::string());
-    std::string cls = static_config->get(key + "cls", std::string());
-    std::string rec = static_config->get(key + "rec", std::string());
-    std::string keys = static_config->get(key + "dict", std::string());
+    std::string det = static_config->getString(key + "det", "");
+    std::string cls = static_config->getString(key + "cls", "");
+    std::string rec = static_config->getString(key + "rec", "");
+    std::string keys = static_config->getString(key + "dict", "");
 
     auto ocr = new OcrLite();
     BAASGlobalLogger->sub_title("OCR Init");

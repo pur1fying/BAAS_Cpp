@@ -76,7 +76,7 @@ public:
         try {
             j = config.at(nlohmann::json::json_pointer(key));
         }
-        catch (std::exception &e) {
+        catch (std::exception& e) {
             throw_key_error("Key [ " + key + " ] not found.");
         }
         if (!j.is_array()) {
@@ -85,7 +85,7 @@ public:
         return j.size();
     }
 
-    inline nlohmann::json::value_t value_type(const std::string &key) const
+    inline nlohmann::json::value_t value_type(const std::string& key) const
     {
         assert(!key.empty());
         if (key[0] != '/') {
@@ -96,19 +96,19 @@ public:
         try {
             return config.at(nlohmann::json::json_pointer(key)).type();
         }
-        catch (std::exception &e) {
+        catch (std::exception& e) {
             throw_key_error("Key [ " + key + " ] not found.");
         }
     }
 
-    inline bool contains(const std::string &key) const
+    inline bool contains(const std::string& key) const
     {
         assert(!key.empty());
         if (key[0] != '/') return config.contains(key);
         try {
             config.at(nlohmann::json::json_pointer(key));
             return true;
-        } catch (std::exception &e) { return false; }
+        } catch (std::exception& e) { return false; }
     }
 
     inline void getBAASConfig(
@@ -129,13 +129,13 @@ public:
         try {
             output = BAASConfig(config.at(nlohmann::json::json_pointer(key)), logger);
         }
-        catch (std::exception &e) {
+        catch (std::exception& e) {
             throw_key_error("Key [ " + key + " ] not found.");
         }
     }
 
     inline int getInt(
-            const std::string &key,
+            const std::string& key,
             int default_value = 0
     )   const
     {
@@ -143,7 +143,7 @@ public:
     }
 
     inline unsigned int getUInt(
-            const std::string &key,
+            const std::string& key,
             unsigned int default_value = 0
     )   const
     {
@@ -151,7 +151,7 @@ public:
     }
 
     inline uint8_t getUInt8(
-            const std::string &key,
+            const std::string& key,
             uint8_t default_value = 0
     )   const
     {
@@ -159,8 +159,8 @@ public:
     }
 
     inline cv::Vec3b getVec3b(
-            const std::string &key,
-            const cv::Vec3b &default_value = {0, 0, 0}
+            const std::string& key,
+            const cv::Vec3b& default_value = {0, 0, 0}
     )   const
     {
         if (contains(key)) {
@@ -178,7 +178,7 @@ public:
                         it[1].get<uint8_t>(),
                         it[2].get<uint8_t>()
                 };
-            } catch (std::exception &e) {
+            } catch (std::exception& e) {
                 return default_value;
             }
         }
@@ -186,23 +186,23 @@ public:
     }
 
     inline BAASPoint get_point(
-            const std::string &key,
-            const BAASPoint &default_value = {0, 0}
+            const std::string& key,
+            const BAASPoint& default_value = {0, 0}
     )   const
     {
         return get<BAASPoint>(key, default_value);
     }
 
     inline BAASRectangle get_rect(
-            const std::string &key,
-            const BAASRectangle &default_value = {0, 0, 0, 0}
+            const std::string& key,
+            const BAASRectangle& default_value = {0, 0, 0, 0}
     )   const
     {
         return get<BAASRectangle>(key, default_value);
     }
 
     inline long getLong(
-            const std::string &key,
+            const std::string& key,
             long default_value = 0
     )   const
     {
@@ -210,7 +210,7 @@ public:
     }
 
     inline unsigned long getULong(
-            const std::string &key,
+            const std::string& key,
             unsigned long default_value = 0
     )   const
     {
@@ -218,15 +218,23 @@ public:
     }
 
     inline long long getLLong(
-            const std::string &key,
+            const std::string& key,
             long long default_value = 0
     )   const
     {
         return get<long long>(key, default_value);
     }
 
+    inline nlohmann::json getJson(
+            const std::string& key,
+            const nlohmann::json& default_value = nlohmann::json()
+    )   const
+    {
+        return get<nlohmann::json>(key, default_value);
+    }
+
     inline float getFloat(
-            const std::string &key,
+            const std::string& key,
             float default_value = 0.0f
     )   const
     {
@@ -234,7 +242,7 @@ public:
     }
 
     inline double getDouble(
-            const std::string &key,
+            const std::string& key,
             double default_value = 0.0
     ) const
     {
@@ -242,16 +250,16 @@ public:
     }
 
     inline std::string getString(
-            const std::string &key,
-            const std::string &default_value = ""
+            const std::string& key,
+            const std::string& default_value = ""
     ) const
     {
         return get<std::string>(key, default_value);
     }
 
     inline std::filesystem::path getPath(
-            const std::string &key,
-            const std::filesystem::path &default_value = ""
+            const std::string& key,
+            const std::filesystem::path& default_value = ""
     )   const
     {
         std::string str_path = getString(key, default_value.string());
@@ -266,7 +274,7 @@ public:
     }
 
     inline bool getBool(
-            const std::string &key,
+            const std::string& key,
             bool default_value = false
     ) const
     {
@@ -305,7 +313,7 @@ public:
 
     // will throw exception if key not exist or data type mismatch
     template<typename T>
-    inline T get(std::string key) const
+    inline T get(const std::string& key) const
     {
         T default_value;
         assert(!key.empty());
@@ -338,8 +346,8 @@ public:
     */
     template<typename T>
     void replace(
-            const std::string &key,
-            T &value
+            const std::string& key,
+            T& value
     )
     {
         assert(!key.empty());
@@ -373,8 +381,8 @@ public:
 
     template<typename T>
     inline void replace_and_save(
-            const std::string &key,
-            T &value
+            const std::string& key,
+            T& value
     )
     {
         replace(key, value);
@@ -386,7 +394,7 @@ public:
     */
     template<typename T>
     void update(
-            const std::string &key,
+            const std::string& key,
             T value
     )
     {
@@ -414,7 +422,7 @@ public:
             return;
         }
         try {
-            nlohmann::json &j = config.at(nlohmann::json::json_pointer(key));
+            nlohmann::json& j = config.at(nlohmann::json::json_pointer(key));
             if (j != value) {
                 modified.push_back(
                         {{"op",    "replace"},
@@ -467,7 +475,7 @@ public:
             return;
         }
         try {
-            nlohmann::json &j = config.at(nlohmann::json::json_pointer(key));
+            nlohmann::json& j = config.at(nlohmann::json::json_pointer(key));
             if (j != value) {
                 modified.push_back(
                         {{"op",    "replace"},
@@ -477,7 +485,7 @@ public:
                 j = value;
             }
         }
-        catch (std::exception &e) {
+        catch (std::exception& e) {
             config[nlohmann::json::json_pointer(key)] = value;
             modified.push_back(
                     {{"op",    "add"},
@@ -487,7 +495,7 @@ public:
         }
     }
 
-    void update(const BAASConfig *patch)
+    void update(const BAASConfig* patch)
     {
         for (auto &i: patch->get_config().items())
             update_reference(i.key(), i.value());
@@ -495,7 +503,7 @@ public:
 
     template<typename T>
     inline void update_and_save(
-            const std::string &key,
+            const std::string& key,
             const T& value
     )
     {
@@ -580,7 +588,7 @@ public:
 
 protected:
 
-    void _check_p(const std::filesystem::path &_p);
+    void _check_p(const std::filesystem::path& _p);
 
     void _get_logger();
 

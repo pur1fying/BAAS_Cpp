@@ -5,6 +5,8 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_CONDITIONS_BASECONDITION_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_CONDITIONS_BASECONDITION_H_
 
+#define BAAS_AUTO_FIGHT_CONDITION_DEFAULT_TIMEOUT 5000
+
 #include <config/BAASConfig.h>
 #include <BAAS.h>
 
@@ -13,8 +15,8 @@
 BAAS_NAMESPACE_BEGIN
 
 class BaseCondition {
-
 public:
+
     enum ConditionType {
         COMBINED,
         COST,
@@ -25,7 +27,17 @@ public:
         BOSS_HEALTH
     };
 
-    BaseCondition(BAAS*baas, screenshot_data* data, const BAASConfig& config);
+    static bool is_condition_valid(const std::string& type) {
+        return condition_type_map.find(type) != condition_type_map.end();
+    }
+
+    static ConditionType type_st_to_idx(const std::string& type) {
+        auto it = condition_type_map.find(type);
+        if (it != condition_type_map.end()) return it->second;
+        throw TypeError("Invalid ConditionType : [ " + type + " ]");
+    }
+
+    BaseCondition(BAAS* baas, screenshot_data* data, const BAASConfig& config);
 
     virtual std::optional<bool> try_match();
 
@@ -51,14 +63,15 @@ public:
         return !and_conditions.empty();
     }
 
-private:
+protected:
+    BAAS* baas;
+    BAASLogger* logger;
+    screenshot_data* data;
+    BAASConfig config;
+
     static const std::map<std::string, BaseCondition::ConditionType> condition_type_map;
 
     bool _is_primitive;
-
-    screenshot_data* data;
-
-    BAASConfig config;
 
     std::vector<uint64_t> or_conditions;
     std::vector<uint64_t> and_conditions;

@@ -24,11 +24,26 @@ public:
         INCREASE,
         DECREASE
     };
+
+    void reset_state() override;
+
     const static std::map<std::string, Op> op_map;
 
     std::optional<bool> try_match() override;
 
 private:
+
+    void _parse_config_value();
+
+    void _parse_config_range();
+
+    void _parse_op();
+
+    Op _op;
+
+    bool _reset_cost;
+
+    double _value, _range_min, _range_max;
 
     std::optional<double> _last_recorded_cost;
 

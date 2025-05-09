@@ -67,15 +67,23 @@ public:
         latest_screenshot_d.skill_cost_update_flag = flag;
     }
 
-    bool condition_appear(int idx);
-
-    bool condition_appear(const std::string& name);
+    std::optional<uint64_t> cond_appear();
 
     const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
 
     const static std::string template_j_ptr_prefix;
 
 private:
+
+    void _init_d_fight(const std::filesystem::path& name);
+
+    void _init_skills();
+
+    void _init_all_cond();
+
+    void _init_self_cond();
+
+    bool _init_single_cond(const BAASConfig& d_cond);
 
     void _init_single_skill_template(std::string &skill_name);
 
@@ -126,11 +134,15 @@ BEGIN_AUTO_FIGHT_CONDITIONS
 
     void _init_cond_timeout();
 
-    std::vector<std::unique_ptr<BaseCondition>> all_conditions;
+    // currently judging condition idx
+    std::vector<uint64_t> cond_wait_to_judge_idx;
+
+    std::string _cond_type;
+
+    std::vector<std::unique_ptr<BaseCondition>> all_cond;
 
     // name to index in all_conditions
-    std::map<std::string, uint64_t> condition_name_map;
-
+    std::map<std::string, uint64_t> cond_name_map;
 
 END_AUTO_FIGHT_CONDITIONS
 

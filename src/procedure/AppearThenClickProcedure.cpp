@@ -50,7 +50,7 @@ void AppearThenClickProcedure::implement(
 
     bool show_log = baas->script_show_image_compare_log;
 
-    if (end.is_array() or end.is_object()) { for (auto &i: end)if (i.is_string())end_feature_names.push_back(i); }
+    if (end.is_array() or end.is_object()) { for (auto &i: end) if (i.is_string())end_feature_names.push_back(i); }
     else if (end.is_string()) { end_feature_names.push_back(end); }
 
     json possible = possible_feature->get<json>("possibles", json::array());

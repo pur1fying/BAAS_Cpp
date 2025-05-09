@@ -24,8 +24,29 @@
       "phase5": 323657
     }
   },
-  "start_state": [
-
-  ]
-
+  "conditions": {
+    "cost_over_5": {
+      "type": "cost",
+      "op": "over",
+      "value": 5,
+      "timeout": 3000
+    },
+    "cost_below_3": {
+      "type": "cost",
+      "op": "below",
+      "value": 3,
+      "timeout": 3000
+    },
+    "cost_increase_6": {
+      "type": "cost",
+      "op": "increase",
+      "value": 6,
+      "timeout": 3000
+    },
+    "cost_decrease_2.5": {
+      "type": "cost",
+      "op": "decrease",
+      "value": 2.5
+    }
+  }
 }

@@ -16,12 +16,12 @@ public:
 
     inline int ocr_gpu_id() noexcept
     {
-        return get("/ocr/gpu_id", -1);
+        return getInt("/ocr/gpu_id", -1);
     }
 
     inline int ocr_num_thread() noexcept
     {
-        return get("/ocr/num_thread", 4);
+        return getInt("/ocr/num_thread", 4);
     }
 
 private:
