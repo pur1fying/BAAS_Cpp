@@ -15,7 +15,7 @@
     ],
     "borrow": ""
   },
-  "start_state": "1",
+  "start_state": "state_release_skill_1",
   "states": {
     "state_release_skill_1": {
       "transitions": [
@@ -23,10 +23,12 @@
           "condition": "cost_over_5",
           "next": "state_check_boss_health_after_release_skill_1"
         }
-      ]
+      ],
+      "desc": "release skill 1"
     },
     "state_check_boss_health_after_release_skill_1": {
-      "default_transition": "state_release_skill_2"
+      "default_transition": "state_release_skill_2",
+      "desc": "check boss health after release skill 1"
     },
     "state_release_skill_2": {
       "transitions": [
@@ -35,7 +37,11 @@
           "next": "state_check_boss_health_after_release_skill_1"
         }
       ],
-      "default_transition": "non-exist-state"
+      "default_transition": "end",
+      "desc": "release skill 2"
+    },
+    "end": {
+
     }
   },
   "conditions": {

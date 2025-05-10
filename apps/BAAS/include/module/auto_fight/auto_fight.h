@@ -176,7 +176,7 @@ private:
 
     void _init_self_state();
 
-    bool _init_single_state(const BAASConfig& d_state);
+    bool _init_single_state(const BAASConfig& d_state, const std::string& state_name);
 
     void _conv_tans_state_name_st_to_idx();
 

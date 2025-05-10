@@ -16,7 +16,9 @@ std::filesystem::path GlobalLogger::folder_path;
 
 GlobalLogger *GlobalLogger::global_logger = nullptr;
 
-string BAAS_LOGGER_HR_LINE = std::string(80, '-');
+const string BAAS_LOGGER_HR_LINE = std::string(80, '-');
+
+const string BAAS_LOGGER_DIVIDER_LINE = std::string(80, '=');
 
 void gen_hr_msg(
         const string &msg,

@@ -18,11 +18,13 @@
 
 BAAS_NAMESPACE_BEGIN
 
-extern std::string BAAS_LOGGER_HR_LINE;
+extern const std::string BAAS_LOGGER_HR_LINE;
+
+extern const std::string BAAS_LOGGER_DIVIDER_LINE;
 
 void gen_hr_msg(
-        const std::string &msg,
-        std::string &out
+        const std::string& msg,
+        std::string& out
 );
 
 class GlobalLogger {
@@ -34,7 +36,7 @@ public:
             fileLogger->flush();
     }
 
-    static GlobalLogger *getGlobalLogger();
+    static GlobalLogger* getGlobalLogger();
 
     inline void Path(const std::filesystem::path& path, const int level=2)
     {
@@ -47,19 +49,24 @@ public:
 #endif
     }
 
-    inline void BAASTrace(const std::string &message)
+    inline void BAASLine() {
+        if (enable & 0b1) consoleLogger->info(BAAS_LOGGER_DIVIDER_LINE);
+        if (enable & 0b10)fileLogger->info(BAAS_LOGGER_DIVIDER_LINE);
+    }
+
+    inline void BAASTrace(const std::string& message)
     {
         if (enable & 0b1) consoleLogger->trace(message);
         if (enable & 0b10)fileLogger->trace(message);
     }
 
-    inline void BAASTrance(const std::string &message)
+    inline void BAASTrance(const std::string& message)
     {
         if (enable & 0b1) consoleLogger->trace(message);
         if (enable & 0b10)fileLogger->trace(message);
     }
 
-    inline void BAASTrance(const std::vector<std::string> &messages)
+    inline void BAASTrance(const std::vector<std::string>& messages)
     {
         for (auto &message: messages) {
             if (enable & 0b1)consoleLogger->trace(message);
@@ -67,13 +74,13 @@ public:
         }
     }
 
-    inline void BAASDebug(const std::string &message)
+    inline void BAASDebug(const std::string& message)
     {
         if (enable & 0b1) consoleLogger->debug(message);
         if (enable & 0b10) fileLogger->debug(message);
     }
 
-    inline void BAASDebug(const std::vector<std::string> &messages)
+    inline void BAASDebug(const std::vector<std::string>& messages)
     {
         for (auto &message: messages) {
             if (enable & 0b1) consoleLogger->debug(message);
@@ -81,13 +88,13 @@ public:
         }
     }
 
-    inline void BAASWarn(const std::string &message)
+    inline void BAASWarn(const std::string& message)
     {
         if (enable & 0b1) consoleLogger->warn(message);
         if (enable & 0b10) fileLogger->warn(message);
     }
 
-    inline void BAASWarn(const std::vector<std::string> &messages)
+    inline void BAASWarn(const std::vector<std::string>& messages)
     {
         for (auto &message: messages) {
             if (enable & 0b1) consoleLogger->warn(message);
@@ -95,13 +102,13 @@ public:
         }
     }
 
-    inline void BAASInfo(const std::string &message)
+    inline void BAASInfo(const std::string& message)
     {
         if (enable & 0b1) consoleLogger->info(message);
         if (enable & 0b10) fileLogger->info(message);
     }
 
-    inline void BAASInfo(const std::vector<std::string> &messages)
+    inline void BAASInfo(const std::vector<std::string>& messages)
     {
         for (auto &message: messages) {
             if (enable & 0b1) consoleLogger->info(message);
@@ -109,13 +116,13 @@ public:
         }
     }
 
-    inline void BAASError(const std::string &message)
+    inline void BAASError(const std::string& message)
     {
         if (enable & 0b1) consoleLogger->error(message);
         if (enable & 0b10) fileLogger->error(message);
     }
 
-    inline void BAASError(const std::vector<std::string> &messages)
+    inline void BAASError(const std::vector<std::string>& messages)
     {
         for (auto &message: messages) {
             if (enable & 0b1) consoleLogger->error(message);
@@ -123,13 +130,13 @@ public:
         }
     }
 
-    inline void BAASCritical(const std::string &message)
+    inline void BAASCritical(const std::string& message)
     {
         if (enable & 0b1) consoleLogger->critical(message);
         if (enable & 0b10) fileLogger->critical(message);
     }
 
-    inline void BAASCritical(const std::vector<std::string> &messages)
+    inline void BAASCritical(const std::vector<std::string>& messages)
     {
         for (auto &message: messages) {
             if (enable & 0b1) consoleLogger->critical(message);
@@ -137,7 +144,7 @@ public:
         }
     }
 
-    inline void hr(const std::string &message)
+    inline void hr(const std::string& message)
     {
         std::string msg;
         gen_hr_msg(message, msg);
@@ -153,7 +160,7 @@ public:
         }
     }
 
-    inline void sub_title(const std::string &message)
+    inline void sub_title(const std::string& message)
     {
         std::string msg = "<<< " + message + " >>>";
         if (enable & 0b1) consoleLogger->info(msg);
@@ -176,7 +183,7 @@ public:
     {
         return folder_path;
     }
-    inline void _out(const std::string &message, const int level)
+    inline void _out(const std::string& message, const int level)
     {
         switch (level) {
             case 0:
@@ -206,7 +213,7 @@ public:
 private:
     static std::filesystem::path folder_path;
 
-    static GlobalLogger *global_logger;
+    static GlobalLogger* global_logger;
 
     GlobalLogger();
 
@@ -221,23 +228,23 @@ private:
     friend class BAASLogger;
 };
 
-extern GlobalLogger *BAASGlobalLogger;
+extern GlobalLogger* BAASGlobalLogger;
 
 /*
  * each config file has it's unique logger
  */
 class BAASLogger : public GlobalLogger {
 public:
-    static BAASLogger *get(const std::string &name);
+    static BAASLogger* get(const std::string& name);
 
 private:
-    explicit BAASLogger(const std::string &name);
+    explicit BAASLogger(const std::string& name);
 
     ~BAASLogger();
 
     std::string filename;
 
-    static std::map<std::string, BAASLogger *> instances;
+    static std::map<std::string, BAASLogger*> instances;
 
 };
 

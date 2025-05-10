@@ -52,6 +52,8 @@ struct state_info {
     std::vector<trans_info> transitions;
     std::optional<uint64_t> default_trans;
 
+    std::string desc;
+    std::string name;
     state_info() = default;
 };
 
