@@ -17,8 +17,25 @@
   },
   "start_state": "1",
   "states": {
-    "1": {
-
+    "state_release_skill_1": {
+      "transitions": [
+        {
+          "condition": "cost_over_5",
+          "next": "state_check_boss_health_after_release_skill_1"
+        }
+      ]
+    },
+    "state_check_boss_health_after_release_skill_1": {
+      "default_transition": "state_release_skill_2"
+    },
+    "state_release_skill_2": {
+      "transitions": [
+        {
+          "condition": "cost_below_10",
+          "next": "state_check_boss_health_after_release_skill_1"
+        }
+      ],
+      "default_transition": "non-exist-state"
     }
   },
   "conditions": {

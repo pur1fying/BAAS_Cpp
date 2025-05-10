@@ -415,7 +415,6 @@ bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
         case BaseCondition::SKILL_NAME:
             break;
     }
-
     return true;
 }
 
@@ -442,6 +441,8 @@ void AutoFight::_init_all_state()
     _init_self_state();
 
     _init_start_state();
+
+    _conv_tans_state_name_st_to_idx();
 }
 
 void AutoFight::_init_self_state()
@@ -473,7 +474,78 @@ void AutoFight::_init_self_state()
 
 bool AutoFight::_init_single_state(const BAASConfig &d_state)
 {
-    return false;
+    state_info _state;
+
+    // action
+    std::string act = d_state.getString("action", "");
+    if (act.empty()) _state.act_id = std::nullopt;
+    // action is not implemented now
+    // TODO:: check action
+
+    std::vector<std::string> _trans_next_state_name_recoder;
+    if(d_state.contains("transitions")) {
+        BAASConfig _t_transitions;
+        d_state.getBAASConfig("transitions", _t_transitions, logger);
+        if(!_t_transitions.get_config().is_array())  {
+            logger->BAASInfo("In a single state, [ transitions ] must be an array.");
+            return false;
+        }
+        for (auto &trans : _t_transitions.get_config()) {
+            auto it = trans.find("condition");
+            if(it == trans.end()) {
+                logger->BAASInfo("transition must contain key [ condition ].");
+                return false;
+            }
+
+            if(!it->is_string()) {
+                logger->BAASInfo("In a single transition, value of [ condition ] must be string.");
+                return false;
+            }
+
+            std::string _t_st = *it;
+
+            if (cond_name_idx_map.find(_t_st) == cond_name_idx_map.end()) {
+                logger->BAASInfo("Condition [ " + _t_st + " ] not found.");
+                return false;
+            }
+
+            it = trans.find("next");
+
+            if(it == trans.end()) {
+                logger->BAASInfo("transition must contain key [ next ].");
+                return false;
+            }
+
+            if(!it->is_string()) {
+                logger->BAASInfo("In a single transition, value of [ next ] must be string.");
+                return false;
+            }
+
+            _state.transitions.push_back({cond_name_idx_map[_t_st], 0});
+            _trans_next_state_name_recoder.push_back(*it);
+        }
+
+    }
+
+    // transitions
+
+    // "next" and "default_transition" int64_value should not be init here
+    if(d_state.contains("default_transition"))  {
+        if(d_state.value_type("default_transition") != nlohmann::detail::value_t::string) {
+            logger->BAASInfo("In a single state, value of [ default_transition ] must be string.");
+            return false;
+        }
+        _state_default_trans_name_recorder.emplace_back(d_state.getString("default_transition"));
+    }
+    else {
+        // do not have default transition
+        _state_default_trans_name_recorder.push_back(std::nullopt);
+    }
+
+    _state_trans_name_recorder.push_back(_trans_next_state_name_recoder);
+
+    all_states.push_back(_state);
+    return true;
 }
 
 // start state
@@ -495,6 +567,36 @@ void AutoFight::_init_start_state()
     logger->BAASInfo("Name  : [ " + start_state_name + " ]");
     logger->BAASInfo("Index : [ " + std::to_string(curr_state_idx) + " ]");
 
+}
+
+void AutoFight::_conv_tans_state_name_st_to_idx()
+{
+
+    for (int i = 0; i < all_states.size(); ++i) {
+        // convert transitions
+
+        for(int j = 0; j < all_states[i].transitions.size(); ++j) {
+            auto _trans_next_state_name_it = state_name_idx_map.find(_state_trans_name_recorder[i][j]);
+            if (_trans_next_state_name_it == state_name_idx_map.end()) {
+                logger->BAASError("Undefined state name [ " + _trans_next_state_name_it->first + " ] found in transitions.");
+                throw ValueError("Invalid State Name.");
+            }
+            all_states[i].transitions[j].next_sta_idx = _trans_next_state_name_it->second;
+        }
+
+        // convert default transitions
+        if (_state_default_trans_name_recorder[i].has_value()) {
+            auto _default_trans_state_name_it = state_name_idx_map.find(_state_default_trans_name_recorder[i].value());
+            if(state_name_idx_map.find(_state_default_trans_name_recorder[i].value()) == state_name_idx_map.end()) {
+                logger->BAASError("Undefined state name [ " + _default_trans_state_name_it->first + " ] found in default transitions.");
+                throw ValueError("Invalid State Name.");
+            }
+            all_states[i].default_trans = _default_trans_state_name_it->second;
+        }
+    }
+
+    _state_trans_name_recorder.clear();
+    _state_default_trans_name_recorder.clear();
 }
 
 BAAS_NAMESPACE_END

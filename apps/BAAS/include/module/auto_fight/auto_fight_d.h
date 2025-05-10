@@ -48,10 +48,11 @@ struct trans_info {
 
 
 struct state_info {
-    std::string name;
-    uint64_t act_id;
+    std::optional<uint64_t> act_id;
     std::vector<trans_info> transitions;
-    uint64_t default_tans;
+    std::optional<uint64_t> default_trans;
+
+    state_info() = default;
 };
 
 struct auto_fight_d {

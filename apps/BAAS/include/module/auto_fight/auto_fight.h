@@ -178,7 +178,12 @@ private:
 
     bool _init_single_state(const BAASConfig& d_state);
 
+    void _conv_tans_state_name_st_to_idx();
+
     std::vector<state_info> all_states;
+
+    std::vector<std::vector<std::string>> _state_trans_name_recorder;
+    std::vector<std::optional<std::string>> _state_default_trans_name_recorder;
 
     std::map<std::string, uint64_t> state_name_idx_map;
 
