@@ -14,12 +14,21 @@ const std::map<std::string, CostCondition::Op> CostCondition::op_map = {
         {"decrease", DECREASE}
 };
 
+const std::vector<std::string> CostCondition::op_to_st = {
+        "over",
+        "below",
+        "in_range",
+        "increase",
+        "decrease"
+};
+
 CostCondition::CostCondition(
         BAAS* baas,
-        screenshot_data* data,
+        auto_fight_d* data,
         const BAASConfig& config
 ) : BaseCondition(baas, data, config)
 {
+    type = COST;
     _parse_op();
 }
 
@@ -118,6 +127,23 @@ void CostCondition::_parse_config_range()
     }
     _range_min = j[0];
     _range_max = j[1];
+}
+
+void CostCondition::display() const noexcept
+{
+    _display_basic_info();
+    logger->BAASInfo("Op      : [ " + op_to_st[_op] + " ]");
+    switch (_op) {
+        case IN_RANGE:
+            logger->BAASInfo("Range   : [ " + std::to_string(_range_min) + ", " + std::to_string(_range_max) + " ]");
+            break;
+        case OVER:
+        case BELOW:
+        case INCREASE:
+        case DECREASE:
+            logger->BAASInfo("Value   : [ " + std::to_string(_value) + " ]");
+            break;
+    }
 }
 
 

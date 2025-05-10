@@ -9,7 +9,7 @@ BAAS_NAMESPACE_BEGIN
 
 AccelerationPhaseUpdater::AccelerationPhaseUpdater(
         BAAS *baas,
-        screenshot_data *data
+        auto_fight_d *data
 ) : BaseDataUpdater(baas, data)
 {
     acc_feature_ptrs.push_back(nullptr);

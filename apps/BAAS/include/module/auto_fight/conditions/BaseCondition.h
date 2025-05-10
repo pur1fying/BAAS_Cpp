@@ -10,11 +10,12 @@
 #include <config/BAASConfig.h>
 #include <BAAS.h>
 
-#include "module/auto_fight/screenshot_data/screenshot_data_recoder.h"
+#include "module/auto_fight/auto_fight_d.h"
 
 BAAS_NAMESPACE_BEGIN
 
 class BaseCondition {
+
 public:
 
     enum ConditionType {
@@ -28,31 +29,61 @@ public:
     };
 
     static bool is_condition_valid(const std::string& type) {
-        return condition_type_map.find(type) != condition_type_map.end();
+        return cond_type_map.find(type) != cond_type_map.end();
     }
 
     static ConditionType type_st_to_idx(const std::string& type) {
-        auto it = condition_type_map.find(type);
-        if (it != condition_type_map.end()) return it->second;
+        auto it = cond_type_map.find(type);
+        if (it != cond_type_map.end()) return it->second;
         throw TypeError("Invalid ConditionType : [ " + type + " ]");
     }
 
-    BaseCondition(BAAS* baas, screenshot_data* data, const BAASConfig& config);
+    BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config);
 
     virtual std::optional<bool> try_match();
 
     virtual void reset_state();
 
-    virtual void display();
+    virtual void set_d_update_flag();
 
     virtual ~BaseCondition();
+
+    virtual void display() const noexcept;
+
+    void set_and_cond(const std::vector<uint64_t>& and_cond) {
+        and_conditions = and_cond;
+    }
+
+    void set_or_cond(const std::vector<uint64_t>& or_cond) {
+        or_conditions = or_cond;
+    }
+
+    inline const std::vector<uint64_t>& get_and_cond() const noexcept {
+        return and_conditions;
+    }
+
+    inline const std::vector<uint64_t>& get_or_cond() const noexcept {
+        return or_conditions;
+    }
+
+    inline const std::vector<std::string> get_or_cond_st() const noexcept {
+        return config.get<std::vector<std::string>>("or", {});
+    }
+
+    inline const std::vector<std::string> get_and_cond_st() const noexcept {
+        return config.get<std::vector<std::string>>("and", {});
+    }
 
     inline bool is_primitive() const noexcept {
         return _is_primitive;
     }
 
-    inline std::optional<bool> is_matched() {
+    inline std::optional<bool> is_matched() const noexcept {
         return _is_matched;
+    }
+
+    inline bool  is_pending() const noexcept {
+        return !_is_matched.has_value();
     }
 
     inline bool has_or_cond() const noexcept {
@@ -63,13 +94,19 @@ public:
         return !and_conditions.empty();
     }
 
+
+
 protected:
+
+    void _display_basic_info() const noexcept;
+
     BAAS* baas;
     BAASLogger* logger;
-    screenshot_data* data;
+    auto_fight_d* data;
     BAASConfig config;
 
-    static const std::map<std::string, BaseCondition::ConditionType> condition_type_map;
+    static const std::map<std::string, BaseCondition::ConditionType> cond_type_map;
+    static const std::vector<std::string> cond_type_st_list;
 
     bool _is_primitive;
 
@@ -81,6 +118,8 @@ protected:
     long long cond_j_start_t;
 
     long long timeout;
+
+    ConditionType type;
 
     std::string name;
 

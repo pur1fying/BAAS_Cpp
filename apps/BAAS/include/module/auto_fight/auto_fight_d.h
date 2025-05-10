@@ -7,9 +7,9 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include <opencv2/opencv.hpp>
+#include "opencv2/opencv.hpp"
 
-#include <config/BAASConfig.h>
+#include "config/BAASConfig.h"
 
 #include "core_defines.h"
 
@@ -41,7 +41,20 @@ struct skill_template {
     std::vector<template_info> skill_inactive_templates;
 };
 
-struct screenshot_data {
+struct trans_info {
+    uint64_t cond_idx;
+    uint64_t next_sta_idx;
+};
+
+
+struct state_info {
+    std::string name;
+    uint64_t act_id;
+    std::vector<trans_info> transitions;
+    uint64_t default_tans;
+};
+
+struct auto_fight_d {
 
     // boss health
     std::optional<long long> boss_current_health;
@@ -91,6 +104,7 @@ struct screenshot_data {
         }
     }
 };
+
 
 BAAS_NAMESPACE_END
 

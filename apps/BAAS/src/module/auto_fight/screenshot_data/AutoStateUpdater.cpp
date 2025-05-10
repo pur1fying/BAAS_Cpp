@@ -9,7 +9,7 @@ BAAS_NAMESPACE_BEGIN
 
 AutoStateUpdater::AutoStateUpdater(
         BAAS *baas,
-        screenshot_data *data
+        auto_fight_d *data
 ) : BaseDataUpdater(baas, data)
 {
     std::vector<std::string> feature_names = {

@@ -39,36 +39,36 @@ AutoFight::AutoFight(BAAS *baas)
 }
 
 // Add data updaters here
-void AutoFight::init_data_updaters()
+void AutoFight::_init_data_updaters()
 {
     // BIT [ 1 ]
     // cost
-    d_updaters.push_back(std::make_unique<CostUpdater>(baas, &latest_screenshot_d));
+    d_updaters.push_back(std::make_unique<CostUpdater>(baas, &d_auto_f));
     d_updater_map["cost"] = 1LL << 0;
 
     // BIT [ 2 ]
     // boss health
-    d_updaters.push_back(std::make_unique<BossHealthUpdater>(baas, &latest_screenshot_d));
+    d_updaters.push_back(std::make_unique<BossHealthUpdater>(baas, &d_auto_f));
     d_updater_map["boss_health"] = 1LL << 1;
 
     // BIT [ 3 ]
     // skill name
-    d_updaters.push_back(std::make_unique<SkillNameUpdater>(baas, &latest_screenshot_d));
+    d_updaters.push_back(std::make_unique<SkillNameUpdater>(baas, &d_auto_f));
     d_updater_map["skill_name"] = 1LL << 2;
 
     // BIT [ 4 ]
     // skill cost
-    d_updaters.push_back(std::make_unique<SkillCostUpdater>(baas, &latest_screenshot_d));
+    d_updaters.push_back(std::make_unique<SkillCostUpdater>(baas, &d_auto_f));
     d_updater_map["skill_cost"] = 1LL << 3;
 
     // BIT [ 5 ]
     // acc phase
-    d_updaters.push_back(std::make_unique<AccelerationPhaseUpdater>(baas, &latest_screenshot_d));
+    d_updaters.push_back(std::make_unique<AccelerationPhaseUpdater>(baas, &d_auto_f));
     d_updater_map["acc_phase"] = 1LL << 4;
 
     // BIT [ 6 ]
     // auto state
-    d_updaters.push_back(std::make_unique<AutoStateUpdater>(baas, &latest_screenshot_d));
+    d_updaters.push_back(std::make_unique<AutoStateUpdater>(baas, &d_auto_f));
     d_updater_map["auto_state"] = 1LL << 5;
 
 }
@@ -149,7 +149,7 @@ void AutoFight::submit_data_updater_task(AutoFight *self, unsigned char idx)
                             "update | Time: " + std::to_string(end_t - start_t) + "ms");
 }
 
-void AutoFight::display_data()
+void AutoFight::display_screenshot_extracted_data()
 {
     for (int i = 0; i <= d_updaters.size(); ++i)
         if ((1LL << i) & d_updater_mask)
@@ -171,6 +171,8 @@ void AutoFight::init_workflow(const std::filesystem::path &name)
     _init_d_fight(name);
     _init_skills();
     _init_all_cond();
+    _init_data_updaters();
+
 }
 
 void AutoFight::_init_single_skill_template(std::string &skill_name)
@@ -218,11 +220,11 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
     }
 
     logger->BAASInfo("Skill Name: [ " + skill_name + " ]");
-    logger->BAASInfo("Index     : [ " + std::to_string( latest_screenshot_d.all_possible_skills.size()) + " ]");
+    logger->BAASInfo("Index     : [ " + std::to_string(d_auto_f.all_possible_skills.size()) + " ]");
     logger->BAASInfo("Active    : [ " + std::to_string(_template.skill_active_templates.size()) + " ]");
     logger->BAASInfo("Inactive  : [ " + std::to_string(_template.skill_inactive_templates.size()) + " ]");
 
-    latest_screenshot_d.all_possible_skills.push_back(_template);
+    d_auto_f.all_possible_skills.push_back(_template);
 }
 
 void AutoFight::set_skill_slot_possible_templates(
@@ -230,11 +232,11 @@ void AutoFight::set_skill_slot_possible_templates(
         const std::vector<int> &possible_templates
 )
 {
-    if (skill_idx < 0 || skill_idx >= latest_screenshot_d.skills.size()) {
+    if (skill_idx < 0 || skill_idx >= d_auto_f.skills.size()) {
         logger->BAASWarn("Invalid skill index: " + std::to_string(skill_idx));
         return;
     }
-    latest_screenshot_d.each_slot_possible_templates[skill_idx] = possible_templates;
+    d_auto_f.each_slot_possible_templates[skill_idx] = possible_templates;
 }
 
 void AutoFight::set_slot_possible_skill_idx(
@@ -242,17 +244,17 @@ void AutoFight::set_slot_possible_skill_idx(
         const std::vector<int> &possible_skill_idx
 )
 {
-    if (slot_idx < 0 || slot_idx >= latest_screenshot_d.skills.size()) {
+    if (slot_idx < 0 || slot_idx >= d_auto_f.skills.size()) {
         logger->BAASError("Invalid slot index : [ " + std::to_string(slot_idx) + " ]");
         return;
     }
     for (auto &idx : possible_skill_idx) {
-        if (idx < 0 || idx >= latest_screenshot_d.all_possible_skills.size()) {
+        if (idx < 0 || idx >= d_auto_f.all_possible_skills.size()) {
             logger->BAASError("Invalid skill index : [ " + std::to_string(idx) + " ]");
             return;
         }
     }
-    latest_screenshot_d.each_slot_possible_templates[slot_idx] = possible_skill_idx;
+    d_auto_f.each_slot_possible_templates[slot_idx] = possible_skill_idx;
 }
 
 std::optional<uint64_t> AutoFight::cond_appear()
@@ -261,14 +263,43 @@ std::optional<uint64_t> AutoFight::cond_appear()
     return std::nullopt;
 }
 
-void AutoFight::_init_cond_ptr()
+void AutoFight::_init_cond_and_or_idx()
 {
+    logger->sub_title("Init Condition And / Or Index.");
+    // convert st --> idx
+    std::vector<uint64_t> _t_idx;
+    std::vector<std::string> _t_st;
+    for (int i = 0; i < all_cond.size(); ++i) {
+        // and cond index
+        _t_idx.clear();
+        _t_st = all_cond[i]->get_and_cond_st();
+        for (const auto &st : _t_st) {
+            if (cond_name_idx_map.find(st) == cond_name_idx_map.end()) {
+                logger->BAASWarn("Condition [ " + std::to_string(i) +" ] And Cond [ " + st + " ] not found.");
+                continue;
+            }
+            _t_idx.push_back(cond_name_idx_map[st]);
+        }
+        all_cond[i]->set_and_cond(_t_idx);
 
+        // or cond index
+        _t_idx.clear();
+        _t_st = all_cond[i]->get_or_cond_st();
+        for (const auto &st : _t_st) {
+            if (cond_name_idx_map.find(st) == cond_name_idx_map.end()) {
+                logger->BAASWarn("Condition [ " + std::to_string(i) +" ] Or Cond [ " + st + " ] not found.");
+                continue;
+            }
+            _t_idx.push_back(cond_name_idx_map[st]);
+        }
+        all_cond[i]->set_or_cond(_t_idx);
+    }
 }
 
 void AutoFight::_init_cond_timeout()
 {
-
+    // cond with and cond, timeout is min(and cond)
+    logger->sub_title("Init Condition Timeout.");
 }
 
 void AutoFight::_init_d_fight(const std::filesystem::path &name)
@@ -293,23 +324,23 @@ void AutoFight::_init_d_fight(const std::filesystem::path &name)
     logger->hr("Load WorkFlow");
     logger->BAASInfo("Name : " + workflow_name);
     logger->BAASInfo("Path : " + workflow_path.string());
-    latest_screenshot_d.d_fight = BAASConfig(workflow_path, logger);
+    d_auto_f.d_fight = BAASConfig(workflow_path, logger);
 }
 
 void AutoFight::_init_skills()
 {
     // Skill
     logger->sub_title("Skills");
-    auto skill_names = latest_screenshot_d.d_fight.get<std::vector<std::string>>("/formation/all_appeared_skills");
+    auto skill_names = d_auto_f.d_fight.get<std::vector<std::string>>("/formation/all_appeared_skills");
     for (int i = 0; i < skill_names.size(); ++i) {
-        latest_screenshot_d.skill_name_to_index_map[skill_names[i]] = i;
+        d_auto_f.skill_name_to_index_map[skill_names[i]] = i;
         _init_single_skill_template(skill_names[i]);
     }
-    latest_screenshot_d.slot_count = latest_screenshot_d.d_fight.getInt("/formation/slot_count", 3);
-    logger->BAASInfo("Slot Count : [ " + std::to_string(latest_screenshot_d.slot_count) + " ]");
+    d_auto_f.slot_count = d_auto_f.d_fight.getInt("/formation/slot_count", 3);
+    logger->BAASInfo("Slot Count : [ " + std::to_string(d_auto_f.slot_count) + " ]");
 
-    latest_screenshot_d.skills.resize(latest_screenshot_d.slot_count);
-    latest_screenshot_d.each_slot_possible_templates.resize(latest_screenshot_d.slot_count);
+    d_auto_f.skills.resize(d_auto_f.slot_count);
+    d_auto_f.each_slot_possible_templates.resize(d_auto_f.slot_count);
 }
 
 void AutoFight::_init_all_cond()
@@ -318,25 +349,35 @@ void AutoFight::_init_all_cond()
     logger->sub_title("Conditions");
 
     _init_self_cond();
+
+    _init_cond_and_or_idx();
 }
 
 void AutoFight::_init_self_cond()
 {
     // condition in this json file
+    if (!d_auto_f.d_fight.contains("/conditions")) {
+        logger->BAASWarn("No condition in workflow file.");
+        return;
+    }
+
     BAASConfig all_conditions;
-    latest_screenshot_d.d_fight.getBAASConfig("/conditions", all_conditions, logger);
+    d_auto_f.d_fight.getBAASConfig("/conditions", all_conditions, logger);
     if(!all_conditions.get_config().is_object()) {
-        logger->BAASError("Elements of [ Conditions ] must be object.");
-        throw TypeError("Workflow file [ Conditions ] must be object.");
+        logger->BAASError("Elements of [ conditions ] must be object.");
+        throw TypeError("In Workflow file [ conditions ] must be object.");
     }
     int suc_cnt = 0;
     bool ret;
     for (auto &cond : all_conditions.get_config().items()) {
         ret = _init_single_cond(BAASConfig(cond.value(), logger));
-        if (ret) ++suc_cnt;
+        if (ret) {
+            ++suc_cnt;
+            cond_name_idx_map[cond.key()] = all_cond.size() - 1;
+        }
     }
 
-    logger->BAASInfo("Successfully Load [ " + std::to_string(suc_cnt) + " ] Conditions");
+    logger->BAASInfo("[ SELF ] Successfully Load [ " + std::to_string(suc_cnt) + " ] Conditions");
 }
 
 bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
@@ -359,7 +400,7 @@ bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
     BaseCondition::ConditionType tp = BaseCondition::type_st_to_idx(_cond_type);
     switch (tp) {
         case BaseCondition::ConditionType::COST:
-            all_cond.push_back(std::make_unique<CostCondition>(baas, &latest_screenshot_d, d_cond));
+            all_cond.push_back(std::make_unique<CostCondition>(baas, &d_auto_f, d_cond));
             break;
         case BaseCondition::ConditionType::SKILL_COST:
             break;
@@ -378,6 +419,83 @@ bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
     return true;
 }
 
+void AutoFight::display_all_cond_info() const noexcept
+{
+    logger->hr("Display All Conditions.");
+    display_cond_idx_name_map();
+    for (const auto &cond : cond_name_idx_map) {
+        logger->sub_title(cond.first);
+        all_cond[cond.second]->display();
+    }
+}
+
+void AutoFight::display_cond_idx_name_map() const noexcept
+{
+    logger->sub_title("Condition Index Name Mapping");
+    for (const auto &cond : cond_name_idx_map)
+        logger->BAASInfo(std::to_string(cond.second) + " : [ " + cond.first + " ] " );
+}
+
+void AutoFight::_init_all_state()
+{
+
+    _init_self_state();
+
+    _init_start_state();
+}
+
+void AutoFight::_init_self_state()
+{
+    // condition in this json file
+    if (!d_auto_f.d_fight.contains("/states")) {
+        logger->BAASWarn("No state in workflow file.");
+        return;
+    }
+
+    BAASConfig _t_all_state;
+    d_auto_f.d_fight.getBAASConfig("/states", _t_all_state, logger);
+    if(!_t_all_state.get_config().is_object()) {
+        logger->BAASError("Elements of [ states ] must be object.");
+        throw TypeError("In Workflow file [ states ] must be object.");
+    }
+    int suc_cnt = 0;
+    bool ret;
+    for (auto &cond : _t_all_state.get_config().items()) {
+        ret = _init_single_state(BAASConfig(cond.value(), logger));
+        if (ret) {
+            ++suc_cnt;
+            state_name_idx_map[cond.key()] = all_states.size() - 1;
+        }
+    }
+
+    logger->BAASInfo("[ SELF ] Successfully Load [ " + std::to_string(suc_cnt) + " ] States");
+}
+
+bool AutoFight::_init_single_state(const BAASConfig &d_state)
+{
+    return false;
+}
+
+// start state
+void AutoFight::_init_start_state()
+{
+    if (!d_auto_f.d_fight.contains("start_state")) {
+        logger->BAASError("Didn't find [ start_state ] in auto fight workflow.");
+        throw ValueError("[ start_state ] not found.");
+    }
+    start_state_name = d_auto_f.d_fight.getString("start_state");
+
+    if (state_name_idx_map.find(start_state_name) == state_name_idx_map.end()) {
+        logger->BAASError("Undefined state [ " + start_state_name + " ].");
+        throw ValueError("Start State Invalid.");
+    }
+
+    curr_state_idx = state_name_idx_map[start_state_name];
+    logger->sub_title("Start State");
+    logger->BAASInfo("Name  : [ " + start_state_name + " ]");
+    logger->BAASInfo("Index : [ " + std::to_string(curr_state_idx) + " ]");
+
+}
 
 BAAS_NAMESPACE_END
 

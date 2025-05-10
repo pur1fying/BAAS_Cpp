@@ -6,13 +6,13 @@
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_BASEDATAUPDATER_H_
 
 #include "BAAS.h"
-#include "screenshot_data_recoder.h"
+#include "module/auto_fight/auto_fight_d.h"
 
 BAAS_NAMESPACE_BEGIN
 
 class BaseDataUpdater {
 public:
-    explicit BaseDataUpdater(BAAS* baas, screenshot_data* data);
+    explicit BaseDataUpdater(BAAS* baas, auto_fight_d* data);
 
     bool at_fight_page();
 
@@ -29,7 +29,7 @@ protected:
 
     BAAS* baas;
 
-    screenshot_data* data;
+    auto_fight_d* data;
 };
 
 BAAS_NAMESPACE_END

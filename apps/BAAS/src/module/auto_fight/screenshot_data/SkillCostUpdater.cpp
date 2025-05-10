@@ -11,7 +11,7 @@ BAAS_NAMESPACE_BEGIN
 
 SkillCostUpdater::SkillCostUpdater(
         BAAS *baas,
-        screenshot_data *data
+        auto_fight_d *data
 ) : BaseDataUpdater(baas, data)
 {
     skill_cost_ocr_region = static_config->get<std::vector<BAASRectangle>>("/BAAS/auto_fight/Skill/slot/cost_ocr/regions");

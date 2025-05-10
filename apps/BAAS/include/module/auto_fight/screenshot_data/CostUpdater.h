@@ -12,7 +12,7 @@ BAAS_NAMESPACE_BEGIN
 class CostUpdater : public BaseDataUpdater {
 
 public:
-    explicit CostUpdater(BAAS *baas, screenshot_data *data);
+    explicit CostUpdater(BAAS *baas, auto_fight_d *data);
 
     void update() override;
 

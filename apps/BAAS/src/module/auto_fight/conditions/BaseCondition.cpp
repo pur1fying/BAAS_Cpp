@@ -6,7 +6,7 @@
 
 BAAS_NAMESPACE_BEGIN
 
-const std::map<std::string, BaseCondition::ConditionType> BaseCondition::condition_type_map = {
+const std::map<std::string, BaseCondition::ConditionType> BaseCondition::cond_type_map = {
         {"combined"   ,  COMBINED},
         {"cost"       ,  COST},
         {"skill_name" ,  SKILL_NAME},
@@ -16,13 +16,25 @@ const std::map<std::string, BaseCondition::ConditionType> BaseCondition::conditi
         {"boss_health",  BOSS_HEALTH}
 };
 
-BaseCondition::BaseCondition(BAAS* baas, screenshot_data* data, const BAASConfig& config)
+const std::vector<std::string> BaseCondition::cond_type_st_list = {
+        "combined",
+        "cost",
+        "skill_name",
+        "skill_cost",
+        "acc_phase",
+        "auto_state",
+        "boss_health"
+};
+
+
+BaseCondition::BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config)
 {
     this->config = BAASConfig(config.get_config(), baas->get_logger());
     this->data = data;
     this->timeout = config.getLLong("timeout", BAAS_AUTO_FIGHT_CONDITION_DEFAULT_TIMEOUT);
     this->baas = baas;
     this->logger = baas->get_logger();
+    this->desc = config.getString("desc", "");
 }
 
 BaseCondition::~BaseCondition()
@@ -41,9 +53,24 @@ void BaseCondition::reset_state()
     throw RuntimeError("BaseCondition class reset_state should not be called.");
 }
 
-void BaseCondition::display()
+void BaseCondition::display() const noexcept
 {
     throw RuntimeError("BaseCondition class display should not be called.");
+}
+
+void BaseCondition::set_d_update_flag()
+{
+    throw RuntimeError("BaseCondition class set_d_update_flag should not be called.");
+}
+
+void BaseCondition::_display_basic_info() const noexcept
+{
+    logger->BAASInfo("Type    : [ " + cond_type_st_list[type] + " ]");
+    logger->BAASInfo("Timeout : [ " + std::to_string(timeout) + " ]");
+    if (has_and_cond())logger->BAASInfo("A C Cnt : [ " + std::to_string(and_conditions.size()) + " ]");
+    if (has_or_cond()) logger->BAASInfo("O C Cnt : [ " + std::to_string(or_conditions.size()) + " ]");
+    if(!desc.empty())logger->BAASInfo("Desc    : " + desc);
+
 }
 
 

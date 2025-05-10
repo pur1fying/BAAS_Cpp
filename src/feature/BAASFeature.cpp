@@ -180,8 +180,8 @@ bool BAASFeature::feature_appear(
                 BAASGlobalLogger->BAASInfo(log);
             }
             if (feature->second->is_primitive()
-            or ( result and feature->second->has_or_feature()  and !feature->second->has_and_feature())
-            or (!result and feature->second->has_and_feature() and !feature->second->has_or_feature()))
+            || ( result && feature->second->has_or_feature()  && !feature->second->has_and_feature())
+            || (!result && feature->second->has_and_feature() && !feature->second->has_or_feature()))
                 return result;
 
         } catch (json::exception &e) {

@@ -11,10 +11,13 @@
 #define BEGIN_AUTO_FIGHT_CONDITIONS
 #define END_AUTO_FIGHT_CONDITIONS
 
+#define BEGIN_AUTO_FIGHT_STATES
+#define END_AUTO_FIGHT_STATES
+
 #include <ThreadPool.h>
 #include <BAAS.h>
 
-#include "screenshot_data/screenshot_data_recoder.h"
+#include "auto_fight_d.h"
 #include "screenshot_data/BaseDataUpdater.h"
 #include "conditions/BaseCondition.h"
 
@@ -28,11 +31,23 @@ public:
 
     ~AutoFight();
 
-    void update_data();
+private:
 
-    void display_data();
+    void _init_d_fight(const std::filesystem::path& name);
 
-    void init_data_updaters();
+    void _init_skills();
+
+    void _init_single_skill_template(std::string &skill_name);
+
+    std::atomic<bool> flag_run;
+
+    BAASUserConfig* config;
+
+    BAASLogger* logger;
+
+BEGIN_AUTO_FIGHT_DATA_UPDATE
+
+public:
 
     void set_slot_possible_skill_idx(
             int slot_idx,
@@ -44,12 +59,19 @@ public:
             const std::vector<int>& possible_templates
     );
 
-    inline void reset_data() {
-        latest_screenshot_d.reset_all();
-    }
+    const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
+
+    const static std::string template_j_ptr_prefix;
+
+    void update_data();
+
+    void display_screenshot_extracted_data();
 
     inline void set_data_updater_mask(uint64_t mask) {
         d_updater_mask = mask;
+    }
+    inline void reset_data() {
+        d_auto_f.reset_all();
     }
 
     inline void update_screenshot(){
@@ -60,40 +82,17 @@ public:
     }
 
     inline void set_boss_health_update_flag(uint8_t flag) {
-        latest_screenshot_d.boss_health_update_flag = flag;
+        d_auto_f.boss_health_update_flag = flag;
     }
 
     inline void set_skill_cost_update_flag(uint32_t flag) {
-        latest_screenshot_d.skill_cost_update_flag = flag;
+        d_auto_f.skill_cost_update_flag = flag;
     }
-
-    std::optional<uint64_t> cond_appear();
-
-    const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
-
-    const static std::string template_j_ptr_prefix;
 
 private:
 
-    void _init_d_fight(const std::filesystem::path& name);
+    void _init_data_updaters();
 
-    void _init_skills();
-
-    void _init_all_cond();
-
-    void _init_self_cond();
-
-    bool _init_single_cond(const BAASConfig& d_cond);
-
-    void _init_single_skill_template(std::string &skill_name);
-
-    std::atomic<bool> flag_run;
-
-    BAASUserConfig* config;
-
-    BAASLogger* logger;
-
-BEGIN_AUTO_FIGHT_DATA_UPDATE
     int d_update_max_thread;
 
     // data update occurs in multiple threads
@@ -124,13 +123,29 @@ BEGIN_AUTO_FIGHT_DATA_UPDATE
 
     uint64_t d_updater_mask = 0;
 
-    screenshot_data latest_screenshot_d;
+    auto_fight_d d_auto_f;
 
 END_AUTO_FIGHT_DATA_UPDATE
 
 BEGIN_AUTO_FIGHT_CONDITIONS
 
-    void _init_cond_ptr();
+public:
+
+    void display_all_cond_info() const noexcept;
+
+    std::optional<uint64_t> cond_appear();
+
+    void display_cond_idx_name_map() const noexcept;
+
+private:
+
+    void _init_all_cond();
+
+    void _init_self_cond();
+
+    bool _init_single_cond(const BAASConfig& d_cond);
+
+    void _init_cond_and_or_idx();
 
     void _init_cond_timeout();
 
@@ -142,9 +157,36 @@ BEGIN_AUTO_FIGHT_CONDITIONS
     std::vector<std::unique_ptr<BaseCondition>> all_cond;
 
     // name to index in all_conditions
-    std::map<std::string, uint64_t> cond_name_map;
+    std::map<std::string, uint64_t> cond_name_idx_map;
 
 END_AUTO_FIGHT_CONDITIONS
+
+BEGIN_AUTO_FIGHT_STATES
+
+public:
+    void display_all_state() const noexcept;
+
+    void display_state_idx_name_map() const noexcept;
+
+private:
+
+    void _init_all_state();
+
+    void _init_start_state();
+
+    void _init_self_state();
+
+    bool _init_single_state(const BAASConfig& d_state);
+
+    std::vector<state_info> all_states;
+
+    std::map<std::string, uint64_t> state_name_idx_map;
+
+    uint64_t curr_state_idx;
+
+    std::string start_state_name;
+
+END_AUTO_FIGHT_STATES
 
     std::filesystem::path workflow_path;
 

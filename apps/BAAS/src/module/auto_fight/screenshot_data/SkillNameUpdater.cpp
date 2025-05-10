@@ -8,7 +8,7 @@ BAAS_NAMESPACE_BEGIN
 
 SkillNameUpdater::SkillNameUpdater(
         BAAS *baas,
-        screenshot_data *data
+        auto_fight_d *data
 ) : BaseDataUpdater(baas, data)
 {
     each_skill_match_template_region = static_config->get<std::vector<BAASRectangle>>(

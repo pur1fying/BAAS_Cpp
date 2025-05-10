@@ -7,7 +7,7 @@
 
 BAAS_NAMESPACE_BEGIN
 
-BaseDataUpdater::BaseDataUpdater(BAAS *baas, screenshot_data *data)
+BaseDataUpdater::BaseDataUpdater(BAAS *baas, auto_fight_d *data)
 {
     this->baas = baas;
     this->data = data;
@@ -31,7 +31,7 @@ constexpr std::string BaseDataUpdater::data_name()
 
 void BaseDataUpdater::display_data()
 {
-    throw RuntimeError("BaseDataUpdater class display_data should not be called.");
+    throw RuntimeError("BaseDataUpdater class display_screenshot_extracted_data should not be called.");
 }
 
 bool BaseDataUpdater::at_fight_page()

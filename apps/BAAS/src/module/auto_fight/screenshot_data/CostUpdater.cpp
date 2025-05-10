@@ -8,7 +8,7 @@ BAAS_NAMESPACE_BEGIN
 
 CostUpdater::CostUpdater(
         BAAS *baas,
-        screenshot_data *data
+        auto_fight_d *data
 ) : BaseDataUpdater(baas, data)
 {
     _init_static_value();

@@ -12,7 +12,7 @@ BAAS_NAMESPACE_BEGIN
 class BossHealthUpdater : public BaseDataUpdater {
 
 public:
-    explicit BossHealthUpdater(BAAS *baas, screenshot_data *data);
+    explicit BossHealthUpdater(BAAS *baas, auto_fight_d *data);
 
     void update() override;
 

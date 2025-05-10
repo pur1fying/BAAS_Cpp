@@ -14,7 +14,7 @@ class SkillCostUpdater : public BaseDataUpdater {
 public:
     explicit SkillCostUpdater(
             BAAS* baas,
-            screenshot_data* data
+            auto_fight_d* data
     );
 
     void update() override;

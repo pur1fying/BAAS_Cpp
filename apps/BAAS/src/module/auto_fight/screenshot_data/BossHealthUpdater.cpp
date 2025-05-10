@@ -9,7 +9,7 @@ BAAS_NAMESPACE_BEGIN
 
 BossHealthUpdater::BossHealthUpdater(
         BAAS *baas,
-        screenshot_data *data
+        auto_fight_d *data
 ) : BaseDataUpdater(baas, data)
 {
     ocr_region = static_config->get<BAASRectangle>("/BAAS/auto_fight/BossHealth/ocr_region");

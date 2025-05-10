@@ -13,7 +13,7 @@ class CostCondition : public BaseCondition {
 public:
     CostCondition(
             BAAS* baas,
-            screenshot_data* data,
+            auto_fight_d* data,
             const BAASConfig& config
     );
 
@@ -27,7 +27,11 @@ public:
 
     void reset_state() override;
 
+    void display() const noexcept override;
+
     const static std::map<std::string, Op> op_map;
+
+    const static std::vector<std::string> op_to_st;
 
     std::optional<bool> try_match() override;
 

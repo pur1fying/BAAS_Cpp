@@ -15,38 +15,62 @@
     ],
     "borrow": ""
   },
-  "battle": {
-    "boss_max_health": {
-      "phase1": 188796,
-      "phase2": 224756,
-      "phase3": 260729,
-      "phase4": 287696,
-      "phase5": 323657
+  "start_state": "1",
+  "states": {
+    "1": {
+
     }
   },
   "conditions": {
     "cost_over_5": {
       "type": "cost",
       "op": "over",
-      "value": 5,
+      "value": 5.0,
+      "desc": "trigger when cost over 5.0",
       "timeout": 3000
     },
     "cost_below_3": {
       "type": "cost",
       "op": "below",
-      "value": 3,
+      "value": 3.0,
+      "desc": "trigger when cost below 3.0",
       "timeout": 3000
+    },
+    "cost_below_10": {
+      "type": "cost",
+      "op": "below",
+      "value": 10.0,
+      "desc": "trigger when cost below 10.0",
+      "timeout": 3000
+    },
+    "cost_in_range_5.0_10.0_2": {
+      "type": "cost",
+      "op": "below",
+      "value": 10.0,
+      "desc": "This condition has same effect with cost_in_range_5.0_10.0",
+      "timeout": 3000,
+      "and": ["cost_over_5"]
     },
     "cost_increase_6": {
       "type": "cost",
       "op": "increase",
       "value": 6,
+      "desc": "trigger when cost increase at least 6.0",
       "timeout": 3000
     },
     "cost_decrease_2.5": {
       "type": "cost",
       "op": "decrease",
-      "value": 2.5
+      "desc": "trigger when cost decrease at least 2.5",
+      "value": 2.5,
+      "or": ["non-exist-condition"]
+    },
+    "cost_in_range_5.0_10.0": {
+      "type": "cost",
+      "op": "in_range",
+      "range": [5.0, 10.0],
+      "desc": "trigger when cost in range [5.0, 10.0]",
+      "timeout": 3000
     }
   }
 }
