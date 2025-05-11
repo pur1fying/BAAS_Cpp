@@ -13,11 +13,8 @@
 #include <functional>
 
 #include "feature/BaseFeature.h"
-#include "BAAS.h"
 
 BAAS_NAMESPACE_BEGIN
-
-class BAAS;
 
 class BAASFeature {
 public:
@@ -26,19 +23,19 @@ public:
 
     static void init_feature_ptr();
 
-    static BAASFeature *get_instance();
+    static BAASFeature* get_instance();
 
-    static BaseFeature *get_feature_ptr(const std::string &feature_name);
+    static BaseFeature* get_feature_ptr(const std::string& feature_name);
 
     static bool reset_then_feature_appear(
             BAAS* baas,
-            const std::string &feature_name
+            const std::string& feature_name
     );
 
     static bool feature_appear(
             BAAS* baas,
-            const std::string &feature_name,
-            BAASConfig &output,
+            const std::string& feature_name,
+            BAASConfig& output,
             bool show_log = false
     );
 

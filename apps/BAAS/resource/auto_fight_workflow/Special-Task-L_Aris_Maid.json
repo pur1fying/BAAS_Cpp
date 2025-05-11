@@ -85,8 +85,7 @@
       "type": "cost",
       "op": "decrease",
       "desc": "trigger when cost decrease at least 2.5",
-      "value": 2.5,
-      "or": ["non-exist-condition"]
+      "value": 2.5
     },
     "cost_in_range_5.0_10.0": {
       "type": "cost",

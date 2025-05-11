@@ -3,8 +3,9 @@
 //
 
 #include "BAAS.h"
+
 #include "ocr/BAASOCR.h"
-#include "procedure/BAASProcedure.h"
+#include "procedure/AppearThenClickProcedure.h"
 
 using namespace std;
 using namespace cv;
@@ -15,8 +16,8 @@ BAAS_NAMESPACE_BEGIN
 std::map<std::string, std::function<bool(BAAS *)>> BAAS::module_implement_funcs;
 
 bool BAAS::feature_appear(
-        const string &feature_name,
-        BAASConfig &output,
+        const string& feature_name,
+        BAASConfig& output,
         bool show_log
 )
 {
@@ -25,7 +26,7 @@ bool BAAS::feature_appear(
     return BAASFeature::feature_appear(this, feature_name, output, show_log);
 }
 
-bool BAAS::feature_appear(const string &feature_name)
+bool BAAS::feature_appear(const string& feature_name)
 {
     BAASConfig output;
     return feature_appear(feature_name, output, script_show_image_compare_log);
@@ -43,7 +44,6 @@ BAAS::BAAS(std::string& config_name)
     config->update_name();
     config->config_update();
     config->save();
-
 
     flag_run = true;
 
@@ -67,13 +67,21 @@ BAAS::BAAS(std::string& config_name)
 
     rgb_feature_key = server + "_" + language;
 
-    init_feature_state_map();
+    _init_procedures();
+
+    _init_feature_state_map();
 }
 
 void BAAS::update_screenshot_array()
 {
     if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
     screenshot->screenshot(latest_screenshot);
+}
+
+void BAAS::i_update_screenshot_array()
+{
+    if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+    screenshot->immediate_screenshot(latest_screenshot);
 }
 
 void BAAS::get_latest_screenshot_clone(cv::Mat &img)
@@ -286,7 +294,7 @@ void BAAS::check_user_config(const string &config_name)
     }
 }
 
-void BAAS::init_feature_state_map()
+void BAAS::_init_feature_state_map()
 {
     std::vector<std::string> feature_list = BAASFeature::get_feature_list();
     for (const auto &feature: feature_list)
@@ -296,41 +304,66 @@ void BAAS::init_feature_state_map()
         };
 }
 
-void BAAS::solve_procedure(
-        const string &procedure_name,
-        const BAASConfig &output
-)
+void BAAS::solve_procedure(const string &procedure_name, bool skip_first_screenshot)
 {
+    BAASConfig _t;
+    solve_procedure(procedure_name, _t, skip_first_screenshot);
+}
 
+void BAAS::solve_procedure(const string &procedure_name, const BAASConfig &patch, bool skip_first_screenshot)
+{
+    BAASConfig _t;
+    solve_procedure(procedure_name, _t, patch, skip_first_screenshot);
 }
 
 void BAAS::solve_procedure(
         const string &procedure_name,
-        const BAASConfig &output,
+        BAASConfig &output,
         bool skip_first_screenshot
 )
 {
+    auto it = procedures.find(procedure_name);
+    if (it == procedures.end()) {
+        BAASGlobalLogger->BAASError("Procedure [ " + procedure_name + " ] not found");
+        return;
+    }
 
+    it->second->implement(output, skip_first_screenshot);
 }
 
 void BAAS::solve_procedure(
-        const string &procedure_name,
-        const BAASConfig &output,
-        const BAASConfig &patch
+        const string& procedure_name,
+        BAASConfig& output,
+        const BAASConfig& patch,
+        bool skip_first_screenshot
+
 )
 {
+    auto it = procedures.find(procedure_name);
+    if (it == procedures.end()) {
+        BAASGlobalLogger->BAASError("Procedure [ " + procedure_name + " ] not found");
+        return;
+    }
+    auto baas_config = BAASConfig(it->second->get_config().get_config(), logger);
+    baas_config.update(&patch);
 
+    BaseProcedure* p = _create_procedure("", baas_config, false);
+    if (p == nullptr) {
+        BAASGlobalLogger->BAASError("Failed to create procedure.");
+        return;
+    }
+    try {
+        p->implement(output, skip_first_screenshot);
+    }
+    catch (exception &e) {
+        p->clear_resource();
+        delete p;
+        throw e;
+    }
+
+    p->clear_resource();
+    delete p;
 }
-
-void BAAS::solve_procedure(const string &procedure_name)
-{
-
-}
-void BAAS::solve_procedure(const string &procedure_name, bool skip_first_screenshot)
-{
-
-}
-
 bool BAAS::solve(const string &module_name)
 {
     auto it = module_implement_funcs.find(module_name);
@@ -357,6 +390,75 @@ void BAAS::register_module_implement_func(
     module_implement_funcs[module_name] = func;
 }
 
+void BAAS::_init_procedures()
+{
+    if (!filesystem::exists(BAAS_PROCEDURE_DIR)) {
+        BAASGlobalLogger->BAASError("Procedure Dir :");
+        BAASGlobalLogger->Path(BAAS_PROCEDURE_DIR, 3);
+        BAASGlobalLogger->BAASError("not exists.");
+        return;
+    }
 
+    string temp_path;
+    int total_loaded = 0;
+    for (const auto &entry: filesystem::recursive_directory_iterator(BAAS_PROCEDURE_DIR)) {
+        temp_path = entry.path()
+                .string();
+        if (filesystem::is_regular_file(entry) && temp_path.ends_with(".json"))
+            total_loaded += _load_procedure_from_json(temp_path);
+    }
+    BAASGlobalLogger->BAASInfo("Totally loaded [ " + to_string(total_loaded) + " ] procedures");
+}
+
+int BAAS::_load_procedure_from_json(const filesystem::path &j_path)
+{
+    BAASConfig _feature(j_path, (BAASLogger *) BAASGlobalLogger);
+    json j = _feature.get_config();
+    assert(j.is_object());
+    BAASConfig temp;
+    int loaded = 0;
+    for (auto &i: j.items()) {
+        temp = BAASConfig(i.value(), (BAASLogger*) BAASGlobalLogger);
+        auto it = procedures.find(i.key());
+        if (it != procedures.end()) {
+            BAASGlobalLogger->BAASError("Procedure [ " + i.key() + " ] already exists");
+            continue;
+        }
+        if (_create_procedure(i.key(), temp) != nullptr) loaded++;
+    }
+    return loaded;
+}
+
+BaseProcedure* BAAS::_create_procedure(const string& procedure_name, const BAASConfig& cfg, bool insert)
+{
+    if (!procedure_name.empty()) {
+        auto it = procedures.find(procedure_name);
+        if (it != procedures.end()) {
+            BAASGlobalLogger->BAASError("Procedure [ " + procedure_name + " ] already exists");
+            return nullptr;
+        }
+    }
+
+    int tp = config->getInt("procedure_type", 0);
+    BaseProcedure* p = nullptr;
+    switch (tp) {
+        case -1:
+            p = new BaseProcedure(this, cfg);
+            break;
+        case 0:
+            p = new AppearThenClickProcedure(this, cfg);
+            break;
+        default:
+            BAASGlobalLogger->BAASError("Procedure Type [ " + to_string(tp) + " ] not found");
+            break;
+    }
+
+    if (p != nullptr) {
+        if (insert)
+        procedures[procedure_name] = std::unique_ptr<BaseProcedure> (p);
+    }
+
+    return p;
+}
 
 BAAS_NAMESPACE_END

@@ -203,7 +203,7 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
     std::string res_ptr;
     BAASImage _img;
     for (const auto &group : temp) {
-        res_ptr = BAASImageResource::resource_pointer(baas, group, skill_name);
+        res_ptr = BAASImageResource::resource_pointer(baas->get_image_resource_prefix(), group, skill_name);
         if(resource->is_loaded(res_ptr)) resource->get(res_ptr, _img);
         else {
             logger->BAASWarn("Image Resource [ " + res_ptr + " ] not find.");
@@ -220,7 +220,7 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
     else temp = default_inactive_skill_template;
 
     for (const auto &group : temp) {
-        res_ptr = BAASImageResource::resource_pointer(baas, group, skill_name);
+        res_ptr = BAASImageResource::resource_pointer(baas->get_image_resource_prefix(), group, skill_name);
         if(resource->is_loaded(res_ptr)) resource->get(res_ptr, _img);
         else {
             logger->BAASWarn("Image Resource [ " + res_ptr + " ] not find.");
@@ -653,6 +653,21 @@ void AutoFight::display_state_idx_name_map() const noexcept
     logger->sub_title("State Index Name Mapping");
     for (const auto &state : state_name_idx_map)
         logger->BAASInfo(std::to_string(state.second) + " : [ " + state.first + " ] " );
+}
+
+void AutoFight::start_state_transition()
+{
+
+}
+
+void AutoFight::ensure_fighting_page()
+{
+
+}
+
+void AutoFight::enter_fight()
+{
+    baas->solve_procedure("UI-FROM_formation_TO_PAGE_fighting", true);
 }
 
 BAAS_NAMESPACE_END

@@ -47,6 +47,11 @@ void BAASScreenshot::screenshot(cv::Mat &img)
     last_screenshot_time = BAASUtil::getCurrentTimeMS();
 }
 
+void BAASScreenshot::immediate_screenshot(cv::Mat &img)
+{
+    screenshot_instance->screenshot(img);
+}
+
 void BAASScreenshot::ensure_interval() const
 {
     long long current_time = BAASUtil::getCurrentTimeMS();

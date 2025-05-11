@@ -14,11 +14,11 @@ BAAS_NAMESPACE_BEGIN
 
 class AppearThenClickProcedure : public BaseProcedure {
 public:
-    explicit AppearThenClickProcedure(BAASConfig *possible_features);
+    explicit AppearThenClickProcedure(BAAS* baas,const BAASConfig& possible_features);
 
     void implement(
-            BAAS *baas,
-            BAASConfig &output
+            BAASConfig& output,
+            bool skip_first_screenshot = false
     ) override;
 
     void clear_resource() override;
@@ -27,11 +27,6 @@ private:
     void wait_loading();
 
     void clear_possibles();
-
-    void solve_feature_appear(
-            BAASConfig *feature,
-            bool show_log = false
-    );
 
     void solve_feature_action_click(BAASConfig *parameters);
 
@@ -73,6 +68,7 @@ private:
 
     std::string last_appeared_feature_name;
 
+    std::vector<std::string> end_feature_names;
 
     std::pair<std::pair<std::string, int>, std::pair<std::string, int>> last_clicked_pair_counter; // too many clicked between two features
 

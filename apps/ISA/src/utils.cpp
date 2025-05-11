@@ -8,7 +8,6 @@
 #include "BAASGlobals.h"
 #include "ocr/BAASOCR.h"
 #include "feature/BAASFeature.h"
-#include "procedure/BAASProcedure.h"
 
 BAAS_NAMESPACE_BEGIN
 

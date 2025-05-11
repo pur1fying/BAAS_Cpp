@@ -20,28 +20,30 @@ class BAAS;
 
 class BaseProcedure {
 public:
-    explicit BaseProcedure(BAASConfig *possible_feature);
+    explicit BaseProcedure(BAAS* baas, const BAASConfig& possible_feature);
+
+    virtual void implement(
+            BAASConfig& output,
+            bool skip_first_screenshot = false
+    );
 
     virtual ~BaseProcedure();
 
-    virtual void implement(
-            BAAS *baas,
-            BAASConfig &output
-    );
-
     virtual void clear_resource();
 
-    inline BAASConfig *get_config()
+    inline const BAASConfig& get_config()
     {
         return possible_feature;
     }
 
 protected:
-    BAASConfig *possible_feature;
+    BAASConfig possible_feature;
 
-    BAASLogger *logger;
+    BAAS* baas;
 
-    BAAS *baas;
+    BAASLogger* logger;
+
+    bool show_log;
 };
 
 BAAS_NAMESPACE_END

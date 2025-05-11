@@ -76,7 +76,7 @@ public:
 
     inline void update_screenshot(){
         auto t_start = BAASUtil::getCurrentTimeMS();
-        baas->update_screenshot_array();
+        baas->i_update_screenshot_array();
         auto t_end = BAASUtil::getCurrentTimeMS();
         logger->BAASInfo("[ Screenshot ] update | Time: " + std::to_string(t_end - t_start) + "ms");
     }
@@ -164,6 +164,12 @@ END_AUTO_FIGHT_CONDITIONS
 BEGIN_AUTO_FIGHT_STATES
 
 public:
+    void enter_fight();
+
+    void ensure_fighting_page();
+
+    void start_state_transition();
+
     void display_all_state() const noexcept;
 
     void display_state_idx_name_map() const noexcept;

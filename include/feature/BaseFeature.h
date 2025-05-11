@@ -11,12 +11,12 @@
 #include <optional>
 
 #include "config/BAASConfig.h"
-#include "BAASImageResource.h"
-#include "BAAS.h"
 
 // used to create different feature and combine them
 
 BAAS_NAMESPACE_BEGIN
+
+class BAAS;
 
 class BaseFeature {
 public:

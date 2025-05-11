@@ -8,7 +8,6 @@
 #include "BAASGlobals.h"
 #include "ocr/BAASOCR.h"
 #include "feature/BAASFeature.h"
-#include "procedure/BAASProcedure.h"
 
 #include "module/auto_fight/BAASAutoFight.h"
 
@@ -32,7 +31,7 @@ void init_globals()
     static_config = BAASStaticConfig::getStaticConfig();
     BAASOCR::update_valid_languages();
     baas_features = BAASFeature::get_instance();
-    baas_procedures = BAASProcedure::get_instance();
+
     GameServer::init();
 
     config_name_change = new BAASConfig(CONFIG_TYPE_CONFIG_NAME_CHANGE);

@@ -19,9 +19,11 @@ public:
 
     void init();
 
-    void set_interval(const double value) noexcept;
+    void set_interval(double value) noexcept;
 
     void screenshot(cv::Mat &img);
+
+    void immediate_screenshot(cv::Mat &img);
 
     void ensure_interval() const;
 
@@ -42,13 +44,13 @@ public:
     }
 
 private:
-    BaseScreenshot *screenshot_instance;
+    BaseScreenshot* screenshot_instance;
 
     std::string screenshot_method;
 
-    BAASConnection *connection;
+    BAASConnection* connection;
 
-    BAASLogger *logger;
+    BAASLogger* logger;
 
     int interval;
 

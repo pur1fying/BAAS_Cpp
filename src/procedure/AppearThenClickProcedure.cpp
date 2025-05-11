@@ -32,46 +32,39 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
-AppearThenClickProcedure::AppearThenClickProcedure(BAASConfig *possible_features) : BaseProcedure(possible_features)
+AppearThenClickProcedure::AppearThenClickProcedure(
+        BAAS* baas,
+        const BAASConfig& possible_features
+): BaseProcedure(baas, possible_features)
 {
-
-}
-
-void AppearThenClickProcedure::implement(
-        BAAS *baas,
-        BAASConfig &output
-)
-{
-    this->baas = baas;
-    this->logger = baas->get_logger();
-
-    json end = possible_feature->get<json>("ends");
-    vector<string> end_feature_names;
-
-    bool show_log = baas->script_show_image_compare_log;
+    json end = possible_feature.getJson("ends");
 
     if (end.is_array() or end.is_object()) { for (auto &i: end) if (i.is_string())end_feature_names.push_back(i); }
     else if (end.is_string()) { end_feature_names.push_back(end); }
 
-    json possible = possible_feature->get<json>("possibles", json::array());
+    json possible = possible_feature.get<json>("possibles", json::array());
     if (possible.is_array())
         for (auto &i: possible)
             if (i.is_array() && i.size() >= 3) {
                 possibles.push_back(new BAASConfig(i, logger));
                 possibles_feature_names.push_back(possibles[possibles.size() - 1]->get<string>("/0"));
             }
-
-    max_stuck_time = possible_feature->getInt("max_stuck_time", 20);
-    max_click = possible_feature->getInt("max_click_times", 20);
-    max_execute_time = possible_feature->getLLong("max_execute_time", LLONG_MAX);
-    enable_tentative_click = possible_feature->getBool("/tentative_click/0", false);
+    max_stuck_time = possible_feature.getInt("max_stuck_time", 20);
+    max_click = possible_feature.getInt("max_click_times", 20);
+    max_execute_time = possible_feature.getLLong("max_execute_time", LLONG_MAX);
+    enable_tentative_click = possible_feature.getBool("/tentative_click/0", false);
     if (enable_tentative_click) {
-        tentative_click_x = possible_feature->getInt("/tentative_click/1", 640);
-        tentative_click_y = possible_feature->getInt("/tentative_click/2", 360);
-        tentative_click_stuck_time = possible_feature->getLLong("/tentative_click/3", 10);
+        tentative_click_x = possible_feature.getInt("/tentative_click/1", 640);
+        tentative_click_y = possible_feature.getInt("/tentative_click/2", 360);
+        tentative_click_stuck_time = possible_feature.getLLong("/tentative_click/3", 10);
     }
+}
 
-    bool skip_first_screenshot = possible_feature->getBool("skip_first_screenshot", false);
+void AppearThenClickProcedure::implement(
+        BAASConfig &output,
+        bool skip_first_screenshot
+)
+{
 
     output.clear();
 
@@ -167,13 +160,6 @@ void AppearThenClickProcedure::clear_possibles()
     possibles_feature_names.clear();
 }
 
-void AppearThenClickProcedure::solve_feature_appear(
-        BAASConfig *feature,
-        bool show_log
-)
-{
-
-}
 
 void AppearThenClickProcedure::solve_feature_action_click(BAASConfig *parameters)
 {
@@ -267,6 +253,8 @@ void AppearThenClickProcedure::clear_resource()
 
     temp_output.clear();
 }
+
+
 
 BAAS_NAMESPACE_END
 

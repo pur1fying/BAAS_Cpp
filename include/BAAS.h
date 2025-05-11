@@ -8,12 +8,15 @@
 #include "device/screenshot/BAASScreenshot.h"
 #include "device/control/BAASControl.h"
 #include "ocr/OcrStruct.h"
+#include "procedure/BaseProcedure.h"
+
+#define PROCEDURE_BEGIN
+#define PROCEDURE_END
 
 BAAS_NAMESPACE_BEGIN
 
 class BAAS {
 public:
-
     void register_module_implement_func(
             const std::string&module_name,
             std::function<bool(BAAS*)> module
@@ -30,6 +33,8 @@ public:
     explicit BAAS(std::string& config_name);
 
     void update_screenshot_array();
+
+    void i_update_screenshot_array();
 
     void get_latest_screenshot_clone(cv::Mat& img);
 
@@ -213,28 +218,6 @@ public:
 
     bool feature_appear(const std::string& feature_name);
 
-    void solve_procedure(
-            const std::string& procedure_name
-    );
-    void solve_procedure(
-            const std::string& procedure_name,
-            bool skip_first_screenshot
-    );
-    void solve_procedure(
-            const std::string& procedure_name,
-            const BAASConfig& output
-    );
-    void solve_procedure(
-            const std::string& procedure_name,
-            const BAASConfig& output,
-            bool skip_first_screenshot
-    );
-    void solve_procedure(
-            const std::string& procedure_name,
-            const BAASConfig& output,
-            const BAASConfig& patch
-    );
-
     inline void reset_feature(const std::string& name) {
         auto it = feature_state_map.find(name);
         if(it != feature_state_map.end()) it->second.round_feature_appear_state.reset();
@@ -254,8 +237,48 @@ public:
     {
         return rgb_feature_key;
     }
+
+PROCEDURE_BEGIN
+
+public:
+
+    void solve_procedure(
+            const std::string& procedure_name,
+            bool skip_first_screenshot = false
+    );
+
+    void solve_procedure(
+            const std::string& procedure_name,
+            const BAASConfig& patch,
+            bool skip_first_screenshot = false
+    );
+
+    void solve_procedure(
+            const std::string& procedure_name,
+            BAASConfig& output,
+            bool skip_first_screenshot = false
+    );
+
+    void solve_procedure(
+            const std::string& procedure_name,
+            BAASConfig& output,
+            const BAASConfig& patch,
+            bool skip_first_screenshot = false
+    );
+
 private:
-    static std::map<std::string, std::function<bool(BAAS *)>> module_implement_funcs;
+
+    void _init_procedures();
+
+    int _load_procedure_from_json(const std::filesystem::path& j_path);
+
+    BaseProcedure* _create_procedure(const std::string& procedure_name, const BAASConfig& cfg, bool insert = true);
+
+    std::map<std::string, std::unique_ptr<BaseProcedure>> procedures;
+
+PROCEDURE_END
+
+    static std::map<std::string, std::function<bool(BAAS*)>> module_implement_funcs;
 
     std::string image_resource_prefix;
 
@@ -297,7 +320,7 @@ private:
 
     std::map<std::string, feature_state> feature_state_map;
 
-    void init_feature_state_map();
+    void _init_feature_state_map();
 
     friend class BAASFeature;
 
@@ -307,9 +330,9 @@ private:
 
     friend class JudgePointRGBRangeFeature;
 
-    friend class AppearThenDoProcedure;
-
     friend class AppearThenClickProcedure;
+
+    friend class BaseProcedure;
 };
 
 BAAS_NAMESPACE_END

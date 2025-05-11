@@ -1,20 +1,25 @@
 //
 // Created by pc on 2024/8/10.
 //
+
 #include "procedure/BaseProcedure.h"
+
+#include "BAAS.h"
 
 BAAS_NAMESPACE_BEGIN
 
-BaseProcedure::BaseProcedure(BAASConfig *possible_feature)
+
+BaseProcedure::BaseProcedure(BAAS* baas, const BAASConfig& possible_feature)
 {
+    this->baas = baas;
     this->possible_feature = possible_feature;
-    logger = nullptr;
-    baas = nullptr;
+    this->logger = baas->get_logger();
+    this->show_log = baas->script_show_image_compare_log;
 }
 
 void BaseProcedure::implement(
-        BAAS *baas,
-        BAASConfig &output
+        BAASConfig& output,
+        bool skip_first_screenshot
 )
 {
     throw std::runtime_error("BaseProcedure::implement() should not be called");
@@ -27,7 +32,9 @@ void BaseProcedure::clear_resource()
 
 BaseProcedure::~BaseProcedure()
 {
-    delete possible_feature;
+
 }
+
+
 
 BAAS_NAMESPACE_END

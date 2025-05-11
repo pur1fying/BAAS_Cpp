@@ -20,10 +20,7 @@ void NemuScreenshot::init()
 void NemuScreenshot::screenshot(cv::Mat &output)
 {
     std::lock_guard<std::mutex> lock(screenshot_mtx);
-    auto t1 = std::chrono::high_resolution_clock::now();
     nemu_connection->screenshot(image);
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     output = image.clone();
 }
 

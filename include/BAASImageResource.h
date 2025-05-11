@@ -121,12 +121,12 @@ public:
     }
 
     inline static std::string resource_pointer(
-            const BAAS* baas,
-            const std::string &group,
-            const std::string &name
+            const std::string& prefix,
+            const std::string& group,
+            const std::string& name
     )
     {
-        return baas->get_image_resource_prefix() + group + "." + name;
+        return prefix + group + "." + name;
     }
 
     static void resource_path(

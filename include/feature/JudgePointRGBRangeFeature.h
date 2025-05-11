@@ -6,6 +6,7 @@
 #define BAAS_FEATURE_JUDGEPOINTRGBRANGEFEATURE_H_
 
 #include "feature/BaseFeature.h"
+#include "BAASImageResource.h"
 
 #define BAAS_JUDGE_POINT_RGB_RANGE_FEATURE 2
 
@@ -51,7 +52,7 @@ private:
 
 class JudgePointRGBRangeFeatureError : public std::exception {
 public:
-    explicit JudgePointRGBRangeFeatureError(const std::string &message) : message(message) {}
+    explicit JudgePointRGBRangeFeatureError(const std::string& message) : message(message) {}
 
     [[nodiscard]] const char *what() const noexcept override
     {
