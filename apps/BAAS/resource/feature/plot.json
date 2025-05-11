@@ -2,7 +2,7 @@
   "plot_menu_appear": {
     "feature_type": 0,
     "group": "plot",
-    "name": "skip-plot-button"
+    "name": "menu"
   },
   "plot_skip-plot-button_appear": {
     "feature_type": 0,

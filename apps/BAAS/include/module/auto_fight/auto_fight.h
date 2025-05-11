@@ -166,6 +166,8 @@ BEGIN_AUTO_FIGHT_STATES
 public:
     void enter_fight();
 
+    void restart_fight(bool update_room_left_time = false);
+
     void ensure_fighting_page();
 
     void start_state_transition();

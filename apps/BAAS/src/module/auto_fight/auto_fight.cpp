@@ -667,7 +667,16 @@ void AutoFight::ensure_fighting_page()
 
 void AutoFight::enter_fight()
 {
-    baas->solve_procedure("UI-FROM_formation_TO_PAGE_fighting", true);
+    baas->solve_procedure("UI-FROM_PAGE_formation_TO_PAGE_fighting", true);
+}
+
+void AutoFight::restart_fight(bool update_room_left_time)
+{
+    baas->solve_procedure("UI-GO-TO_PAGE_fight-pause", true);
+    if(update_room_left_time) {
+        // TODO:: update room left time
+    }
+    baas->solve_procedure("fight_confirm_restart", true);
 }
 
 BAAS_NAMESPACE_END

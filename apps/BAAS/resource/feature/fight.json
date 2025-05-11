@@ -4,6 +4,21 @@
     "group": "fight",
     "name": "pause-button"
   },
+  "fight_pause-notice_appear":{
+    "feature_type": 0,
+    "group": "fight",
+    "name": "pause-notice"
+  },
+  "fight_retreat-notice_appear":{
+    "feature_type": 0,
+    "group": "fight",
+    "name": "retreat-notice"
+  },
+  "fight_restart-notice_appear":{
+    "feature_type": 0,
+    "group": "fight",
+    "name": "restart-notice"
+  },
   "fight_acc_phase1": {
     "feature_type": 2,
     "rgb_range": {

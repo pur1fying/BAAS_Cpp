@@ -4,6 +4,15 @@
   "image": {
     "pause-button": {
       "region": [1215, 29, 1251, 65]
+    },
+    "pause-notice": {
+      "region": [594, 139, 681, 174]
+    },
+    "retreat-notice": {
+      "region": [469, 308, 796, 351]
+    },
+    "restart-notice": {
+      "region": [400, 296, 883, 364]
     }
   }
 }
