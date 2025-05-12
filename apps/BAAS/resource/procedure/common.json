@@ -19,7 +19,7 @@
     "max_stuck_time": 100,
     "ends": "fight_pause-notice_appear",
     "possibles": [
-      ["fight_pause-button_appear", 1250, 40]
+      ["fight_pause-button_appear", 1250, 40, 0.0]
     ]
   },
 
@@ -28,8 +28,8 @@
     "max_stuck_time": 100,
     "ends": "fight_pause-button_appear",
     "possibles": [
-      ["fight_pause-notice_appear", 646, 511],
-      ["fight_restart-notice_appear", 772, 502]
+      ["fight_pause-notice_appear", 646, 511, 0.0],
+      ["fight_restart-notice_appear", 772, 502, 0.0, 0.0, 1.0]
     ]
   }
 }

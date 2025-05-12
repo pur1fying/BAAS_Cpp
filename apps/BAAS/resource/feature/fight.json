@@ -2,7 +2,8 @@
   "fight_pause-button_appear":{
     "feature_type": 0,
     "group": "fight",
-    "name": "pause-button"
+    "name": "pause-button",
+    "mean_rgb_diff": [20, 20, 20]
   },
   "fight_pause-notice_appear":{
     "feature_type": 0,

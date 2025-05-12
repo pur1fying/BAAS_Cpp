@@ -99,13 +99,11 @@ public:
 
     inline void click(
             BAASPoint point,
-            uint8_t type = 1,
-            int offset = 5,
             const std::string& description = ""
     )
     {
         if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-        control->click(point, type, offset, description);
+        control->click(point, description);
     }
 
     inline void click(
@@ -113,14 +111,14 @@ public:
             int count,
             uint8_t type = 1,
             int offset = 5,
-            double interval = 0.0,
+            double click_interval = 0.0,
             double pre_wait = 0.0,
             double post_wait = 0.0,
             const std::string& description = ""
     )
     {
         if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-        control->click(point, count, type, offset, interval, pre_wait, post_wait, description);
+        control->click(point, count, type, offset, click_interval, pre_wait, post_wait, description);
     }
 
     inline void click(
@@ -129,14 +127,14 @@ public:
             int count,
             uint8_t type = 1,
             int offset = 5,
-            double interval = 0.0,
+            double click_interval = 0.0,
             double pre_wait = 0.0,
             double post_wait = 0.0,
             const std::string& description = ""
     )
     {
         if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-        control->click(x, y, count, type, offset, interval, pre_wait, post_wait, description);
+        control->click(x, y, count, type, offset, click_interval, pre_wait, post_wait, description);
     }
 
     void long_click(
@@ -296,15 +294,15 @@ PROCEDURE_END
 
     double screen_ratio;
 
-    BAASConnection *connection;
+    BAASConnection* connection;
 
-    BAASUserConfig *config;
+    BAASUserConfig* config;
 
-    BAASLogger *logger;
+    BAASLogger* logger;
 
-    BAASScreenshot *screenshot;
+    BAASScreenshot* screenshot;
 
-    BAASControl *control;
+    BAASControl* control;
 
     struct feature_state {
         // record if a feature is check in screenshot, when screenshot update ,state should be reset.

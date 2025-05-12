@@ -30,8 +30,6 @@ public:
 
     void click(
             BAASPoint point,
-            uint8_t type = 1,
-            int offset = 5,
             const std::string &description = ""
     );
 
@@ -60,7 +58,7 @@ public:
             int count,
             uint8_t type = 1,
             int offset = 5,
-            double interval = 0.0,
+            double click_interval = 0.0,
             double pre_wait = 0.0,
             double post_wait = 0.0,
             const std::string &description = ""

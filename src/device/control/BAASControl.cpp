@@ -35,12 +35,10 @@ void BAASControl::init()
 
 void BAASControl::click(
         BAASPoint point,
-        uint8_t type,
-        int offset,
         const string &description
 )
 {
-    click(point.x, point.y, type, offset, description);
+    click(point.x, point.y, 1, 5, description);
 }
 
 void BAASControl::click(
@@ -63,13 +61,13 @@ void BAASControl::click(
         int count,
         uint8_t type,
         int offset,
-        double interval,
+        double click_interval,
         double pre_wait,
         double post_wait,
         const string &description
 )
 {
-    click(point.x, point.y, count, type, offset, interval, pre_wait, post_wait, description);
+    click(point.x, point.y, count, type, offset, click_interval, pre_wait, post_wait, description);
 }
 
 void BAASControl::click(
@@ -78,7 +76,7 @@ void BAASControl::click(
         int count,
         uint8_t type,
         int offset,
-        double interval,
+        double click_interval,
         double pre_wait,
         double post_wait,
         const string &description
@@ -86,17 +84,24 @@ void BAASControl::click(
 {
     gen_click_log(x, y, count, description);
 
-    set_x_y_offset(x, y, type, offset);
+    if (offset > 0)
+        set_x_y_offset(x, y, type, offset);
+
     x = int(double(x) * 1.0 * ratio);
     y = int(double(y) * 1.0 * ratio);
-    if (pre_wait > 0) BAASUtil::sleepMS(int(pre_wait * 1000));
 
-    int itv = int(interval * 1000);
+    if (pre_wait > 0)
+        BAASUtil::sleepMS(int(pre_wait * 1000));
+
+    int itv = int(click_interval * 1000);
     for (int i = 0; i < count; i++) {
         control->click(x, y);
-        if (i < count - 1) BAASUtil::sleepMS(itv);
+        if (i < count - 1)
+            BAASUtil::sleepMS(itv);
     }
-    if (post_wait > 0) BAASUtil::sleepMS(int(post_wait * 1000));
+
+    if (post_wait > 0)
+        BAASUtil::sleepMS(int(post_wait * 1000));
 }
 
 void BAASControl::long_click(

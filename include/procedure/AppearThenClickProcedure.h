@@ -12,6 +12,18 @@
 
 BAAS_NAMESPACE_BEGIN
 
+struct _click_param {
+    std::string description; // feature name
+    int x, y;                // click position
+    double interval;         // interval between two click
+    double pre_wait;         // pre wait time
+    double post_wait;        // post wait time
+    int count;               // click count
+    double click_interval;   // click interval
+    int type;                // offset type
+    int offset;              // offset size
+};
+
 class AppearThenClickProcedure : public BaseProcedure {
 public:
     explicit AppearThenClickProcedure(BAAS* baas,const BAASConfig& possible_features);
@@ -24,17 +36,20 @@ public:
     void clear_resource() override;
 
 private:
+
+    static _click_param _get_click_param(const BAASConfig& parameters);
+
     void wait_loading();
 
     void clear_possibles();
 
-    void solve_feature_action_click(BAASConfig *parameters);
+    void solve_feature_action_click(int index);
 
     void pop_last_clicked_queue(int size = 0);
 
     void insert_last_clicked_queue(std::string &feature_name);
 
-    std::vector<BAASConfig *> possibles;
+    std::vector<_click_param> possibles;
 
     std::vector<std::string> possibles_feature_names;
 
