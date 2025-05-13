@@ -27,6 +27,25 @@ enum {
     SKILL_RIGHT = 2
 };
 
+struct screenshot_extract_params {
+    std::filesystem::path img_folder;
+    double pre_wait = 0.0;
+    double interval = 0.5;
+    int img_count = 10;
+    bool random = false;
+    double duration = 60;
+
+    screenshot_extract_params(
+            const std::filesystem::path& img_folder,
+            double pre_wait = 0.0,
+            double interval = 0.5,
+            int img_count = 10,
+            bool random = false,
+            double duration = 60
+    ) : img_folder(img_folder), pre_wait(pre_wait), interval(interval), img_count(img_count), random(random), duration(duration) {}
+
+};
+
 class BAASDevelopUtils {
 public:
     static void shotStudentSkill(
@@ -44,6 +63,13 @@ public:
             const cv::Scalar &max_,
             const uint8_t cut_edge = true
     );
+
+    static void fight_screenshot_extract(
+            BAAS* baas,
+            const screenshot_extract_params& params
+    );
+
+    static int get_next_image_index(const std::filesystem::path& folder);
 };
 
 BAAS_NAMESPACE_END

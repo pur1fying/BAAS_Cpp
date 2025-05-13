@@ -18,7 +18,13 @@
     },
     "auto_fight": {
       "workflow_name": "Special-Task-L_Aris_Maid",
-      "d_update_max_thread": 4
+      "d_update_max_thread": 4,
+      "yolo": {
+        "gpu_id": -1,
+        "num_thread": 4,
+        "enable_cpu_memory_arena": false,
+        "model_path": "",
+        "model_type": "fp32"
+      }
     }
-
 }
