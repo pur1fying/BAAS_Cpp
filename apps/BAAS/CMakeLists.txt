@@ -51,6 +51,11 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/resource/auto_fight_workflow
         DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
 )
+file(
+        COPY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/yolo_models
+        DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
+)
 
 
 if (MSVC)

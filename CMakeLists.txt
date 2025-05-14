@@ -87,6 +87,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include_directories(
         ${BAAS_PROJECT_PATH}/external
         ${BAAS_PROJECT_PATH}/include
+        ${BAAS_PROJECT_PATH}/external/cuda
 )
 
 file(

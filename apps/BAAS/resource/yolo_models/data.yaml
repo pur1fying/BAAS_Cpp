@@ -1,0 +1,195 @@
+path: D:\github\datasets\baas\labeled
+train: images/train
+val: images/val
+nc: 189
+
+names:
+  0: Aris (Maid)
+  1: Aru
+  2: Eimi
+  3: Haruna
+  4: Hifumi
+  5: Hina
+  6: Hoshino
+  7: Iori
+  8: Maki
+  9: Neru
+  10: Izumi
+  11: Shiroko
+  12: Sumire
+  13: Tsurugi
+  14: Akane
+  15: Chise
+  16: Akari
+  17: Hasumi
+  18: Nonomi
+  19: Kayoko
+  20: Mutsuki
+  21: Junko
+  22: Serika
+  23: Tsubaki
+  24: Yuuka
+  25: Haruka
+  26: Asuna
+  27: Kotori
+  28: Suzumi
+  29: Pina
+  30: Hibiki
+  31: Karin
+  32: Saya
+  33: Airi
+  34: Fuuka
+  35: Hanae
+  36: Hare
+  37: Utaha
+  38: Ayane
+  39: Chinatsu
+  40: Kotama
+  41: Juri
+  42: Serina
+  43: Shimiko
+  44: Yoshimi
+  45: Mashiro
+  46: Izuna
+  47: Shizuko
+  48: Aris
+  49: Midori
+  50: Momoi
+  51: Cherino
+  52: Nodoka
+  53: Yuzu
+  54: Azusa
+  55: Hanako
+  56: Koharu
+  57: Azusa (Swimsuit)
+  58: Mashiro (Swimsuit)
+  59: Hifumi (Swimsuit)
+  60: Hina (Swimsuit)
+  61: Iori (Swimsuit)
+  62: Izumi (Swimsuit)
+  63: Shiroko (Cycling)
+  64: Shun (Small)
+  65: Kirino
+  66: Saya (Casual)
+  67: Neru (Bunny)
+  68: Karin (Bunny)
+  69: Asuna (Bunny)
+  70: Natsu
+  71: Mari
+  72: Hatsune Miku
+  73: Ako
+  74: Cherino (Hot Spring)
+  75: Chinatsu (Hot Spring)
+  76: Tomoe
+  77: Nodoka (Hot Spring)
+  78: Aru (New Year)
+  79: Mutsuki (New Year)
+  80: Serika (New Year)
+  81: Wakamo
+  82: Fubuki
+  83: Sena
+  84: Chihiro
+  85: Mimori
+  86: Ui
+  87: Hinata
+  88: Marina
+  89: Miyako
+  90: Saki
+  91: Miyu
+  92: Kaede
+  93: Tsukuyo
+  94: Misaki
+  95: Hiyori
+  96: Atsuko
+  97: Wakamo (Swimsuit)
+  98: Nonomi (Swimsuit)
+  99: Ayane (Swimsuit)
+  100: Hoshino (Swimsuit)
+  101: Shizuko (Swimsuit)
+  102: Izuna (Swimsuit)
+  103: Chise (Swimsuit)
+  104: Saori
+  105: Moe
+  106: Kazusa
+  107: Kokona
+  108: Utaha (Cheer Squad)
+  109: Noa
+  110: Hibiki (Cheer Squad)
+  111: Akane (Bunny)
+  112: Yuuka (Track)
+  113: Mari (Track)
+  114: Hasumi (Track)
+  115: Himari
+  116: Shigure
+  117: Serina (Christmas)
+  118: Hanae (Christmas)
+  119: Haruna (New Year)
+  120: Fuuka (New Year)
+  121: Junko (New Year)
+  122: Mine
+  123: Mika
+  124: Megu
+  125: Kanna
+  126: Sakurako
+  127: Toki
+  128: Nagisa
+  129: Koyuki
+  130: Kayoko (New Year)
+  131: Haruka (New Year)
+  132: Kaho
+  133: Toki (Bunny)
+  134: Yuzu (Maid)
+  135: Reisa
+  136: Rumi
+  137: Mina
+  138: Minori
+  139: Miyako (Swimsuit)
+  140: Saki (Swimsuit)
+  141: Miyu (Swimsuit)
+  142: Shiroko (Swimsuit)
+  143: Ui (Swimsuit)
+  144: Koharu (Swimsuit)
+  145: Hanako (Swimsuit)
+  146: Mimori (Swimsuit)
+  147: Meru
+  148: Momiji
+  149: Kotori (Cheer Squad)
+  150: Haruna (Track)
+  151: Ichika
+  152: Kasumi
+  153: Shigure (Hot Spring)
+  154: Misaka Mikoto
+  155: Shokuhou Misaki
+  156: Saten Ruiko
+  157: Yukari
+  158: Renge
+  159: Kikyou
+  160: Eimi (Swimsuit)
+  161: Kotama (Camp)
+  162: Hare (Camp)
+  163: Ako (Dress)
+  164: Ibuki
+  165: Makoto
+  166: Hina (Dress)
+  167: Kayoko (Dress)
+  168: Aru (Dress)
+  169: Akari (New Year)
+  170: Umika
+  171: Kazusa (Band)
+  172: Yoshimi (Band)
+  173: Airi (Band)
+  174: Kirara
+  175: Momoi (Maid)
+  176: Midori (Maid)
+  177: Serika (Swimsuit)
+  178: Kanna (Swimsuit)
+  179: Fubuki (Swimsuit)
+  180: Kirino (Swimsuit)
+  181: Moe (Swimsuit)
+  182: Hoshino (Battle)
+  183: Shiroko Terror
+  184: Atsuko (Swimsuit)
+  185: Saori (Swimsuit)
+  186: Hiyori (Swimsuit)
+  187: stu_h_bar
+  188: Nighttime Nero
