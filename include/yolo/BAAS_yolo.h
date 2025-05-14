@@ -27,7 +27,8 @@ public:
 
     void run_session(
             const cv::Mat& In,
-            yolo_res& Out
+            yolo_res& Out,
+            NMS_option nms_op = NO_NMS
     );
 
     void warm_up();
@@ -40,10 +41,32 @@ private:
 
     void _init_yaml();
 
+    void _get_group_num_Out(
+            int strideNum,
+            int signalResultNum,
+            float* data,
+            yolo_res& Out
+    );
+
+    void _get_whole_nms_Out(
+            int strideNum,
+            int signalResultNum,
+            float* data,
+            yolo_res& Out
+    );
+
+    void _get_no_nms_Out(
+            int strideNum,
+            int signalResultNum,
+            float* data,
+            yolo_res& Out
+    );
+
     template<typename N>
     void _tensor_process(
             N& blob,
-            yolo_res& Out
+            yolo_res& Out,
+            NMS_option nms_op
      );
 
     std::vector<std::string> classes;
@@ -68,7 +91,7 @@ private:
     std::pair<int, int> img_size;
     std::vector<int64_t> inputNodeDims;
     unsigned long long tensor_size;
-    float rect_confidence_threshold;
+    float rect_confidence_threshold, iou_threshold;
     float resize_scales; //letterbox scale
 };
 

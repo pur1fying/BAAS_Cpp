@@ -1,5 +1,8 @@
 {
   "name": "Special-Task-L Aris Maid Workflow",
+  "yolo_setting": {
+    "model": "best.onnx"
+  },
   "formation": {
     "front": ["Aris (Maid)", "Wakamo", "Kayoko (New Year)", "Ui"],
     "back": ["Ako", "Himari"],

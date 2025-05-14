@@ -1,30 +1,30 @@
 {
-    "name": "新的配置",
-    "general": {
-      "last_refresh_config_time": 0
-    },
-    "emulator": {
-      "serial": "127.0.0.1:16384",
-      "control_method": "nemu",
-      "screenshot_method": "nemu",
-      "server": "官服",
-      "package_name": "auto",
-      "language": "auto",
-      "emulator_folder_path": ""
-    },
-    "script": {
-      "screenshot_interval": 0.3,
-      "show_image_compare_log": false
-    },
-    "auto_fight": {
-      "workflow_name": "Special-Task-L_Aris_Maid",
-      "d_update_max_thread": 4,
-      "yolo": {
-        "gpu_id": -1,
-        "num_thread": 4,
-        "enable_cpu_memory_arena": false,
-        "model_path": "",
-        "model_type": "fp32"
-      }
+  "name": "新的配置",
+  "general": {
+    "last_refresh_config_time": 0
+  },
+  "emulator": {
+    "serial": "127.0.0.1:16384",
+    "control_method": "nemu",
+    "screenshot_method": "nemu",
+    "server": "官服",
+    "package_name": "auto",
+    "language": "auto",
+    "emulator_folder_path": ""
+  },
+  "script": {
+    "screenshot_interval": 0.3,
+    "show_image_compare_log": false
+  },
+  "auto_fight": {
+    "workflow_name": "Special-Task-L_Aris_Maid",
+    "d_update_max_thread": 4,
+    "yolo": {
+      "gpu_id": -1,
+      "num_thread": 4,
+      "enable_cpu_memory_arena": false,
+      "rect_threshold": 0.6,
+      "iou_threshold": 0.5
     }
+  }
 }

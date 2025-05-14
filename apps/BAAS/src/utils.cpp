@@ -22,6 +22,8 @@ void init_globals()
 
     BAAS_AUTO_FIGHT_WORKFLOW_DIR = BAAS_RESOURCE_DIR / "auto_fight_workflow";
 
+    BAAS_YOLO_MODEL_DIR = BAAS_RESOURCE_DIR / "yolo_models";
+
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
     log_git_info();
 

@@ -7,9 +7,10 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include "opencv2/opencv.hpp"
 
-#include "config/BAASConfig.h"
+#include <opencv2/opencv.hpp>
+#include <config/BAASConfig.h>
+#include <yolo/yolo_d.h>
 
 #include "core_defines.h"
 
@@ -92,6 +93,10 @@ struct auto_fight_d {
     // room close time
     std::optional<int>       room_left_time;
 
+    // YOLO Detected position
+    std::map<std::string, int> obj_name_to_index_map;
+    std::map<int, std::vector<yolo_single_res>> positions;
+
     BAASConfig d_fight;
 
     void reset_all() noexcept {
@@ -104,6 +109,9 @@ struct auto_fight_d {
         boss_current_health.reset();
         for (auto& skill : skills) {
             skill.reset();
+        }
+        for (auto& position : positions) {
+            position.second.clear();
         }
     }
 };

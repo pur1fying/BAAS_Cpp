@@ -76,7 +76,8 @@ void BAAS_Yolo_v8::preprocess_input_image(const cv::Mat& In, cv::Mat& Out) {
 }
 
 
-void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out) {
+void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out, NMS_option nms_op) {
+    Out.results.clear();
     Out.time_info.pre_t = getCurrentTime();
     cv::Mat processed_img;
     preprocess_input_image(In, processed_img);
@@ -85,7 +86,7 @@ void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out) {
         case YOLO_DETECT_V8: {
             float* blob = (float*)blob_ptr;
             blob_from_image(processed_img, blob);
-            _tensor_process(blob, Out);
+            _tensor_process(blob, Out, nms_op);
             break;
         }
 
@@ -93,7 +94,7 @@ void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out) {
 #ifdef __CUDA__
             half* blob = (half*)blob_ptr;
             blob_from_image(processed_img, blob);
-            _tensor_process(blob, Out);
+            _tensor_process(blob, Out, nms_op);
             break;
 #endif
         }
@@ -110,6 +111,7 @@ void BAAS_Yolo_v8::init_model(const yolo_d& d)
         }
 
         rect_confidence_threshold = d.rect_threshold;
+        iou_threshold = d.iou_threshold;
         img_size = d.img_size;
         inputNodeDims = { 1, 3, img_size.first, img_size.second };
         tensor_size = 3 * img_size.first * img_size.second;
@@ -123,11 +125,13 @@ void BAAS_Yolo_v8::init_model(const yolo_d& d)
         _init_yaml();
 
         env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "Yolo");
+#ifdef __CUDA__
         if (gpu_id >= 0) {
             OrtCUDAProviderOptions cudaOption;
             cudaOption.device_id = gpu_id;
             sessionOptions.AppendExecutionProvider_CUDA(cudaOption);
         }
+#endif // __CUDA__
 
         sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
         sessionOptions.SetInterOpNumThreads(num_thread);
@@ -160,8 +164,10 @@ void BAAS_Yolo_v8::init_model(const yolo_d& d)
             break;
         }
         case YOLO_DETECT_V8_HALF: {
+#ifdef __CUDA__
             blob_ptr = new half[tensor_size];
             break;
+#endif // __CUDA__
         }
     }
 }
@@ -232,7 +238,8 @@ void BAAS_Yolo_v8::warm_up()
 template<typename N>
 void BAAS_Yolo_v8::_tensor_process(
         N& blob,
-        yolo_res& Out
+        yolo_res& Out,
+        NMS_option nms_op
 )
 {
     Ort::Value inputTensor =
@@ -262,6 +269,7 @@ void BAAS_Yolo_v8::_tensor_process(
     Ort::TypeInfo typeInfo = outputTensor.front().GetTypeInfo();
     auto tensor_info = typeInfo.GetTensorTypeAndShapeInfo();
     std::vector<int64_t> outputNodeDims = tensor_info.GetShape();
+
     auto output = outputTensor.front().GetTensorMutableData<typename std::remove_pointer<N>::type>();
 
     switch (type) {
@@ -285,39 +293,24 @@ void BAAS_Yolo_v8::_tensor_process(
             // ultralytics add transpose operator to the output of yolov8 model.which make yolov8/v5/v7 has same shape
             // https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt
             rawData = rawData.t();
-
             float* data = (float*) rawData.data;
-
-            yolo_single_res res;
-            for (int i = 0; i < strideNum; ++i) {
-                float* classesScores = data + 4;
-                cv::Mat scores(1, this->classes.size(), CV_32FC1, classesScores);
-                cv::Point class_id;
-                double maxClassScore;
-                cv::minMaxLoc(scores, 0, &maxClassScore, 0, &class_id);
-                if (maxClassScore > rect_confidence_threshold) {
-                    res.confidence = maxClassScore;
-                    res.classId = class_id.x;
-                    float x = data[0];
-                    float y = data[1];
-                    float w = data[2];
-                    float h = data[3];
-
-                    int left = int((x - 0.5 * w) * resize_scales);
-                    int top = int((y - 0.5 * h) * resize_scales);
-
-                    int width = int(w * resize_scales);
-                    int height = int(h * resize_scales);
-                    res.box = cv::Rect(left, top, width, height);
-                    Out.results.push_back(res);
-                }
-                data += signalResultNum;
+            switch (nms_op) {
+                case GROUP_NMS:
+                    _get_group_num_Out(strideNum, signalResultNum, data, Out);
+                    break;
+                case WHOLE_NMS:
+                    _get_whole_nms_Out(strideNum, signalResultNum, data, Out);
+                    break;
+                case NO_NMS:
+                    _get_no_nms_Out(strideNum, signalResultNum, data, Out);
+                    break;
             }
+
+            double t_end = getCurrentTime();
+            Out.time_info.pre_t = Out.time_info.infer_t - Out.time_info.pre_t;
+            Out.time_info.infer_t = Out.time_info.post_t - Out.time_info.infer_t;
+            Out.time_info.post_t = t_end - Out.time_info.post_t;
         }
-        double t_end = getCurrentTime();
-        Out.time_info.pre_t = Out.time_info.infer_t - Out.time_info.pre_t;
-        Out.time_info.infer_t = Out.time_info.post_t - Out.time_info.infer_t;
-        Out.time_info.post_t = t_end - Out.time_info.post_t;
     }
 }
 
@@ -360,6 +353,152 @@ void BAAS_Yolo_v8::_init_yaml() {
     classes = names;
 }
 
+void BAAS_Yolo_v8::_get_group_num_Out(
+        int strideNum,
+        int signalResultNum,
+        float* data,
+        yolo_res& Out
+)
+{
+    std::map<int, std::vector<int>> m_class_ids;
+    std::map<int, std::vector<float>> m_confidences;
+    std::map<int, std::vector<cv::Rect>> m_boxes;
+
+    for (int i = 0; i < strideNum; ++i) {
+        float* classesScores = data + 4;
+        cv::Mat scores(1, this->classes.size(), CV_32FC1, classesScores);
+        cv::Point class_id;
+        double maxClassScore;
+        cv::minMaxLoc(scores, 0, &maxClassScore, 0, &class_id);
+        if (maxClassScore > rect_confidence_threshold) {
+            m_confidences[class_id.x].push_back(maxClassScore);
+            m_class_ids[class_id.x].push_back(class_id.x);
+            float x = data[0];
+            float y = data[1];
+            float w = data[2];
+            float h = data[3];
+
+            int left = int((x - 0.5 * w) * resize_scales);
+            int top = int((y - 0.5 * h) * resize_scales);
+
+            int width = int(w * resize_scales);
+            int height = int(h * resize_scales);
+            m_boxes[class_id.x].push_back(cv::Rect(left, top, width, height));
+        }
+        data += signalResultNum;
+    }
+
+    std::vector<int> nmsResult;
+    for (auto& it : m_boxes) {
+        cv::dnn::NMSBoxes(
+                m_boxes[it.first],
+                m_confidences[it.first],
+                rect_confidence_threshold,
+                iou_threshold,
+                nmsResult
+        );
+        yolo_single_res res;
+        for (int i = 0; i < nmsResult.size(); ++i) {
+            int idx = nmsResult[i];
+            res.classId = it.first;
+            res.confidence = m_confidences[it.first][idx];
+            res.box = m_boxes[it.first][idx];
+            Out.results.push_back(res);
+        }
+    }
+}
+
+void BAAS_Yolo_v8::_get_whole_nms_Out(
+        int strideNum,
+        int signalResultNum,
+        float* data,
+        yolo_res& Out
+)
+{
+    std::vector<int> class_ids;
+    std::vector<float> confidences;
+    std::vector<cv::Rect> boxes;
+    for (int i = 0; i < strideNum; ++i) {
+        float* classesScores = data + 4;
+        cv::Mat scores(1, this->classes.size(), CV_32FC1, classesScores);
+        cv::Point class_id;
+        double maxClassScore;
+        cv::minMaxLoc(scores, 0, &maxClassScore, 0, &class_id);
+        if (maxClassScore > rect_confidence_threshold) {
+            confidences.push_back(maxClassScore);
+            class_ids.push_back(class_id.x);
+            float x = data[0];
+            float y = data[1];
+            float w = data[2];
+            float h = data[3];
+
+            int left = int((x - 0.5 * w) * resize_scales);
+            int top = int((y - 0.5 * h) * resize_scales);
+
+            int width = int(w * resize_scales);
+            int height = int(h * resize_scales);
+            boxes.push_back(cv::Rect(left, top, width, height));
+        }
+        data += signalResultNum;
+    }
+
+    std::vector<int> nmsResult;
+
+    cv::dnn::NMSBoxes(
+            boxes,
+            confidences,
+            rect_confidence_threshold,
+            iou_threshold,
+            nmsResult
+    );
+
+    yolo_single_res res;
+    for (int i = 0; i < nmsResult.size(); ++i) {
+        int idx = nmsResult[i];
+        res.classId = class_ids[idx];
+        res.confidence = confidences[idx];
+        res.box = boxes[idx];
+        Out.results.push_back(res);
+    }
+}
+
+void BAAS_Yolo_v8::_get_no_nms_Out(
+        int strideNum,
+        int signalResultNum,
+        float* data,
+        yolo_res& Out
+)
+{
+    yolo_single_res res;
+    std::vector<int> class_ids;
+    std::vector<float> confidences;
+    std::vector<cv::Rect> boxes;
+
+    for (int i = 0; i < strideNum; ++i) {
+        float* classesScores = data + 4;
+        cv::Mat scores(1, this->classes.size(), CV_32FC1, classesScores);
+        cv::Point class_id;
+        double maxClassScore;
+        cv::minMaxLoc(scores, 0, &maxClassScore, 0, &class_id);
+        if (maxClassScore > rect_confidence_threshold) {
+            res.confidence = maxClassScore;
+            res.classId = class_id.x;
+            float x = data[0];
+            float y = data[1];
+            float w = data[2];
+            float h = data[3];
+
+            int left = int((x - 0.5 * w) * resize_scales);
+            int top = int((y - 0.5 * h) * resize_scales);
+
+            int width = int(w * resize_scales);
+            int height = int(h * resize_scales);
+            res.box = cv::Rect(left, top, width, height);
+            Out.results.push_back(res);
+        }
+        data += signalResultNum;
+    }
+}
 
 
 BAAS_NAMESPACE_END

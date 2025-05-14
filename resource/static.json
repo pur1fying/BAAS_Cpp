@@ -1,6 +1,18 @@
 {
   "BAAS": {
     "auto_fight": {
+      "yolo": {
+        "models": {
+          "best.onnx": {
+            "yaml_path": "data.yaml",
+            "type": "fp32"
+          },
+          "best_fp16.onnx": {
+            "yaml_path": "data.yaml",
+            "type": "fp16"
+          }
+        }
+      },
       "cost" :{
         "increase_1_dealt_x": 31.7,
         "recognize_region": [820, 681, 1141, 696],

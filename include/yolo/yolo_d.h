@@ -15,8 +15,13 @@
 
 BAAS_NAMESPACE_BEGIN
 
-enum model_type
-{
+enum NMS_option {
+    GROUP_NMS,
+    WHOLE_NMS,
+    NO_NMS,
+};
+
+enum model_type {
     //FLOAT32 MODEL
     YOLO_DETECT_V8,
 
@@ -24,28 +29,24 @@ enum model_type
     YOLO_DETECT_V8_HALF,
 };
 
-struct yolo_d
-{
+struct yolo_d {
     std::filesystem::path model_path, yaml_path;
     model_type modelType = YOLO_DETECT_V8;
 
     std::pair<int, int> img_size = {640, 640 };
     float rect_threshold = 0.6;
+    float iou_threshold = 0.5;
 
-    // ---------------
     int gpu_id = -1;
     int num_thread = 4;
     bool enable_cpu_memory_arena = false;
-
 };
 
 
-struct yolo_single_res
-{
+struct yolo_single_res {
     int classId;
     float confidence;
     cv::Rect box;
-    std::vector<cv::Point2f> keyPoints;
 };
 
 struct yolo_run_time_info {
@@ -54,11 +55,11 @@ struct yolo_run_time_info {
     double post_t;
 };
 
-struct yolo_res
-{
+struct yolo_res {
     std::vector<yolo_single_res> results;
     yolo_run_time_info time_info;
 };
+
 BAAS_NAMESPACE_END
 
 #endif //BAAS_YOLO_YOLO_D_H_
