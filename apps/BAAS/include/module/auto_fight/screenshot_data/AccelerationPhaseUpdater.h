@@ -12,7 +12,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class AccelerationPhaseUpdater : public BaseDataUpdater {
+
 public:
+
     explicit AccelerationPhaseUpdater(BAAS *baas, auto_fight_d *data);
 
     void update() override;
@@ -22,7 +24,9 @@ public:
     constexpr std::string data_name() override;
 
     void display_data() override;
+
 private:
+
     BAASConfig feature_appear_output;
 
     double _time_cost;

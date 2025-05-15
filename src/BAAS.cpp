@@ -461,4 +461,11 @@ BaseProcedure* BAAS::_create_procedure(const string& procedure_name, const BAASC
     return p;
 }
 
+BAAS::~BAAS() {
+    delete screenshot;
+    delete control;
+    delete config;
+    delete connection;
+}
+
 BAAS_NAMESPACE_END

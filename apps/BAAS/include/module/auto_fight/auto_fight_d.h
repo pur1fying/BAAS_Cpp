@@ -99,6 +99,8 @@ struct auto_fight_d {
 
     BAASConfig d_fight;
 
+    yolo_d yolo_pra;
+
     void reset_all() noexcept {
         cost.reset();
         auto_state.reset();

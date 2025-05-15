@@ -7,11 +7,14 @@
 
 #include "BaseDataUpdater.h"
 
+#include <yolo/BAAS_yolo.h>
+
 BAAS_NAMESPACE_BEGIN
 
 class ObjectPositionUpdater : public BaseDataUpdater {
 
 public:
+
     explicit ObjectPositionUpdater(
             BAAS* baas,
             auto_fight_d* data
@@ -26,13 +29,25 @@ public:
     void display_data() override;
 
 private:
-    std::string ocr_model_name, filtered_text;
 
-    cv::Mat origin_screenshot, cropped_image;
+    void _init_time_cost();
 
-    std::vector<BAASRectangle> skill_cost_ocr_region;
+    void _init_yolo_d();
 
-    TextLine ocr_result;
+    void _init_yolo_model();
+
+    void _warm_up_session();
+
+    double average_cost;
+
+    cv::Mat origin_screenshot;
+
+    NMS_option nms_op;
+    yolo_res result;
+
+    std::unique_ptr<BAAS_Yolo_v8> _yolo;
+
+    static constexpr auto _display_format = "| {:<15}| {:<12}| {:>5}";
 
 };
 

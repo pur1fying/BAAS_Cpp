@@ -22,64 +22,11 @@ int main(int argc, char **argv) {
     string config_name = "default_config";
     cv::Mat img;
     try{
-//        auto hDll = LoadLibraryA("D:\\github\\BAAS_Cpp\\dll\\Windows\\onnxruntime_providers_cuda.dll");
-//        if (hDll == NULL) {
-//            std::cerr << "无法加载DLL: " << GetLastError() << std::endl;
-//            return 1;
-//        }
         init_globals();
         BAASFeature::show();
-
-
-        BAAS_Yolo_v8 yolo;
-        yolo_d d;
-        d.model_path = "resource\\yolo_models\\best.onnx";
-        d.yaml_path = "resource\\yolo_models\\data.yaml";
-        d.num_thread = 4;
-        d.gpu_id = 0;
-        d.img_size = {640, 640};
-        d.modelType = YOLO_DETECT_V8;
-        d.rect_threshold = 0.6;
-
-        yolo.init_model(d);
-
-        std::cout << "model count " << yolo.get_classes().size() << std::endl;
-        auto t1 = std::chrono::high_resolution_clock::now();
-
-        yolo.warm_up();
-        auto t2 = std::chrono::high_resolution_clock::now();
-        std::cout << "warm up time: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << "us" << std::endl;
-        img = cv::imread("190.png");
-
-        yolo_res res;
-
-        yolo.run_session(img, res);
-
-        std::cout << "time: " << std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count() << "us" << std::endl;
-
-        std::cout << "result count " << res.results.size() << std::endl;
-
-        // draw box
-        for (const auto& r : res.results) {
-            cv::rectangle(img, r.box, cv::Scalar(0, 255, 0), 2);
-            std::cout << "class id " << r.classId  << "name "<< yolo.get_classes()[r.classId] << " confidence " << r.confidence << std::endl;
-        }
-        std::cout <<  "time " << res.time_info.pre_t << " " << res.time_info.infer_t << " " << res.time_info.post_t << std::endl;
-        cv::imwrite("result.png", img);
-
-        std::vector<int> nmsResult;
-//        cv::dnn::NMSBoxes(boxes, confidences, rect_confidence_threshold, threshold, nmsResult);
-//        for (int i = 0; i < nmsResult.size(); ++i) {
-//            int idx = nmsResult[i];
-//            yolo_single_res result;
-//            result.classId = class_ids[idx];
-//            result.confidence = confidences[idx];
-//            result.box = boxes[idx];
-//            Out.push_back(result);
-//        }
-        return 0;
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
+
 //        std::vector<std::string> names = {
 //                "Ui",
 //                "Nagisa",
@@ -107,7 +54,7 @@ int main(int argc, char **argv) {
 
         fight.display_all_state();
         fight.display_all_cond_info();
-        fight.set_data_updater_mask(0b000001);
+        fight.set_data_updater_mask(0b1000001);
 
 //        fight.set_skill_slot_possible_templates(0, {5, 4, 3, 2, 1, 0});
 //        fight.set_skill_slot_possible_templates(1, {5, 4, 3, 2, 0, 1});

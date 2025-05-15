@@ -12,6 +12,7 @@ BAAS_NAMESPACE_BEGIN
 class BossHealthUpdater : public BaseDataUpdater {
 
 public:
+
     explicit BossHealthUpdater(BAAS *baas, auto_fight_d *data);
 
     void update() override;
@@ -23,6 +24,7 @@ public:
     void display_data() override;
 
 private:
+
     void _update_all();
 
     void _update_current_health();

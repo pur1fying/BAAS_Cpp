@@ -23,11 +23,13 @@ namespace Ort
 
 BAAS_NAMESPACE_BEGIN
 
-BAAS_Yolo_v8::BAAS_Yolo_v8() {
+BAAS_Yolo_v8::BAAS_Yolo_v8()
+{
 
 }
 
-BAAS_Yolo_v8::~BAAS_Yolo_v8() {
+BAAS_Yolo_v8::~BAAS_Yolo_v8()
+{
     session.reset();
     inputNamesPtr.clear();
     outputNamesPtr.clear();
@@ -48,7 +50,8 @@ void blob_from_image(cv::Mat& iImg, T& iBlob) {
 }
 
 
-void BAAS_Yolo_v8::preprocess_input_image(const cv::Mat& In, cv::Mat& Out) {
+void BAAS_Yolo_v8::preprocess_input_image(const cv::Mat& In, cv::Mat& Out)
+{
     if (In.channels() == 3) {
         Out = In.clone();
         cv::cvtColor(In, Out, cv::COLOR_BGR2RGB);
@@ -76,7 +79,8 @@ void BAAS_Yolo_v8::preprocess_input_image(const cv::Mat& In, cv::Mat& Out) {
 }
 
 
-void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out, NMS_option nms_op) {
+void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out, NMS_option nms_op)
+{
     Out.results.clear();
     Out.time_info.pre_t = getCurrentTime();
     cv::Mat processed_img;
@@ -132,6 +136,9 @@ void BAAS_Yolo_v8::init_model(const yolo_d& d)
             sessionOptions.AppendExecutionProvider_CUDA(cudaOption);
         }
 #endif // __CUDA__
+
+        if (d.enable_cpu_memory_arena)  sessionOptions.EnableCpuMemArena();
+        else                            sessionOptions.DisableCpuMemArena();
 
         sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
         sessionOptions.SetInterOpNumThreads(num_thread);
@@ -314,7 +321,8 @@ void BAAS_Yolo_v8::_tensor_process(
     }
 }
 
-void BAAS_Yolo_v8::_init_yaml() {
+void BAAS_Yolo_v8::_init_yaml()
+{
     // Open the YAML file
     std::ifstream file(yaml_path.c_str());
     if (!file.is_open()) {
@@ -346,8 +354,7 @@ void BAAS_Yolo_v8::_init_yaml() {
         std::string name;
         std::getline(ss, name, ':'); // Extract the number before the delimiter
         std::getline(ss, name); // Extract the string after the delimiter
-        names.push_back(name);
-        std::cout << name << std::endl;
+        names.push_back(name.substr(1)); // remove space after ':'
     }
 
     classes = names;

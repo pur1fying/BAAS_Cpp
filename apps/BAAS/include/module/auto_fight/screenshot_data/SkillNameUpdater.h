@@ -10,7 +10,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class SkillNameUpdater : public BaseDataUpdater {
+
 public:
+
     explicit SkillNameUpdater(BAAS *baas, auto_fight_d *data);
 
     void update() override;

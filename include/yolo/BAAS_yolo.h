@@ -72,7 +72,7 @@ private:
     std::vector<std::string> classes;
 
     std::filesystem::path model_path, yaml_path;
-    model_type type;
+    yolo_model_type type;
 
     void* blob_ptr;
 

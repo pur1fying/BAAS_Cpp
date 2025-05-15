@@ -21,7 +21,7 @@ enum NMS_option {
     NO_NMS,
 };
 
-enum model_type {
+enum yolo_model_type {
     //FLOAT32 MODEL
     YOLO_DETECT_V8,
 
@@ -31,7 +31,7 @@ enum model_type {
 
 struct yolo_d {
     std::filesystem::path model_path, yaml_path;
-    model_type modelType = YOLO_DETECT_V8;
+    yolo_model_type modelType = YOLO_DETECT_V8;
 
     std::pair<int, int> img_size = {640, 640 };
     float rect_threshold = 0.6;

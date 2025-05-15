@@ -12,6 +12,7 @@ BAAS_NAMESPACE_BEGIN
 class SkillCostUpdater : public BaseDataUpdater {
 
 public:
+
     explicit SkillCostUpdater(
             BAAS* baas,
             auto_fight_d* data
@@ -26,6 +27,7 @@ public:
     void display_data() override;
 
 private:
+
     std::string ocr_model_name, filtered_text;
 
     cv::Mat origin_screenshot, cropped_image;

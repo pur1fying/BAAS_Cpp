@@ -12,6 +12,7 @@ BAAS_NAMESPACE_BEGIN
 class CostUpdater : public BaseDataUpdater {
 
 public:
+
     explicit CostUpdater(BAAS *baas, auto_fight_d *data);
 
     void update() override;
@@ -23,6 +24,7 @@ public:
     void display_data() override;
 
 private:
+
     void _init_static_value();
 
     // static value

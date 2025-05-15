@@ -241,11 +241,8 @@ void AngleNet::try_release_all()
 
 void AngleNet::set_cpu_memory_arena(bool state)
 {
-    if (state) {
-        sessionOptions.EnableCpuMemArena();
-    } else {
-        sessionOptions.DisableCpuMemArena();
-    }
+    if (state)sessionOptions.EnableCpuMemArena();
+    else      sessionOptions.DisableCpuMemArena();
 }
 
 BAAS_NAMESPACE_END

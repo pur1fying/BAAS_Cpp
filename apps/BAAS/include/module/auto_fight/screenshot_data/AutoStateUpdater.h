@@ -11,6 +11,7 @@
 BAAS_NAMESPACE_BEGIN
 
 class AutoStateUpdater : public BaseDataUpdater {
+
 public:
 
     explicit AutoStateUpdater(BAAS *baas, auto_fight_d *data);

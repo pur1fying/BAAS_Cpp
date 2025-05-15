@@ -11,7 +11,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class BaseDataUpdater {
+
 public:
+
     explicit BaseDataUpdater(BAAS* baas, auto_fight_d* data);
 
     bool at_fight_page();
@@ -25,6 +27,7 @@ public:
     virtual void display_data();
 
 protected:
+
     BAASLogger* logger;
 
     BAAS* baas;

@@ -60,7 +60,7 @@ public:
         return !latest_screenshot.empty();
     }
 
-    ~BAAS() = default;
+    ~BAAS();
 
     [[nodiscard]] inline bool is_running() const
     {

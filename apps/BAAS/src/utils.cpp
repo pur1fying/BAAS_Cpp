@@ -15,6 +15,8 @@ BAAS_NAMESPACE_BEGIN
 
 std::filesystem::path BAAS_AUTO_FIGHT_WORKFLOW_DIR;
 
+std::filesystem::path BAAS_YOLO_MODEL_DIR;
+
 void init_globals()
 {
     BAASUtil::initWinsock();

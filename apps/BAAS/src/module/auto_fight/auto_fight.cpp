@@ -15,6 +15,7 @@
 #include "module/auto_fight/screenshot_data/BossHealthUpdater.h"
 #include "module/auto_fight/screenshot_data/AccelerationPhaseUpdater.h"
 #include "module/auto_fight/screenshot_data/AutoStateUpdater.h"
+#include "module/auto_fight/screenshot_data/ObjectPositionUpdater.h"
 
 #include "module/auto_fight/conditions/CostCondition.h"
 
@@ -73,6 +74,11 @@ void AutoFight::_init_data_updaters()
     // auto state
     d_updaters.push_back(std::make_unique<AutoStateUpdater>(baas, &d_auto_f));
     d_updater_map["auto_state"] = 1LL << 5;
+
+    // BIT [ 7 ]
+    // object position
+    d_updaters.push_back(std::make_unique<ObjectPositionUpdater>(baas, &d_auto_f));
+    d_updater_map["object_position"] = 1LL << 6;
 
 }
 
