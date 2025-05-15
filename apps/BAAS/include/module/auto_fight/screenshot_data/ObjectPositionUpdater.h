@@ -47,7 +47,7 @@ private:
 
     std::unique_ptr<BAAS_Yolo_v8> _yolo;
 
-    static constexpr auto _display_format = "| {:<15}| {:<12}| {:>5}";
+    static constexpr auto _display_format = "| {:>15}| {:>12}| {:>5}";
 
 };
 

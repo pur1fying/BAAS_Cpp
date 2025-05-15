@@ -35,7 +35,12 @@ constexpr std::string ObjectPositionUpdater::data_name() {
 }
 
 void ObjectPositionUpdater::display_data() {
-    logger->BAASInfo(std::format(_display_format, "Name", "Center", "Score"));
+    if(result.results.empty()) {
+        logger->BAASInfo("Obj  : No Object Detected.");
+        return;
+    }
+
+    logger->BAASInfo(std::format(_display_format, "Object Name", "Center", "Score"));
 
     for (const auto& res : result.results) {
         std::string name = _yolo->get_classes()[res.classId];
@@ -45,7 +50,16 @@ void ObjectPositionUpdater::display_data() {
         std::string conf = std::format("{:.2f}", res.confidence);
 
         logger->BAASInfo(std::format(_display_format, name, pos, conf));
+//        cv::rectangle(
+//                origin_screenshot,
+//                res.box,
+//                cv::Scalar(0, 255, 0),
+//                2
+//        );
+
     }
+//    cv::imshow("Object Detection", origin_screenshot);
+//    cv::waitKey(1);
 }
 
 void ObjectPositionUpdater::_init_yolo_d() {

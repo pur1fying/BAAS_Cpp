@@ -17,38 +17,52 @@ using namespace std;
 using namespace baas;
 using json = nlohmann::json;
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     system("chcp 65001");
     string config_name = "default_config";
     cv::Mat img;
-    try{
+    try {
         init_globals();
         BAASFeature::show();
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
 
-//        std::vector<std::string> names = {
-//                "Ui",
-//                "Nagisa",
-//                "Himari"
-//        };
-//        std::vector<BAASRectangle> regions = {
-//                SKILL1_LEFT,
-//                SKILL2_LEFT,
-//                SKILL3_LEFT
-//        };
-//        std::vector<int> type = {
-//                SKILL_LEFT,
-//                SKILL_LEFT,
-//                SKILL_LEFT
-//        };
-//
-//        for (int i = 0; i < names.size(); ++i) {
-//            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
-//        }
-//        return 0;
+        baas.update_screenshot_array();
+
+        std::vector<std::string> names = {
+                "Koharu",
+                "Eimi",
+                "Fuuka (New Year)"
+        };
+        std::vector<BAASRectangle> regions = {
+                SKILL1_RIGHT,
+//                SKILL2_RIGHT,
+//                SKILL3_RIGHT
+        };
+        std::vector<int> type = {
+                SKILL_RIGHT,
+//                SKILL_RIGHT,
+//                SKILL_RIGHT
+        };
+        for (int i = 0; i < names.size(); ++i) {
+            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
+        }
+        return 0;
 //        std::vector<std::string> languages = {"en-us", "zh-cn"};
 //        baas_ocr->init(languages);
+//        BAASDevelopUtils::fight_screenshot_extract(
+//                &baas,
+//                screenshot_extract_params(
+//                        R"(D:\github\datasets\baas\raw)",
+//                        0.0,
+//                        0.5,
+//                        60,
+//                        false,
+//                        60
+//                )
+//        );
+//        return 0;
         AutoFight fight(&baas);
         fight.init_workflow();
 
@@ -61,96 +75,46 @@ int main(int argc, char **argv) {
 //        fight.set_skill_slot_possible_templates(2, {5, 4, 3, 1, 0, 2});
         fight.set_skill_slot_possible_templates(0, {0, 1, 2});
         fight.set_skill_slot_possible_templates(1, {0, 1, 2});
-        fight.set_skill_slot_possible_templates(2, {0, 1 ,2});
+        fight.set_skill_slot_possible_templates(2, {0, 1, 2});
         auto start = BAASUtil::getCurrentTimeMS();
         int frame_count = 0;
 
         fight.set_boss_health_update_flag(0b100);
         fight.set_skill_cost_update_flag(0b111);
         cv::Mat img;
-
-        while(1){
-//            baas.update_screenshot_array();
-            auto st = BAASUtil::getCurrentTimeMS();
-            baas.reset_all_feature();
-            fight.update_screenshot();
-//            if (!baas.feature_appear("fight_pause-button_appear")) {
-//                continue;
-//            }
-
-            fight.reset_data();
-            fight.update_data();
-            auto end = BAASUtil::getCurrentTimeMS();
-            baas.get_logger()->BAASInfo("Shot And Update data time: " + std::to_string(end - st) + "ms");
-            fight.display_screenshot_extracted_data();
-
-            baas.get_latest_screenshot(img);
-            frame_count++;
-            if (BAASUtil::getCurrentTimeMS() - start > 1000) {
-                start = BAASUtil::getCurrentTimeMS();
-                baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
-                frame_count = 0;
-            }
-        }
-        system("pause");
-
-
-        return 0;
-        baas.update_screenshot_array();
-        baas.get_latest_screenshot(img);
-
-//        cv::imshow("img", img);
-//        cv::waitKey(0);
-
-//        string name = "pause-button";
-//        BAASRectangle region = {1215, 29, 1251, 65};
-//        BAASDevelopUtils::extract_image_rgb_range(img, name, region, {0, 0, 0}, {255, 255, 255});
-//        cv::imshow("img", img);
-//        cv::waitKey(0);
-//        return 0;
-
-        register_baas_module(&baas);
-        baas.solve("AutoFight");
-
-        return 0;
-
-//        baas_ocr->test_images();
-        OcrResult result;
-        TextLine result2;
-        std::string a = "1234567890/";
-        baas.update_screenshot_array();
-        BAASRectangle region_ap = {345, 32, 452, 53};
-        baas.ocr_for_single_line("zh-cn", result2, region_ap, "AP", a);
-        BAASRectangle region_diamond = {549, 30, 663, 63};
-        baas.ocr_for_single_line("zh-cn", result2, region_diamond, "Diamond", "1234567890,");
-        json j;
-//        BAASOCR::ocrResult2json(result, j);
-//        cout << j.dump(4) << endl;
-//            BAASUtil::stringReplace("/", "_", result2.text);
-//            cv::imwrite(result2.text + ".png", img);
-            }
-//        for (int i = 1; i<=10; ++i) {
-//            baas_ocr->ocr("en-us", img, result);
-//        }
-//        baas_ocr->ocr("en-us", img, result);
-//        for (int i = 1; i<=10; ++i) {
-//            baas.update_screenshot_array();
+//
+//        while(1){
+////            baas.update_screenshot_array();
+//            auto st = BAASUtil::getCurrentTimeMS();
+//            baas.reset_all_feature();
+//            fight.update_screenshot();
+////            if (!baas.feature_appear("fight_pause-button_appear")) {
+////                continue;
+////            }
+//
+//            fight.reset_data();
+//            fight.update_data();
+//            auto end = BAASUtil::getCurrentTimeMS();
+//            baas.get_logger()->BAASInfo("Shot And Update data time: " + std::to_string(end - st) + "ms");
+//            fight.display_screenshot_extracted_data();
+//
 //            baas.get_latest_screenshot(img);
-//            cv::imwrite(to_string(i) + ".png", img);
-//            imgName = to_string(i) + ".png";
-//
-//
+//            frame_count++;
+//            if (BAASUtil::getCurrentTimeMS() - start > 1000) {
+//                start = BAASUtil::getCurrentTimeMS();
+//                baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
+//                frame_count = 0;
+//            }
 //        }
-            catch (const std::exception& e){
-                BAASGlobalLogger->BAASInfo(e.what());
+    }
+    catch (const std::exception& e) {
+        BAASGlobalLogger->BAASInfo(e.what());
 
-                system("pause");
-            }
+    }
 
-            return 0;
-        }
-
-
+    system("pause");
+    return 0;
+}
 //
 //
 //
