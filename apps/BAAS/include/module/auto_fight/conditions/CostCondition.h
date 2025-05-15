@@ -29,6 +29,8 @@ public:
 
     void display() const noexcept override;
 
+    void set_d_update_flag() override;
+
     const static std::map<std::string, Op> op_map;
 
     const static std::vector<std::string> op_to_st;

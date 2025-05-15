@@ -82,6 +82,7 @@ public:
         return _is_matched;
     }
 
+    // condition match state still unknown
     inline bool  is_pending() const noexcept {
         return !_is_matched.has_value();
     }
@@ -94,7 +95,13 @@ public:
         return !and_conditions.empty();
     }
 
+    inline long long get_timeout() {
+        return timeout;
+    }
 
+    inline const void set_match_state(bool state) {
+        _is_matched = state;
+    }
 
 protected:
 

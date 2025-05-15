@@ -59,6 +59,8 @@ struct state_info {
 };
 
 struct auto_fight_d {
+    // data updaters
+    uint64_t d_updater_mask = 0;
 
     // boss health
     std::optional<long long> boss_current_health;
@@ -109,12 +111,8 @@ struct auto_fight_d {
         fight_left_time.reset();
         acceleration_state.reset();
         boss_current_health.reset();
-        for (auto& skill : skills) {
-            skill.reset();
-        }
-        for (auto& position : positions) {
-            position.second.clear();
-        }
+        for (auto& skill : skills)       skill.reset();
+        for (auto& position : positions) position.second.clear();
     }
 };
 

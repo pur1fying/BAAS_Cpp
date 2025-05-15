@@ -68,7 +68,7 @@ public:
     void display_screenshot_extracted_data();
 
     inline void set_data_updater_mask(uint64_t mask) {
-        d_updater_mask = mask;
+        d_auto_f.d_updater_mask = mask;
     }
     inline void reset_data() {
         d_auto_f.reset_all();
@@ -121,8 +121,6 @@ private:
 
     std::map<std::string, uint64_t> d_updater_map;
 
-    uint64_t d_updater_mask = 0;
-
     auto_fight_d d_auto_f;
 
 END_AUTO_FIGHT_DATA_UPDATE
@@ -147,14 +145,13 @@ private:
 
     void _init_cond_and_or_idx();
 
-    void _init_cond_timeout();
-
     // currently judging condition idx
     std::vector<uint64_t> cond_wait_to_judge_idx;
 
     std::string _cond_type;
 
     std::vector<std::unique_ptr<BaseCondition>> all_cond;
+    std::vector<bool> _cond_checked;
 
     // name to index in all_conditions
     std::map<std::string, uint64_t> cond_name_idx_map;
@@ -164,6 +161,11 @@ END_AUTO_FIGHT_CONDITIONS
 BEGIN_AUTO_FIGHT_STATES
 
 public:
+    void state_transition(
+            const std::string& state_name,
+            bool update_room_left_time = false
+    );
+
     void enter_fight();
 
     void restart_fight(bool update_room_left_time = false);
@@ -177,6 +179,26 @@ public:
     void display_state_idx_name_map() const noexcept;
 
 private:
+
+    bool _state_start_cond_j_loop();
+
+    void _state_update_cond_j_loop_start_t();
+
+    void _state_transition();
+
+    bool _state_cond_timeout_update();
+
+    bool _recursive_check_cond_timeout(uint64_t cond_idx);
+
+    inline bool _cond_is_pending(uint64_t cond_idx) {
+        return all_cond[cond_idx]->is_pending();
+    }
+
+    void _state_cond_j();
+
+    void _state_set_d_update_flags();
+
+    void _recursive_set_d_update_flags(uint64_t cond_idx);
 
     void _init_all_state();
 
@@ -195,7 +217,18 @@ private:
 
     std::map<std::string, uint64_t> state_name_idx_map;
 
-    uint64_t curr_state_idx;
+    uint64_t _curr_state_idx;
+
+    // start time of condition judgement
+    long long _state_cond_j_start_t;
+
+    // start time of a single condition judgement loop
+    long long _state_cond_j_loop_start_t;
+
+    // time elapsed since the start of condition judgement
+    long long _state_cond_j_elapsed_t;
+
+    bool _state_cond_j_loop_running_flg;
 
     std::string start_state_name;
 

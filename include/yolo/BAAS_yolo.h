@@ -80,6 +80,7 @@ private:
     Ort::Env env = Ort::Env(ORT_LOGGING_LEVEL_ERROR, "Yolo");
     Ort::SessionOptions sessionOptions = Ort::SessionOptions();
     Ort::RunOptions runOptions = Ort::RunOptions();
+    Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeCPU);
 
     int num_thread, gpu_id;
 

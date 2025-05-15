@@ -87,7 +87,7 @@ void AutoFight::update_data()
     d_wait_to_update_idx.clear();
 
     for (int i = 0; i < d_updaters.size(); ++i) {
-        if((1LL << i) & d_updater_mask) {
+        if((1LL << i) & d_auto_f.d_updater_mask) {
             d_wait_to_update_idx.push_back(i);
         }
     }
@@ -161,7 +161,7 @@ void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
 void AutoFight::display_screenshot_extracted_data()
 {
     for (int i = 0; i <= d_updaters.size(); ++i)
-        if ((1LL << i) & d_updater_mask)
+        if ((1LL << i) & d_auto_f.d_updater_mask)
             d_updaters[i]->display_data();
 }
 
@@ -314,12 +314,6 @@ void AutoFight::_init_cond_and_or_idx()
     }
 }
 
-void AutoFight::_init_cond_timeout()
-{
-    // cond with and cond, timeout is min(and cond)
-    logger->sub_title("Init Condition Timeout.");
-}
-
 void AutoFight::_init_d_fight(const std::filesystem::path &name)
 {
     // consider chinese name
@@ -368,6 +362,8 @@ void AutoFight::_init_all_cond()
     logger->hr("Init Conditions");
 
     _init_self_cond();
+
+    _cond_checked.resize(all_cond.size(), false);
 
     _init_cond_and_or_idx();
 }
@@ -587,10 +583,10 @@ void AutoFight::_init_start_state()
         throw ValueError("Start State Invalid.");
     }
 
-    curr_state_idx = it->second;
+    _curr_state_idx = it->second;
     logger->sub_title("Start State");
     logger->BAASInfo("Name  : [ " + start_state_name + " ]");
-    logger->BAASInfo("Index : [ " + std::to_string(curr_state_idx) + " ]");
+    logger->BAASInfo("Index : [ " + std::to_string(_curr_state_idx) + " ]");
 
 }
 
@@ -684,6 +680,143 @@ void AutoFight::restart_fight(bool update_room_left_time)
     }
     baas->solve_procedure("fight_confirm_restart", true);
 }
+
+/*
+ * Returns:
+ *      true  --> need to transit to next state
+ *      false --> stop state transition
+ */
+
+bool AutoFight::_state_start_cond_j_loop()
+{
+    _state_cond_j_start_t = BAASUtil::getCurrentTimeMS();
+
+    while(_state_cond_j_loop_running_flg) {
+        // time elapsed update
+        _state_update_cond_j_loop_start_t();
+
+        // timeout check
+        if (!_state_cond_timeout_update()) {
+            logger->BAASInfo("All Condition Dissatisfied.");
+            // default transition
+            if(all_states[_curr_state_idx].default_trans.has_value()) {
+                logger->BAASInfo("Default Transition.");
+                _curr_state_idx = all_states[_curr_state_idx].default_trans.value();
+                return true;
+            }
+            // stop state transition
+            return false;
+        }
+
+        // screenshot update
+        baas->i_update_screenshot_array();
+
+        // check at fighting page
+        if (!d_updaters[0]->at_fight_page()) continue;
+
+        _state_set_d_update_flags();
+
+
+
+    }
+}
+
+/*
+ * Returns:
+ *          true  --> there is a pending condition
+ *          false --> all conditions dissatisfied
+ */
+
+bool AutoFight::_state_cond_timeout_update()
+{
+    std::fill(_cond_checked.begin(), _cond_checked.end(), false);
+
+    bool f_has_pending_cond = false;
+    for(const auto& trans : all_states[_curr_state_idx].transitions) {
+        // has_value  /  checked
+        if(!_cond_is_pending(trans.cond_idx) || _cond_checked[trans.cond_idx]) continue;
+        if (_recursive_check_cond_timeout(trans.cond_idx)) f_has_pending_cond = true;
+    }
+    return f_has_pending_cond;
+}
+
+void AutoFight::_state_transition()
+{
+
+}
+
+void AutoFight::_state_cond_j()
+{
+
+}
+
+void AutoFight::_state_set_d_update_flags()
+{
+    d_auto_f.d_updater_mask = 0b0;
+    for (const auto tran : all_states[_curr_state_idx].transitions) {
+        if (_cond_is_pending(tran.cond_idx)) {
+
+
+        }
+    }
+}
+
+bool AutoFight::_recursive_check_cond_timeout(uint64_t cond_idx)
+{
+    _cond_checked[cond_idx] = true;
+    BaseCondition* cond = all_cond[cond_idx].get();
+    // check self timeout
+    if(_state_cond_j_elapsed_t >= cond->get_timeout()) {
+        cond->set_match_state(false);
+        return false;
+    }
+
+    // check and timeout
+    if(cond->has_and_cond()) {
+        for (const auto &and_cond : cond->get_and_cond()) {
+            // has_value  /  checked
+            if(!_cond_is_pending(and_cond) || _cond_checked[and_cond]) continue;
+            if (!_recursive_check_cond_timeout(and_cond)) return false;
+        }
+    }
+
+    // check or timeout
+    if(cond->has_or_cond()) {
+        for (const auto &or_cond : cond->get_or_cond()) {
+            // has_value  /  checked
+            if(!_cond_is_pending(or_cond) || _cond_checked[or_cond]) continue;
+            _recursive_check_cond_timeout(or_cond);
+        }
+    }
+
+    // self / and cond not timeout
+    return true;
+}
+
+void AutoFight::_state_update_cond_j_loop_start_t()
+{
+    _state_cond_j_loop_start_t = BAASUtil::getCurrentTimeMS();
+    _state_cond_j_elapsed_t = _state_cond_j_loop_start_t - _state_cond_j_start_t;
+}
+
+void AutoFight::_recursive_set_d_update_flags(uint64_t cond_idx)
+{
+    all_cond[cond_idx]->set_d_update_flag();
+
+    if(all_cond[cond_idx]->has_and_cond()) {
+        for (const auto &and_cond : all_cond[cond_idx]->get_and_cond()) {
+            if(_cond_is_pending(and_cond)) _recursive_set_d_update_flags(and_cond);
+        }
+    }
+
+    if(all_cond[cond_idx]->has_or_cond()) {
+        for (const auto &or_cond : all_cond[cond_idx]->get_or_cond()) {
+            if(_cond_is_pending(or_cond)) _recursive_set_d_update_flags(or_cond);
+        }
+    }
+
+}
+
 
 BAAS_NAMESPACE_END
 

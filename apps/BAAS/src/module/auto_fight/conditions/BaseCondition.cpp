@@ -26,7 +26,6 @@ const std::vector<std::string> BaseCondition::cond_type_st_list = {
         "boss_health"
 };
 
-
 BaseCondition::BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config)
 {
     this->config = BAASConfig(config.get_config(), baas->get_logger());
@@ -70,7 +69,6 @@ void BaseCondition::_display_basic_info() const noexcept
     if (has_and_cond())logger->BAASInfo("A C Cnt : [ " + std::to_string(and_conditions.size()) + " ]");
     if (has_or_cond()) logger->BAASInfo("O C Cnt : [ " + std::to_string(or_conditions.size()) + " ]");
     if(!desc.empty())logger->BAASInfo("Desc    : " + desc);
-
 }
 
 

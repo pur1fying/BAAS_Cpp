@@ -146,5 +146,10 @@ void CostCondition::display() const noexcept
     }
 }
 
+void CostCondition::set_d_update_flag()
+{
+    data->d_updater_mask |= (1LL << 0);
+}
+
 
 BAAS_NAMESPACE_END

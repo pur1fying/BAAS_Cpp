@@ -28,27 +28,27 @@ int main(int argc, char **argv)
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
 
-        baas.update_screenshot_array();
-
-        std::vector<std::string> names = {
-                "Koharu",
-                "Eimi",
-                "Fuuka (New Year)"
-        };
-        std::vector<BAASRectangle> regions = {
-                SKILL1_RIGHT,
-//                SKILL2_RIGHT,
-//                SKILL3_RIGHT
-        };
-        std::vector<int> type = {
-                SKILL_RIGHT,
+//        baas.update_screenshot_array();
+//
+//        std::vector<std::string> names = {
+//                "Koharu",
+//                "Eimi",
+//                "Fuuka (New Year)"
+//        };
+//        std::vector<BAASRectangle> regions = {
+//                SKILL1_RIGHT,
+////                SKILL2_RIGHT,
+////                SKILL3_RIGHT
+//        };
+//        std::vector<int> type = {
 //                SKILL_RIGHT,
-//                SKILL_RIGHT
-        };
-        for (int i = 0; i < names.size(); ++i) {
-            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
-        }
-        return 0;
+////                SKILL_RIGHT,
+////                SKILL_RIGHT
+//        };
+//        for (int i = 0; i < names.size(); ++i) {
+//            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
+//        }
+//        return 0;
 //        std::vector<std::string> languages = {"en-us", "zh-cn"};
 //        baas_ocr->init(languages);
 //        BAASDevelopUtils::fight_screenshot_extract(
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 
         fight.display_all_state();
         fight.display_all_cond_info();
-        fight.set_data_updater_mask(0b1000001);
+        fight.set_data_updater_mask(0b1111111);
 
 //        fight.set_skill_slot_possible_templates(0, {5, 4, 3, 2, 1, 0});
 //        fight.set_skill_slot_possible_templates(1, {5, 4, 3, 2, 0, 1});
@@ -83,29 +83,29 @@ int main(int argc, char **argv)
         fight.set_skill_cost_update_flag(0b111);
         cv::Mat img;
 //
-//        while(1){
-////            baas.update_screenshot_array();
-//            auto st = BAASUtil::getCurrentTimeMS();
-//            baas.reset_all_feature();
-//            fight.update_screenshot();
-////            if (!baas.feature_appear("fight_pause-button_appear")) {
-////                continue;
-////            }
-//
-//            fight.reset_data();
-//            fight.update_data();
-//            auto end = BAASUtil::getCurrentTimeMS();
-//            baas.get_logger()->BAASInfo("Shot And Update data time: " + std::to_string(end - st) + "ms");
-//            fight.display_screenshot_extracted_data();
-//
-//            baas.get_latest_screenshot(img);
-//            frame_count++;
-//            if (BAASUtil::getCurrentTimeMS() - start > 1000) {
-//                start = BAASUtil::getCurrentTimeMS();
-//                baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
-//                frame_count = 0;
+        while(1){
+//            baas.update_screenshot_array();
+            auto st = BAASUtil::getCurrentTimeMS();
+            baas.reset_all_feature();
+            fight.update_screenshot();
+//            if (!baas.feature_appear("fight_pause-button_appear")) {
+//                continue;
 //            }
-//        }
+
+            fight.reset_data();
+            fight.update_data();
+            auto end = BAASUtil::getCurrentTimeMS();
+            baas.get_logger()->BAASInfo("Shot And Update data time: " + std::to_string(end - st) + "ms");
+            fight.display_screenshot_extracted_data();
+
+            baas.get_latest_screenshot(img);
+            frame_count++;
+            if (BAASUtil::getCurrentTimeMS() - start > 1000) {
+                start = BAASUtil::getCurrentTimeMS();
+                baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
+                frame_count = 0;
+            }
+        }
     }
     catch (const std::exception& e) {
         BAASGlobalLogger->BAASInfo(e.what());

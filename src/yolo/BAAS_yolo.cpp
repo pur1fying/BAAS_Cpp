@@ -84,7 +84,9 @@ void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out, NMS_option nms_
     Out.results.clear();
     Out.time_info.pre_t = getCurrentTime();
     cv::Mat processed_img;
+    BAASGlobalLogger->BAASInfo("preprocess input image");
     preprocess_input_image(In, processed_img);
+    BAASGlobalLogger->BAASInfo("preprocess input image done");
     switch (type) {
 
         case YOLO_DETECT_V8: {
@@ -100,7 +102,7 @@ void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out, NMS_option nms_
             blob_from_image(processed_img, blob);
             _tensor_process(blob, Out, nms_op);
             break;
-#endif
+#endif // __CUDA__
         }
     }
 }
@@ -155,7 +157,6 @@ void BAAS_Yolo_v8::init_model(const yolo_d& d)
         outputNamesPtr = getOutputNames(session);
         inputNames = {inputNamesPtr.data()->get()};
         outputNames = {outputNamesPtr.data()->get()};
-
         runOptions = Ort::RunOptions{ nullptr };
     }
     catch (const std::exception& e)
@@ -191,10 +192,7 @@ void BAAS_Yolo_v8::warm_up()
             std::vector<int64_t> YOLO_input_node_dims = {1, 3, img_size.first, img_size.second};
             Ort::Value input_tensor =
                     Ort::Value::CreateTensor<float>(
-                            Ort::MemoryInfo::CreateCpu(
-                                    OrtDeviceAllocator,
-                                    OrtMemTypeCPU
-                            ),
+                            memory_info,
                             blob,
                             tensor_size,
                             inputNodeDims.data(),
@@ -217,10 +215,7 @@ void BAAS_Yolo_v8::warm_up()
             blob_from_image(processedImg, blob);
             Ort::Value input_tensor =
                     Ort::Value::CreateTensor<half>(
-                            Ort::MemoryInfo::CreateCpu(
-                                    OrtDeviceAllocator,
-                                    OrtMemTypeCPU
-                            ),
+                            memory_info,
                             blob,
                             tensor_size,
                             inputNodeDims.data(),
@@ -251,10 +246,7 @@ void BAAS_Yolo_v8::_tensor_process(
 {
     Ort::Value inputTensor =
             Ort::Value::CreateTensor<typename std::remove_pointer<N>::type>(
-                    Ort::MemoryInfo::CreateCpu(
-                            OrtDeviceAllocator,
-                            OrtMemTypeCPU
-                    ),
+                    memory_info,
                     blob,
                     tensor_size,
                     inputNodeDims.data(),
@@ -262,14 +254,16 @@ void BAAS_Yolo_v8::_tensor_process(
             );
     Out.time_info.infer_t = getCurrentTime();
 
+    BAASGlobalLogger->BAASInfo("run session");
     auto outputTensor = session->Run(
             runOptions,
             inputNames.data(),
             &inputTensor,
-            inputNames.size(),
+            1,
             outputNames.data(),
             outputNames.size()
     );
+    BAASGlobalLogger->BAASInfo("run session done");
 
     Out.time_info.post_t = getCurrentTime();
 
@@ -278,15 +272,12 @@ void BAAS_Yolo_v8::_tensor_process(
     std::vector<int64_t> outputNodeDims = tensor_info.GetShape();
 
     auto output = outputTensor.front().GetTensorMutableData<typename std::remove_pointer<N>::type>();
-
+    BAASGlobalLogger->BAASInfo("post process start");
     switch (type) {
         case YOLO_DETECT_V8:
         case YOLO_DETECT_V8_HALF: {
             int signalResultNum = outputNodeDims[1];//84
             int strideNum = outputNodeDims[2];//8400
-            std::vector<int> class_ids;
-            std::vector<float> confidences;
-            std::vector<cv::Rect> boxes;
             cv::Mat rawData;
             if (type == YOLO_DETECT_V8) {
                 // FP32
@@ -300,6 +291,7 @@ void BAAS_Yolo_v8::_tensor_process(
             // ultralytics add transpose operator to the output of yolov8 model.which make yolov8/v5/v7 has same shape
             // https://github.com/ultralytics/assets/releases/download/v8.3.0/yolov8n.pt
             rawData = rawData.t();
+
             float* data = (float*) rawData.data;
             switch (nms_op) {
                 case GROUP_NMS:
@@ -319,6 +311,7 @@ void BAAS_Yolo_v8::_tensor_process(
             Out.time_info.post_t = t_end - Out.time_info.post_t;
         }
     }
+    BAASGlobalLogger->BAASInfo("post process done");
 }
 
 void BAAS_Yolo_v8::_init_yaml()
@@ -477,9 +470,6 @@ void BAAS_Yolo_v8::_get_no_nms_Out(
 )
 {
     yolo_single_res res;
-    std::vector<int> class_ids;
-    std::vector<float> confidences;
-    std::vector<cv::Rect> boxes;
 
     for (int i = 0; i < strideNum; ++i) {
         float* classesScores = data + 4;
