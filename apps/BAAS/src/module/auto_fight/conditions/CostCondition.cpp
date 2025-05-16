@@ -38,37 +38,36 @@ std::optional<bool> CostCondition::try_match()
 
     switch (_op) {
         case OVER:
-            if(data->cost > _value) _is_matched = true;
+            if(data->cost > _value) return true;
             break;
         case BELOW:
-            if(data->cost < _value) _is_matched = true;
+            if(data->cost < _value) return true;
             break;
         case IN_RANGE:
-            if(data->cost > _range_min && data->cost < _range_max) _is_matched = true;
+            if(data->cost > _range_min && data->cost < _range_max) return true;
             break;
         case INCREASE:
             if (_last_recorded_cost.has_value() && (data->cost.value() > _last_recorded_cost.value())) {
                 _cost_increment = _cost_increment + (data->cost.value() - _last_recorded_cost.value());
-                if (_cost_increment > _value) _is_matched = true;
+                if (_cost_increment > _value) return true;
             }
             break;
         case DECREASE:
             if (_last_recorded_cost.has_value() && (data->cost.value() < _last_recorded_cost.value())) {
                 _cost_increment = _cost_increment + (_last_recorded_cost.value() - data->cost.value());
-                if (_cost_increment > _value) _is_matched = true;
+                if (_cost_increment > _value) return true;
             }
             break;
     }
 
     _last_recorded_cost = data->cost;
-    return _is_matched;
+    return std::nullopt;
 }
 
 void CostCondition::reset_state()
 {
     if (_reset_cost) _last_recorded_cost = std::nullopt;
     _cost_increment = 0;
-    _is_matched = std::nullopt;
 }
 
 void CostCondition::_parse_op()

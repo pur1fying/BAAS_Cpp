@@ -151,6 +151,9 @@ private:
     std::string _cond_type;
 
     std::vector<std::unique_ptr<BaseCondition>> all_cond;
+
+    std::vector<std::optional<bool>> _cond_is_matched_recorder;
+
     std::vector<bool> _cond_checked;
 
     // name to index in all_conditions
@@ -180,21 +183,37 @@ public:
 
 private:
 
-    bool _state_start_cond_j_loop();
+    bool _state_start_trans_cond_j_loop();
+
+    void _state_reset_all_cond();
+
+    void _wait_d_update_running_thread_end();
 
     void _state_update_cond_j_loop_start_t();
 
-    void _state_transition();
+    void _start_state_transition_loop();
+
+    inline bool _cond_is_pending(uint64_t cond_idx) {
+        return !_cond_is_matched_recorder[cond_idx].has_value();
+    }
+
+    inline bool _cond_is_satisfied(uint64_t cond_idx) {
+        assert(_cond_is_matched_recorder[cond_idx].has_value());
+        return _cond_is_matched_recorder[cond_idx].value();
+    }
+
+    inline bool _cond_is_dissatisfied(uint64_t cond_idx) {
+        assert(_cond_is_matched_recorder[cond_idx].has_value());
+        return !_cond_is_matched_recorder[cond_idx].value();
+    }
 
     bool _state_cond_timeout_update();
 
     bool _recursive_check_cond_timeout(uint64_t cond_idx);
 
-    inline bool _cond_is_pending(uint64_t cond_idx) {
-        return all_cond[cond_idx]->is_pending();
-    }
-
     void _state_cond_j();
+
+    std::optional<bool> _recursive_cond_j(uint64_t cond_idx);
 
     void _state_set_d_update_flags();
 
@@ -227,6 +246,11 @@ private:
 
     // time elapsed since the start of condition judgement
     long long _state_cond_j_elapsed_t;
+
+    // index of matched transition
+    std::optional<uint64_t> _state_trans_cond_matched_idx;
+
+    bool _state_flg_all_trans_cond_dissatisfied;
 
     bool _state_cond_j_loop_running_flg;
 

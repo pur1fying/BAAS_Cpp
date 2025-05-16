@@ -78,15 +78,6 @@ public:
         return _is_primitive;
     }
 
-    inline std::optional<bool> is_matched() const noexcept {
-        return _is_matched;
-    }
-
-    // condition match state still unknown
-    inline bool  is_pending() const noexcept {
-        return !_is_matched.has_value();
-    }
-
     inline bool has_or_cond() const noexcept {
         return !or_conditions.empty();
     }
@@ -97,10 +88,6 @@ public:
 
     inline long long get_timeout() {
         return timeout;
-    }
-
-    inline const void set_match_state(bool state) {
-        _is_matched = state;
     }
 
 protected:
@@ -119,8 +106,6 @@ protected:
 
     std::vector<uint64_t> or_conditions;
     std::vector<uint64_t> and_conditions;
-
-    std::optional<bool> _is_matched;
 
     long long cond_j_start_t;
 

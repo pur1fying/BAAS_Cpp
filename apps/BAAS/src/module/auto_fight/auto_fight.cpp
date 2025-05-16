@@ -129,15 +129,12 @@ void AutoFight::update_data()
         std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
         if (d_updater_running_thread_count == 0) break;
         start_running_t = d_updater_running_thread_count;
-//        logger->BAASInfo("Start Running Threads : " + std::to_string(start_running_t));
         d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
             return d_updater_running_thread_count < start_running_t;
         });
         // condition judgement
-//        logger->BAASInfo("Running Threads : " + std::to_string(d_updater_running_thread_count));
     }
 
-//    logger->BAASInfo("End Running Threads : " + std::to_string(d_updater_running_thread_count));
     assert(d_updater_running_thread_count == 0);
 }
 
@@ -364,7 +361,7 @@ void AutoFight::_init_all_cond()
     _init_self_cond();
 
     _cond_checked.resize(all_cond.size(), false);
-
+    _cond_is_matched_recorder.resize(all_cond.size(), std::nullopt);
     _init_cond_and_or_idx();
 }
 
@@ -659,7 +656,7 @@ void AutoFight::display_state_idx_name_map() const noexcept
 
 void AutoFight::start_state_transition()
 {
-
+    _start_state_transition_loop();
 }
 
 void AutoFight::ensure_fighting_page()
@@ -687,8 +684,9 @@ void AutoFight::restart_fight(bool update_room_left_time)
  *      false --> stop state transition
  */
 
-bool AutoFight::_state_start_cond_j_loop()
+bool AutoFight::_state_start_trans_cond_j_loop()
 {
+    _state_reset_all_cond();
     _state_cond_j_start_t = BAASUtil::getCurrentTimeMS();
 
     while(_state_cond_j_loop_running_flg) {
@@ -697,10 +695,11 @@ bool AutoFight::_state_start_cond_j_loop()
 
         // timeout check
         if (!_state_cond_timeout_update()) {
-            logger->BAASInfo("All Condition Dissatisfied.");
+            _state_flg_all_trans_cond_dissatisfied = true;
+            logger->sub_title("All Trans Cond Dissatisfied");
             // default transition
             if(all_states[_curr_state_idx].default_trans.has_value()) {
-                logger->BAASInfo("Default Transition.");
+                logger->BAASInfo("[ Default Trans ]");
                 _curr_state_idx = all_states[_curr_state_idx].default_trans.value();
                 return true;
             }
@@ -714,11 +713,80 @@ bool AutoFight::_state_start_cond_j_loop()
         // check at fighting page
         if (!d_updaters[0]->at_fight_page()) continue;
 
+        // data update with condition judgement
         _state_set_d_update_flags();
 
+        d_wait_to_update_idx.clear();
+
+        for (int i = 0; i < d_updaters.size(); ++i) {
+            if((1LL << i) & d_auto_f.d_updater_mask) {
+                d_wait_to_update_idx.push_back(i);
+            }
+        }
+
+        // sort by cost
+        std::sort(d_wait_to_update_idx.begin(),d_wait_to_update_idx.end(), [this](auto a, auto b) {
+            return d_updaters[a]->estimated_time_cost() < d_updaters[b]->estimated_time_cost();
+        });
 
 
+        for (auto idx : d_wait_to_update_idx) {
+            d_updater_queue.push(idx);
+        }
+
+        // wait d_updater_thread_count = 0
+        if(d_updater_running_thread_count > 0) _wait_d_update_running_thread_end();
+
+        assert(d_updater_running_thread_count == 0);
+
+        // submit updaters into thread pool
+        for (int i = 0; i < d_wait_to_update_idx.size(); ++i) {
+            if (d_updater_running_thread_count >= d_update_max_thread){
+                std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
+                d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
+                    return d_updater_running_thread_count < d_update_max_thread;
+                });
+
+                // condition judgement
+                _state_cond_j();
+                if(_state_trans_cond_matched_idx.has_value()) return true;
+                if(_state_flg_all_trans_cond_dissatisfied)    return false;
+            }
+            ++d_updater_running_thread_count;
+            unsigned char idx = d_updater_queue.front();
+            d_updater_queue.pop();
+            d_update_thread_pool->submit([this, idx]() {
+                submit_data_updater_task(this, idx);
+            });
+        }
+
+        // when ever a updater finished, do condition judgement
+        int start_running_t, initial_t_count = d_updater_running_thread_count;
+        for (int i = 1; i <= initial_t_count; ++i) {
+            std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
+            if (d_updater_running_thread_count == 0) break;
+            start_running_t = d_updater_running_thread_count;
+            d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
+                return d_updater_running_thread_count < start_running_t;
+            });
+
+            // condition judgement
+            _state_cond_j();
+            if(_state_trans_cond_matched_idx.has_value()) return true;
+            if(_state_flg_all_trans_cond_dissatisfied)    return false;
+        }
     }
+}
+
+// reset all cond
+void AutoFight::_state_reset_all_cond()
+{
+    _state_flg_all_trans_cond_dissatisfied = false;
+    _state_trans_cond_matched_idx.reset();
+    std::fill(_cond_is_matched_recorder.begin(), _cond_is_matched_recorder.end(), std::nullopt);
+
+    for(const auto& cond : all_cond) cond->reset_state();
+
 }
 
 /*
@@ -740,24 +808,164 @@ bool AutoFight::_state_cond_timeout_update()
     return f_has_pending_cond;
 }
 
-void AutoFight::_state_transition()
+void AutoFight::_start_state_transition_loop()
 {
+    while (1) {
+        // TODO::action
 
+        if(!_state_start_trans_cond_j_loop()) break;
+        assert(_state_trans_cond_matched_idx.has_value());
+
+        // state transition
+        _curr_state_idx = _state_trans_cond_matched_idx.value();
+    }
 }
 
+// cond j should tell if there is a transition condition satisfied or no condition satisfied
 void AutoFight::_state_cond_j()
 {
+    std::fill(_cond_checked.begin(), _cond_checked.end(), false);
+    _state_flg_all_trans_cond_dissatisfied = true;
+    std::optional<bool> ret;
+    for (int i = 0; i < all_states[_curr_state_idx].transitions.size(); ++i) {
+        auto tran = all_states[_curr_state_idx].transitions[i];
+        if (!_cond_is_pending(tran.cond_idx))
+            if(_cond_is_satisfied(tran.cond_idx)) {
+                _state_trans_cond_matched_idx = i;
+                return;
+            }
 
+        if(_cond_checked[tran.cond_idx]) continue;
+
+        ret = _recursive_cond_j(tran.cond_idx);
+        if(ret.has_value())
+            if(ret.value()) {
+                _state_trans_cond_matched_idx = i;
+                return;
+            }
+        else _state_flg_all_trans_cond_dissatisfied = false;
+    }
+}
+
+/*
+ * Returns:
+ *          std::nullopt --> pending
+ *          true         --> satisfied
+ *          false        --> dissatisfied
+ *
+ *  self pending      --> check and
+ *
+ *                        and dissatisfied        --> return false
+ *                        and satisfied / pending --> check or
+ *
+ *                                                    or satisfied              --> return true
+ *                                                    or dissatisfied / pending --> return nullopt
+ *
+ *  self dissatisfied --> check or
+ *
+ *                        or satisfied    --> return true
+ *                        or pending      --> return nullopt
+ *                        or dissatisfied --> return false
+ *
+ *  self satisfied    --> check and
+ *
+ *                        and satisfied    --> return true
+ *                        and pending      --> return nullopt
+ *                        and dissatisfied --> return false
+ */
+
+std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
+{
+    std::optional<bool> final_ret = std::nullopt;
+    _cond_checked[cond_idx] = true;
+    // self match
+    std::optional<bool> ret = all_cond[cond_idx]->try_match();
+
+    // self is pending
+    if(!ret.has_value()) {
+
+        // check and
+         for(const auto& _and : all_cond[cond_idx]->get_and_cond())  {
+            if(!_cond_is_pending(_and)) {
+                if(_cond_is_dissatisfied(_and)) {
+                    final_ret = false;
+                    break;
+                }
+            }
+
+            if(_cond_checked[_and]) continue;
+            ret = _recursive_cond_j(_and);
+
+            if(ret.has_value() && !ret.value()) {
+                final_ret = false;
+                break;
+            }
+
+         }
+
+         if(final_ret.has_value()) {
+             _cond_is_matched_recorder[cond_idx] = final_ret;
+             return final_ret;
+         }
+
+         // check or
+         for(const auto& _or : all_cond[cond_idx]->get_or_cond()) {
+             if(_cond_is_pending(_or)) continue;
+             if(_cond_is_satisfied(_or)) {
+                 final_ret = true;
+                 break;
+             }
+
+             if(_cond_checked[_or]) continue;
+             ret = _recursive_cond_j(_or);
+
+             if(ret.has_value() && ret.value()) {
+                 final_ret = true;
+                 break;
+             }
+         }
+    }
+
+    // self satisfied
+    if(ret.value()) {
+        // check and
+        if(all_cond[cond_idx]->has_and_cond())
+        for (const auto &and_cond : all_cond[cond_idx]->get_and_cond()) {
+            if (!_cond_is_pending(and_cond) || _cond_checked[and_cond]) continue;
+            ret = _recursive_cond_j(and_cond);
+            if (ret.has_value() && !ret.value()) {
+                final_ret = false;
+                break;
+            }
+        }
+    }
+
+    // self dissatisfied
+    else {
+        // check or
+        if(all_cond[cond_idx]->has_or_cond())
+        for (const auto &or_cond : all_cond[cond_idx]->get_or_cond()) {
+            if (_cond_is_pending(or_cond) || _cond_checked[or_cond]) continue;
+            ret = _recursive_cond_j(or_cond);
+            if (ret.has_value() && ret.value()) {
+                final_ret = true;
+                break;
+            }
+        }
+    }
+
+    _cond_is_matched_recorder[cond_idx] = final_ret;
+    return final_ret;
 }
 
 void AutoFight::_state_set_d_update_flags()
 {
+    std::fill(_cond_checked.begin(), _cond_checked.end(), false);
     d_auto_f.d_updater_mask = 0b0;
+
     for (const auto tran : all_states[_curr_state_idx].transitions) {
-        if (_cond_is_pending(tran.cond_idx)) {
-
-
-        }
+        if (!_cond_is_pending(tran.cond_idx) || _cond_checked[tran.cond_idx]) continue;
+        _recursive_set_d_update_flags(tran.cond_idx);
     }
 }
 
@@ -765,18 +973,23 @@ bool AutoFight::_recursive_check_cond_timeout(uint64_t cond_idx)
 {
     _cond_checked[cond_idx] = true;
     BaseCondition* cond = all_cond[cond_idx].get();
+
     // check self timeout
     if(_state_cond_j_elapsed_t >= cond->get_timeout()) {
-        cond->set_match_state(false);
+        _cond_is_matched_recorder[cond_idx] = false;
         return false;
     }
 
-    // check and timeout
+    // check and cond timeout
     if(cond->has_and_cond()) {
         for (const auto &and_cond : cond->get_and_cond()) {
             // has_value  /  checked
             if(!_cond_is_pending(and_cond) || _cond_checked[and_cond]) continue;
-            if (!_recursive_check_cond_timeout(and_cond)) return false;
+            // and cond timeout
+            if (!_recursive_check_cond_timeout(and_cond)) {
+                _cond_is_matched_recorder[cond_idx] = false;
+                return false;
+            }
         }
     }
 
@@ -801,22 +1014,36 @@ void AutoFight::_state_update_cond_j_loop_start_t()
 
 void AutoFight::_recursive_set_d_update_flags(uint64_t cond_idx)
 {
+    _cond_checked[cond_idx] = true;
     all_cond[cond_idx]->set_d_update_flag();
 
     if(all_cond[cond_idx]->has_and_cond()) {
         for (const auto &and_cond : all_cond[cond_idx]->get_and_cond()) {
-            if(_cond_is_pending(and_cond)) _recursive_set_d_update_flags(and_cond);
+            if(!_cond_is_pending(and_cond) || _cond_checked[and_cond]) continue;
+                _recursive_set_d_update_flags(and_cond);
         }
     }
 
     if(all_cond[cond_idx]->has_or_cond()) {
         for (const auto &or_cond : all_cond[cond_idx]->get_or_cond()) {
-            if(_cond_is_pending(or_cond)) _recursive_set_d_update_flags(or_cond);
+            if(_cond_is_pending(or_cond) || _cond_checked[or_cond]) continue;
+            _recursive_set_d_update_flags(or_cond);
         }
     }
+}
 
+void AutoFight::_wait_d_update_running_thread_end()
+{
+    int start_running_t, initial_t_count = d_updater_running_thread_count;
+    for (int i = 1; i <= initial_t_count; ++i) {
+        std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
+        if (d_updater_running_thread_count == 0) return;
+        start_running_t = d_updater_running_thread_count;
+        d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
+            return d_updater_running_thread_count < start_running_t;
+        });
+    }
 }
 
 
 BAAS_NAMESPACE_END
-

@@ -19,7 +19,7 @@ void BAASDevelopUtils::shotStudentSkill(
         const int type
 )
 {
-    std::filesystem::path temp = "C:\\Users\\pc\\Desktop\\work\\c\\BAAS_Cpp\\apps\\BAAS\\resource\\image\\CN\\zh-cn\\skill";
+    std::filesystem::path temp = "D:\\github\\BAAS_Cpp\\apps\\BAAS\\resource\\image\\CN\\zh-cn\\skill";
     if (type == SKILL_FULL) {
         temp = temp / "active";
     } else if (type == SKILL_LEFT) {
@@ -28,7 +28,6 @@ void BAASDevelopUtils::shotStudentSkill(
         temp = temp / "r_inactive";
     }
     Mat image;
-    baas->update_screenshot_array();
     baas->get_latest_screenshot(image);
     Mat im = BAASImageUtil::crop(image, r);
     BAASImageUtil::save(im, name, temp.string(), true);

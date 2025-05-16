@@ -4,3 +4,7 @@
 
 #include "module/auto_fight/conditions/BossHealthCondition.h"
 
+void baas::BossHealthCondition::display() const noexcept
+{
+    BaseCondition::display();
+}

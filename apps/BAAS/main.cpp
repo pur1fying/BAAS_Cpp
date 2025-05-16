@@ -27,6 +27,12 @@ int main(int argc, char **argv)
         BAASFeature::show();
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
+        AutoFight fight(&baas);
+        fight.init_workflow();
+        fight.display_all_state();
+        fight.display_all_cond_info();
+        fight.start_state_transition();
+
 
 //        baas.update_screenshot_array();
 //
@@ -63,49 +69,47 @@ int main(int argc, char **argv)
 //                )
 //        );
 //        return 0;
-        AutoFight fight(&baas);
-        fight.init_workflow();
 
-        fight.display_all_state();
-        fight.display_all_cond_info();
+
+
         fight.set_data_updater_mask(0b1111111);
 
 //        fight.set_skill_slot_possible_templates(0, {5, 4, 3, 2, 1, 0});
 //        fight.set_skill_slot_possible_templates(1, {5, 4, 3, 2, 0, 1});
 //        fight.set_skill_slot_possible_templates(2, {5, 4, 3, 1, 0, 2});
-        fight.set_skill_slot_possible_templates(0, {0, 1, 2});
-        fight.set_skill_slot_possible_templates(1, {0, 1, 2});
-        fight.set_skill_slot_possible_templates(2, {0, 1, 2});
-        auto start = BAASUtil::getCurrentTimeMS();
-        int frame_count = 0;
-
-        fight.set_boss_health_update_flag(0b100);
-        fight.set_skill_cost_update_flag(0b111);
-        cv::Mat img;
+//        fight.set_skill_slot_possible_templates(0, {0, 1, 2});
+//        fight.set_skill_slot_possible_templates(1, {0, 1, 2});
+//        fight.set_skill_slot_possible_templates(2, {0, 1, 2});
+//        auto start = BAASUtil::getCurrentTimeMS();
+//        int frame_count = 0;
 //
-        while(1){
+//        fight.set_boss_health_update_flag(0b100);
+//        fight.set_skill_cost_update_flag(0b111);
+//        cv::Mat img;
+////
+//        while(1){
 //            baas.update_screenshot_array();
-            auto st = BAASUtil::getCurrentTimeMS();
-            baas.reset_all_feature();
-            fight.update_screenshot();
-//            if (!baas.feature_appear("fight_pause-button_appear")) {
-//                continue;
+//            auto st = BAASUtil::getCurrentTimeMS();
+//            baas.reset_all_feature();
+////            fight.update_screenshot();
+////            if (!baas.feature_appear("fight_pause-button_appear")) {
+////                continue;
+////            }
+//
+//            fight.reset_data();
+//            fight.update_data();
+//            auto end = BAASUtil::getCurrentTimeMS();
+//            baas.get_logger()->BAASInfo("Update data time: " + std::to_string(end - st) + "ms");
+//            fight.display_screenshot_extracted_data();
+//
+//            baas.get_latest_screenshot(img);
+//            frame_count++;
+//            if (BAASUtil::getCurrentTimeMS() - start > 1000) {
+//                start = BAASUtil::getCurrentTimeMS();
+//                baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
+//                frame_count = 0;
 //            }
-
-            fight.reset_data();
-            fight.update_data();
-            auto end = BAASUtil::getCurrentTimeMS();
-            baas.get_logger()->BAASInfo("Shot And Update data time: " + std::to_string(end - st) + "ms");
-            fight.display_screenshot_extracted_data();
-
-            baas.get_latest_screenshot(img);
-            frame_count++;
-            if (BAASUtil::getCurrentTimeMS() - start > 1000) {
-                start = BAASUtil::getCurrentTimeMS();
-                baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
-                frame_count = 0;
-            }
-        }
+//        }
     }
     catch (const std::exception& e) {
         BAASGlobalLogger->BAASInfo(e.what());
