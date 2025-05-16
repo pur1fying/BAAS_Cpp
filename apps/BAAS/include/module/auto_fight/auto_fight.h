@@ -39,11 +39,22 @@ private:
 
     void _init_single_skill_template(std::string &skill_name);
 
-    std::atomic<bool> flag_run;
+
+    const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
+
+    const static std::string template_j_ptr_prefix;
+
+    BAAS* baas;
+
+    BAASLogger* logger;
+
+    std::filesystem::path workflow_path;
 
     BAASUserConfig* config;
 
-    BAASLogger* logger;
+    std::atomic<bool> flag_run;
+
+    std::string workflow_name;
 
 BEGIN_AUTO_FIGHT_DATA_UPDATE
 
@@ -58,10 +69,6 @@ public:
             int skill_idx,
             const std::vector<int>& possible_templates
     );
-
-    const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
-
-    const static std::string template_j_ptr_prefix;
 
     void update_data();
 
@@ -258,11 +265,7 @@ private:
 
 END_AUTO_FIGHT_STATES
 
-    std::filesystem::path workflow_path;
 
-    std::string workflow_name;
-
-    BAAS* baas;
 
 };
 
