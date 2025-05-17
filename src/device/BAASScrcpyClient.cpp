@@ -30,40 +30,39 @@ bool BAASScrcpyClient::deploy_server()
         return false;
     }
     vector<string> cmd = {
-            "CLASSPATH=/data/local/tmp/" + scrcpyJarName.string(),
+            "CLASSPATH=/data/local/tmp/" + scrcpyJarName,
             "app_process",
             "/",
-            "com.genymobile.scrcpy.GameServer",
-            "1.20",                                 // GameServer version
-            "info",                                 // Log level
-            fmt::format("{}", maxWidth),            // Max screen width
-            fmt::format("{}", bitrate),             // Bit rate
-            fmt::format("{}", maxFPS),              // Max frame rate
-            "-1",                                   // Lock video orientation
-            "true",                                 // Tunnel forward
-            "-",                                    // Crop screen
-            "false",                                // Send frame rate to Client
-            "true",                                 // Control enabled
-            "0",                                    // Display id
-            "false",                                // Show touches
-            stayAwake ? "true" : "false",           // Stay awake
-            "-",                                    // Codec (video encoding) options
-            "-",                                    // Encoder name
-            "false"                                 // Power off screen after server closed
+            "com.genymobile.scrcpy.Server",
+            "2.4",                                 // Server version
+            "log_level=info",                                 // Log level
+            fmt::format("max_size={}", maxWidth),            // Max screen width
+            fmt::format("max_fps={}", maxFPS),              // Max frame rate
+            fmt::format("video_bit_rate={}", bitrate),             // Bit rate
+            "video_encoder=OMX.google.h264.encoder",
+            "video_codec=h264",                            // Video codec
+            "tunnel_forward=true",
+            "send_frame_meta=false",
+            "control=true",
+            "audio=false",
+            "show_touches=false",
+            "stay_awake=false",
+            "power_off_on_close=false",
+            "clipboard_autosync=false"                               // Power off screen after server closed
     };
     try {
-        logger->BAASInfo("Create GameServer Stream.");
+        logger->BAASInfo("Create Server Stream.");
         serverStream = device->shellStream(cmd, 3000.0);
         string ret = serverStream->readFully(10);
-        logger->BAASInfo("GameServer response : " + ret);
+        logger->BAASInfo("Server response : " + ret);
         if (ret.find("Aborted") != string::npos)throw ScrcpyError("Aborted");
         else if (ret.find("[server] E") != string::npos) {
             string ret_err;
             serverStream->readUntilClose(ret_err);
             logger->BAASError(ret);
             if (ret.find("match the client") != string::npos)
-                throw ScrcpyError("GameServer version does not match the client.");
-            else throw ScrcpyError("Unknown GameServer Error");
+                throw ScrcpyError("Server version does not match the client.");
+            else throw ScrcpyError("Unknown Server Error");
         }
     }
     catch (AdbError &e) {
@@ -91,7 +90,7 @@ bool BAASScrcpyClient::init_socket()
     }
     if (video_stream == nullptr) {
         logger->BAASError("Can't connect to Scrcpy server after 30 attempts");
-        throw ScrcpyError("GameServer Connect Error");
+        throw ScrcpyError("Server Connect Error");
     }
 
     string buffer = video_stream->readFully(1);
@@ -308,6 +307,7 @@ void BAASScrcpyClient::touch(
     BAASUtil::append_big_endian(msg, resol.first);
     BAASUtil::append_big_endian(msg, resol.second);
     BAASUtil::append_big_endian(msg, cst1);
+    BAASUtil::append_big_endian(msg, cst2);
     BAASUtil::append_big_endian(msg, cst2);
 
     control_socket_send(msg);

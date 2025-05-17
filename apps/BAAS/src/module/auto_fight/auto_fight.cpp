@@ -18,7 +18,8 @@
 #include "module/auto_fight/screenshot_data/ObjectPositionUpdater.h"
 
 #include "module/auto_fight/conditions/CostCondition.h"
-
+#include "module/auto_fight/conditions/BossHealthCondition.h"
+#include "module/auto_fight/conditions/SkillNameCondition.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -47,37 +48,37 @@ void AutoFight::_init_data_updaters()
 {
     // BIT [ 1 ]
     // cost
-    d_updaters.push_back(std::make_unique<CostUpdater>(baas, &d_auto_f));
+    d_auto_f.d_updaters.push_back(std::make_unique<CostUpdater>(baas, &d_auto_f));
     d_updater_map["cost"] = 1LL << 0;
 
     // BIT [ 2 ]
     // boss health
-    d_updaters.push_back(std::make_unique<BossHealthUpdater>(baas, &d_auto_f));
+    d_auto_f.d_updaters.push_back(std::make_unique<BossHealthUpdater>(baas, &d_auto_f));
     d_updater_map["boss_health"] = 1LL << 1;
 
     // BIT [ 3 ]
     // skill name
-    d_updaters.push_back(std::make_unique<SkillNameUpdater>(baas, &d_auto_f));
+    d_auto_f.d_updaters.push_back(std::make_unique<SkillNameUpdater>(baas, &d_auto_f));
     d_updater_map["skill_name"] = 1LL << 2;
 
     // BIT [ 4 ]
     // skill cost
-    d_updaters.push_back(std::make_unique<SkillCostUpdater>(baas, &d_auto_f));
+    d_auto_f.d_updaters.push_back(std::make_unique<SkillCostUpdater>(baas, &d_auto_f));
     d_updater_map["skill_cost"] = 1LL << 3;
 
     // BIT [ 5 ]
     // acc phase
-    d_updaters.push_back(std::make_unique<AccelerationPhaseUpdater>(baas, &d_auto_f));
+    d_auto_f.d_updaters.push_back(std::make_unique<AccelerationPhaseUpdater>(baas, &d_auto_f));
     d_updater_map["acc_phase"] = 1LL << 4;
 
     // BIT [ 6 ]
     // auto state
-    d_updaters.push_back(std::make_unique<AutoStateUpdater>(baas, &d_auto_f));
+    d_auto_f.d_updaters.push_back(std::make_unique<AutoStateUpdater>(baas, &d_auto_f));
     d_updater_map["auto_state"] = 1LL << 5;
 
     // BIT [ 7 ]
     // object position
-    d_updaters.push_back(std::make_unique<ObjectPositionUpdater>(baas, &d_auto_f));
+    d_auto_f.d_updaters.push_back(std::make_unique<ObjectPositionUpdater>(baas, &d_auto_f));
     d_updater_map["object_position"] = 1LL << 6;
 
 }
@@ -86,7 +87,7 @@ void AutoFight::update_data()
 {
     d_wait_to_update_idx.clear();
 
-    for (int i = 0; i < d_updaters.size(); ++i) {
+    for (int i = 0; i < d_auto_f.d_updaters.size(); ++i) {
         if((1LL << i) & d_auto_f.d_updater_mask) {
             d_wait_to_update_idx.push_back(i);
         }
@@ -98,7 +99,7 @@ void AutoFight::update_data()
 
     // sort by cost
     std::sort(d_wait_to_update_idx.begin(),d_wait_to_update_idx.end(), [this](auto a, auto b) {
-        return d_updaters[a]->estimated_time_cost() < d_updaters[b]->estimated_time_cost();
+        return d_auto_f.d_updaters[a]->estimated_time_cost() < d_auto_f.d_updaters[b]->estimated_time_cost();
     });
 
 
@@ -142,33 +143,33 @@ void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
 {
     auto start_t = BAASUtil::getCurrentTimeMS();
     try {
-        self->d_updaters[idx]->update();
+        self->d_auto_f.d_updaters[idx]->update();
     }
     catch (const std::exception &e) {
-        self->logger->BAASError("In [ " + self->d_updaters[idx]->data_name() + " ] update | Error: " + e.what());
+        self->logger->BAASError("In [ " + self->d_auto_f.d_updaters[idx]->data_name() + " ] update | Error: " + e.what());
     }
 
     self->notify_d_update_thread_end();
 
     auto end_t = BAASUtil::getCurrentTimeMS();
-    self->logger->BAASInfo("[ " + self->d_updaters[idx]->data_name() + " ] "
+    self->logger->BAASInfo("[ " + self->d_auto_f.d_updaters[idx]->data_name() + " ] "
                             "update | Time: " + std::to_string(end_t - start_t) + "ms");
 }
 
 void AutoFight::display_screenshot_extracted_data()
 {
-    for (int i = 0; i <= d_updaters.size(); ++i)
+    for (int i = 0; i <= d_auto_f.d_updaters.size(); ++i)
         if ((1LL << i) & d_auto_f.d_updater_mask)
-            d_updaters[i]->display_data();
+            d_auto_f.d_updaters[i]->display_data();
 }
 
 
 AutoFight::~AutoFight()
 {
-    for (auto &updater : d_updaters) {
+    for (auto &updater : d_auto_f.d_updaters) {
         updater.reset();
     }
-    d_updaters.clear();
+    d_auto_f.d_updaters.clear();
     d_update_thread_pool->shutdown();
 }
 
@@ -177,17 +178,21 @@ void AutoFight::init_workflow(const std::filesystem::path &name)
     // load workflow json
     _init_d_fight(name);
 
-    // all appeared skills
+    // appeared skills
     _init_skills();
 
-    // all conditions
+    // conditions
     _init_all_cond();
 
-    // data updaters
+    // updaters
     _init_data_updaters();
 
-    // all states
+    // actions
+    _init_actions();
+
+    // states
     _init_all_state();
+
 }
 
 void AutoFight::_init_single_skill_template(std::string &skill_name)
@@ -240,42 +245,6 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
     logger->BAASInfo("Inactive  : [ " + std::to_string(_template.skill_inactive_templates.size()) + " ]");
 
     d_auto_f.all_possible_skills.push_back(_template);
-}
-
-void AutoFight::set_skill_slot_possible_templates(
-        int skill_idx,
-        const std::vector<int> &possible_templates
-)
-{
-    if (skill_idx < 0 || skill_idx >= d_auto_f.skills.size()) {
-        logger->BAASWarn("Invalid skill index: " + std::to_string(skill_idx));
-        return;
-    }
-    d_auto_f.each_slot_possible_templates[skill_idx] = possible_templates;
-}
-
-void AutoFight::set_slot_possible_skill_idx(
-        int slot_idx,
-        const std::vector<int> &possible_skill_idx
-)
-{
-    if (slot_idx < 0 || slot_idx >= d_auto_f.skills.size()) {
-        logger->BAASError("Invalid slot index : [ " + std::to_string(slot_idx) + " ]");
-        return;
-    }
-    for (auto &idx : possible_skill_idx) {
-        if (idx < 0 || idx >= d_auto_f.all_possible_skills.size()) {
-            logger->BAASError("Invalid skill index : [ " + std::to_string(idx) + " ]");
-            return;
-        }
-    }
-    d_auto_f.each_slot_possible_templates[slot_idx] = possible_skill_idx;
-}
-
-std::optional<uint64_t> AutoFight::cond_appear()
-{
-
-    return std::nullopt;
 }
 
 void AutoFight::_init_cond_and_or_idx()
@@ -417,6 +386,7 @@ bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
         case BaseCondition::ConditionType::SKILL_COST:
             break;
         case BaseCondition::ConditionType::BOSS_HEALTH:
+            all_cond.push_back(std::make_unique<BossHealthCondition>(baas, &d_auto_f, d_cond));
             break;
         case BaseCondition::ConditionType::ACC_PHASE:
             break;
@@ -425,6 +395,7 @@ bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
         case BaseCondition::COMBINED:
             break;
         case BaseCondition::SKILL_NAME:
+            all_cond.push_back(std::make_unique<SkillNameCondition>(baas, &d_auto_f, d_cond));
             break;
     }
     return true;
@@ -491,9 +462,13 @@ bool AutoFight::_init_single_state(const BAASConfig &d_state, const std::string&
     // action
     std::string act = d_state.getString("action");
     if (act.empty()) _state.act_id = std::nullopt;
-    // action is not implemented now
-    // TODO:: check action
-
+    else {
+        if (!_actions->act_exist(act)) {;
+            logger->BAASError("Action [ " + act + " ] not found.");
+            throw ValueError("Action not found.");
+        }
+        _state.act_id = _actions->get_act_id(act);
+    }
 
     // transitions
     std::vector<std::string> _trans_next_state_name_recoder;
@@ -656,6 +631,7 @@ void AutoFight::display_state_idx_name_map() const noexcept
 
 void AutoFight::start_state_transition()
 {
+    enter_fight();
     _start_state_transition_loop();
 }
 
@@ -698,35 +674,28 @@ bool AutoFight::_state_start_trans_cond_j_loop()
             _state_flg_all_trans_cond_dissatisfied = true;
             logger->sub_title("All Trans Cond Dissatisfied");
             // default transition
-            if(all_states[_curr_state_idx].default_trans.has_value()) {
-                logger->BAASInfo("[ Default Trans ]");
-                _curr_state_idx = all_states[_curr_state_idx].default_trans.value();
-                return true;
-            }
-            // stop state transition
-            return false;
+            return _try_default_trans();
         }
 
         // screenshot update
         baas->i_update_screenshot_array();
+        baas->reset_all_feature();
 
         // check at fighting page
-        if (!d_updaters[0]->at_fight_page()) continue;
+        if (!d_auto_f.d_updaters[0]->at_fight_page()) continue;
 
         // data update with condition judgement
         _state_set_d_update_flags();
 
         d_wait_to_update_idx.clear();
 
-        for (int i = 0; i < d_updaters.size(); ++i) {
-            if((1LL << i) & d_auto_f.d_updater_mask) {
+        for (int i = 0; i < d_auto_f.d_updaters.size(); ++i)
+            if((1LL << i) & d_auto_f.d_updater_mask)
                 d_wait_to_update_idx.push_back(i);
-            }
-        }
 
         // sort by cost
         std::sort(d_wait_to_update_idx.begin(),d_wait_to_update_idx.end(), [this](auto a, auto b) {
-            return d_updaters[a]->estimated_time_cost() < d_updaters[b]->estimated_time_cost();
+            return d_auto_f.d_updaters[a]->estimated_time_cost() < d_auto_f.d_updaters[b]->estimated_time_cost();
         });
 
 
@@ -749,8 +718,8 @@ bool AutoFight::_state_start_trans_cond_j_loop()
 
                 // condition judgement
                 _state_cond_j();
-                if(_state_trans_cond_matched_idx.has_value()) return true;
-                if(_state_flg_all_trans_cond_dissatisfied)    return false;
+                if(_state_trans_next_state_idx.has_value()) return true;
+                if(_state_flg_all_trans_cond_dissatisfied)  return _try_default_trans();
             }
             ++d_updater_running_thread_count;
             unsigned char idx = d_updater_queue.front();
@@ -772,8 +741,8 @@ bool AutoFight::_state_start_trans_cond_j_loop()
 
             // condition judgement
             _state_cond_j();
-            if(_state_trans_cond_matched_idx.has_value()) return true;
-            if(_state_flg_all_trans_cond_dissatisfied)    return false;
+            if(_state_trans_next_state_idx.has_value())   return true;
+            if(_state_flg_all_trans_cond_dissatisfied)    return _try_default_trans();
         }
     }
 }
@@ -782,7 +751,7 @@ bool AutoFight::_state_start_trans_cond_j_loop()
 void AutoFight::_state_reset_all_cond()
 {
     _state_flg_all_trans_cond_dissatisfied = false;
-    _state_trans_cond_matched_idx.reset();
+    _state_trans_next_state_idx.reset();
     std::fill(_cond_is_matched_recorder.begin(), _cond_is_matched_recorder.end(), std::nullopt);
 
     for(const auto& cond : all_cond) cond->reset_state();
@@ -810,14 +779,26 @@ bool AutoFight::_state_cond_timeout_update()
 
 void AutoFight::_start_state_transition_loop()
 {
+
     while (1) {
-        // TODO::action
+        if(all_states[_curr_state_idx].act_id.has_value())
+            _actions->execute(all_states[_curr_state_idx].act_id.value());
 
         if(!_state_start_trans_cond_j_loop()) break;
-        assert(_state_trans_cond_matched_idx.has_value());
+
+        cv::Mat img;
+        baas->get_latest_screenshot(img);
+        cv::imshow("state_transition_last_screenshot", img);
+        cv::waitKey(0);
+
+        assert(_state_trans_next_state_idx.has_value());
 
         // state transition
-        _curr_state_idx = _state_trans_cond_matched_idx.value();
+        logger->sub_title("State Transition");
+        logger->BAASInfo("[ " + all_states[_curr_state_idx].name + " ] --> "
+                         "[ " + all_states[_state_trans_next_state_idx.value()].name + " ]");
+
+        _curr_state_idx = _state_trans_next_state_idx.value();
     }
 }
 
@@ -827,23 +808,28 @@ void AutoFight::_state_cond_j()
     std::fill(_cond_checked.begin(), _cond_checked.end(), false);
     _state_flg_all_trans_cond_dissatisfied = true;
     std::optional<bool> ret;
+    // top conditions
     for (int i = 0; i < all_states[_curr_state_idx].transitions.size(); ++i) {
         auto tran = all_states[_curr_state_idx].transitions[i];
+
+        // cond has value
         if (!_cond_is_pending(tran.cond_idx))
             if(_cond_is_satisfied(tran.cond_idx)) {
-                _state_trans_cond_matched_idx = i;
+                _state_trans_next_state_idx = i;
                 return;
             }
 
         if(_cond_checked[tran.cond_idx]) continue;
 
         ret = _recursive_cond_j(tran.cond_idx);
-        if(ret.has_value())
+        if(ret.has_value()) {
             if(ret.value()) {
-                _state_trans_cond_matched_idx = i;
+                _state_trans_next_state_idx = i;
                 return;
             }
+        }
         else _state_flg_all_trans_cond_dissatisfied = false;
+
     }
 }
 
@@ -883,7 +869,6 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
 
     // self is pending
     if(!ret.has_value()) {
-
         // check and
          for(const auto& _and : all_cond[cond_idx]->get_and_cond())  {
             if(!_cond_is_pending(_and)) {
@@ -925,32 +910,45 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
              }
          }
     }
-
-    // self satisfied
-    if(ret.value()) {
-        // check and
-        if(all_cond[cond_idx]->has_and_cond())
-        for (const auto &and_cond : all_cond[cond_idx]->get_and_cond()) {
-            if (!_cond_is_pending(and_cond) || _cond_checked[and_cond]) continue;
-            ret = _recursive_cond_j(and_cond);
-            if (ret.has_value() && !ret.value()) {
-                final_ret = false;
-                break;
-            }
-        }
-    }
-
-    // self dissatisfied
     else {
-        // check or
-        if(all_cond[cond_idx]->has_or_cond())
-        for (const auto &or_cond : all_cond[cond_idx]->get_or_cond()) {
-            if (_cond_is_pending(or_cond) || _cond_checked[or_cond]) continue;
-            ret = _recursive_cond_j(or_cond);
-            if (ret.has_value() && ret.value()) {
-                final_ret = true;
-                break;
-            }
+        // self satisfied
+        if(ret.value()) {
+            // check and
+            bool has_pending = false;
+            if(all_cond[cond_idx]->has_and_cond())
+                for (const auto &and_cond : all_cond[cond_idx]->get_and_cond()) {
+                    if (!_cond_is_pending(and_cond) || _cond_checked[and_cond]) continue;
+                    ret = _recursive_cond_j(and_cond);
+                    if (!ret.has_value()) {
+                        has_pending = true;
+                        break;
+                    }
+                    if (!ret.value()) {
+                        final_ret = false;
+                        break;
+                    }
+                }
+            if (final_ret != false && !has_pending) final_ret = true;
+        }
+
+        // self dissatisfied
+        else {
+            // check or
+            bool has_pending = false;
+            if(all_cond[cond_idx]->has_or_cond())
+                for (const auto &or_cond : all_cond[cond_idx]->get_or_cond()) {
+                    if (_cond_is_pending(or_cond) || _cond_checked[or_cond]) continue;
+                    ret = _recursive_cond_j(or_cond);
+                    if (!ret.has_value()) {
+                        has_pending = true;
+                        break;
+                    }
+                    if (ret.value()) {
+                        final_ret = true;
+                        break;
+                    }
+                }
+            if (final_ret != true && !has_pending) final_ret = false;
         }
     }
 
@@ -962,6 +960,10 @@ void AutoFight::_state_set_d_update_flags()
 {
     std::fill(_cond_checked.begin(), _cond_checked.end(), false);
     d_auto_f.d_updater_mask = 0b0;
+    d_auto_f.boss_health_update_flag = 0b000;
+    d_auto_f.skill_cost_update_flag = 0b000;
+
+    for (auto& s : d_auto_f.each_slot_possible_templates) s.clear();
 
     for (const auto tran : all_states[_curr_state_idx].transitions) {
         if (!_cond_is_pending(tran.cond_idx) || _cond_checked[tran.cond_idx]) continue;
@@ -1043,6 +1045,21 @@ void AutoFight::_wait_d_update_running_thread_end()
             return d_updater_running_thread_count < start_running_t;
         });
     }
+}
+
+bool AutoFight::_try_default_trans()
+{
+    if(all_states[_curr_state_idx].default_trans.has_value()) {
+        logger->BAASInfo("[ Default Trans ]");
+        _state_trans_next_state_idx = all_states[_curr_state_idx].default_trans.value();
+        return true;
+    }
+    return false;
+}
+
+void AutoFight::_init_actions()
+{
+    _actions = std::make_unique<auto_fight_act>(baas, &d_auto_f);
 }
 
 

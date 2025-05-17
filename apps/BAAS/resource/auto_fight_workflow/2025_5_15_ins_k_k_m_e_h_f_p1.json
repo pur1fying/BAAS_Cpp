@@ -1,5 +1,11 @@
 {
   "name": "气垫船_小春_未花_加代子_艾米_春锅_轮椅P1",
+  "BossHealth": {
+    "current_ocr_region": [549, 45, 656, 60],
+    "max_ocr_region": [666, 45, 775, 60],
+    "ocr_region": [549, 45, 775, 60],
+    "ocr_model_name": "en-us"
+  },
   "video_link": "https://www.bilibili.com/video/BV1CxLCzEE8e?spm_id_from=333.788.videopod.episodes&p=29",
   "yolo_setting": {
     "model": "best.onnx"
@@ -19,84 +25,188 @@
     ],
     "borrow": ""
   },
-  "start_state": "state_release_skill_1",
+  "start_state": "start",
   "states": {
-    "state_release_skill_1": {
+    "restart": {
+        "default_transition": "start"
+    },
+
+    "start": {
+      "action": "restart",
       "transitions": [
         {
-          "condition": "cost_over_5",
-          "next": "state_check_boss_health_after_release_skill_1"
+          "condition": "initial_skill_check",
+          "next": "start"
         }
       ],
-      "desc": "release skill 1"
+      "default_transition": "wait_auto_release_kayoko"
     },
-    "state_check_boss_health_after_release_skill_1": {
-      "default_transition": "state_release_skill_2",
-      "desc": "check boss health after release skill 1"
+
+    "wait_auto_release_kayoko": {
+       "type": "auto_release",
+       "skill": "Kayoko",
+       "default_transition": "end"
     },
-    "state_release_skill_2": {
-      "transitions": [
-        {
-          "condition": "cost_below_10",
-          "next": "state_check_boss_health_after_release_skill_1"
-        }
-      ],
-      "default_transition": "end",
-      "desc": "release skill 2"
-    },
+
     "end": {
 
     }
+
   },
   "conditions": {
+    "initial_skill_check": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Kayoko",
+      "p": 0,
+      "and": [
+        "initial_skill_Mika_check",
+        "initial_skill_Fuuka_check"
+      ],
+      "timeout": 1000
+    },
+    "initial_skill_Mika_check": {
+        "type": "skill_name",
+        "op": "at",
+        "name": "Mika",
+        "p": 1,
+        "timeout": 1000
+    },
+    "initial_skill_Fuuka_check": {
+        "type": "skill_name",
+        "op": "at",
+        "name": "Fuuka (New Year)",
+        "p": 2,
+        "timeout": 1000
+    },
+    "skill_Himari_appear": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Himari",
+      "timeout": 2000
+    },
+    "boss_health_decrease_1_000_000": {
+      "type": "boss_health",
+      "op": "C_decrease",
+      "value": 1000000,
+      "timeout": 1000000
+    },
+    "boss_health_below_4_000_000": {
+        "type": "boss_health",
+        "op": "C_below",
+        "value": 4000000,
+        "timeout": 10000,
+        "and": [
+          "boss_max_health_equals_5_000_000"
+        ]
+    },
+    "boss_max_health_equals_5_000_000": {
+        "type": "boss_health",
+        "op": "M_equal",
+        "value": 5000000,
+        "timeout": 10000
+    },
+    "cost_decrease_5.5": {
+        "type": "cost",
+        "op": "decrease",
+        "value": 5.5,
+        "timeout": 10000
+    },
+    "cost_in_range_5_6": {
+      "type": "cost",
+      "op": "in_range",
+      "range": [5.0, 6.0],
+      "timeout": 10000
+    },
+    "cost_below_2": {
+        "type": "cost",
+        "op": "below",
+        "value": 2.0,
+        "timeout": 3000
+    },
+    "cost_over_2": {
+      "type": "cost",
+      "op": "over",
+      "value": 2.0,
+      "timeout": 10000
+    },
+    "cost_over_9": {
+      "type": "cost",
+      "op": "over",
+      "value": 9.0,
+      "timeout": 10000
+    },
+    "cost_over_6": {
+      "type": "cost",
+      "op": "over",
+      "value": 6.0,
+      "timeout": 10000
+    },
+    "cost_over_3": {
+      "type": "cost",
+      "op": "over",
+      "value": 3.0,
+      "timeout": 10000
+    },
+    "cost_over_7": {
+      "type": "cost",
+      "op": "over",
+      "value": 7.0,
+      "timeout": 10000
+    },
     "cost_over_5": {
       "type": "cost",
       "op": "over",
       "value": 5.0,
-      "desc": "trigger when cost over 5.0",
-      "timeout": 3000
+      "timeout": 10000
     },
-    "cost_below_3": {
+    "cost_over_9.5": {
       "type": "cost",
-      "op": "below",
-      "value": 3.0,
-      "desc": "trigger when cost below 3.0",
-      "timeout": 3000
+      "op": "over",
+      "value": 9.5,
+      "timeout": 10000
     },
-    "cost_below_10": {
+    "cost_over_4.6": {
       "type": "cost",
-      "op": "below",
-      "value": 10.0,
-      "desc": "trigger when cost below 10.0",
-      "timeout": 3000
+      "op": "over",
+      "value": 4.6,
+      "timeout": 10000
     },
-    "cost_in_range_5.0_10.0_2": {
+    "cost_over_6.8": {
       "type": "cost",
-      "op": "below",
-      "value": 10.0,
-      "desc": "This condition has same effect with cost_in_range_5.0_10.0",
-      "timeout": 3000,
-      "and": ["cost_over_5"]
+      "op": "over",
+      "value": 6.8,
+      "timeout": 10000
     },
-    "cost_increase_6": {
+    "cost_over_4": {
       "type": "cost",
-      "op": "increase",
-      "value": 6,
-      "desc": "trigger when cost increase at least 6.0",
-      "timeout": 3000
-    },
-    "cost_decrease_2.5": {
-      "type": "cost",
-      "op": "decrease",
-      "desc": "trigger when cost decrease at least 2.5",
-      "value": 2.5
-    },
-    "cost_in_range_5.0_10.0": {
-      "type": "cost",
-      "op": "in_range",
-      "range": [5.0, 10.0],
-      "desc": "trigger when cost in range [5.0, 10.0]",
-      "timeout": 3000
+      "op": "over",
+      "value": 4.0,
+      "timeout": 10000
     }
+  },
+
+  "actions": {
+    "restart": [
+      {
+        "t": "restart"
+      }
+    ],
+    "turn_on_auto_acc3": [
+      {
+        "t": "auto",
+        "op": "on"
+      },
+      {
+        "t": "acc",
+        "op": "1"
+      }
+    ],
+    "turn_off_auto": [
+      {
+        "t": "auto",
+        "op": "off"
+      }
+    ]
   }
 }

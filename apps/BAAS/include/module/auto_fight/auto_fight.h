@@ -14,17 +14,22 @@
 #define BEGIN_AUTO_FIGHT_STATES
 #define END_AUTO_FIGHT_STATES
 
+#define BEGIN_AUTO_FIGHT_ACTIONS
+#define END_AUTO_FIGHT_ACTIONS
+
 #include <ThreadPool.h>
 #include <BAAS.h>
 
 #include "auto_fight_d.h"
-#include "screenshot_data/BaseDataUpdater.h"
 #include "conditions/BaseCondition.h"
+#include "actions/auto_fight_act.h"
 
 BAAS_NAMESPACE_BEGIN
 
 class AutoFight{
+
 public:
+
     explicit AutoFight(BAAS* baas);
 
     void init_workflow(const std::filesystem::path& p="");
@@ -39,7 +44,6 @@ private:
 
     void _init_single_skill_template(std::string &skill_name);
 
-
     const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
 
     const static std::string template_j_ptr_prefix;
@@ -52,23 +56,11 @@ private:
 
     BAASUserConfig* config;
 
-    std::atomic<bool> flag_run;
-
     std::string workflow_name;
 
 BEGIN_AUTO_FIGHT_DATA_UPDATE
 
 public:
-
-    void set_slot_possible_skill_idx(
-            int slot_idx,
-            const std::vector<int>& possible_skill_idx
-    );
-
-    void set_skill_slot_possible_templates(
-            int skill_idx,
-            const std::vector<int>& possible_templates
-    );
 
     void update_data();
 
@@ -120,7 +112,6 @@ private:
     }
 
     // max len : 64 ( 2^6 )
-    std::vector<std::unique_ptr<BaseDataUpdater>> d_updaters;
 
     std::vector<uint8_t> d_wait_to_update_idx;
 
@@ -138,8 +129,6 @@ public:
 
     void display_all_cond_info() const noexcept;
 
-    std::optional<uint64_t> cond_appear();
-
     void display_cond_idx_name_map() const noexcept;
 
 private:
@@ -151,9 +140,6 @@ private:
     bool _init_single_cond(const BAASConfig& d_cond);
 
     void _init_cond_and_or_idx();
-
-    // currently judging condition idx
-    std::vector<uint64_t> cond_wait_to_judge_idx;
 
     std::string _cond_type;
 
@@ -191,6 +177,8 @@ public:
 private:
 
     bool _state_start_trans_cond_j_loop();
+
+    bool _try_default_trans();
 
     void _state_reset_all_cond();
 
@@ -255,7 +243,7 @@ private:
     long long _state_cond_j_elapsed_t;
 
     // index of matched transition
-    std::optional<uint64_t> _state_trans_cond_matched_idx;
+    std::optional<uint64_t> _state_trans_next_state_idx;
 
     bool _state_flg_all_trans_cond_dissatisfied;
 
@@ -265,7 +253,16 @@ private:
 
 END_AUTO_FIGHT_STATES
 
+BEGIN_AUTO_FIGHT_ACTIONS
+public:
 
+
+private:
+    void _init_actions();
+
+    std::unique_ptr<auto_fight_act> _actions;
+
+END_AUTO_FIGHT_ACTIONS
 
 };
 

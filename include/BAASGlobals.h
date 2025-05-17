@@ -28,7 +28,7 @@ extern std::filesystem::path scrcpyJarPath;
 
 extern std::filesystem::path scrcpyJar_REMOTE_DIR;
 
-extern std::filesystem::path scrcpyJarName;
+extern std::string scrcpyJarName;
 
 extern std::filesystem::path MuMuInstallPath;
 

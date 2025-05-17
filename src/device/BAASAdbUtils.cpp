@@ -384,6 +384,7 @@ bool BAASAdbBaseDevice::shellBytes(
         string &out,
         double socketTimeout
 )
+
 {
     BAASAdbConnection *conn = shellStream(command, socketTimeout);
     conn->readUntilClose(out);
@@ -442,7 +443,7 @@ int BAASAdbBaseDevice::push(
         throw (PathError("File " + src + " not exists or not a regular file."));
     }
     string dstPath = dst + "," + to_string(32768 | mode);
-    BAASAdbConnection *conn = prepareSync(dstPath, "SEND");
+    BAASAdbConnection* conn = prepareSync(dstPath, "SEND");
     ifstream file(src, ios::binary);
     int fileSize = int(filesystem::file_size(src));
     char buffer[4096];
@@ -468,7 +469,7 @@ int BAASAdbBaseDevice::push(
         delete conn;
         BAASGlobalLogger->BAASError(e.what());
         file.close();
-        return -1;
+        throw AdbError("Push file failed.");
     }
     if (check) {
         int remoteSize = stat(dst);

@@ -10,7 +10,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class BossHealthCondition : public BaseCondition {
+
 public:
+
     BossHealthCondition(
             BAAS* baas,
             auto_fight_d* data,
@@ -30,6 +32,8 @@ public:
 
     void display() const noexcept override;
 
+    void set_d_update_flag() override;
+
     const static std::map<std::string, Op> op_map;
 
     const static std::vector<std::string> op_to_st;
@@ -46,13 +50,11 @@ private:
 
     Op _op;
 
-    bool _reset_health;
-
     double _value, _range_min, _range_max;
 
     std::optional<double> _last_recorded_health;
 
-    double _cost_increment;
+    double _health_increment;
 };
 
 BAAS_NAMESPACE_END

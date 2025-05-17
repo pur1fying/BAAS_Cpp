@@ -381,7 +381,7 @@ public:
             int x,
             int y,
             uint8_t action = ScrcpyConst::ACTION_DOWN,
-            unsigned long long touch_id = -1
+            unsigned long long touch_id = 0x1234567887654321
     );
 
     void scroll(
@@ -491,13 +491,11 @@ private:
 
     std::mutex alive_mutex;
 
-    int maxWidth = 2560;
+    int maxWidth = 0;
 
-    int maxFPS = 60;
+    int maxFPS = 0;
 
-    int bitrate = 1000000000;
-
-    bool stayAwake = false;
+    int bitrate = 8000000;
 
     std::pair<uint16_t, uint16_t> resolution;
 

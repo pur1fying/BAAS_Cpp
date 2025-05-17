@@ -19,8 +19,6 @@ public:
 
 private:
 
-
-
 };
 
 BAAS_NAMESPACE_END

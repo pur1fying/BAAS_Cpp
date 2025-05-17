@@ -27,7 +27,7 @@ std::filesystem::path scrcpyJarPath;
 
 std::filesystem::path scrcpyJar_REMOTE_DIR;
 
-std::filesystem::path scrcpyJarName;
+std::string scrcpyJarName;
 
 std::filesystem::path MuMuInstallPath;
 
@@ -66,7 +66,7 @@ void init_path() {
     DEVELOPER_PROJECT_DIR = BAAS_PROJECT_DIR.parent_path().parent_path().string();
     scrcpyJarName = "scrcpy-server.jar";
     scrcpyJarPath = BAAS_RESOURCE_DIR / "bin" / "scrcpy" / scrcpyJarName;
-    scrcpyJar_REMOTE_DIR = "/data/local/tmp" / scrcpyJarName;
+    scrcpyJar_REMOTE_DIR = "/data/local/tmp/" + scrcpyJarName;
 
     ASCREENCAP_BIN_DIR = BAAS_RESOURCE_DIR / "bin" / "ascreencap";
     ASCREENCAP_REMOTE_DIR = "/data/local/tmp/ascreencap";

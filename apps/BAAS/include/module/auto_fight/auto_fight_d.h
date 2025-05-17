@@ -14,7 +14,10 @@
 
 #include "core_defines.h"
 
+
 BAAS_NAMESPACE_BEGIN
+
+class BaseDataUpdater;
 
 struct slot_skill{
     std::optional<int>         index;     // skill index
@@ -39,26 +42,37 @@ struct skill_template {
     std::string name;    // skill name
 
     std::vector<template_info> skill_active_templates;
+
     std::vector<template_info> skill_inactive_templates;
 };
 
 struct trans_info {
+
     uint64_t cond_idx;
+
     uint64_t next_sta_idx;
+
 };
 
 
 struct state_info {
+
     std::optional<uint64_t> act_id;
+
     std::vector<trans_info> transitions;
+
     std::optional<uint64_t> default_trans;
 
     std::string desc;
+
     std::string name;
+
     state_info() = default;
 };
 
 struct auto_fight_d {
+    std::vector<std::unique_ptr<BaseDataUpdater>> d_updaters;
+
     // data updaters
     uint64_t d_updater_mask = 0;
 
