@@ -147,6 +147,8 @@ private:
 
     std::vector<std::optional<bool>> _cond_is_matched_recorder;
 
+    std::vector<std::optional<bool>> _cond_self_matched;
+
     std::vector<bool> _cond_checked;
 
     // name to index in all_conditions
@@ -157,10 +159,6 @@ END_AUTO_FIGHT_CONDITIONS
 BEGIN_AUTO_FIGHT_STATES
 
 public:
-    void state_transition(
-            const std::string& state_name,
-            bool update_room_left_time = false
-    );
 
     void enter_fight();
 

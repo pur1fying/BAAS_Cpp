@@ -8,7 +8,8 @@
   },
   "video_link": "https://www.bilibili.com/video/BV1CxLCzEE8e?spm_id_from=333.788.videopod.episodes&p=29",
   "yolo_setting": {
-    "model": "best.onnx"
+    "model": "best.onnx",
+    "update_interval": 100
   },
   "formation": {
     "front": ["Kayoko", "Koharu", "Mika", "Eimi"],
@@ -28,56 +29,266 @@
   "start_state": "start",
   "states": {
     "restart": {
-        "default_transition": "start"
+      "action": "restart",
+      "default_transition": "start"
     },
 
     "start": {
-      "action": "restart",
+      "action": "set_start_fight_auto_acc",
       "transitions": [
         {
-          "condition": "initial_skill_check",
-          "next": "start"
+          "condition": "enter_fight_check",
+          "next": "auto_release_kayoko_wait_cost_to_5"
         }
       ],
-      "default_transition": "wait_auto_release_kayoko"
+      "default_transition": "end"
+    },
+    "auto_release_kayoko_wait_cost_to_5": {
+      "transitions": [
+        {
+          "condition": "cost_in_range_5_6",
+          "next": "[1] auto release [ Kayoko ]"
+        }
+      ],
+      "default_transition": "end"
     },
 
-    "wait_auto_release_kayoko": {
-       "type": "auto_release",
-       "skill": "Kayoko",
-       "default_transition": "end"
+    "[1] auto release [ Kayoko ]": {
+       "action": "[1] auto release [ Kayoko ]",
+       "transitions": [
+         {
+              "condition": "cost_over_2.05",
+              "next": "[2] [ Fuuka Skill ] to [ Mika ]"
+         }
+       ],
+       "default_transition" : "end"
     },
 
+    "[2] [ Fuuka Skill ] to [ Mika ]": {
+      "action": "[2] [ Fuuka Skill ] to [ Mika ]",
+      "transitions": [
+        {
+          "condition": "skill [ Himari ] appear",
+          "next": "[ Himari ] appear wait cost 9.05"
+        }
+      ],
+      "default_transition": "[ Himari ] disappear wait cost 9.05"
+    },
+    "[ Himari ] appear wait cost 9.05": {
+      "transitions": [
+        {
+          "condition": "cost_over_9.05",
+          "next": "[3] [ Himari appear ] [ Mika ] [ Himari ] skill rel"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[ Himari ] disappear wait cost 9.05": {
+      "transitions": [
+        {
+          "condition": "cost_over_9.05",
+          "next": "[3] [ Himari disappear ] [ Mika ] [ Himari ] skill rel"
+        }
+      ]
+    },
+    "[3] [ Himari appear ] [ Mika ] [ Himari ] skill rel": {
+      "action": "[3] [ Himari appear ] [ Mika Skill ] to [ BOSS ]",
+      "default_transition": "[ CheckPoint ] boss_health_below_10_657_721"
+    },
+    "[3] [ Himari disappear ] [ Mika ] [ Himari ] skill rel": {
+      "action": "[3] [ Himari disappear ] [ Mika Skill ] to [ BOSS ]",
+      "default_transition": "[ CheckPoint ] boss_health_below_10_657_721"
+    },
+    "[ CheckPoint ] boss_health_below_10_657_721": {
+      "transitions": [
+        {
+          "condition": "boss_health_below_10_657_721",
+          "next": "[4] [ Koharu ] [ Fuuka ] skill rel"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[4] [ Koharu ] [ Fuuka ] skill rel": {
+        "action": "[4] [ Koharu ] [ Fuuka ] skill rel",
+        "transitions": [
+            {
+              "condition": "[5]",
+              "next": "[5] [ Mika ] skill to boss"
+            }
+        ],
+        "default_transition": "restart"
+    },
+    "[5] [ Mika ] skill to boss": {
+      "action": "[5] [ Mika ] skill to boss",
+      "default_transition": "[ CheckPoint ] boss_health_below_8_600_000"
+    },
+    "[ CheckPoint ] boss_health_below_8_600_000": {
+      "transitions": [
+        {
+          "condition": "boss_health_below_8_600_000",
+          "next": "[6] [ Kayoko ] skill rel"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[6] [ Kayoko ] skill rel": {
+      "action": "[6] [ Kayoko ] skill rel",
+      "transitions": [
+        {
+          "condition": "[7]",
+          "next": "[7] [ Koharu ] skill to [ Mika Eimi ]"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[7] [ Koharu ] skill to [ Mika Eimi ]": {
+      "action": "[7] [ Koharu ] skill to [ Mika Eimi ]",
+      "transitions": [
+        {
+          "condition": "[8]",
+          "next": "[8] [ Mika ] skill to [ BOSS ]"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[8] [ Mika ] skill to [ BOSS ]": {
+      "action": "[8] [ Mika ] skill to [ BOSS ]",
+      "default_transition": "[ CheckPoint ] boss_health_below_4_800_000"
+    },
+    "[ CheckPoint ] boss_health_below_4_800_000": {
+      "transitions": [
+        {
+          "condition": "boss_health_below_4_800_000",
+          "next": "[9] [ Koharu ] skill to [ Mika Eimi ]"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[9] [ Koharu ] skill to [ Mika Eimi ]": {
+      "action": "[9] [ Koharu ] skill to [ Mika Eimi ]",
+      "transitions": [
+        {
+          "condition": "[10]",
+          "next": "[10] [ Mika ] skill to [ BOSS ]"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[10] [ Mika ] skill to [ BOSS ]": {
+      "action": "[5] [ Mika ] skill to boss",
+      "default_transition": "[ CheckPoint ] boss_health_below_2_500_000"
+    },
+    "[ CheckPoint ] boss_health_below_2_500_000": {
+      "transitions": [
+        {
+          "condition": "boss_health_below_2_500_000",
+          "next": "[11] [ Himari ] skill to [ Mika ]"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[11] [ Himari ] skill to [ Mika ]": {
+      "action": "[11] [ Himari ] skill to [ Mika ]",
+      "transitions": [
+        {
+          "condition": "[12]",
+          "next": "[12] [ Koharu ] skill to [ Mika Eimi ]"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[12] [ Koharu ] skill to [ Mika Eimi ]": {
+      "action": "[9] [ Koharu ] skill to [ Mika Eimi ]",
+      "transitions": [
+        {
+          "condition": "[13]",
+          "next": "[13] [ Mika ] skill to [ BOSS ]"
+        }
+      ],
+      "default_transition": "restart"
+    },
+    "[13] [ Mika ] skill to [ BOSS ]": {
+      "action": "[5] [ Mika ] skill to boss",
+      "transitions": [
+        {
+          "condition": "boss_health_below_1",
+          "next": "end"
+        }
+      ],
+      "default_transition": "restart"
+    },
     "end": {
 
     }
-
   },
   "conditions": {
-    "initial_skill_check": {
+    "skill [ Kayoko ] appear": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Kayoko",
+      "timeout": 2000
+    },
+    "skill [ Fuuka ] appear": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Fuuka (New Year)",
+      "timeout": 2000
+    },
+    "skill [ Mika ] appear": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Mika",
+      "timeout": 2000
+    },
+    "skill [ Himari ] appear": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Himari",
+      "timeout": 2000
+    },
+    "skill [ Koharu ] appear": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Koharu",
+      "timeout": 2000
+    },
+    "skill [ Eimi ] appear": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Eimi",
+      "timeout": 2000
+    },
+    "enter_fight_check": {
+      "type": "boss_health",
+      "op": "M_equal",
+      "value": 12500000,
+      "and": [
+        "initial_skill [ Kayoko ] check",
+        "initial_skill [  Mika  ] check",
+        "initial_skill [  Fuuka ] check"
+      ],
+      "timeout": 1000
+    },
+    "initial_skill [ Kayoko ] check": {
       "type": "skill_name",
       "op": "appear",
       "name": "Kayoko",
       "p": 0,
-      "and": [
-        "initial_skill_Mika_check",
-        "initial_skill_Fuuka_check"
-      ],
       "timeout": 1000
     },
-    "initial_skill_Mika_check": {
-        "type": "skill_name",
-        "op": "at",
-        "name": "Mika",
-        "p": 1,
-        "timeout": 1000
+    "initial_skill [  Mika  ] check": {
+      "type": "skill_name",
+      "op": "at",
+      "name": "Mika",
+      "p": 1,
+      "timeout": 1000
     },
-    "initial_skill_Fuuka_check": {
-        "type": "skill_name",
-        "op": "at",
-        "name": "Fuuka (New Year)",
-        "p": 2,
-        "timeout": 1000
+    "initial_skill [  Fuuka ] check": {
+      "type": "skill_name",
+      "op": "at",
+      "name": "Fuuka (New Year)",
+      "p": 2,
+      "timeout": 1000
     },
     "skill_Himari_appear": {
       "type": "skill_name",
@@ -85,38 +296,117 @@
       "name": "Himari",
       "timeout": 2000
     },
-    "boss_health_decrease_1_000_000": {
+    "boss_health_below_10_657_721": {
       "type": "boss_health",
-      "op": "C_decrease",
-      "value": 1000000,
-      "timeout": 1000000
+      "op": "C_below",
+      "value": 10657721,
+      "timeout": 5000,
+      "and": [
+        "skill [ Koharu ] appear",
+        "cost_over_6"
+      ]
     },
-    "boss_health_below_4_000_000": {
-        "type": "boss_health",
-        "op": "C_below",
-        "value": 4000000,
-        "timeout": 10000,
+    "boss_health_below_8_600_000": {
+      "type": "boss_health",
+      "op": "C_below",
+      "value": 8600000,
+      "timeout": 5000,
+      "and": [
+        "skill [ Kayoko ] appear",
+        "cost_over_6"
+      ]
+    },
+    "boss_health_below_4_800_000": {
+      "type": "boss_health",
+      "op": "C_below",
+      "value": 5000000,
+      "timeout": 5000,
+      "and": [
+        "skill [ Koharu ] appear",
+        "cost_over_5.05"
+      ]
+    },
+    "boss_health_below_2_500_000": {
+      "type": "boss_health",
+      "op": "C_below",
+      "value": 2800000,
+      "timeout": 5000,
+      "and": [
+          "skill [ Himari ] appear",
+          "cost_over_6.8"
+      ]
+    },
+    "boss_health_below_1": {
+      "type": "boss_health",
+      "op": "C_below",
+      "value": 1,
+      "timeout": 5000
+    },
+    "[5]": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Mika",
+      "timeout": 2000,
+      "and": [
+        "cost_over_3.05"
+      ]
+    },
+    "[7]": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Koharu",
+      "and": [
+        "cost_over_7"
+      ]
+    },
+    "[8]": {
+      "type": "skill_name",
+      "op": "appear",
+        "name": "Mika",
+        "timeout": 2000,
         "and": [
-          "boss_max_health_equals_5_000_000"
+          "cost_over_9.55",
+          "skill [ Himari ] appear"
         ]
     },
-    "boss_max_health_equals_5_000_000": {
-        "type": "boss_health",
-        "op": "M_equal",
-        "value": 5000000,
-        "timeout": 10000
+    "[10]": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Mika",
+      "timeout": 2000,
+      "and": [
+        "cost_over_3.05"
+      ]
+    },
+    "[12]": {
+      "type": "cost",
+      "op": "over",
+      "value": 4.0,
+      "timeout": 10000,
+      "and": [
+        "skill [ Koharu ] appear"
+      ]
+    },
+    "[13]": {
+      "type": "cost",
+      "op": "over",
+      "value": 3.05,
+      "timeout": 10000,
+      "and": [
+        "skill [ Mika ] appear"
+      ]
     },
     "cost_decrease_5.5": {
-        "type": "cost",
-        "op": "decrease",
-        "value": 5.5,
-        "timeout": 10000
+      "type": "cost",
+      "op": "decrease",
+      "value": 5.5,
+      "timeout": 20000
     },
     "cost_in_range_5_6": {
       "type": "cost",
       "op": "in_range",
       "range": [5.0, 6.0],
-      "timeout": 10000
+      "timeout": 20000
     },
     "cost_below_2": {
         "type": "cost",
@@ -130,41 +420,53 @@
       "value": 2.0,
       "timeout": 10000
     },
+    "cost_over_2.05": {
+      "type": "cost",
+      "op": "over",
+      "value": 2.05,
+      "timeout": 10000
+    },
     "cost_over_9": {
       "type": "cost",
       "op": "over",
       "value": 9.0,
-      "timeout": 10000
+      "timeout": 20000
     },
     "cost_over_6": {
       "type": "cost",
       "op": "over",
       "value": 6.0,
-      "timeout": 10000
+      "timeout": 20000
     },
-    "cost_over_3": {
+    "cost_over_3.05": {
       "type": "cost",
       "op": "over",
-      "value": 3.0,
+      "value": 3.05,
       "timeout": 10000
     },
     "cost_over_7": {
       "type": "cost",
       "op": "over",
       "value": 7.0,
-      "timeout": 10000
+      "timeout": 20000
     },
-    "cost_over_5": {
+    "cost_over_5.05": {
       "type": "cost",
       "op": "over",
-      "value": 5.0,
+      "value": 5.05,
       "timeout": 10000
     },
-    "cost_over_9.5": {
+    "cost_over_9.05": {
       "type": "cost",
       "op": "over",
-      "value": 9.5,
-      "timeout": 10000
+      "value": 9.05,
+      "timeout": 20000
+    },
+    "cost_over_9.55": {
+      "type": "cost",
+      "op": "over",
+      "value": 9.55,
+      "timeout": 20000
     },
     "cost_over_4.6": {
       "type": "cost",
@@ -176,7 +478,7 @@
       "type": "cost",
       "op": "over",
       "value": 6.8,
-      "timeout": 10000
+      "timeout": 20000
     },
     "cost_over_4": {
       "type": "cost",
@@ -192,14 +494,286 @@
         "t": "restart"
       }
     ],
-    "turn_on_auto_acc3": [
+    "[1] auto release [ Kayoko ]": [
       {
-        "t": "auto",
-        "op": "on"
-      },
+        "t": "skill",
+        "op": "auto",
+        "check": {
+          "op": "C_decrease",
+          "value": 5.5,
+          "timeout": 10000
+        }
+      }
+    ],
+    "[2] [ Fuuka Skill ] to [ Mika ]": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Fuuka (New Year)",
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Mika"]
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 1.5,
+          "timeout": 3000
+        }
+      }
+    ],
+    "[3] [ Himari appear ] [ Mika Skill ] to [ BOSS ]": [
       {
         "t": "acc",
         "op": "1"
+      },
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Mika",
+        "target": {
+          "op": "fixed",
+          "x": 1080,
+          "y": 360
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 2.5,
+          "timeout": 3000
+        }
+      },
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Himari",
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Mika"]
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 2.5,
+          "timeout": 3000
+        }
+      },
+      {
+        "t": "acc",
+        "op": "3"
+      }
+    ],
+    "[3] [ Himari disappear ] [ Mika Skill ] to [ BOSS ]": [
+      {
+        "t": "acc",
+        "op": "1"
+      },
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Mika",
+        "target": {
+          "op": "fixed",
+          "x": 1080,
+          "y": 360
+        }
+      },
+      {
+        "t": "skill",
+        "op": "l_rel_p",
+        "l_rel_idx": 0,
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Mika"]
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 2.5,
+          "timeout": 3000
+        }
+      },
+      {
+        "t": "acc",
+        "op": "3"
+      }
+    ],
+    "[4] [ Koharu ] [ Fuuka ] skill rel": [
+      {
+        "t": "acc",
+        "op": "1"
+      },
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Koharu",
+        "target": {
+          "op": "yolo_g_p",
+          "obj": ["Mika", "Eimi"]
+        }
+      },
+      {
+        "t": "skill",
+        "op": "l_rel_p",
+        "l_rel_idx": 0,
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Mika"]
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 1.5,
+          "timeout": 3000
+        }
+      },
+      {
+        "t": "acc",
+        "op": "3"
+      }
+    ],
+    "[5] [ Mika ] skill to boss": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Mika",
+        "target": {
+          "op": "fixed",
+          "x": 1080,
+          "y": 360
+        }
+      }
+    ],
+    "[6] [ Kayoko ] skill rel": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Kayoko",
+        "target": {
+          "op": "fixed",
+          "x": 1080,
+          "y": 360
+        }
+      }
+    ],
+    "[7] [ Koharu ] skill to [ Mika Eimi ]": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Koharu",
+        "target": {
+          "op": "yolo_g_p",
+          "obj": ["Mika", "Eimi"]
+        }
+      },
+      {
+        "t": "skill",
+        "op": "l_rel_p",
+        "l_rel_idx": 0,
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Mika"]
+        }
+      }
+    ],
+    "[8] [ Mika ] skill to [ BOSS ]": [
+      {
+        "t": "acc",
+        "op": "1"
+      },
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Mika",
+        "target": {
+          "op": "fixed",
+          "x": 1080,
+          "y": 360
+        }
+      },
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Himari",
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Mika"]
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 2.5,
+          "timeout": 3000
+        }
+      },
+      {
+        "t": "acc",
+        "op": "3"
+      }
+    ],
+    "[9] [ Koharu ] skill to [ Mika Eimi ]": [
+      {
+        "t": "acc",
+        "op": "1"
+      },
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Koharu",
+        "target": {
+        "op": "yolo_g_p",
+        "obj": ["Mika", "Eimi"]
+        }
+      },
+      {
+        "t": "skill",
+        "op": "l_rel_p",
+        "l_rel_idx": 0,
+        "target": {
+        "op": "yolo_c_p",
+        "obj": ["Mika"]
+        }
+      },
+      {
+        "t": "acc",
+        "op": "3"
+      }
+    ],
+    "[11] [ Himari ] skill to [ Mika ]": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Himari",
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Mika"]
+        }
+      }
+    ],
+    "[12] [ Koharu ] skill to [ Mika Eimi ]": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Koharu",
+        "target": {
+          "op": "yolo_g_p",
+          "obj": ["Mika", "Eimi"]
+        }
+      }
+    ],
+    "[13] [ Fuuka ] skill to [ Mika ]": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Fuuka (New Year)",
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Mika"]
+        }
+      }
+    ],
+    "set_start_fight_auto_acc": [
+      {
+        "t": "auto",
+        "op": "off"
+      },
+      {
+        "t": "acc",
+        "op": "3"
       }
     ],
     "turn_off_auto": [

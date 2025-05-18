@@ -29,7 +29,7 @@
     "max_stuck_time": 3,
     "ends": "fight_auto_on",
     "possibles": [
-      ["fight_auto_off", 1249, 689, 0.6]
+      ["fight_auto_off", 1249, 689, 0.3]
     ]
   },
   "fight_set_auto_off": {
@@ -37,7 +37,7 @@
     "max_stuck_time": 3,
     "ends": "fight_auto_off",
     "possibles": [
-      ["fight_auto_on", 1249, 689, 0.6]
+      ["fight_auto_on", 1249, 689, 0.3]
     ]
   },
   "fight_set_acc_phase_1": {
@@ -45,7 +45,7 @@
     "max_stuck_time": 3,
     "ends": "fight_acc_phase1",
     "possibles": [
-      ["fight_acc_phase2", 1254, 610, 0.3],
+      ["fight_acc_phase2", 1254, 610, 0.3, 0.0, 0.0, 2, 0.2],
       ["fight_acc_phase3", 1254, 610, 0.3]
     ]
   },
@@ -54,7 +54,7 @@
       "max_stuck_time": 3,
       "ends": "fight_acc_phase2",
       "possibles": [
-        ["fight_acc_phase3", 1254, 610, 0.3],
+        ["fight_acc_phase3", 1254, 610, 0.3, 0.0, 0.0, 2, 0.2],
         ["fight_acc_phase1", 1254, 610, 0.3]
       ]
   },
@@ -63,8 +63,56 @@
       "max_stuck_time": 3,
       "ends": "fight_acc_phase3",
       "possibles": [
-        ["fight_acc_phase1", 1254, 610, 0.3],
+        ["fight_acc_phase1", 1254, 610, 0.3, 0.0, 0.0, 2, 0.2],
         ["fight_acc_phase2", 1254, 610, 0.3]
       ]
+  },
+  "fight_select_slot_0": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_slot_0_selected",
+    "possibles": [
+      ["fight_pause-button_appear", 926, 586, 0.3]
+    ]
+  },
+  "fight_select_slot_1": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_slot_1_selected",
+    "possibles": [
+      ["fight_pause-button_appear", 1024, 586, 0.3]
+    ]
+  },
+  "fight_select_slot_2": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_slot_2_selected",
+    "possibles": [
+      ["fight_pause-button_appear", 1127, 586, 0.3]
+    ]
+  },
+  "fight_release_skill_slot_0": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_pause-button_appear",
+    "possibles": [
+      ["fight_slot_0_selected", -1, -1, 0.3]
+    ]
+  },
+  "fight_release_skill_slot_1": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_pause-button_appear",
+    "possibles": [
+      ["fight_slot_1_selected", -1, -1, 0.3]
+    ]
+  },
+  "fight_release_skill_slot_2": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_pause-button_appear",
+    "possibles": [
+      ["fight_slot_2_selected", -1, -1, 0.3]
+    ]
   }
 }

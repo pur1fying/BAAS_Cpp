@@ -21,9 +21,21 @@ ObjectPositionUpdater::ObjectPositionUpdater(
     _warm_up_session();
 }
 
-void ObjectPositionUpdater::update() {
-    baas->get_latest_screenshot(origin_screenshot);
-    _yolo->run_session(origin_screenshot, result, nms_op);
+void ObjectPositionUpdater::update()
+{
+    long long _t = BAASUtil::getCurrentTimeMS();
+    if (_t - _yolo_last_update_t > _yolo_update_itv) {
+        baas->get_latest_screenshot(origin_screenshot);
+        _yolo->run_session(origin_screenshot, result, nms_op);
+        _yolo_last_update_t = _t;
+        for (const auto& _p : data->obj_last_appeared_pos) {
+            std::optional<yolo_single_res> res = std::nullopt;
+            for (const auto& r : result.results)
+                if (r.classId == _p.first && (res == std::nullopt || r.confidence > res->confidence))
+                    res = r;
+            if (res != std::nullopt) data->obj_last_appeared_pos[_p.first] = res;
+        }
+    }
 }
 
 double ObjectPositionUpdater::estimated_time_cost() {
@@ -88,7 +100,7 @@ void ObjectPositionUpdater::_init_yolo_d() {
          logger->BAASError("Invalid NMS type [ " + nms_type + " ].");
          throw ValueError("Unsupported NMS Type.");
     }
-
+    _yolo_update_itv = data->d_fight.getLLong("/yolo_setting/update_interval", 100);
 
     data->yolo_pra.model_path = BAAS_YOLO_MODEL_DIR / model;
     data->yolo_pra.yaml_path = BAAS_YOLO_MODEL_DIR / static_config->getString(_j_p + "/yaml_path");
@@ -105,6 +117,7 @@ void ObjectPositionUpdater::_init_yolo_d() {
     logger->BAASInfo("Num Thread  : " + std::to_string(data->yolo_pra.num_thread));
     logger->BAASInfo("Memory Pool : " + std::to_string(data->yolo_pra.enable_cpu_memory_arena));
 
+    logger->BAASInfo("Update Itv  : " + std::to_string(_yolo_update_itv) + "ms");
     logger->BAASInfo("Model Type  : " + model_type);
     logger->BAASInfo("Config Path : " + data->yolo_pra.yaml_path.string());
     logger->BAASInfo("NMS Type    : " + nms_type);
@@ -117,7 +130,7 @@ void ObjectPositionUpdater::_init_time_cost()
 {
     // gpu
     if(data->yolo_pra.gpu_id >= 0) average_cost = 2e8;
-        // cpu
+    // cpu
     else                           average_cost = 2e9 / min(data->yolo_pra.num_thread * 0.5, 2.0);
 }
 
@@ -129,7 +142,26 @@ void ObjectPositionUpdater::_init_yolo_model()
     _yolo->init_model(data->yolo_pra);
     auto e_t = BAASUtil::getCurrentTimeMS();
     logger->BAASInfo("Load  Model T: " + std::to_string(e_t - s_t) + "ms");
-    logger->BAASInfo("Class Size   : " + std::to_string(_yolo->get_classes().size()));
+
+    const std::vector<std::string>& cls = _yolo->get_classes();
+
+    logger->BAASInfo("Class Size   : " + std::to_string(cls.size()));
+
+    data->all_possible_obj_names = data->d_fight.get<std::vector<std::string>>("/formation/front");
+
+    logger->sub_title("List Formation Front Object");
+    for (int i = 0; i < data->all_possible_obj_names.size(); i++) {
+        logger->BAASInfo(data->all_possible_obj_names[i]);
+        auto it = std::find(cls.begin(), cls.end(), data->all_possible_obj_names[i]);
+        if(it == cls.end()) {
+            logger->BAASError("Object Name [ " + data->all_possible_obj_names[i] + " ] not found in YOLO class list.");
+            throw ValueError("Invalid YOLO Object Name.");
+        }
+        int idx_in_cls = int(std::distance(cls.begin(), it));
+        data->all_possible_obj_idx.push_back(idx_in_cls);
+        data->obj_name_to_index_map[data->all_possible_obj_names[i]] = idx_in_cls;
+        data->obj_last_appeared_pos[idx_in_cls] = std::nullopt;
+    }
 }
 
 void ObjectPositionUpdater::_warm_up_session()

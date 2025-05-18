@@ -71,7 +71,10 @@ void SkillCostUpdater::update()
         }
 
         if (filtered_text.empty()) data->skills[i].cost = std::nullopt;
-        else                       data->skills[i].cost = std::stoi(filtered_text);
+        else {
+            data->skills[i].cost = std::stoi(filtered_text);
+            data->skill_last_detect[i].cost = data->skills[i].cost.value();
+        }
     }
 }
 

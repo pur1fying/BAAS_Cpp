@@ -39,6 +39,7 @@ struct template_info {
 };
 
 struct skill_template {
+
     std::string name;    // skill name
 
     std::vector<template_info> skill_active_templates;
@@ -71,6 +72,9 @@ struct state_info {
 };
 
 struct auto_fight_d {
+
+    std::vector<int> last_rel_skill_slot_idx;
+
     std::vector<std::unique_ptr<BaseDataUpdater>> d_updaters;
 
     // data updaters
@@ -97,6 +101,8 @@ struct auto_fight_d {
 
     // use vector since there is fight with 6 skills
     std::vector<slot_skill>  skills;
+    std::vector<slot_skill>  skill_last_detect;
+
     std::vector<std::vector<int>> each_slot_possible_templates; 
     std::vector<skill_template> all_possible_skills;
     uint32_t skill_cost_update_flag = 0b000000; // max skill is 6
@@ -110,8 +116,10 @@ struct auto_fight_d {
     std::optional<int>       room_left_time;
 
     // YOLO Detected position
+    std::vector<std::string> all_possible_obj_names;
+    std::vector<int> all_possible_obj_idx;
     std::map<std::string, int> obj_name_to_index_map;
-    std::map<int, std::vector<yolo_single_res>> positions;
+    std::map<int, std::optional<yolo_single_res>> obj_last_appeared_pos;
 
     BAASConfig d_fight;
 
@@ -126,7 +134,6 @@ struct auto_fight_d {
         acceleration_state.reset();
         boss_current_health.reset();
         for (auto& skill : skills)       skill.reset();
-        for (auto& position : positions) position.second.clear();
     }
 };
 

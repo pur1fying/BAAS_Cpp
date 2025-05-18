@@ -2,10 +2,6 @@
 // Created by Administrator on 2025/5/17.
 //
 
-//
-// Created by Administrator on 2025/5/17.
-//
-
 #include "module/auto_fight/actions/restart_handler.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -26,6 +22,7 @@ bool restart_handler::execute()
 
     // TODO::fight left time check
 
+    data->last_rel_skill_slot_idx.clear();
     baas->solve_procedure("fight_execute_restart", true);
 
     return true;

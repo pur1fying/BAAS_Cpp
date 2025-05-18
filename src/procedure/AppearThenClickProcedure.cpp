@@ -35,7 +35,7 @@ BAAS_NAMESPACE_BEGIN
 AppearThenClickProcedure::AppearThenClickProcedure(
         BAAS* baas,
         const BAASConfig& possible_features
-): BaseProcedure(baas, possible_features)
+) : BaseProcedure(baas, possible_features)
 {
     json end = possible_feature.getJson("ends");
 
@@ -49,14 +49,18 @@ AppearThenClickProcedure::AppearThenClickProcedure(
                 possibles.push_back(_get_click_param(BAASConfig(i, logger)));
                 possibles_feature_names.push_back(possibles[possibles.size() - 1].description);
             }
-    max_stuck_time = possible_feature.getInt("max_stuck_time", 20);
+    max_stuck_time = (long long)(possible_feature.getDouble("max_stuck_time", 20) * 1000);
     max_click = possible_feature.getInt("max_click_times", 20);
-    max_execute_time = possible_feature.getLLong("max_execute_time", LLONG_MAX);
+    max_execute_time = (long long)(possible_feature.getDouble("max_execute_time", 6000) * 1000);
     enable_tentative_click = possible_feature.getBool("/tentative_click/0", false);
+    logger->BAASInfo("enable_tentative_click : " + to_string(enable_tentative_click));
     if (enable_tentative_click) {
         tentative_click_x = possible_feature.getInt("/tentative_click/1", 640);
         tentative_click_y = possible_feature.getInt("/tentative_click/2", 360);
-        tentative_click_stuck_time = possible_feature.getLLong("/tentative_click/3", 10);
+        tentative_click_stuck_time = (long long)(possible_feature.getDouble("/tentative_click/3", 10.0)*1000);
+        logger->BAASInfo("tentative_click_x : " + to_string(tentative_click_x));
+        logger->BAASInfo("tentative_click_y : " + to_string(tentative_click_y));
+        logger->BAASInfo("tentative_click_stuck_time : " + to_string(tentative_click_stuck_time));
     }
 }
 
@@ -65,15 +69,26 @@ void AppearThenClickProcedure::implement(
         bool skip_first_screenshot
 )
 {
-
+    last_clicked_pair_counter.first.second = 0;
+    last_clicked_pair_counter.second.second = 0;
+    last_clicked_counter.clear();
     output.clear();
 
-    start_time = BAASUtil::getCurrentTimeStamp();
+    start_time = BAASUtil::getCurrentTimeMS();
     last_appeared_time = start_time;
     last_tentative_click_time = start_time;
 
     while (baas->is_running()) {
-        this_round_start_time = BAASUtil::getCurrentTimeStamp();
+
+        if (!skip_first_screenshot) {
+            baas->update_screenshot_array();
+            for (auto &i: end_feature_names) baas->reset_feature(i);
+            for (auto &i: possibles_feature_names) baas->reset_feature(i);
+//            wait_loading();
+        }
+        else skip_first_screenshot = false;
+
+        this_round_start_time = BAASUtil::getCurrentTimeMS();
         if (this_round_start_time - start_time >= max_execute_time) {
             logger->hr("Max execute time " + to_string(max_execute_time) + "s reached.");
             logger->BAASError("Looking for End features : ");
@@ -84,7 +99,7 @@ void AppearThenClickProcedure::implement(
         }
 
         if (this_round_start_time - last_appeared_time >= max_stuck_time) {
-            logger->hr(to_string(max_stuck_time) + "s didn't find any feature, assume game stuck.");
+            logger->hr(to_string(max_stuck_time) + "ms didn't find any feature, assume game stuck.");
             logger->BAASError("Looking for End features : ");
             logger->BAASError(end_feature_names);
             logger->BAASError("Looking for Possible features : ");
@@ -92,18 +107,17 @@ void AppearThenClickProcedure::implement(
             throw GameStuckError("Game stuck.");
         }
 
-        if (enable_tentative_click && this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time) {
+        BAASGlobalLogger->BAASInfo("Stucktime");
+        logger->BAASInfo("enable_tentative_click : " + to_string(enable_tentative_click));
+        BAASGlobalLogger->BAASInfo(std::to_string(this_round_start_time - last_tentative_click_time));
+        BAASGlobalLogger->BAASInfo(std::to_string(tentative_click_stuck_time));
+
+
+        if (enable_tentative_click && (this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time)) {
             baas->click(tentative_click_x, tentative_click_y, 1, 1, 5, 0.0, 0.0, 0.0, "Tentative Click");
-            last_tentative_click_time = BAASUtil::getCurrentTimeStamp();
+            last_tentative_click_time = BAASUtil::getCurrentTimeMS();
         }
 
-        if (!skip_first_screenshot) {
-            baas->update_screenshot_array();
-            for (auto &i: end_feature_names) baas->reset_feature(i);
-            for (auto &i: possibles_feature_names) baas->reset_feature(i);
-//            wait_loading();
-        }
-        else skip_first_screenshot = false;
 
         for (const auto & end_feature_name : end_feature_names) {
             current_comparing_feature_name = end_feature_name;
@@ -119,7 +133,7 @@ void AppearThenClickProcedure::implement(
             if (baas->feature_appear(current_comparing_feature_name, temp_output, show_log)) {
                 logger->BAASInfo("Feature [ " + possibles_feature_names[i] + " ] appeared. ");
                 last_appeared_feature_name = possibles_feature_names[i];
-                last_appeared_time = BAASUtil::getCurrentTimeStamp();
+                last_appeared_time = BAASUtil::getCurrentTimeMS();
                 solve_feature_action_click(i);
                 last_tentative_click_time = last_appeared_time;
                 break;
@@ -258,7 +272,7 @@ _click_param AppearThenClickProcedure::_get_click_param(const BAASConfig& parame
     ret.description = parameters.getString("/0");
     ret.x = parameters.getInt("/1");
     ret.y = parameters.getInt("/2");
-    ret.interval = parameters.getDouble("/3", 0.0);
+    ret.interval = ( long long )(parameters.getDouble("/3", 0.0) * 1000);
     ret.pre_wait = parameters.getDouble("/4", 0.0);
     ret.post_wait = parameters.getDouble("/5", 0.0);
     ret.count = parameters.getInt("/6", 1);

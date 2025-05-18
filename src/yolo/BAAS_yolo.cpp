@@ -84,9 +84,7 @@ void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out, NMS_option nms_
     Out.results.clear();
     Out.time_info.pre_t = getCurrentTime();
     cv::Mat processed_img;
-    BAASGlobalLogger->BAASInfo("preprocess input image");
     preprocess_input_image(In, processed_img);
-    BAASGlobalLogger->BAASInfo("preprocess input image done");
     switch (type) {
 
         case YOLO_DETECT_V8: {
@@ -254,7 +252,6 @@ void BAAS_Yolo_v8::_tensor_process(
             );
     Out.time_info.infer_t = getCurrentTime();
 
-    BAASGlobalLogger->BAASInfo("run session");
     auto outputTensor = session->Run(
             runOptions,
             inputNames.data(),
@@ -263,7 +260,6 @@ void BAAS_Yolo_v8::_tensor_process(
             outputNames.data(),
             outputNames.size()
     );
-    BAASGlobalLogger->BAASInfo("run session done");
 
     Out.time_info.post_t = getCurrentTime();
 
@@ -272,7 +268,6 @@ void BAAS_Yolo_v8::_tensor_process(
     std::vector<int64_t> outputNodeDims = tensor_info.GetShape();
 
     auto output = outputTensor.front().GetTensorMutableData<typename std::remove_pointer<N>::type>();
-    BAASGlobalLogger->BAASInfo("post process start");
     switch (type) {
         case YOLO_DETECT_V8:
         case YOLO_DETECT_V8_HALF: {
@@ -311,7 +306,6 @@ void BAAS_Yolo_v8::_tensor_process(
             Out.time_info.post_t = t_end - Out.time_info.post_t;
         }
     }
-    BAASGlobalLogger->BAASInfo("post process done");
 }
 
 void BAAS_Yolo_v8::_init_yaml()

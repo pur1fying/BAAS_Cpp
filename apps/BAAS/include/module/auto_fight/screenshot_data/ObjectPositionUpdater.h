@@ -38,6 +38,10 @@ private:
 
     void _warm_up_session();
 
+    long long _yolo_last_update_t = 0;
+
+    long long _yolo_update_itv;
+
     double average_cost;
 
     cv::Mat origin_screenshot;

@@ -23,12 +23,14 @@ int main(int argc, char **argv)
     string config_name = "default_config";
     cv::Mat img;
     try {
+
         init_globals();
         BAASFeature::show();
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
         AutoFight fight(&baas);
         fight.init_workflow();
+        fight.display_cond_idx_name_map();
         fight.display_all_state();
         fight.display_all_cond_info();
         fight.start_state_transition();
@@ -72,7 +74,7 @@ int main(int argc, char **argv)
 
 
 
-        fight.set_data_updater_mask(0b1111111);
+//        fight.set_data_updater_mask(0b1111111);
 
 //        fight.set_skill_slot_possible_templates(0, {5, 4, 3, 2, 1, 0});
 //        fight.set_skill_slot_possible_templates(1, {5, 4, 3, 2, 0, 1});

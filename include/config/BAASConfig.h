@@ -547,7 +547,7 @@ public:
     void show(
             int indent = 4,
             bool ensure_ascii = false
-    );
+    ) const;
 
     void show_modify_history();
 

@@ -84,8 +84,8 @@ void BossHealthUpdater::_update_current_health()
             ocr_model_name,
             cropped_image,
             ocr_result,
-            "",
-            nullptr,
+            "c",
+            logger,
             "0123456789"
     );
     data->boss_current_health = std::stoll(ocr_result.text);

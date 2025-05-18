@@ -47,7 +47,18 @@ void SkillNameUpdater::update()
                     break;
                 }
             }
-            if (_find) break;
+            if (_find) {
+                for (int i = 0 ; i < data->slot_count; ++i) {
+                    if (data->skill_last_detect[i].index.has_value()
+                     && data->skill_last_detect[i].index.value() == _tmp_idx) {
+                        data->skill_last_detect[i].reset();
+                        break;
+                    }
+                }
+                data->skill_last_detect[i].index = _tmp_idx;
+                data->skill_last_detect[i].is_active = true;
+                break;
+            }
 
             for (auto& _inactive_template : data->all_possible_skills[_tmp_idx].skill_inactive_templates) {
                 if(_template_appear(_inactive_template)) {
@@ -59,7 +70,18 @@ void SkillNameUpdater::update()
                 }
             }
 
-            if (_find) break;
+            if (_find) {
+                for (int i = 0 ; i < data->slot_count; ++i) {
+                    if (data->skill_last_detect[i].index.has_value()
+                     && data->skill_last_detect[i].index.value() == _tmp_idx) {
+                        data->skill_last_detect[i].reset();
+                        break;
+                    }
+                }
+                data->skill_last_detect[i].index = _tmp_idx;
+                data->skill_last_detect[i].is_active = false;
+                break;
+            }
         }
     }
 }

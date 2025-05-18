@@ -276,7 +276,7 @@ void BAASConfig::remove(const string &key)
 void BAASConfig::show(
         int indent,
         bool ensure_ascii
-)
+) const
 {
     cout << config.dump(indent, ' ', ensure_ascii) << endl;
 }

@@ -15,7 +15,7 @@ BAAS_NAMESPACE_BEGIN
 struct _click_param {
     std::string description; // feature name
     int x, y;                // click position
-    double interval;         // interval between two click
+    long long interval;      // interval between two click
     double pre_wait;         // pre wait time
     double post_wait;        // post wait time
     int count;               // click count

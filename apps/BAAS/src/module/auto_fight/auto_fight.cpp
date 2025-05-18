@@ -166,10 +166,11 @@ void AutoFight::display_screenshot_extracted_data()
 
 AutoFight::~AutoFight()
 {
-    for (auto &updater : d_auto_f.d_updaters) {
-        updater.reset();
-    }
+    logger->BAASInfo("AutoFight Exited.");
+    for (auto &updater : d_auto_f.d_updaters) updater.reset();
+
     d_auto_f.d_updaters.clear();
+    _wait_d_update_running_thread_end();
     d_update_thread_pool->shutdown();
 }
 
@@ -319,6 +320,7 @@ void AutoFight::_init_skills()
     logger->BAASInfo("Slot Count : [ " + std::to_string(d_auto_f.slot_count) + " ]");
 
     d_auto_f.skills.resize(d_auto_f.slot_count);
+    d_auto_f.skill_last_detect.resize(d_auto_f.slot_count);
     d_auto_f.each_slot_possible_templates.resize(d_auto_f.slot_count);
 }
 
@@ -330,6 +332,7 @@ void AutoFight::_init_all_cond()
     _init_self_cond();
 
     _cond_checked.resize(all_cond.size(), false);
+    _cond_self_matched.resize(all_cond.size(), false);
     _cond_is_matched_recorder.resize(all_cond.size(), std::nullopt);
     _init_cond_and_or_idx();
 }
@@ -613,7 +616,7 @@ void AutoFight::display_all_state() const noexcept
         logger->BAASInfo("Desc      : " + all_states[i].desc);
 
         if(!all_states[i].transitions.empty()) {
-        logger->BAASInfo("CondIdx  NexTIdx");
+        logger->BAASInfo("CondIdx  NextIdx");
         for (const auto& tran : all_states[i].transitions)
             logger->BAASInfo(fmt::format("{:>7}  {:>7}", tran.cond_idx, tran.next_sta_idx));
         }
@@ -664,6 +667,7 @@ bool AutoFight::_state_start_trans_cond_j_loop()
 {
     _state_reset_all_cond();
     _state_cond_j_start_t = BAASUtil::getCurrentTimeMS();
+    _state_cond_j_loop_running_flg = true;
 
     while(_state_cond_j_loop_running_flg) {
         // time elapsed update
@@ -672,8 +676,6 @@ bool AutoFight::_state_start_trans_cond_j_loop()
         // timeout check
         if (!_state_cond_timeout_update()) {
             _state_flg_all_trans_cond_dissatisfied = true;
-            logger->sub_title("All Trans Cond Dissatisfied");
-            // default transition
             return _try_default_trans();
         }
 
@@ -745,6 +747,7 @@ bool AutoFight::_state_start_trans_cond_j_loop()
             if(_state_flg_all_trans_cond_dissatisfied)    return _try_default_trans();
         }
     }
+    return false;
 }
 
 // reset all cond
@@ -752,6 +755,7 @@ void AutoFight::_state_reset_all_cond()
 {
     _state_flg_all_trans_cond_dissatisfied = false;
     _state_trans_next_state_idx.reset();
+    std::fill(_cond_self_matched.begin(), _cond_self_matched.end(), std::nullopt);
     std::fill(_cond_is_matched_recorder.begin(), _cond_is_matched_recorder.end(), std::nullopt);
 
     for(const auto& cond : all_cond) cond->reset_state();
@@ -786,11 +790,6 @@ void AutoFight::_start_state_transition_loop()
 
         if(!_state_start_trans_cond_j_loop()) break;
 
-        cv::Mat img;
-        baas->get_latest_screenshot(img);
-        cv::imshow("state_transition_last_screenshot", img);
-        cv::waitKey(0);
-
         assert(_state_trans_next_state_idx.has_value());
 
         // state transition
@@ -815,7 +814,7 @@ void AutoFight::_state_cond_j()
         // cond has value
         if (!_cond_is_pending(tran.cond_idx))
             if(_cond_is_satisfied(tran.cond_idx)) {
-                _state_trans_next_state_idx = i;
+                _state_trans_next_state_idx = tran.next_sta_idx;
                 return;
             }
 
@@ -824,12 +823,11 @@ void AutoFight::_state_cond_j()
         ret = _recursive_cond_j(tran.cond_idx);
         if(ret.has_value()) {
             if(ret.value()) {
-                _state_trans_next_state_idx = i;
+                _state_trans_next_state_idx = tran.next_sta_idx;
                 return;
             }
         }
         else _state_flg_all_trans_cond_dissatisfied = false;
-
     }
 }
 
@@ -865,7 +863,11 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
     std::optional<bool> final_ret = std::nullopt;
     _cond_checked[cond_idx] = true;
     // self match
-    std::optional<bool> ret = all_cond[cond_idx]->try_match();
+    std::optional<bool> ret;
+    if (!_cond_self_matched[cond_idx].has_value())
+        ret = all_cond[cond_idx]->try_match();
+    else
+        ret = _cond_self_matched[cond_idx];
 
     // self is pending
     if(!ret.has_value()) {
@@ -876,6 +878,7 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
                     final_ret = false;
                     break;
                 }
+                continue;
             }
 
             if(_cond_checked[_and]) continue;
@@ -885,7 +888,6 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
                 final_ret = false;
                 break;
             }
-
          }
 
          if(final_ret.has_value()) {
@@ -895,11 +897,14 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
 
          // check or
          for(const auto& _or : all_cond[cond_idx]->get_or_cond()) {
-             if(_cond_is_pending(_or)) continue;
-             if(_cond_is_satisfied(_or)) {
-                 final_ret = true;
-                 break;
+             if(!_cond_is_pending(_or)) {
+                 if(_cond_is_satisfied(_or)) {
+                     final_ret = true;
+                     break;
+                 }
+                 continue;
              }
+
 
              if(_cond_checked[_or]) continue;
              ret = _recursive_cond_j(_or);
@@ -911,6 +916,8 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
          }
     }
     else {
+        _cond_self_matched[cond_idx] = true;
+
         // self satisfied
         if(ret.value()) {
             // check and
@@ -959,11 +966,12 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
 void AutoFight::_state_set_d_update_flags()
 {
     std::fill(_cond_checked.begin(), _cond_checked.end(), false);
-    d_auto_f.d_updater_mask = 0b0;
+    d_auto_f.d_updater_mask = 0b1000000;
     d_auto_f.boss_health_update_flag = 0b000;
     d_auto_f.skill_cost_update_flag = 0b000;
 
     for (auto& s : d_auto_f.each_slot_possible_templates) s.clear();
+    for (auto& s : d_auto_f.skills) s.reset();
 
     for (const auto tran : all_states[_curr_state_idx].transitions) {
         if (!_cond_is_pending(tran.cond_idx) || _cond_checked[tran.cond_idx]) continue;
@@ -977,10 +985,11 @@ bool AutoFight::_recursive_check_cond_timeout(uint64_t cond_idx)
     BaseCondition* cond = all_cond[cond_idx].get();
 
     // check self timeout
-    if(_state_cond_j_elapsed_t >= cond->get_timeout()) {
-        _cond_is_matched_recorder[cond_idx] = false;
-        return false;
-    }
+    if(!_cond_self_matched[cond_idx].has_value())
+        if(_state_cond_j_elapsed_t >= cond->get_timeout()) {
+            _cond_is_matched_recorder[cond_idx] = false;
+            return false;
+        }
 
     // check and cond timeout
     if(cond->has_and_cond()) {
@@ -1017,12 +1026,14 @@ void AutoFight::_state_update_cond_j_loop_start_t()
 void AutoFight::_recursive_set_d_update_flags(uint64_t cond_idx)
 {
     _cond_checked[cond_idx] = true;
-    all_cond[cond_idx]->set_d_update_flag();
+    // self still pending
+    if (!_cond_self_matched[cond_idx].has_value())
+        all_cond[cond_idx]->set_d_update_flag();
 
     if(all_cond[cond_idx]->has_and_cond()) {
         for (const auto &and_cond : all_cond[cond_idx]->get_and_cond()) {
             if(!_cond_is_pending(and_cond) || _cond_checked[and_cond]) continue;
-                _recursive_set_d_update_flags(and_cond);
+            _recursive_set_d_update_flags(and_cond);
         }
     }
 
@@ -1049,6 +1060,7 @@ void AutoFight::_wait_d_update_running_thread_end()
 
 bool AutoFight::_try_default_trans()
 {
+    logger->sub_title("All trans cond dissatisfied, try default trans");
     if(all_states[_curr_state_idx].default_trans.has_value()) {
         logger->BAASInfo("[ Default Trans ]");
         _state_trans_next_state_idx = all_states[_curr_state_idx].default_trans.value();
@@ -1061,6 +1073,8 @@ void AutoFight::_init_actions()
 {
     _actions = std::make_unique<auto_fight_act>(baas, &d_auto_f);
 }
+
+
 
 
 BAAS_NAMESPACE_END
