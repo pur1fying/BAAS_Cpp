@@ -8,7 +8,7 @@ target_link_directories(
 
 SET(
         DLL_COMMON
-        libonnxruntime.so.1.17.1
+        libonnxruntime.so.1.22.0
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

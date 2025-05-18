@@ -38,7 +38,7 @@ endforeach ()
 set(
     DLL_MOVE
     ${DLL_RAW}
-    libonnxruntime.1.17.1.dylib
+    libonnxruntime.1.22.0.dylib
     libopencv_world.4.9.0.dylib
 )
 
