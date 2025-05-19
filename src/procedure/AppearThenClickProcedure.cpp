@@ -53,14 +53,10 @@ AppearThenClickProcedure::AppearThenClickProcedure(
     max_click = possible_feature.getInt("max_click_times", 20);
     max_execute_time = (long long)(possible_feature.getDouble("max_execute_time", 6000) * 1000);
     enable_tentative_click = possible_feature.getBool("/tentative_click/0", false);
-    logger->BAASInfo("enable_tentative_click : " + to_string(enable_tentative_click));
     if (enable_tentative_click) {
         tentative_click_x = possible_feature.getInt("/tentative_click/1", 640);
         tentative_click_y = possible_feature.getInt("/tentative_click/2", 360);
         tentative_click_stuck_time = (long long)(possible_feature.getDouble("/tentative_click/3", 10.0)*1000);
-        logger->BAASInfo("tentative_click_x : " + to_string(tentative_click_x));
-        logger->BAASInfo("tentative_click_y : " + to_string(tentative_click_y));
-        logger->BAASInfo("tentative_click_stuck_time : " + to_string(tentative_click_stuck_time));
     }
 }
 
@@ -107,17 +103,10 @@ void AppearThenClickProcedure::implement(
             throw GameStuckError("Game stuck.");
         }
 
-        BAASGlobalLogger->BAASInfo("Stucktime");
-        logger->BAASInfo("enable_tentative_click : " + to_string(enable_tentative_click));
-        BAASGlobalLogger->BAASInfo(std::to_string(this_round_start_time - last_tentative_click_time));
-        BAASGlobalLogger->BAASInfo(std::to_string(tentative_click_stuck_time));
-
-
         if (enable_tentative_click && (this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time)) {
             baas->click(tentative_click_x, tentative_click_y, 1, 1, 5, 0.0, 0.0, 0.0, "Tentative Click");
             last_tentative_click_time = BAASUtil::getCurrentTimeMS();
         }
-
 
         for (const auto & end_feature_name : end_feature_names) {
             current_comparing_feature_name = end_feature_name;

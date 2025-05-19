@@ -141,7 +141,6 @@ void AutoFight::update_data()
 
 void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
 {
-    auto start_t = BAASUtil::getCurrentTimeMS();
     try {
         self->d_auto_f.d_updaters[idx]->update();
     }
@@ -150,10 +149,6 @@ void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
     }
 
     self->notify_d_update_thread_end();
-
-    auto end_t = BAASUtil::getCurrentTimeMS();
-    self->logger->BAASInfo("[ " + self->d_auto_f.d_updaters[idx]->data_name() + " ] "
-                            "update | Time: " + std::to_string(end_t - start_t) + "ms");
 }
 
 void AutoFight::display_screenshot_extracted_data()
