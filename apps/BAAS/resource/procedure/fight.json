@@ -45,7 +45,7 @@
     "max_stuck_time": 3,
     "ends": "fight_acc_phase1",
     "possibles": [
-      ["fight_acc_phase2", 1254, 610, 0.3, 0.0, 0.0, 2, 0.2],
+      ["fight_acc_phase2", 1254, 610, 0.3, 0.0, 0.0, 2, 0.1],
       ["fight_acc_phase3", 1254, 610, 0.3]
     ]
   },
@@ -54,7 +54,7 @@
       "max_stuck_time": 3,
       "ends": "fight_acc_phase2",
       "possibles": [
-        ["fight_acc_phase3", 1254, 610, 0.3, 0.0, 0.0, 2, 0.2],
+        ["fight_acc_phase3", 1254, 610, 0.3, 0.0, 0.0, 2, 0.1],
         ["fight_acc_phase1", 1254, 610, 0.3]
       ]
   },
@@ -63,7 +63,7 @@
       "max_stuck_time": 3,
       "ends": "fight_acc_phase3",
       "possibles": [
-        ["fight_acc_phase1", 1254, 610, 0.3, 0.0, 0.0, 2, 0.2],
+        ["fight_acc_phase1", 1254, 610, 0.3, 0.0, 0.0, 2, 0.1],
         ["fight_acc_phase2", 1254, 610, 0.3]
       ]
   },

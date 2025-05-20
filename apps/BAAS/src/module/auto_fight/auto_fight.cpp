@@ -141,12 +141,17 @@ void AutoFight::update_data()
 
 void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
 {
-    try {
+    auto start_t = std::chrono::high_resolution_clock::now();
+    try{
         self->d_auto_f.d_updaters[idx]->update();
     }
     catch (const std::exception &e) {
         self->logger->BAASError("In [ " + self->d_auto_f.d_updaters[idx]->data_name() + " ] update | Error: " + e.what());
     }
+    auto end_t = std::chrono::high_resolution_clock::now();
+    // us
+    self->logger->BAASInfo("In [ " + self->d_auto_f.d_updaters[idx]->data_name() + " ] update | Time: " + std::to_string(
+            std::chrono::duration_cast<std::chrono::microseconds>(end_t - start_t).count()) + "us");
 
     self->notify_d_update_thread_end();
 }

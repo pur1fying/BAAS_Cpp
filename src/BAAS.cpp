@@ -81,7 +81,11 @@ void BAAS::update_screenshot_array()
 void BAAS::i_update_screenshot_array()
 {
     if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
+    auto t1 = std::chrono::high_resolution_clock::now();
     screenshot->immediate_screenshot(latest_screenshot);
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    logger->BAASInfo("Screenshot time: " + std::to_string(time) + "us");
 }
 
 void BAAS::get_latest_screenshot_clone(cv::Mat &img)

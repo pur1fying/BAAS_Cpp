@@ -121,12 +121,9 @@ void BAASNemu::click(
 )
 {
     update_resolution();
-    int t = BAASUtil::genRandInt(10, 20);
-    convertXY(x, y);
+//    convertXY(x, y);
     down(x, y);
-    BAASUtil::sleepMS(t);
     up();
-    BAASUtil::sleepMS(50 - t);
 }
 
 void BAASNemu::click(BAASPoint point)
@@ -141,7 +138,7 @@ void BAASNemu::long_click(
 )
 {
     update_resolution();
-    convertXY(x, y);
+//    convertXY(x, y);
     down(x, y);
     BAASUtil::sleepMS(int(duration * 1000));
     up();
@@ -165,8 +162,8 @@ void BAASNemu::swipe(
 )
 {
     update_resolution();
-    convertXY(start_x, start_y);
-    convertXY(end_x, end_y);
+//    convertXY(start_x, start_y);
+//    convertXY(end_x, end_y);
 
     vector<pair<int, int>> points;
     BAASUtil::insert_swipe(points, start_x, start_y, end_x, end_y, step_len);

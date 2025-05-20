@@ -2,6 +2,7 @@
 //
 #include "device/control/BAASControl.h"
 
+#include <chrono>
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
@@ -95,9 +96,13 @@ void BAASControl::click(
 
     int itv = int(click_interval * 1000);
     for (int i = 0; i < count; i++) {
+        auto t1 = std::chrono::high_resolution_clock::now();
         control->click(x, y);
         if (i < count - 1)
             BAASUtil::sleepMS(itv);
+        auto t2 = std::chrono::high_resolution_clock::now();
+        auto time = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+        logger->BAASInfo("Click time: " + std::to_string(time) + "us");
     }
 
     if (post_wait > 0)

@@ -108,7 +108,7 @@ public:
 
     inline void click(
             BAASPoint point,
-            int count,
+            int count=1,
             uint8_t type = 1,
             int offset = 5,
             double click_interval = 0.0,
@@ -124,7 +124,7 @@ public:
     inline void click(
             int x,
             int y,
-            int count,
+            int count=1,
             uint8_t type = 1,
             int offset = 5,
             double click_interval = 0.0,
