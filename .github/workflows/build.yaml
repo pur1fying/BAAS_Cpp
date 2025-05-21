@@ -39,6 +39,13 @@ jobs:
       run:
         working-directory: ./baas_cpp
     steps:
+      - name: Clone Source Repo
+        id: checkout_main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: "baas_cpp"
+
       - name: Install GCC 13
         run: |
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
@@ -48,13 +55,6 @@ jobs:
 
       - name: Check compiler version
         run: g++ --version
-
-      - name: Clone Source Repo
-        id: checkout_main
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          path: "baas_cpp"
 
       - name: Clone Prebuild Repo
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
