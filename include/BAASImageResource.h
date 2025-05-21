@@ -40,6 +40,9 @@ struct BAASImage {
     [[nodiscard]] std::string get_size() const;
 
     [[nodiscard]] std::string gen_info() const;
+
+    [[nodiscard]] std::string get_mean_rgb() const;
+
 };
 
 // {server}.{language}.{group}.{name}

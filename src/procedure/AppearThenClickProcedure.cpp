@@ -78,8 +78,7 @@ void AppearThenClickProcedure::implement(
 
         if (!skip_first_screenshot) {
             baas->update_screenshot_array();
-            for (auto &i: end_feature_names) baas->reset_feature(i);
-            for (auto &i: possibles_feature_names) baas->reset_feature(i);
+            baas->reset_all_feature();
 //            wait_loading();
         }
         else skip_first_screenshot = false;

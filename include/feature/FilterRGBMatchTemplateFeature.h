@@ -13,7 +13,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class FilterRGBMatchTemplateFeature : public BaseFeature {
+
 public:
+
     explicit FilterRGBMatchTemplateFeature(BAASConfig *config);
 
     bool appear(

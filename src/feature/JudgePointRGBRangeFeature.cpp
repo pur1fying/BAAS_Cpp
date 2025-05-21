@@ -24,6 +24,13 @@ using namespace std;
 using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
+ static int count = 0;
+const std::map<int, JudgePointRGBRangeFeature::Op> JudgePointRGBRangeFeature::op_map = {
+        {0, Op::ALL},
+        {1, Op::ANY},
+        {2, Op::ALL_NOT},
+        {3, Op::ANY_NOT}
+};
 
 bool JudgePointRGBRangeFeature::appear(
         const BAAS *baas,
@@ -31,50 +38,113 @@ bool JudgePointRGBRangeFeature::appear(
 )
 {
     vector<string> log;
-    log.emplace_back("Compare Method : [ JudgePointRGBRangeFeature ].");
 
     cv::Mat image = baas->latest_screenshot;
 
     int dir = 1;
     if (image.cols > image.rows) dir = 0;
-    log.push_back("Image direction : " + to_string(dir));
-
-    if (dir != feature_direction) {
-        log.emplace_back("Screenshot direction not match, Quit.");
-        output.insert("log", log);
-        return false;
-    }
+    if (dir != feature_direction) return false;
 
     auto it = rgb_info.find(baas->rgb_feature_key);
-    if (it == rgb_info.end()) {
-        log.emplace_back("RGB Range not found, Quit.");
-        output.insert("log", log);
-        return false;
-    }
-    for (int i = 0; i < it->second.size(); i++) {
-        if (!BAASImageUtil::judge_rgb_range(
-                    image,
-                    it->second[i].x,
-                    it->second[i].y,
-                    it->second[i].r_min,
-                    it->second[i].r_max,
-                    it->second[i].g_min,
-                    it->second[i].g_max,
-                    it->second[i].b_min,
-                    it->second[i].b_max,
-                    baas->screen_ratio,
-                    check_around,
-                    around_range)
-        )
-        {
-            log.emplace_back("Position " + to_string(i) + " not match, Quit.");
-            output.insert("log", log);
+    if (it == rgb_info.end()) return false;
+
+    switch (_op) {
+        // all point rgb should match
+        case Op::ALL :{
+            for (int i = 0; i < it->second.size(); i++)
+                if (!BAASImageUtil::judge_rgb_range(
+                        image,
+                        it->second[i].x,
+                        it->second[i].y,
+                        it->second[i].r_min,
+                        it->second[i].r_max,
+                        it->second[i].g_min,
+                        it->second[i].g_max,
+                        it->second[i].b_min,
+                        it->second[i].b_max,
+                        baas->screen_ratio,
+                        check_around,
+                        around_range))
+                    return false;
+            return true;
+        }
+
+        // one match then true
+        case Op::ANY : {
+            bool _match = false;
+            for (int i = 0; i < it->second.size(); i++)
+                if (BAASImageUtil::judge_rgb_range(
+                        image,
+                        it->second[i].x,
+                        it->second[i].y,
+                        it->second[i].r_min,
+                        it->second[i].r_max,
+                        it->second[i].g_min,
+                        it->second[i].g_max,
+                        it->second[i].b_min,
+                        it->second[i].b_max,
+                        baas->screen_ratio,
+                        check_around,
+                        around_range)
+                        )
+                    return true;
+            return false;
+        }
+        // all point rgb should not match
+        case Op::ALL_NOT : {
+            for (int i = 0; i < it->second.size(); i++)
+                if (BAASImageUtil::judge_rgb_range(
+                        image,
+                        it->second[i].x,
+                        it->second[i].y,
+                        it->second[i].r_min,
+                        it->second[i].r_max,
+                        it->second[i].g_min,
+                        it->second[i].g_max,
+                        it->second[i].b_min,
+                        it->second[i].b_max,
+                        baas->screen_ratio,
+                        check_around,
+                        around_range)
+                        )
+                    return false;
+            return true;
+        }
+        // one not match then true
+        case Op::ANY_NOT : {
+            for (int i = 0; i < it->second.size(); i++)
+                if (!BAASImageUtil::judge_rgb_range(
+                        image,
+                        it->second[i].x,
+                        it->second[i].y,
+                        it->second[i].r_min,
+                        it->second[i].r_max,
+                        it->second[i].g_min,
+                        it->second[i].g_max,
+                        it->second[i].b_min,
+                        it->second[i].b_max,
+                        baas->screen_ratio,
+                        check_around,
+                        around_range)
+                        ){
+
+                    cv::imwrite("debug_" + to_string(count) + ".png", image);
+                    count++;
+                    // print x y rgb
+                    BAASGlobalLogger->BAASInfo("RGB Range : " + to_string(it->second[i].r_min) + ", " + to_string(it->second[i].r_max) + ", "
+                                       + to_string(it->second[i].g_min) + ", " + to_string(it->second[i].g_max) + ", "
+                                       + to_string(it->second[i].b_min) + ", " + to_string(it->second[i].b_max));
+                    BAASGlobalLogger->BAASInfo("Position : " + to_string(it->second[i].x) + ", " + to_string(it->second[i].y));
+                    BAASGlobalLogger->BAASInfo("RGB : " + to_string(image.at<cv::Vec3b>(it->second[i].y, it->second[i].x)[0]) + ", " +
+                                               to_string(image.at<cv::Vec3b>(it->second[i].y, it->second[i].x)[1]) + ", " +
+                                               to_string(image.at<cv::Vec3b>(it->second[i].y, it->second[i].x)[2]));
+                    return true;
+                }
             return false;
         }
     }
 
-    output.insert("log", log);
-    return true;
+    return false;
 }
 
 JudgePointRGBRangeFeature::JudgePointRGBRangeFeature(BAASConfig *config) : BaseFeature(config)
@@ -91,7 +161,13 @@ JudgePointRGBRangeFeature::JudgePointRGBRangeFeature(BAASConfig *config) : BaseF
         rgb_info[i.key()] = temp_rgb_info_vec;
     }
 
-    feature_direction = config->getInt("direction", 0);  // 720x1280
+    feature_direction = config->getInt("direction", 0);
+    int t_op = config->getInt("op", 0);
+    auto it = op_map.find(t_op);
+    if (it == op_map.end())
+        throw JudgePointRGBRangeFeatureError("Invalid [ JudgePointRGBRangeFeature ] Op [ " + to_string(t_op) + " ]");
+
+    _op = it->second;
 
 }
 
@@ -105,9 +181,8 @@ double JudgePointRGBRangeFeature::self_average_cost(const baas::BAAS *baas)
 void JudgePointRGBRangeFeature::show()
 {
     BAASGlobalLogger->sub_title("JudgePointRGBRangeFeature");
-    BAASGlobalLogger->BAASInfo("is_primitive        : [ " + std::to_string(_is_primitive) + " ]");
-    BAASGlobalLogger->BAASInfo("and_feature_count   : [ " + std::to_string(and_feature_ptr.size()) + " ]");
-    BAASGlobalLogger->BAASInfo("or_feature_count    : [ " + std::to_string(or_feature_ptr.size()) + " ]");
+    _display_basic_info();
+    BAASGlobalLogger->BAASInfo("Op : " + to_string(_op));
     for (const auto &i: rgb_info) {
         BAASGlobalLogger->BAASInfo("Server Language : " + i.first);
         for (const auto &j: i.second) {
@@ -159,7 +234,6 @@ void JudgePointRGBRangeFeature::_decode_single_rgb_info(
         out[count].b_max = _r[5];
         count ++;
     }
-
 }
 
 

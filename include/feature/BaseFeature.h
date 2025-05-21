@@ -94,6 +94,13 @@ public:
         return path;
     }
 protected:
+
+    inline void _display_basic_info() {
+        BAASGlobalLogger->BAASInfo("is_primitive        : [ " + std::to_string(_is_primitive) + " ]");
+        BAASGlobalLogger->BAASInfo("and_feature_count   : [ " + std::to_string(and_feature_ptr.size()) + " ]");
+        BAASGlobalLogger->BAASInfo("or_feature_count    : [ " + std::to_string(or_feature_ptr.size()) + " ]");
+    }
+
     bool _is_primitive;
 
     std::vector<BaseFeature*> and_feature_ptr;

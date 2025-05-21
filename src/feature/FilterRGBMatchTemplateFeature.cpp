@@ -72,7 +72,6 @@ bool FilterRGBMatchTemplateFeature::appear(
 )
 {
     vector<string> log;
-    log.emplace_back("Compare Method : [ FilterRGBMatchTemplateFeature ].");
 
     BAASImage template_image;
     get_template_image(baas, template_image);
@@ -81,14 +80,9 @@ bool FilterRGBMatchTemplateFeature::appear(
         output.insert("log", log);
         return false;
     }
-    log.emplace_back("Template Image Info : ");
-    log.push_back(template_image.gen_info());
     int dir = 1;
     cv::Mat image = baas->latest_screenshot;
     if (image.cols > image.rows) dir = 0;
-    log.emplace_back("Screenshot Info : ");
-    log.push_back("Image size : " + to_string(image.cols) + "x" + to_string(image.rows));
-    log.push_back("Image direction : " + to_string(dir));
 
     if (template_image.direction != dir) {
         log.emplace_back("Template image and screenshot direction not match, Quit.");
@@ -159,9 +153,7 @@ double FilterRGBMatchTemplateFeature::self_average_cost(const BAAS *baas)
 void FilterRGBMatchTemplateFeature::show()
 {
     BAASGlobalLogger->sub_title("FilterRGBMatchTemplateFeature");
-    BAASGlobalLogger->BAASInfo("is_primitive        : [ " + std::to_string(_is_primitive) + " ]");
-    BAASGlobalLogger->BAASInfo("and_feature_count   : [ " + std::to_string(and_feature_ptr.size()) + " ]");
-    BAASGlobalLogger->BAASInfo("or_feature_count    : [ " + std::to_string(or_feature_ptr.size()) + " ]");
+    _display_basic_info();
     BAASGlobalLogger->BAASInfo("Group_name          : [ " + group_name + " ]");
     BAASGlobalLogger->BAASInfo("Check mean_rgb      : [ " + to_string(check_mean_rgb) + " ]");
     BAASGlobalLogger->BAASInfo("RGB_diff            : [ " + to_string(mean_rgb_diff[0]) + " , " +

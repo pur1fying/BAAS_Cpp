@@ -47,9 +47,15 @@ std::string BAASImage::get_size() const
 std::string BAASImage::gen_info() const
 {
     string info = "Region : " + region.to_string();
-    info += " Direction : " + to_string(direction);
+    info += " Direction  : " + to_string(direction);
     info += " Resolution : " + get_size();
+    info += " Mean RGB   : " + get_mean_rgb();
     return info;
+}
+
+std::string BAASImage::get_mean_rgb() const
+{
+    return to_string(mean_rgb[0]) + ", " + to_string(mean_rgb[1]) + ", " + to_string(mean_rgb[2]);
 }
 
 
@@ -111,7 +117,7 @@ void BAASImageResource::clear()
 
 void BAASImageResource::show()
 {
-    BAASGlobalLogger->hr("List Loaded Image Resource");
+    BAASGlobalLogger->hr("List All Loaded Image Resource");
     for (auto &i: images)
         BAASGlobalLogger->BAASInfo("Image [ " +  i.first + " ]\n" +i.second.gen_info());
 }
@@ -206,10 +212,6 @@ int BAASImageResource::load_from_json(
         }
         if (!check_shape(image, server, language, group, name)) continue;
         image.mean_rgb = BAASImageUtil::get_mean_rgb(image.image);
-        BAASGlobalLogger->BAASInfo(
-                "Image [ " + group + "." + name + " ] loaded, " + "mean_rgb : [ " + std::to_string(image.mean_rgb[0]) + " , " +
-                std::to_string(image.mean_rgb[1]) + " , " + std::to_string(image.mean_rgb[2]) + " ]"
-        );
         successfully_loaded_cnt++;
         set(server, language, group, name, image);
     }
