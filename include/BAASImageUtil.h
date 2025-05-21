@@ -55,9 +55,7 @@ struct BAASPoint {
     }
 
     [[nodiscard]] std::string to_string() const {
-        std::ostringstream oss;
-        oss << "(" << std::setw(4) << std::setfill(' ') << x << ", " << std::setw(4) << std::setfill(' ') << y<< ")";
-        return oss.str();
+        return std::format(_point_format, x, y);
     }
 
     // circle point with center : point , radius : r
@@ -65,6 +63,8 @@ struct BAASPoint {
             int r,
             int angle
     ) const;
+
+    static constexpr auto _point_format = "({:>4},{:})";
 };
 
 inline BAASPoint operator*(
@@ -248,8 +248,7 @@ inline std::ostream &operator<<(
         const BAASPoint &point
 )
 {
-    os << "(" << std::setw(4) << std::setfill(' ') << point.x << ", " <<
-                std::setw(4) << std::setfill(' ') << point.y << ")";
+    os << point.to_string();
     return os;
 }
 
@@ -315,10 +314,10 @@ struct BAASRectangle {
             BAASPoint p2
     );
 
+    static constexpr auto _rect_format = "[({:>4},{:>3}), ({:>4},{:>3})]";
+
     [[nodiscard]] std::string to_string() const {
-        std::ostringstream oss;
-        oss << "[" << ul << ", \t" << lr << "]";
-        return oss.str();
+        return std::format(_rect_format, ul.x, ul.y, lr.x, lr.y);
     }
 
     [[nodiscard]] inline bool contains(BAASPoint p) const {

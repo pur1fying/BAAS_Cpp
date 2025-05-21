@@ -186,10 +186,8 @@ void JudgePointRGBRangeFeature::show()
     for (const auto &i: rgb_info) {
         BAASGlobalLogger->BAASInfo("Server Language : " + i.first);
         for (const auto &j: i.second) {
-            BAASGlobalLogger->BAASInfo("Position            : " + to_string(j.x) + ", " + to_string(j.y));
-            BAASGlobalLogger->BAASInfo("Range               : " + to_string(j.r_min) + ", " + to_string(j.r_max) + ", "
-                                       + to_string(j.g_min) + ", " + to_string(j.g_max) + ", "
-                                       + to_string(j.b_min) + ", " + to_string(j.b_max));
+            BAASGlobalLogger->BAASInfo("Position            : " + j.get_position());
+            BAASGlobalLogger->BAASInfo("RGB Range           : " + j.get_rgb_range());
         }
     }
 }

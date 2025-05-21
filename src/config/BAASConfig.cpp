@@ -50,8 +50,8 @@ BAASConfig::BAASConfig(
 }
 
 BAASConfig::BAASConfig(
-        const filesystem::path &path,
-        BAASLogger *logger
+        const filesystem::path& path,
+        BAASLogger* logger
 )
 {
     assert(logger != nullptr);
@@ -103,7 +103,7 @@ BAASConfig::BAASConfig(const int config_type)
             BAASGlobalLogger->sub_title("Config Load");
             BAASGlobalLogger->Path(path);
         }
-        catch (json::parse_error &e) {
+        catch (json::parse_error& e) {
             BAASGlobalLogger->BAASError("Config");
             BAASGlobalLogger->Path(path, 4);
             BAASGlobalLogger->BAASError("parse error : " + string(e.what()));
@@ -146,8 +146,8 @@ void BAASConfig::save()
 }
 
 void BAASConfig::_preprocess(
-        string &jp,
-        nlohmann::json &value
+        string& jp,
+        nlohmann::json& value
 )
 {
     switch (value.type()) {
@@ -232,7 +232,7 @@ void BAASConfig::_preprocess(
 }
 
 
-void BAASConfig::remove(const string &key)
+void BAASConfig::remove(const string& key)
 {
     assert(!key.empty());
     if (!count(key.begin(), key.end(), '/')) {
@@ -299,7 +299,7 @@ void BAASConfig::clear() noexcept
     config.clear();
 }
 
-void BAASConfig::replace_all(json &new_config)
+void BAASConfig::replace_all(json& new_config)
 {
     config = new_config;
 }
@@ -314,9 +314,9 @@ void BAASConfig::my_flatten()
 }
 
 void BAASConfig::flatten(
-        string &jp,
-        json &tar,
-        json &result
+        string& jp,
+        json& tar,
+        json& result
 )
 {
     switch (tar.type()) {
@@ -353,7 +353,7 @@ void BAASConfig::my_unflatten()
     unflatten(config);
 }
 
-void BAASConfig::unflatten(json &value)
+void BAASConfig::unflatten(json& value)
 {
     json result = json::object({});
     for (auto it = value.begin(); it != value.end(); it++) {
@@ -371,7 +371,7 @@ void BAASConfig::_get_logger()
 }
 
 // path : "name/config.json"
-void BAASConfig::_check_p(const std::filesystem::path &_p)
+void BAASConfig::_check_p(const std::filesystem::path& _p)
 {
     config_name = _p.parent_path().string();
     _get_logger();
@@ -385,7 +385,6 @@ void BAASConfig::_check_p(const std::filesystem::path &_p)
         BAASGlobalLogger->Path(this->path);
         throw PathError("Config file not exist.");
     }
-
 }
 
 void BAASConfig::_init_modify_history()
@@ -414,7 +413,7 @@ void BAASConfig::_init_config()
         BAASGlobalLogger->sub_title("Config Load");
         BAASGlobalLogger->Path(this->path);
     }
-    catch (json::parse_error &e) {
+    catch (json::parse_error& e) {
         BAASGlobalLogger->BAASError("Config");
         BAASGlobalLogger->Path(path, 3);
         BAASGlobalLogger->BAASError("parse error : " + string(e.what()));
@@ -423,7 +422,7 @@ void BAASConfig::_init_config()
 }
 
 
-BAASConfig *config_name_change = nullptr;
-BAASConfig *default_global_setting = nullptr;
+BAASConfig* config_name_change = nullptr;
+BAASConfig* default_global_setting = nullptr;
 
 BAAS_NAMESPACE_END

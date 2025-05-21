@@ -25,7 +25,20 @@ private:
         u_char g_max;
         u_char b_min;
         u_char b_max;
+
+        static constexpr auto _p_format = "({:>4},{:>4})";
+        static constexpr auto _rgb_format = "({:>3},{:>3},{:>3},{:>3},{:>3},{:>3})";
+
+        [[nodiscard]] std::string get_position() const {
+            return std::format(_p_format, x, y);
+        }
+        [[nodiscard]] std::string get_rgb_range() const {
+            return std::format(_rgb_format, r_min, r_max, g_min, g_max, b_min, b_max);
+        }
+
     };
+
+
 
     static void _decode_single_rgb_info(const nlohmann::json& j, std::vector<RGBInfo> &out);
 

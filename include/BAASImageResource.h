@@ -29,7 +29,7 @@ struct BAASImage {
     );
 
     explicit BAASImage(
-            std::vector<int> &rg,
+            const std::vector<int>& rg,
             uint8_t dir
     );
 
@@ -39,10 +39,9 @@ struct BAASImage {
 
     [[nodiscard]] std::string get_size() const;
 
-    [[nodiscard]] std::string gen_info() const;
-
     [[nodiscard]] std::string get_mean_rgb() const;
 
+    static constexpr auto _vec3_format = "({:>3},{:>3},{:>3})";
 };
 
 // {server}.{language}.{group}.{name}
@@ -62,18 +61,18 @@ public:
     );
 
     void set(
-            const std::string &server,
-            const std::string &language,
-            const std::string &group,
-            const std::string &name,
-            const BAASImage &res
+            const std::string& server,
+            const std::string& language,
+            const std::string& group,
+            const std::string& name,
+            const BAASImage& res
     );
 
     static inline std::string get_resource_pointer(
-            const std::string &server,
-            const std::string &language,
-            const std::string &group,
-            const std::string &name
+            const std::string& server,
+            const std::string& language,
+            const std::string& group,
+            const std::string& name
     )
     {
         return server + "." + language + "." + group + "." + name;
@@ -87,37 +86,37 @@ public:
 
     bool is_loaded(
             const BAAS* baas,
-            const std::string &group,
-            const std::string &name
+            const std::string& group,
+            const std::string& name
     ) const;
 
     bool is_loaded(
-            const std::string &server,
-            const std::string &language,
-            const std::string &group,
-            const std::string &name
+            const std::string& server,
+            const std::string& language,
+            const std::string& group,
+            const std::string& name
     ) const;
 
     bool is_loaded(const std::string &key) const;
 
-    void keys(std::vector<std::string> &out);
+    void keys(std::vector<std::string>& out);
 
     void load(
-            const std::string &server,
-            const std::string &language
+            const std::string& server,
+            const std::string& language
     );
 
     int load_from_json(
-            const std::string &server,
-            const std::string &language,
-            const std::filesystem::path &json_path
+            const std::string& server,
+            const std::string& language,
+            const std::filesystem::path& json_path
     );
 
     static std::string resource_pointer(
-            const std::string &server,
-            const std::string &language,
-            const std::string &group,
-            const std::string &name
+            const std::string& server,
+            const std::string& language,
+            const std::string& group,
+            const std::string& name
     )
     {
         return server + "." + language + "." + group + "." + name;
@@ -133,22 +132,22 @@ public:
     }
 
     static void resource_path(
-            const std::string &server,
-            const std::string &language,
-            const std::string &suffix,
-            std::filesystem::path &out
+            const std::string& server,
+            const std::string& language,
+            const std::string& suffix,
+            std::filesystem::path& out
     );
 
     static bool check_shape(
-            const BAASImage &image,
-            const std::string &server,
-            const std::string &language,
-            const std::string &group,
-            const std::string &name
+            const BAASImage& image,
+            const std::string& server,
+            const std::string& language,
+            const std::string& group,
+            const std::string& name
     );
 
 private:
-    static BAASImageResource *instance;
+    static BAASImageResource* instance;
 
     BAASImageResource();
 
@@ -160,7 +159,7 @@ private:
 
 class GetResourceError : public std::exception {
 public:
-    explicit GetResourceError(const std::string &msg) : msg(msg) {}
+    explicit GetResourceError(const std::string& msg) : msg(msg) {}
 
     const char *what() const noexcept override
     {
@@ -171,7 +170,7 @@ private:
     std::string msg;
 };
 
-extern BAASImageResource *resource;
+extern BAASImageResource* resource;
 
 BAAS_NAMESPACE_END
 

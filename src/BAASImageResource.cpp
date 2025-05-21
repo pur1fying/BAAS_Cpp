@@ -9,9 +9,9 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
-BAASImageResource *BAASImageResource::instance = nullptr;
+BAASImageResource* BAASImageResource::instance = nullptr;
 
-BAASImageResource *resource = nullptr;
+BAASImageResource* resource = nullptr;
 
 BAASImage::BAASImage(
         int ulx,
@@ -26,10 +26,11 @@ BAASImage::BAASImage(
 }
 
 BAASImage::BAASImage(
-        vector<int> &rg,
+        const vector<int>& rg,
         uint8_t dir
 )
 {
+    if (rg.size() != 4) throw ValueError("BAASImage Region should be a vector of 4 integers");
     region = {rg[0], rg[1], rg[2], rg[3]};
     direction = dir;
 }
@@ -41,25 +42,15 @@ bool BAASImage::empty() const
 
 std::string BAASImage::get_size() const
 {
-    return to_string(region.lr.x - region.ul.x) + "x" + to_string(region.lr.y - region.ul.y);
-}
-
-std::string BAASImage::gen_info() const
-{
-    string info = "Region : " + region.to_string();
-    info += " Direction  : " + to_string(direction);
-    info += " Resolution : " + get_size();
-    info += " Mean RGB   : " + get_mean_rgb();
-    return info;
+    return to_string(image.cols) + "x" + to_string(image.rows);
 }
 
 std::string BAASImage::get_mean_rgb() const
 {
-    return to_string(mean_rgb[0]) + ", " + to_string(mean_rgb[1]) + ", " + to_string(mean_rgb[2]);
+    return std::format(_vec3_format, mean_rgb[0], mean_rgb[1], mean_rgb[2]);
 }
 
-
-BAASImageResource *BAASImageResource::get_instance()
+BAASImageResource* BAASImageResource::get_instance()
 {
     if (instance == nullptr) {
         instance = new BAASImageResource();
@@ -68,8 +59,8 @@ BAASImageResource *BAASImageResource::get_instance()
 }
 
 void BAASImageResource::get(
-        const string &resource_pointer,
-        cv::Mat &out
+        const string& resource_pointer,
+        cv::Mat& out
 )
 {
     auto it = images.find(resource_pointer);
@@ -79,8 +70,8 @@ void BAASImageResource::get(
 }
 
 void BAASImageResource::get(
-        const string &resource_pointer,
-        BAASImage &out
+        const string& resource_pointer,
+        BAASImage& out
 )
 {
     auto it = images.find(resource_pointer);
@@ -90,18 +81,18 @@ void BAASImageResource::get(
 }
 
 void BAASImageResource::set(
-        const string &server,
-        const string &language,
-        const string &group,
-        const string &name,
-        const BAASImage &res
+        const string& server,
+        const string& language,
+        const string& group,
+        const string& name,
+        const BAASImage& res
 )
 {
     lock_guard<mutex> lock(resource_mutex);
     images[get_resource_pointer(server, language, group, name)] = res;
 }
 
-bool BAASImageResource::remove(const string &key)
+bool BAASImageResource::remove(const string& key)
 {
     if (images.find(key) == images.end()) {
         return false;
@@ -118,18 +109,24 @@ void BAASImageResource::clear()
 void BAASImageResource::show()
 {
     BAASGlobalLogger->hr("List All Loaded Image Resource");
-    for (auto &i: images)
-        BAASGlobalLogger->BAASInfo("Image [ " +  i.first + " ]\n" +i.second.gen_info());
+    for (auto &i: images) {
+        BAASGlobalLogger->BAASInfo("[ " +  i.first + " ]");
+        BAASGlobalLogger->BAASInfo("Resolution : " + i.second.get_size());
+        BAASGlobalLogger->BAASInfo("Region     : " + i.second.region.to_string());
+        BAASGlobalLogger->BAASInfo("Direction  : " + to_string(i.second.direction));
+        BAASGlobalLogger->BAASInfo("Mean RGB   : " + i.second.get_mean_rgb());
+    }
+
 }
 
-bool BAASImageResource::is_loaded(const string &key) const
+bool BAASImageResource::is_loaded(const string& key) const
 {
     auto it = images.find(key);
     if (it == images.end()) return false;
     return true;
 }
 
-void BAASImageResource::keys(std::vector<std::string> &out)
+void BAASImageResource::keys(std::vector<std::string>& out)
 {
     out.clear();
     for (auto &i: images) {
@@ -138,8 +135,8 @@ void BAASImageResource::keys(std::vector<std::string> &out)
 }
 
 void BAASImageResource::load(
-        const string &server,
-        const string &language
+        const string& server,
+        const string& language
 )
 {
     BAASGlobalLogger->BAASInfo("Load Image Resource Server : [ " + server + " ] Language : [ " + language + " ]");
@@ -173,19 +170,19 @@ void BAASImageResource::load(
 }
 
 bool BAASImageResource::is_loaded(
-        const string &server,
-        const string &language,
-        const string &group,
-        const string &name
+        const string& server,
+        const string& language,
+        const string& group,
+        const string& name
 ) const
 {
     return is_loaded(get_resource_pointer(server, language, group, name));
 }
 
 int BAASImageResource::load_from_json(
-        const string &server,
-        const string &language,
-        const filesystem::path &json_path
+        const string& server,
+        const string& language,
+        const filesystem::path& json_path
 )
 {
     int successfully_loaded_cnt = 0;
@@ -219,10 +216,10 @@ int BAASImageResource::load_from_json(
 }
 
 void BAASImageResource::resource_path(
-        const std::string &server,
-        const std::string &language,
-        const std::string &suffix,
-        std::filesystem::path &out
+        const std::string& server,
+        const std::string& language,
+        const std::string& suffix,
+        std::filesystem::path& out
 )
 {
     out = BAAS_IMAGE_RESOURCE_DIR / server / language / suffix;
@@ -230,11 +227,11 @@ void BAASImageResource::resource_path(
 
 
 inline bool BAASImageResource::check_shape(
-        const BAASImage &image,
-        const string &server,
-        const string &language,
-        const string &group,
-        const string &name
+        const BAASImage& image,
+        const string& server,
+        const string& language,
+        const string& group,
+        const string& name
 )
 {
     if (image.region == BAASRectangle(-1, -1, -1, -1)) return true;
@@ -257,15 +254,12 @@ BAASImageResource::BAASImageResource()
 }
 
 bool BAASImageResource::is_loaded(
-        const BAAS *baas,
-        const string &group,
-        const string &name
+        const BAAS* baas,
+        const string& group,
+        const string& name
 ) const
 {
     return is_loaded(baas->get_image_resource_prefix() + group + "." + name);
 }
-
-
-
 
 BAAS_NAMESPACE_END
