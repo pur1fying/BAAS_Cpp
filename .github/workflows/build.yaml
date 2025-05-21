@@ -39,6 +39,8 @@ jobs:
       run:
         working-directory: ./baas_cpp
     steps:
+      - name: Show GCC version
+        run: g++ --version
       - name: Clone Source Repo
         id: checkout_main
         uses: actions/checkout@v4
