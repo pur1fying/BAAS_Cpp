@@ -89,7 +89,7 @@ void SkillNameUpdater::update()
 double SkillNameUpdater::estimated_time_cost()
 {
     double cost = 0.0;
-    size_t tmp_cnt;
+    size_t tmp_cnt = 0;
     double d_tmp_cnt;
     for (int i = 0; i < data->each_slot_possible_templates.size(); i++) {
         for (auto& _template : data->each_slot_possible_templates[i]) {
