@@ -195,20 +195,22 @@ void skill_handler::_parse_check_op()
 {
     std::string _c_op_st = this->config.getString("/check/op", "");
     if (check_op_map.find(_c_op_st) == check_op_map.end()) {
-        logger->BAASError("Invalid skill_handler check op: " + _c_op_st);
-        throw ValueError("Invalid skill_handler check op.");
+        logger->BAASError("Invalid check op : [ " + _c_op_st + " ]");
+        _display_valid_check_op();
+        throw ValueError("Invalid check op.");
     }
     _c_op = check_op_map.at(_c_op_st);
 
     switch (_c_op) {
         case C_DECREASE: {
             if (!config.contains("/check/value")) {
-                logger->BAASError("skill_handler check op " + std::to_string(_c_op) + " requires [ /check/value ].");
-                throw ValueError("skill_handler check op " + std::to_string(_c_op) + " requires [ /check/value ].");
+                logger->BAASError("If you want to check skill release by [ Cost Decrease ], "
+                                  "you must fill [ /check/value ] which indicates the cost decrease threshold.");
+                throw ValueError("[ /check/value ] must be specified.");
             }
             if (!config.getJson("/check/value").is_number()) {
-                logger->BAASError("skill_handler config [ /check/value ] must be number.");
-                throw TypeError("skill_handler [ /check/value ] TypeError");
+                logger->BAASError("[ /check/value ] must be a number.");
+                throw TypeError("[ /check/value ] TypeError");
             }
             _c_v = config.getDouble("/check/value");
             _c_timeout = config.getUInt("/check/timeout", 5000);

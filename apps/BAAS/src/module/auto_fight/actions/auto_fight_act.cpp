@@ -50,8 +50,8 @@ void auto_fight_act::_init_all_act()
 void auto_fight_act::_init_single_act(const BAASConfig& config)
 {
     if(!config.get_config().is_array()) {
-        logger->BAASWarn("Single Action config must be an array.");
-        throw TypeError("Invalid Single Action Config Type.");
+        logger->BAASWarn("In workflow [ Actions ], Single [ Action ] config must be an array.");
+        throw TypeError("Invalid Single [ Action ] Config Type.");
     }
 
     BAASConfig single_act_config;
@@ -59,6 +59,11 @@ void auto_fight_act::_init_single_act(const BAASConfig& config)
     for(auto& i : config.get_config()) {
         single_act_config = BAASConfig(i, logger);
         _type_name = single_act_config.getString("t");
+        if(!base_handler::is_valid_action_type(_type_name)) {
+            logger->BAASWarn("Invalid Action Type : [ " + _type_name + " ]");
+            base_handler::_display_valid_action_types(logger);
+            throw ValueError("Invalid Action Type.");
+        }
         base_handler::ACTION_TYPE tp = base_handler::act_type_st_to_enum(_type_name);
 
         switch(tp){
@@ -77,7 +82,6 @@ void auto_fight_act::_init_single_act(const BAASConfig& config)
         }
     }
 }
-
 
 BAAS_NAMESPACE_END
 

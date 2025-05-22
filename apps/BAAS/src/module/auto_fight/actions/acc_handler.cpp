@@ -49,10 +49,17 @@ void acc_handler::display()
 
 void acc_handler::_parse_op()
 {
+    if (!this->config.contains("op")) {
+        logger->BAASError("If you want to do action [ acc ], you must fill [ op ] in config, "
+                          "which indicates the target acc phase you expect.");
+        _display_valid_acc_op();
+        throw ValueError("[ /op ] must be specified.");
+    }
     std::string op = this->config.getString("op");
     if (op_map.find(op) == op_map.end()) {
-        logger->BAASError("Invalid acc_handler op: " + op);
-        throw ValueError("Invalid acc_handler op.");
+        logger->BAASError("Invalid acc op : [ " + op + " ]");
+        _display_valid_acc_op();
+        throw ValueError("Invalid acc op.");
     }
     _op = op_map.at(op);
 }

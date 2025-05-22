@@ -67,10 +67,17 @@ std::optional<bool> auto_handler::_get_fight_auto_state()
 
 void auto_handler::_parse_op()
 {
+    if (!this->config.contains("op")) {
+        logger->BAASError("If you want to do action [ auto ], you must fill [ op ] in config, "
+                          "which indicates the auto state you expect.");
+        _display_valid_auto_op();
+        throw ValueError("[ /op ] must be specified.");
+    }
     std::string op = this->config.getString("op");
     if (op_map.find(op) == op_map.end()) {
-        logger->BAASError("Invalid auto_handler op: " + op);
-        throw ValueError("Invalid auto_handler op.");
+        logger->BAASError("Invalid auto op : [ " + op + " ]");
+        _display_valid_auto_op();
+        throw ValueError("Invalid auto op.");
     }
     _op = op_map.at(op);
 }
