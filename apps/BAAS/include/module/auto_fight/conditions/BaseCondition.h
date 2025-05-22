@@ -19,7 +19,8 @@ class BaseCondition {
 public:
 
     enum ConditionType {
-        COMBINED,
+        A_COMBINED,
+        O_COMBINED,
         COST,
         SKILL_NAME,
         SKILL_COST,

@@ -12,7 +12,7 @@
     "max_stuck_time": 30,
     "ends": "fight_pause-button_appear",
     "possibles": [
-      ["fight_pause-notice_appear", 553, 515, 0.3],
+      ["fight_pause-notice_appear", 563, 515, 0.3],
       ["fight_restart-notice_appear", 772, 503, 0.0, 0.0, 1.0]
     ]
   },

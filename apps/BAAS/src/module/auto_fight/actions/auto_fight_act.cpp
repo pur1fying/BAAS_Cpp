@@ -75,7 +75,6 @@ void auto_fight_act::_init_single_act(const BAASConfig& config)
                 all_act.back().push_back(std::make_unique<restart_handler>(baas, data, single_act_config));
                 break;
         }
-
     }
 }
 

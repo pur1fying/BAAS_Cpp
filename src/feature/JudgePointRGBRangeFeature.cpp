@@ -127,17 +127,7 @@ bool JudgePointRGBRangeFeature::appear(
                         check_around,
                         around_range)
                         ){
-
-                    cv::imwrite("debug_" + to_string(count) + ".png", image);
                     count++;
-                    // print x y rgb
-                    BAASGlobalLogger->BAASInfo("RGB Range : " + to_string(it->second[i].r_min) + ", " + to_string(it->second[i].r_max) + ", "
-                                       + to_string(it->second[i].g_min) + ", " + to_string(it->second[i].g_max) + ", "
-                                       + to_string(it->second[i].b_min) + ", " + to_string(it->second[i].b_max));
-                    BAASGlobalLogger->BAASInfo("Position : " + to_string(it->second[i].x) + ", " + to_string(it->second[i].y));
-                    BAASGlobalLogger->BAASInfo("RGB : " + to_string(image.at<cv::Vec3b>(it->second[i].y, it->second[i].x)[0]) + ", " +
-                                               to_string(image.at<cv::Vec3b>(it->second[i].y, it->second[i].x)[1]) + ", " +
-                                               to_string(image.at<cv::Vec3b>(it->second[i].y, it->second[i].x)[2]));
                     return true;
                 }
             return false;

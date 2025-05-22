@@ -23,7 +23,9 @@ const std::map<std::string, skill_handler::Target_Op> skill_handler::target_op_m
         {"fixed", FIXED},
         {"yolo_t_p", YOLO_T_P_MEAN},
         {"yolo_c_p", YOLO_C_P_MEAN},
-        {"yolo_g_p", YOLO_G_P_MEAN}
+        {"yolo_g_p", YOLO_G_P_MEAN},
+        {"yolo_l_p", YOLO_L_P_MEAN},
+        {"yolo_r_p", YOLO_R_P_MEAN}
 };
 
 skill_handler::skill_handler(
@@ -81,21 +83,23 @@ void skill_handler::_parse_op()
 void skill_handler::_parse_release_op()
 {
     if (!config.contains("op")) {
-        logger->BAASError("skill_handler config  " + std::to_string(_r_op) + " requires [ op ].");
-        throw ValueError("skill_handler config lacks [ op ].");
+        logger->BAASError("If you want to do action [ skill ], you must fill [ op ] which indicates the skill release method type.");
+        _display_valid_release_op();
+        throw ValueError("[ /op ] must be specified.");
     }
     if (config.value_type("op") != nlohmann::detail::value_t::string) {
-        logger->BAASError("skill_handler config [ op ] must be string.");
-        throw TypeError("skill_handler [ op ] TypeError");
+        logger->BAASError("[ /op ] must be a string.");
+        throw TypeError("[ /op ] TypeError");
     }
 
-    std::string op = this->config.getString("op");
-    if (release_op_map.find(op) == release_op_map.end()) {
-        logger->BAASError("Invalid skill_handler release op: " + op);
-        throw ValueError("Invalid skill_handler op.");
+    std::string _rel_op_st = this->config.getString("op");
+    if (release_op_map.find(_rel_op_st) == release_op_map.end()) {
+        logger->BAASError("Invalid skill_handler release op : [ " + _rel_op_st + " ]");
+        _display_valid_release_op();
+        throw ValueError("Invalid skill_handler release op.");
     }
 
-    _r_op = release_op_map.at(op);
+    _r_op = release_op_map.at(_rel_op_st);
 
     switch (_r_op) {
         case AUTO:
@@ -119,36 +123,39 @@ void skill_handler::_parse_target_op()
         case NAME:
         case LAST_REL_IDX:{
             if (!config.contains("/target/op")) {
-                logger->BAASError("skill_handler op [ " + std::to_string(_r_op) + " ] requires [ /target/op ].");
-                throw ValueError("skill_handler op [ " + std::to_string(_r_op) + " ] requires [ /target/op ].");
+                logger->BAASError("If you want to release skill with a target, you must fill [ /target/op ]"
+                                  " which indicates the target type.");
+                _display_valid_target_op();
+                throw ValueError("[ /target/op ] must be specified.");
             }
             if (config.value_type("/target/op") != nlohmann::detail::value_t::string) {
-                logger->BAASError("skill_handler config [ /target/op ] must be string.");
-                throw TypeError("skill_handler [ /target/op ] TypeError");
+                logger->BAASError("[ /target/op ] must be a string.");
+                throw TypeError("[ /target/op ] TypeError");
             }
             std::string _t_op_st = this->config.getString("/target/op");
             if (target_op_map.find(_t_op_st) == target_op_map.end()) {
-                logger->BAASError("Invalid skill_handler target op: " + _t_op_st);
+                logger->BAASError("Invalid skill_handler target op : [ " + _t_op_st + " ]");
+                _display_valid_target_op();
                 throw ValueError("Invalid skill_handler target op.");
             }
             _t_op = target_op_map.at(_t_op_st);
             switch(_t_op) {
                 case FIXED: {
                     if (!config.contains("/target/x")) {
-                        logger->BAASError("skill_handler target op [ " + std::to_string(_t_op) + " ] requires [ /target/x ].");
-                        throw ValueError("skill_handler target op [ " + std::to_string(_t_op) + " ] requires [ /target/x ].");
+                        logger->BAASError("When target is fixed, you must fill [ /target/x ].");
+                        throw ValueError("Fixed position [ x ] must be specified.");
                     }
                     if (!config.contains("/target/y")) {
-                        logger->BAASError("skill_handler target op [ " + std::to_string(_t_op) + " ] requires [ /target/y ].");
-                        throw ValueError("skill_handler target op [ " + std::to_string(_t_op) + " ] requires [ /target/y ].");
+                        logger->BAASError("When target is fixed, you must fill [ /target/y ].");
+                        throw ValueError("Fixed position [ y ] must be specified.");
                     }
                     if (!config.getJson("/target/x").is_number()) {
-                        logger->BAASError("skill_handler config [ /target/x ] must be number.");
-                        throw TypeError("skill_handler [ /target/x ] TypeError");
+                        logger->BAASError("When target is fixed [ /target/x ] must be a number.");
+                        throw TypeError("[ /target/x ] TypeError");
                     }
                     if (!config.getJson("/target/y").is_number()) {
-                        logger->BAASError("skill_handler config [ /target/y ] must be number.");
-                        throw TypeError("skill_handler [ /target/y ] TypeError");
+                        logger->BAASError("When target is fixed [ /target/y ] must be a number.");
+                        throw TypeError("[ /target/y ] TypeError");
                     }
                     _fixed_x = config.getInt("/target/x");
                     _fixed_y = config.getInt("/target/y");
@@ -156,16 +163,23 @@ void skill_handler::_parse_target_op()
                 }
                 case YOLO_T_P_MEAN:
                 case YOLO_C_P_MEAN:
-                case YOLO_G_P_MEAN:{
+                case YOLO_G_P_MEAN:
+                case YOLO_L_P_MEAN:
+                case YOLO_R_P_MEAN:{
                     if (!config.contains("/target/obj")) {
                         logger->BAASError("skill_handler target op [ " + std::to_string(_t_op) + " ] requires [ /target/obj ].");
-                        throw ValueError("skill_handler target op [ " + std::to_string(_t_op) + " ] requires [ /target/obj ].");
+                        throw ValueError("Yolo object name must be specified.");
                     }
                     auto obj_names = config.get<std::vector<std::string>>("/target/obj");
+                    if (obj_names.size() == 0) {
+                        logger->BAASError("skill_handler target op [ " + std::to_string(_t_op) + " ] requires [ /target/obj ] length > 0.");
+                        throw ValueError("At least one object name is required.");
+                    }
                     for (const auto &obj_name : obj_names) {
                         auto it = data->obj_name_to_index_map.find(obj_name);
                         if (it == data->obj_name_to_index_map.end()) {
-                            logger->BAASError("Obj [ " + obj_name + " ] is not detect in workflow.");
+                            logger->BAASError("Object [ " + obj_name + " ] is not detect in this workflow.");
+                            throw ValueError("Invalid yolo object detected.");
                         }
                         else _obj_idx.push_back(it->second);
                     }
@@ -368,6 +382,38 @@ void skill_handler::_calc_target_p(int& _x, int& _y)
                                    data->obj_last_appeared_pos[obj_idx].value().box.height;
                     _x += ground_x;
                     _y += ground_y;
+                }
+            }
+            _x /= int(_obj_idx.size());
+            _y /= int(_obj_idx.size());
+            break;
+        }
+        case YOLO_L_P_MEAN: {
+            _x = 0;
+            _y = 0;
+            for (const auto& obj_idx : _obj_idx) {
+                if (data->obj_last_appeared_pos[obj_idx].has_value()) {
+                    _x += data->obj_last_appeared_pos[obj_idx].value().box.x;
+                    int left_y = data->obj_last_appeared_pos[obj_idx].value().box.y +
+                                 data->obj_last_appeared_pos[obj_idx].value().box.height / 2;
+                    _y += left_y;
+                }
+            }
+            _x /= int(_obj_idx.size());
+            _y /= int(_obj_idx.size());
+            break;
+        }
+        case YOLO_R_P_MEAN: {
+            _x = 0;
+            _y = 0;
+            for (const auto& obj_idx : _obj_idx) {
+                if (data->obj_last_appeared_pos[obj_idx].has_value()) {
+                    int right_x = data->obj_last_appeared_pos[obj_idx].value().box.x +
+                                  data->obj_last_appeared_pos[obj_idx].value().box.width;
+                    int right_y = data->obj_last_appeared_pos[obj_idx].value().box.y +
+                                  data->obj_last_appeared_pos[obj_idx].value().box.height / 2;
+                    _x += right_x;
+                    _y += right_y;
                 }
             }
             _x /= int(_obj_idx.size());

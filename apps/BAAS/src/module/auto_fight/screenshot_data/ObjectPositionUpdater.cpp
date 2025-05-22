@@ -28,6 +28,28 @@ void ObjectPositionUpdater::update()
         baas->get_latest_screenshot(origin_screenshot);
         _yolo->run_session(origin_screenshot, result, nms_op);
         _yolo_last_update_t = _t;
+        // draw all rect
+//        for (const auto& res : result.results) {
+//            cv::rectangle(
+//                    origin_screenshot,
+//                    res.box,
+//                    cv::Scalar(0, 255, 0),
+//                    2
+//            );
+//            int center_x = res.box.x + res.box.width / 2;
+//            int center_y = res.box.y + res.box.height / 2;
+//             cv::putText(
+//                        origin_screenshot,
+//                        std::format("{}: {:.2f}", _yolo->get_classes()[res.classId], res.confidence),
+//                        cv::Point(center_x, center_y),
+//                        cv::FONT_HERSHEY_SIMPLEX,
+//                        0.5,
+//                        cv::Scalar(0, 255, 0),
+//                        1
+//                );
+//            cv::imshow("Object Detection", origin_screenshot);
+//            cv::waitKey(1);
+//        }
         for (const auto& _p : data->obj_last_appeared_pos) {
             std::optional<yolo_single_res> res = std::nullopt;
             for (const auto& r : result.results)

@@ -14,7 +14,6 @@
   "formation": {
     "front": ["Kayoko", "Koharu", "Mika", "Eimi"],
     "back": ["Himari", "Fuuka (New Year)"],
-    "initial_skills": ["Kayoko", "Mika", "Fuuka (New Year)"],
     "slot_count": 3,
     "all_appeared_skills": [
       "Himari",
@@ -23,8 +22,7 @@
       "Mika",
       "Koharu",
       "Eimi"
-    ],
-    "borrow": ""
+    ]
   },
   "start_state": "start",
   "states": {
@@ -271,7 +269,7 @@
     },
     "initial_skill [ Kayoko ] check": {
       "type": "skill_name",
-      "op": "appear",
+      "op": "at",
       "name": "Kayoko",
       "p": 0,
       "timeout": 1000

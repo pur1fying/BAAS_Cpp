@@ -7,17 +7,19 @@
 BAAS_NAMESPACE_BEGIN
 
 const std::map<std::string, BaseCondition::ConditionType> BaseCondition::cond_type_map = {
-        {"combined"   ,  COMBINED},
-        {"cost"       ,  COST},
-        {"skill_name" ,  SKILL_NAME},
-        {"skill_cost" ,  SKILL_COST},
-        {"acc_phase"  ,  ACC_PHASE},
-        {"auto_state" ,  AUTO_STATE},
-        {"boss_health",  BOSS_HEALTH}
+        {"and_combined",  A_COMBINED},
+        {"or_combined" ,  O_COMBINED},
+        {"cost"        ,  COST},
+        {"skill_name"  ,  SKILL_NAME},
+        {"skill_cost"  ,  SKILL_COST},
+        {"acc_phase"   ,  ACC_PHASE},
+        {"auto_state"  ,  AUTO_STATE},
+        {"boss_health" ,  BOSS_HEALTH}
 };
 
 const std::vector<std::string> BaseCondition::cond_type_st_list = {
-        "combined",
+        "and_combined",
+        "or_combined",
         "cost",
         "skill_name",
         "skill_cost",

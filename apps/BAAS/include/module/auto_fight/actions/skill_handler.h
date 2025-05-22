@@ -25,6 +25,8 @@ public:
         YOLO_T_P_MEAN,
         YOLO_C_P_MEAN,
         YOLO_G_P_MEAN,
+        YOLO_L_P_MEAN,
+        YOLO_R_P_MEAN,
     };
 
     enum Check_Op {
@@ -74,7 +76,21 @@ private:
 
     void _parse_release_op();
 
+    inline void _display_valid_release_op() {
+        logger->BAASInfo("Valid release op are displayed as follow : ");
+        int cnt = 0;
+        for (auto& op : release_op_map)
+            logger->BAASInfo(std::to_string(++cnt) + " : " + op.first);
+    }
+
     void _parse_target_op();
+
+    inline void _display_valid_target_op() {
+        logger->BAASInfo("Valid target op are displayed as follow : ");
+        int cnt = 0;
+        for (auto& op : target_op_map)
+            logger->BAASInfo(std::to_string(++cnt) + " : " + op.first);
+    }
 
     void _parse_check_op();
 

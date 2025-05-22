@@ -9,7 +9,7 @@
       ["plot_menu_appear", 1205, 34],
       ["plot_skip-plot-button_appear", 1213, 116],
       ["plot_skip-plot-notice_appear", 770, 519],
-      ["fight_pause-notice_appear", 374, 508],
+      ["fight_pause-notice_appear", 380, 508],
       ["fight_retreat-notice_appear", 886, 164],
       ["fight_restart-notice_appear", 886, 164]
     ]

@@ -20,6 +20,8 @@
 #include "module/auto_fight/conditions/CostCondition.h"
 #include "module/auto_fight/conditions/BossHealthCondition.h"
 #include "module/auto_fight/conditions/SkillNameCondition.h"
+#include "module/auto_fight/conditions/OrCombinedCondition.h"
+#include "module/auto_fight/conditions/AndCombinedCondition.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -141,7 +143,7 @@ void AutoFight::update_data()
 
 void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
 {
-    auto start_t = std::chrono::high_resolution_clock::now();
+//    auto start_t = std::chrono::high_resolution_clock::now();
     try{
         self->d_auto_f.d_updaters[idx]->update();
     }
@@ -150,8 +152,8 @@ void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
     }
     auto end_t = std::chrono::high_resolution_clock::now();
     // us
-    self->logger->BAASInfo("In [ " + self->d_auto_f.d_updaters[idx]->data_name() + " ] update | Time: " + std::to_string(
-            std::chrono::duration_cast<std::chrono::microseconds>(end_t - start_t).count()) + "us");
+//    self->logger->BAASInfo("In [ " + self->d_auto_f.d_updaters[idx]->data_name() + " ] update | Time: " + std::to_string(
+//            std::chrono::duration_cast<std::chrono::microseconds>(end_t - start_t).count()) + "us");
 
     self->notify_d_update_thread_end();
 }
@@ -286,12 +288,12 @@ void AutoFight::_init_d_fight(const std::filesystem::path &name)
     // consider chinese name
     if(name.empty())  {
         workflow_name = config->getString("/auto_fight/workflow_name");
-        workflow_path = config->getPath("/auto_fight/workflow_name").replace_extension(".json");
+        workflow_path = config->getPath("/auto_fight/workflow_name").string() + ".json";
     }
     else {
         std::filesystem::path temp = name;
         workflow_name = name.string();
-        workflow_path = temp.replace_extension(".json");
+        workflow_path = temp.string() + ".json";
     }
 
     workflow_path = BAAS_AUTO_FIGHT_WORKFLOW_DIR / workflow_path;
@@ -395,7 +397,11 @@ bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
             break;
         case BaseCondition::ConditionType::AUTO_STATE:
             break;
-        case BaseCondition::COMBINED:
+        case BaseCondition::O_COMBINED:
+            all_cond.push_back(std::make_unique<OrCombinedCondition>(baas, &d_auto_f, d_cond));
+            break;
+        case BaseCondition::A_COMBINED:
+            all_cond.push_back(std::make_unique<AndCombinedCondition>(baas, &d_auto_f, d_cond));
             break;
         case BaseCondition::SKILL_NAME:
             all_cond.push_back(std::make_unique<SkillNameCondition>(baas, &d_auto_f, d_cond));
@@ -1073,8 +1079,5 @@ void AutoFight::_init_actions()
 {
     _actions = std::make_unique<auto_fight_act>(baas, &d_auto_f);
 }
-
-
-
 
 BAAS_NAMESPACE_END
