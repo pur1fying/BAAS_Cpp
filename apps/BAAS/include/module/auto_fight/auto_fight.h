@@ -186,6 +186,15 @@ private:
 
     void _start_state_transition_loop();
 
+    // state transition
+    inline void _execute_state_transition() {
+        logger->sub_title("State Transition");
+        logger->BAASInfo("[ " + all_states[_curr_state_idx].name + " ] --> "
+                         "[ " + all_states[_state_trans_next_state_idx.value()].name + " ]");
+
+        _curr_state_idx = _state_trans_next_state_idx.value();
+    }
+
     inline bool _cond_is_pending(uint64_t cond_idx) {
         return !_cond_is_matched_recorder[cond_idx].has_value();
     }
@@ -222,10 +231,13 @@ private:
 
     void _conv_tans_state_name_st_to_idx();
 
+    void _init_state_act_fail_trans();
+
     std::vector<state_info> all_states;
 
     std::vector<std::vector<std::string>> _state_trans_name_recorder;
     std::vector<std::optional<std::string>> _state_default_trans_name_recorder;
+    std::vector<std::optional<std::string>> _state_act_fail_trans_name_recorder;
 
     std::map<std::string, uint64_t> state_name_idx_map;
 

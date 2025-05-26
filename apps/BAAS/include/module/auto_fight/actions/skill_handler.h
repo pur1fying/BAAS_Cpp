@@ -40,9 +40,9 @@ public:
             const BAASConfig& config
     );
 
-    bool execute() override;
+    bool execute() noexcept override;
 
-    void display() override;
+    void display() noexcept override;
 
     const static std::map<std::string, Release_Op> release_op_map;
 

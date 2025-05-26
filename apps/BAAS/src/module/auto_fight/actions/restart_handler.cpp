@@ -15,7 +15,7 @@ restart_handler::restart_handler(
 
 }
 
-bool restart_handler::execute()
+bool restart_handler::execute() noexcept
 {
     logger->hr("Fight Restart");
     baas->solve_procedure("UI-GO-TO_fight_pause_page", true);
@@ -28,7 +28,7 @@ bool restart_handler::execute()
     return true;
 }
 
-void restart_handler::display()
+void restart_handler::display() noexcept
 {
 
 }

@@ -64,6 +64,8 @@ struct state_info {
 
     std::optional<uint64_t> default_trans;
 
+    std::optional<uint64_t> act_fail_trans;
+
     std::string desc;
 
     std::string name;

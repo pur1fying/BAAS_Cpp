@@ -525,7 +525,7 @@ bool AutoFight::_init_single_state(const BAASConfig &d_state, const std::string&
 
     }
 
-    // "next" and "default_transition" int64_value should not be init here
+    // "next" , "default_transition" , "action_fail_transition" int64 value should not be init here
     if(d_state.contains("default_transition"))  {
         if(d_state.value_type("default_transition") != nlohmann::detail::value_t::string) {
             logger->BAASError("In state [ " + name + " ] , value of [ default_transition ] must be string.");
@@ -533,10 +533,16 @@ bool AutoFight::_init_single_state(const BAASConfig &d_state, const std::string&
         }
         _state_default_trans_name_recorder.emplace_back(d_state.getString("default_transition"));
     }
-    else {
-        // do not have default transition
-        _state_default_trans_name_recorder.emplace_back(std::nullopt);
+    else _state_default_trans_name_recorder.emplace_back(std::nullopt);
+
+    if(d_state.contains("action_fail_transition")) {
+        if(d_state.value_type("action_fail_transition") != nlohmann::detail::value_t::string) {
+            logger->BAASError("In state [ " + name + " ] , value of [ action_fail_transition ] must be string.");
+            throw TypeError("Invalid [ action_fail_transition ] type in state.");
+        }
+        _state_act_fail_trans_name_recorder.emplace_back(d_state.getString("action_fail_transition"));
     }
+    else _state_act_fail_trans_name_recorder.emplace_back(std::nullopt);
 
     _state_trans_name_recorder.push_back(_trans_next_state_name_recoder);
 
@@ -560,7 +566,7 @@ void AutoFight::_init_start_state()
     start_state_name = d_auto_f.d_fight.getString("start_state");
     auto it = state_name_idx_map.find(start_state_name);
     if (it == state_name_idx_map.end()) {
-        logger->BAASError("Undefined START state [ " + start_state_name + " ] .");
+        logger->BAASError("Undefined [ start state ] --> [ " + start_state_name + " ] .");
         throw ValueError("Start State Invalid.");
     }
 
@@ -576,7 +582,6 @@ void AutoFight::_conv_tans_state_name_st_to_idx()
 
     for (int i = 0; i < all_states.size(); ++i) {
         // convert transitions
-
         for(int j = 0; j < all_states[i].transitions.size(); ++j) {
             auto _trans_next_state_name_it = state_name_idx_map.find(_state_trans_name_recorder[i][j]);
             if (_trans_next_state_name_it == state_name_idx_map.end()) {
@@ -589,11 +594,22 @@ void AutoFight::_conv_tans_state_name_st_to_idx()
         // convert default transitions
         if (_state_default_trans_name_recorder[i].has_value()) {
             auto _default_trans_state_name_it = state_name_idx_map.find(_state_default_trans_name_recorder[i].value());
-            if(state_name_idx_map.find(_state_default_trans_name_recorder[i].value()) == state_name_idx_map.end()) {
-                logger->BAASError("Undefined state [ " + _state_default_trans_name_recorder[i].value() + " ] found in default transitions.");
+            if(_default_trans_state_name_it == state_name_idx_map.end()) {
+                logger->BAASError("Undefined state [ " + _state_default_trans_name_recorder[i].value() + " ] "
+                                  "found in [ Default Transition ].");
                 throw ValueError("Invalid State Name.");
             }
             all_states[i].default_trans = _default_trans_state_name_it->second;
+        }
+
+        // convert action fail transitions
+        if (_state_act_fail_trans_name_recorder[i].has_value()) {
+            auto _act_fail_trans_state_name_it = state_name_idx_map.find(_state_act_fail_trans_name_recorder[i].value());
+            if (_act_fail_trans_state_name_it == state_name_idx_map.end()) {
+                logger->BAASError("Undefined state [ " + _state_act_fail_trans_name_recorder[i].value() + " ] "
+                                  "found in [ Action Fail Transition ].");
+                throw ValueError("Invalid State Name.");
+            }
         }
     }
 
@@ -613,10 +629,13 @@ void AutoFight::display_all_state() const noexcept
         if(all_states[i].act_id.has_value())
         logger->BAASInfo("Act_Idx   : " + std::to_string(all_states[i].act_id.value()));
 
-        logger->BAASInfo("Trans_Cnt : " + std::to_string(all_states[i].transitions.size()));
+        logger->BAASInfo("T_Cnt     : " + std::to_string(all_states[i].transitions.size()));
 
         if(all_states[i].default_trans.has_value())
-        logger->BAASInfo("D_Tran_Idx: " + std::to_string(all_states[i].default_trans.value()));
+        logger->BAASInfo("D_T_Idx   : " + std::to_string(all_states[i].default_trans.value()));
+
+        if(all_states[i].act_fail_trans.has_value())
+        logger->BAASInfo("A_F_T_Idx : " + std::to_string(all_states[i].act_fail_trans.value()));
 
         if(!all_states[i].desc.empty())
         logger->BAASInfo("Desc      : " + all_states[i].desc);
@@ -791,19 +810,23 @@ void AutoFight::_start_state_transition_loop()
 {
 
     while (1) {
-        if(all_states[_curr_state_idx].act_id.has_value())
-            _actions->execute(all_states[_curr_state_idx].act_id.value());
+        if(all_states[_curr_state_idx].act_id.has_value()) {
+            bool act_ret = _actions->_execute(all_states[_curr_state_idx].act_id.value());
+            if (!act_ret)
+                if(all_states[_curr_state_idx].act_fail_trans.has_value()) {
+                    logger->BAASInfo("Execute State [ Action Fail Transition ]");
+                    _state_trans_next_state_idx = all_states[_curr_state_idx].act_fail_trans.value();
+
+                }
+
+        }
+
 
         if(!_state_start_trans_cond_j_loop()) break;
 
         assert(_state_trans_next_state_idx.has_value());
 
-        // state transition
-        logger->sub_title("State Transition");
-        logger->BAASInfo("[ " + all_states[_curr_state_idx].name + " ] --> "
-                         "[ " + all_states[_state_trans_next_state_idx.value()].name + " ]");
-
-        _curr_state_idx = _state_trans_next_state_idx.value();
+        _execute_state_transition();
     }
 }
 

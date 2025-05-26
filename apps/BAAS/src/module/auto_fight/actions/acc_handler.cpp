@@ -22,7 +22,7 @@ acc_handler::acc_handler(
     _parse_op();
 }
 
-bool acc_handler::execute()
+bool acc_handler::execute() noexcept
 {
     switch (_op) {
         case PHASE_1 : {
@@ -42,7 +42,7 @@ bool acc_handler::execute()
     return true;
 }
 
-void acc_handler::display()
+void acc_handler::display() noexcept
 {
 
 }

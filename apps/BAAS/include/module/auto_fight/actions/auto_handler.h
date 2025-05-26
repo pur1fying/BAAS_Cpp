@@ -26,9 +26,9 @@ public:
             const BAASConfig& config
     );
 
-    bool execute() override;
+    bool execute() noexcept override;
 
-    void display() override;
+    void display() noexcept override;
 
 private:
 

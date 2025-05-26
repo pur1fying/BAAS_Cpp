@@ -21,14 +21,13 @@ auto_fight_act::auto_fight_act(BAAS* baas, auto_fight_d* data)
     _init_all_act();
 }
 
-void auto_fight_act::execute(uint64_t act_id)
+bool auto_fight_act::_execute(uint64_t act_id) noexcept
 {
-    if(act_id >= all_act.size()) {
-        logger->BAASWarn("Action ID out of range.");
-        throw ValueError("Action ID out of range.");
-    }
+    assert(act_id < all_act.size());
 
-    for(auto& i : all_act[act_id]) i->execute();
+    for(auto& i : all_act[act_id]) if(!i->execute()) return false;
+
+    return true;
 }
 
 void auto_fight_act::_init_all_act()

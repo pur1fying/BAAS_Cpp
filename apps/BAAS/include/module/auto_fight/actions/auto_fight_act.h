@@ -18,7 +18,7 @@ public:
             auto_fight_d* data
     );
 
-    void execute(uint64_t act_id);
+    bool _execute(uint64_t act_id) noexcept;
 
     inline bool act_exist(const std::string& act_name) {
         return act_name_idx_map.find(act_name) != act_name_idx_map.end();
@@ -29,6 +29,7 @@ public:
         if (it != act_name_idx_map.end())return it->second;
         else throw ValueError("Action [ " + act_name + " ] not found.");
     }
+
 private:
 
     void _init_all_act();

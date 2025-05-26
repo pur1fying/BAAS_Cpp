@@ -20,6 +20,7 @@ public:
         AUTO,
         ACC,
         SKILL,
+        SKIP_ANIMATION,
         RESTART
     };
 
@@ -29,7 +30,7 @@ public:
             const BAASConfig& config
     );
 
-    static bool is_valid_action_type(const std::string& act_type) {
+    static bool is_valid_action_type(const std::string& act_type) noexcept {
         return act_type_map.find(act_type) != act_type_map.end();
     }
 
@@ -39,7 +40,7 @@ public:
         else throw ValueError("Invalid action type.");
     }
 
-    static inline void _display_valid_action_types(BAASLogger* logger) {
+    static inline void _display_valid_action_types(BAASLogger* logger) noexcept {
         logger->BAASInfo("Valid action types are as displayed as follow.");
         int cnt = 0;
         for (const auto& [key, value] : act_type_map)
@@ -51,7 +52,6 @@ public:
     virtual void display();
 
 protected:
-
     BAAS* baas;
 
     BAASLogger* logger;
@@ -67,9 +67,6 @@ protected:
     static const std::vector<std::string> act_type_st_list;
 
 };
-
-
-
 
 BAAS_NAMESPACE_END
 

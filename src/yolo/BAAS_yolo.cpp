@@ -394,7 +394,7 @@ void BAAS_Yolo_v8::_get_group_num_Out(
         yolo_single_res res;
         for (int i = 0; i < nmsResult.size(); ++i) {
             int idx = nmsResult[i];
-            res.classId = it.first;
+            res.class_id = it.first;
             res.confidence = m_confidences[it.first][idx];
             res.box = m_boxes[it.first][idx];
             Out.results.push_back(res);
@@ -449,7 +449,7 @@ void BAAS_Yolo_v8::_get_whole_nms_Out(
     yolo_single_res res;
     for (int i = 0; i < nmsResult.size(); ++i) {
         int idx = nmsResult[i];
-        res.classId = class_ids[idx];
+        res.class_id = class_ids[idx];
         res.confidence = confidences[idx];
         res.box = boxes[idx];
         Out.results.push_back(res);
@@ -473,7 +473,7 @@ void BAAS_Yolo_v8::_get_no_nms_Out(
         cv::minMaxLoc(scores, 0, &maxClassScore, 0, &class_id);
         if (maxClassScore > rect_confidence_threshold) {
             res.confidence = maxClassScore;
-            res.classId = class_id.x;
+            res.class_id = class_id.x;
             float x = data[0];
             float y = data[1];
             float w = data[2];

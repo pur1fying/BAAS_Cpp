@@ -53,7 +53,7 @@ void ObjectPositionUpdater::update()
         for (const auto& _p : data->obj_last_appeared_pos) {
             std::optional<yolo_single_res> res = std::nullopt;
             for (const auto& r : result.results)
-                if (r.classId == _p.first && (res == std::nullopt || r.confidence > res->confidence))
+                if (r.class_id == _p.first && (res == std::nullopt || r.confidence > res->confidence))
                     res = r;
             if (res != std::nullopt) data->obj_last_appeared_pos[_p.first] = res;
         }
@@ -77,7 +77,7 @@ void ObjectPositionUpdater::display_data() {
     logger->BAASInfo(std::format(_display_format, "Object Name", "Center", "Score"));
 
     for (const auto& res : result.results) {
-        std::string name = _yolo->get_classes()[res.classId];
+        std::string name = _yolo->get_classes()[res.class_id];
         int center_x = res.box.x + res.box.width / 2;
         int center_y = res.box.y + res.box.height / 2;
         std::string pos = std::format("({}, {})", center_x, center_y);

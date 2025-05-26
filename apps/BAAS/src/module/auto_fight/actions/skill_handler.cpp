@@ -37,7 +37,7 @@ skill_handler::skill_handler(
     _parse_op();
 }
 
-bool skill_handler::execute()
+bool skill_handler::execute() noexcept
 {
     _execute_prepare();
 
@@ -68,7 +68,7 @@ bool skill_handler::execute()
     return true;
 }
 
-void skill_handler::display()
+void skill_handler::display() noexcept
 {
 
 }

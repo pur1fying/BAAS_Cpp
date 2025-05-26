@@ -21,7 +21,7 @@ auto_handler::auto_handler(
     _parse_op();
 }
 
-bool auto_handler::execute()
+bool auto_handler::execute() noexcept
 {
     switch (_op) {
         case ON : {
@@ -47,7 +47,7 @@ bool auto_handler::execute()
     return true;
 }
 
-void auto_handler::display()
+void auto_handler::display() noexcept
 {
 
 }
