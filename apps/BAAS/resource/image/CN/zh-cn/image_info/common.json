@@ -1,0 +1,10 @@
+{
+  "group": "common",
+  "path": "common",
+  "image": {
+
+    "skip-animation-notice": {
+      "region": [569, 309, 701, 353]
+    }
+  }
+}

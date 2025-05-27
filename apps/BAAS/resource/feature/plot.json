@@ -1,19 +1,23 @@
 {
+
   "plot_menu_appear": {
     "feature_type": 0,
     "group": "plot",
     "name": "menu"
   },
+
   "plot_skip-plot-button_appear": {
     "feature_type": 0,
     "group": "plot",
     "name": "skip-plot-button"
   },
+
   "plot_skip-plot-notice_appear": {
     "feature_type": 0,
     "group": "plot",
     "name": "skip-plot-notice"
   },
+
   "plot_formation_appear": {
     "feature_type": 0,
     "group": "plot",

@@ -9,6 +9,7 @@
 #include "module/auto_fight/actions/acc_handler.h"
 #include "module/auto_fight/actions/skill_handler.h"
 #include "module/auto_fight/actions/restart_handler.h"
+#include "module/auto_fight/actions/skip_ani_handler.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -59,7 +60,7 @@ void auto_fight_act::_init_single_act(const BAASConfig& config)
         single_act_config = BAASConfig(i, logger);
         _type_name = single_act_config.getString("t");
         if(!base_handler::is_valid_action_type(_type_name)) {
-            logger->BAASWarn("Invalid Action Type : [ " + _type_name + " ]");
+            logger->BAASError("Invalid Action Type : [ " + _type_name + " ]");
             base_handler::_display_valid_action_types(logger);
             throw ValueError("Invalid Action Type.");
         }
@@ -77,6 +78,9 @@ void auto_fight_act::_init_single_act(const BAASConfig& config)
                 break;
             case base_handler::ACTION_TYPE::RESTART:
                 all_act.back().push_back(std::make_unique<restart_handler>(baas, data, single_act_config));
+                break;
+            case base_handler::ACTION_TYPE::SKIP_ANIMATION:
+                all_act.back().push_back(std::make_unique<skip_ani_handler>(baas, data, single_act_config));
                 break;
         }
     }

@@ -17,18 +17,28 @@ skip_ani_handler::skip_ani_handler(
         const BAASConfig& config
 ) : base_handler(baas, data, config)
 {
-
+    _timeout = config.getDouble("timeout", 3.0);
+    _patch = BAASConfig(nlohmann::json(), logger);
+    _patch.insert("/max_execute_time", _timeout);
+    _patch.insert("/tentative_click", nlohmann::json::array({true, 469, 194, 0.3}));
 }
 
 bool skip_ani_handler::execute() noexcept
 {
     try {
-        baas->solve_procedure("fight_skip_animation", true);
+        BAASConfig _out;
+        baas->solve_procedure(
+                "fight_try_skip_animation",
+                _out,
+                _patch,
+                true
+        );
     }
     catch (const std::exception& e) {
         return false;
     }
-    baas->solve_procedure("fight_set_auto_off", true);
+
+    baas->solve_procedure("fight_confirm_skip_animation", true);
     return true;
 }
 

@@ -26,6 +26,8 @@ public:
 
 private:
 
+    BAASConfig _patch;
+
     double _timeout;
 
 };

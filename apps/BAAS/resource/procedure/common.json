@@ -11,7 +11,8 @@
       ["plot_skip-plot-notice_appear", 770, 519],
       ["fight_pause-notice_appear", 380, 508],
       ["fight_retreat-notice_appear", 886, 164],
-      ["fight_restart-notice_appear", 886, 164]
+      ["fight_restart-notice_appear", 886, 164],
+      ["common_skip-animation-notice_appear", 762, 507, 0.3]
     ]
   },
 

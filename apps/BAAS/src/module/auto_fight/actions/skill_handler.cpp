@@ -436,7 +436,7 @@ void skill_handler::_rel_skill(int slot_idx, int x, int y)
     baas->solve_procedure("fight_select_slot_" + std::to_string(slot_idx), _out, _patch, true);
     _patch.insert("/possibles/0/1", x);
     _patch.insert("/possibles/0/2", y);
-    _patch.update("/tentative_click", nlohmann::json::array({true, x, y, 1.0}));
+    _patch.update("/tentative_click", nlohmann::json::array({true, x, y, 0.5}));
     baas->solve_procedure("fight_release_skill_slot_" + std::to_string(slot_idx), _out, _patch, true);
 }
 

@@ -85,7 +85,7 @@ void AppearThenClickProcedure::implement(
 
         this_round_start_time = BAASUtil::getCurrentTimeMS();
         if (this_round_start_time - start_time >= max_execute_time) {
-            logger->hr("Max execute time " + to_string(max_execute_time) + "s reached.");
+            logger->hr("Max execute time " + to_string(max_execute_time) + "ms reached.");
             logger->BAASError("Looking for End features : ");
             logger->BAASError(end_feature_names);
             logger->BAASError("Looking for Possible features : ");
@@ -164,6 +164,11 @@ void AppearThenClickProcedure::clear_possibles()
 void AppearThenClickProcedure::solve_feature_action_click(int index)
 {
     _click_param& param = possibles[index];
+
+    // click p check
+    if (param.x < 0 || param.y < 0) return;
+
+    // interval
     if (last_clicked_feature_name == last_appeared_feature_name &&
         (int(BAASUtil::getCurrentTimeMS() - last_clicked_time) < param.interval))
         return;
