@@ -8,6 +8,8 @@
 #include <windows.h>
 #include <iostream>
 
+#include "BAASImageResource.h"
+
 #include <yolo/BAAS_yolo.h>
 
 #pragma comment(lib, "ws2_32.lib")
@@ -23,66 +25,42 @@ int main(int argc, char **argv)
     string config_name = "default_config";
     cv::Mat img;
     try {
-
         init_globals();
+        // feature information
         BAASFeature::show();
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
-//        int count = 1000;
-//        long long t_total = 0;
-//        for (int i = 1 ;i <= count; ++i) {
-//            auto t1 = BAASUtil::getCurrentTimeMS();
-//
-//            baas.click(640, 360);
-//            auto t2 = BAASUtil::getCurrentTimeMS();
-//            t_total+= (t2 - t1);
-//        }
-//        baas.get_logger()->BAASInfo("Click ave time: " + std::to_string(t_total / count) + "ms");
-        long long benchmark_run_t = 10010; // run for 10 seconds
-        int d_update_total_t = 0, screenshot_total_t = 0;
-        int total_frame_count = 0;
-        long long benchmark_start_time = baas::BAASUtil::getCurrentTimeMS();
+        // image resource
+        resource->show();
+
         AutoFight fight(&baas);
         fight.init_workflow();
-        fight.set_data_updater_mask(0b1111111);
-        fight.set_boss_health_update_flag(0b100);
-        fight.set_skill_cost_update_flag(0b100);
-        while (1) {
-            long long loop_start_t = baas::BAASUtil::getCurrentTimeMS();
-            if(loop_start_t - benchmark_start_time > benchmark_run_t) {
-                baas::BAASGlobalLogger->BAASInfo("Benchmark Run Time : " + std::to_string(benchmark_run_t / 1000) + "s, Exit.");
-                break;
-            }
-            fight.update_screenshot();
-            fight.update_data();
-            total_frame_count++;
-        }
-
-        baas::BAASGlobalLogger->BAASInfo("Fps : " + std::to_string(total_frame_count / (benchmark_run_t / 1000.0)));
-//        fight.init_workflow();
-//        fight.display_cond_idx_name_map();
-//        fight.display_all_state();
-//        fight.display_all_cond_info();
-//        fight.start_state_transition();
+        // cond
+        fight.display_cond_idx_name_map();
+        fight.display_all_cond_info();
+        // state
+        fight.display_all_state();
+        fight.start_state_transition();
 
 
+// How To Release Hoshino ( Swimsuit ) Skill when Cost Reach 5.0
 //        baas.update_screenshot_array();
-//
 //        std::vector<std::string> names = {
-//                "Koharu",
-//                "Eimi",
-//                "Fuuka (New Year)"
+//                "Aru",
+//                "Shiroko",
+//                "Cherino"
 //        };
 //        std::vector<BAASRectangle> regions = {
-//                SKILL1_RIGHT,
-////                SKILL2_RIGHT,
-////                SKILL3_RIGHT
+//                SKILL1_FULL,
+//                SKILL2_FULL,
+//                SKILL3_FULL
 //        };
 //        std::vector<int> type = {
-//                SKILL_RIGHT,
-////                SKILL_RIGHT,
-////                SKILL_RIGHT
+//                SKILL_FULL,
+//                SKILL_FULL,
+//                SKILL_FULL
 //        };
+
 //        for (int i = 0; i < names.size(); ++i) {
 //            BAASDevelopUtils::shotStudentSkill(&baas, names[i], regions[i], type[i]);
 //        }
@@ -100,48 +78,8 @@ int main(int argc, char **argv)
 //                        60
 //                )
 //        );
-//        return 0;
+        return 0;
 
-
-
-//        fight.set_data_updater_mask(0b1111111);
-
-//        fight.set_skill_slot_possible_templates(0, {5, 4, 3, 2, 1, 0});
-//        fight.set_skill_slot_possible_templates(1, {5, 4, 3, 2, 0, 1});
-//        fight.set_skill_slot_possible_templates(2, {5, 4, 3, 1, 0, 2});
-//        fight.set_skill_slot_possible_templates(0, {0, 1, 2});
-//        fight.set_skill_slot_possible_templates(1, {0, 1, 2});
-//        fight.set_skill_slot_possible_templates(2, {0, 1, 2});
-//        auto start = BAASUtil::getCurrentTimeMS();
-//        int frame_count = 0;
-//
-//        fight.set_boss_health_update_flag(0b100);
-//        fight.set_skill_cost_update_flag(0b111);
-//        cv::Mat img;
-////
-//        while(1){
-//            baas.update_screenshot_array();
-//            auto st = BAASUtil::getCurrentTimeMS();
-//            baas.reset_all_feature();
-////            fight.update_screenshot();
-////            if (!baas.feature_appear("fight_pause-button_appear")) {
-////                continue;
-////            }
-//
-//            fight.reset_data();
-//            fight.update_data();
-//            auto end = BAASUtil::getCurrentTimeMS();
-//            baas.get_logger()->BAASInfo("Update data time: " + std::to_string(end - st) + "ms");
-//            fight.display_screenshot_extracted_data();
-//
-//            baas.get_latest_screenshot(img);
-//            frame_count++;
-//            if (BAASUtil::getCurrentTimeMS() - start > 1000) {
-//                start = BAASUtil::getCurrentTimeMS();
-//                baas.get_logger()->BAASInfo("Process frame : " + std::to_string(frame_count) + " in 1s.");
-//                frame_count = 0;
-//            }
-//        }
     }
     catch (const std::exception& e) {
         BAASGlobalLogger->BAASInfo(e.what());
