@@ -14,7 +14,7 @@ const std::map<std::string, CostCondition::Op> CostCondition::op_map = {
         {"decrease", DECREASE}
 };
 
-const std::vector<std::string> CostCondition::op_to_st = {
+const std::vector<std::string> CostCondition::op_st_list = {
         "over",
         "below",
         "in_range",
@@ -132,7 +132,7 @@ void CostCondition::_parse_config_range()
 void CostCondition::display() const noexcept
 {
     _display_basic_info();
-    logger->BAASInfo("Op      : [ " + op_to_st[_op] + " ]");
+    logger->BAASInfo("Op      : [ " + op_st_list[_op] + " ]");
     switch (_op) {
         case IN_RANGE:
             logger->BAASInfo("Range   : [ " + std::to_string(_range_min) + ", " + std::to_string(_range_max) + " ]");

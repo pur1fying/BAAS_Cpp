@@ -28,7 +28,11 @@ void gen_hr_msg(
 );
 
 class GlobalLogger {
+
 public:
+
+    static std::string current_time_string();
+
     inline void flush() {
         if (enable & 0b1)
             consoleLogger->flush();

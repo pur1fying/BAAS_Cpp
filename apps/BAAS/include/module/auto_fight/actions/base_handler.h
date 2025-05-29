@@ -51,7 +51,12 @@ public:
 
     virtual void display();
 
+    static const std::map<std::string, base_handler::ACTION_TYPE> act_type_map;
+
+    static const std::vector<std::string> act_type_st_list;
+
 protected:
+    
     BAAS* baas;
 
     BAASLogger* logger;
@@ -61,10 +66,6 @@ protected:
     BAASConfig config;
 
     std::string desc;
-
-    static const std::map<std::string, base_handler::ACTION_TYPE> act_type_map;
-
-    static const std::vector<std::string> act_type_st_list;
 
 };
 

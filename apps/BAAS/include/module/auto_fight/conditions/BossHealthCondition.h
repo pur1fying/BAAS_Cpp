@@ -36,7 +36,7 @@ public:
 
     const static std::map<std::string, Op> op_map;
 
-    const static std::vector<std::string> op_to_st;
+    const static std::vector<std::string> op_st_list;
 
     std::optional<bool> try_match() override;
 

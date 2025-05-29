@@ -673,12 +673,11 @@ protected:
         std::ifstream in(modify_history_path);
         nlohmann::json j = nlohmann::json::parse(in);
         in.close();
-        auto it = j.find(BAASUtil::current_time_string());
+        std::string time_str = GlobalLogger::current_time_string();
+        auto it = j.find(time_str);
         if (it != j.end())it->push_back(modified);
-        else j[BAASUtil::current_time_string()] = modified;
-        std::ofstream out(
-                modify_history_path,
-        std::ios::out | std::ios::trunc);
+        else j[time_str] = modified;
+        std::ofstream out(modify_history_path, std::ios::out | std::ios::trunc);
         out << j.dump(4);
         out.close();
         modified.clear();

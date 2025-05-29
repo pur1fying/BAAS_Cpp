@@ -6,28 +6,6 @@
 
 BAAS_NAMESPACE_BEGIN
 
-const std::map<std::string, BaseCondition::ConditionType> BaseCondition::cond_type_map = {
-        {"and_combined",  A_COMBINED},
-        {"or_combined" ,  O_COMBINED},
-        {"cost"        ,  COST},
-        {"skill_name"  ,  SKILL_NAME},
-        {"skill_cost"  ,  SKILL_COST},
-        {"acc_phase"   ,  ACC_PHASE},
-        {"auto_state"  ,  AUTO_STATE},
-        {"boss_health" ,  BOSS_HEALTH}
-};
-
-const std::vector<std::string> BaseCondition::cond_type_st_list = {
-        "and_combined",
-        "or_combined",
-        "cost",
-        "skill_name",
-        "skill_cost",
-        "acc_phase",
-        "auto_state",
-        "boss_health"
-};
-
 BaseCondition::BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config)
 {
     this->config = BAASConfig(config.get_config(), baas->get_logger());

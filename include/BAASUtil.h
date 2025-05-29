@@ -60,8 +60,6 @@ public:
             int length
     );
 
-    static std::string current_time_string();
-
     static std::string getStreamOutput(FILE *stream);
 
     static void executeCommandWithoutOutPut(const std::string &command);

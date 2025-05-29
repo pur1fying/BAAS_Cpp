@@ -5,13 +5,6 @@
 
 BAAS_NAMESPACE_BEGIN
 
-const std::map<std::string, auto_handler::Op> auto_handler::op_map = {
-        {"on", ON},
-        {"off", OFF},
-        {"opposite", OPPOSITE}
-};
-
-
 auto_handler::auto_handler(
         BAAS* baas,
         auto_fight_d* data,
@@ -74,12 +67,13 @@ void auto_handler::_parse_op()
         throw ValueError("[ /op ] must be specified.");
     }
     std::string op = this->config.getString("op");
-    if (op_map.find(op) == op_map.end()) {
+    auto it = op_map.find(op);
+    if (it == op_map.end()) {
         logger->BAASError("Invalid auto op : [ " + op + " ]");
         _display_valid_auto_op();
         throw ValueError("Invalid auto op.");
     }
-    _op = op_map.at(op);
+    _op = it->second;
 }
 
 

@@ -113,20 +113,6 @@ int BAASUtil::binary2int(
     return res;
 }
 
-string BAASUtil::current_time_string()
-{
-    auto now = std::chrono::system_clock::now();
-    auto timeT = std::chrono::system_clock::to_time_t(now);
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-    std::tm localTime = *std::localtime(&timeT);
-    std::ostringstream oss;
-    oss << std::put_time(&localTime, "%Y-%m-%d_%H.%M.%S");
-    std::string formattedTime = oss.str();
-    CURRENT_TIME_STRING = oss.str();
-    return CURRENT_TIME_STRING;
-}
-
-
 string BAASUtil::getStreamOutput(FILE *stream)
 {
     char buffer[128];

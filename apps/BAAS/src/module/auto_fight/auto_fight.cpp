@@ -290,8 +290,9 @@ void AutoFight::_init_d_fight(const std::filesystem::path &name)
         workflow_name = config->getString("/auto_fight/workflow_name");
         workflow_path = config->getPath("/auto_fight/workflow_name").string() + ".json";
     }
+
     else {
-        std::filesystem::path temp = name;
+        const std::filesystem::path& temp = name;
         workflow_name = name.string();
         workflow_path = temp.string() + ".json";
     }
@@ -311,7 +312,6 @@ void AutoFight::_init_d_fight(const std::filesystem::path &name)
 
 void AutoFight::_init_skills()
 {
-    // Skill
     logger->hr("Init Skills");
     auto skill_names = d_auto_f.d_fight.get<std::vector<std::string>>("/formation/all_appeared_skills");
     for (int i = 0; i < skill_names.size(); ++i) {
@@ -891,16 +891,17 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
 {
     std::optional<bool> final_ret = std::nullopt;
     _cond_checked[cond_idx] = true;
-    // self match
+
+    // self match state
     std::optional<bool> ret;
     if (!_cond_self_matched[cond_idx].has_value())
         ret = all_cond[cond_idx]->try_match();
     else
         ret = _cond_self_matched[cond_idx];
 
-    // self is pending
+    // self pending
     if(!ret.has_value()) {
-        // check and
+         // check and
          for(const auto& _and : all_cond[cond_idx]->get_and_cond())  {
             if(!_cond_is_pending(_and)) {
                 if(_cond_is_dissatisfied(_and)) {
@@ -964,6 +965,7 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
                         break;
                     }
                 }
+            // all and cond satisfied
             if (final_ret != false && !has_pending) final_ret = true;
         }
 
@@ -984,6 +986,7 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
                         break;
                     }
                 }
+            // all or cond dissatisfied
             if (final_ret != true && !has_pending) final_ret = false;
         }
     }

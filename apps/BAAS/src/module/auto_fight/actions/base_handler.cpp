@@ -7,22 +7,6 @@
 
 BAAS_NAMESPACE_BEGIN
 
-const std::map<std::string, base_handler::ACTION_TYPE> base_handler::act_type_map = {
-        {"skill", ACTION_TYPE::SKILL},
-        {"auto", ACTION_TYPE::AUTO},
-        {"acc", ACTION_TYPE::ACC},
-        {"restart",  ACTION_TYPE::RESTART},
-        {"skip_animation", ACTION_TYPE::SKIP_ANIMATION}
-};
-
-const std::vector<std::string> base_handler::act_type_st_list = {
-        "skill",
-        "auto",
-        "acc",
-        "restart",
-        "skip_animation"
-};
-
 base_handler::base_handler(BAAS* baas, auto_fight_d* data, const BAASConfig& config)
 {
     this->config = BAASConfig(config.get_config(), baas->get_logger());

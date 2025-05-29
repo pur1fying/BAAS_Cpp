@@ -7,7 +7,7 @@
 #include <spdlog/async.h>
 
 #include "BAASGlobals.h"
-#include "config/BAASGlobalSetting.h"
+
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
@@ -19,6 +19,19 @@ GlobalLogger *GlobalLogger::global_logger = nullptr;
 const string BAAS_LOGGER_HR_LINE = std::string(80, '-');
 
 const string BAAS_LOGGER_DIVIDER_LINE = std::string(80, '=');
+
+std::string GlobalLogger::current_time_string()
+{
+    auto now = std::chrono::system_clock::now();
+    auto timeT = std::chrono::system_clock::to_time_t(now);
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
+    std::tm localTime = *std::localtime(&timeT);
+    std::ostringstream oss;
+    oss << std::put_time(&localTime, "%Y-%m-%d_%H.%M.%S");
+    std::string formattedTime = oss.str();
+    CURRENT_TIME_STRING = oss.str();
+    return CURRENT_TIME_STRING;
+}
 
 void gen_hr_msg(
         const string &msg,
@@ -32,7 +45,7 @@ void gen_hr_msg(
 }
 
 
-GlobalLogger *GlobalLogger::getGlobalLogger()
+GlobalLogger* GlobalLogger::getGlobalLogger()
 {
     if (global_logger == nullptr) {
         mutex m;
@@ -52,7 +65,7 @@ GlobalLogger::GlobalLogger()
         enable = 0b11;
         consoleLogger = spdlog::stdout_color_mt("console");
         if (!filesystem::exists(BAAS_OUTPUT_DIR)) filesystem::create_directory(BAAS_OUTPUT_DIR);
-        string currTime = BAASUtil::current_time_string();
+        string currTime = current_time_string();
         folder_path = BAAS_OUTPUT_DIR / currTime;
         filesystem::create_directory(folder_path);
         fstream file(folder_path / "global_log.txt", ios::out);
@@ -114,7 +127,7 @@ BAASLogger::BAASLogger(const string &name) : GlobalLogger(1)
     if (!filesystem::exists("output")) {
         filesystem::create_directory("output");
     }
-    string currTime = BAASUtil::current_time_string();
+    string currTime = current_time_string();
     filename = name + ".txt";
     fstream file(GlobalLogger::folder_path / filename, ios::out);
     file.close();

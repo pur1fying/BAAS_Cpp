@@ -47,16 +47,18 @@ struct BAASImage {
 // {server}.{language}.{group}.{name}
 
 class BAASImageResource {
+
 public:
-    static BAASImageResource *get_instance();
+
+    static BAASImageResource* get_instance();
 
     void get(
-            const std::string &resource_pointer,
+            const std::string& resource_pointer,
             cv::Mat &out
     );
 
     void get(
-            const std::string &resource_pointer,
+            const std::string& resource_pointer,
             BAASImage &out
     );
 
@@ -78,7 +80,7 @@ public:
         return server + "." + language + "." + group + "." + name;
     }
 
-    bool remove(const std::string &key);
+    bool remove(const std::string& key);
 
     void clear();
 

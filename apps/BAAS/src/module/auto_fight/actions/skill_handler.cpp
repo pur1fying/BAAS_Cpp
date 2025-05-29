@@ -4,29 +4,10 @@
 
 #include "module/auto_fight/actions/skill_handler.h"
 
+#include "module/auto_fight/constants.h"
 #include "module/auto_fight/screenshot_data/BaseDataUpdater.h"
 
 BAAS_NAMESPACE_BEGIN
-
-const std::map<std::string, skill_handler::Release_Op> skill_handler::release_op_map = {
-        {"auto", AUTO},
-        {"name", NAME},
-        {"l_rel_p", LAST_REL_IDX}
-};
-
-const std::map<std::string, skill_handler::Check_Op> skill_handler::check_op_map = {
-        {"C_decrease", C_DECREASE},
-        {"", NO_CHECK}
-};
-
-const std::map<std::string, skill_handler::Target_Op> skill_handler::target_op_map = {
-        {"fixed", FIXED},
-        {"yolo_t_p", YOLO_T_P_MEAN},
-        {"yolo_c_p", YOLO_C_P_MEAN},
-        {"yolo_g_p", YOLO_G_P_MEAN},
-        {"yolo_l_p", YOLO_L_P_MEAN},
-        {"yolo_r_p", YOLO_R_P_MEAN}
-};
 
 skill_handler::skill_handler(
         BAAS* baas,
@@ -84,22 +65,23 @@ void skill_handler::_parse_release_op()
 {
     if (!config.contains("op")) {
         logger->BAASError("If you want to do action [ skill ], you must fill [ op ] which indicates the skill release method type.");
-        _display_valid_release_op();
-        throw ValueError("[ /op ] must be specified.");
+        _log_valid_op("[ Action skill ] [ /op ]", logger, release_op_st_list);
+        throw ValueError("[ Action skill ] [ /op ] must be specified.");
     }
     if (config.value_type("op") != nlohmann::detail::value_t::string) {
-        logger->BAASError("[ /op ] must be a string.");
-        throw TypeError("[ /op ] TypeError");
+        logger->BAASError("[ Action skill ] [ /op ] must be a string.");
+        throw TypeError("[ Action skill ] [ /op ] TypeError");
     }
 
     std::string _rel_op_st = this->config.getString("op");
-    if (release_op_map.find(_rel_op_st) == release_op_map.end()) {
+    auto it = release_op_map.find(_rel_op_st);
+    if (it == release_op_map.end()) {
         logger->BAASError("Invalid skill_handler release op : [ " + _rel_op_st + " ]");
-        _display_valid_release_op();
-        throw ValueError("Invalid skill_handler release op.");
+        _log_valid_op("[ Action skill ] [ /op ]", logger, release_op_st_list);
+        throw ValueError("Invalid action skill op.");
     }
 
-    _r_op = release_op_map.at(_rel_op_st);
+    _r_op = it->second;
 
     switch (_r_op) {
         case AUTO:
@@ -125,7 +107,7 @@ void skill_handler::_parse_target_op()
             if (!config.contains("/target/op")) {
                 logger->BAASError("If you want to release skill with a target, you must fill [ /target/op ]"
                                   " which indicates the target type.");
-                _display_valid_target_op();
+                _log_valid_op("[ Action skill ] [ /target/op ]", logger, target_op_st_list);
                 throw ValueError("[ /target/op ] must be specified.");
             }
             if (config.value_type("/target/op") != nlohmann::detail::value_t::string) {
@@ -133,12 +115,13 @@ void skill_handler::_parse_target_op()
                 throw TypeError("[ /target/op ] TypeError");
             }
             std::string _t_op_st = this->config.getString("/target/op");
-            if (target_op_map.find(_t_op_st) == target_op_map.end()) {
+            auto it = target_op_map.find(_t_op_st);
+            if (it == target_op_map.end()) {
                 logger->BAASError("Invalid skill_handler target op : [ " + _t_op_st + " ]");
                 _display_valid_target_op();
                 throw ValueError("Invalid skill_handler target op.");
             }
-            _t_op = target_op_map.at(_t_op_st);
+            _t_op = it->second;
             switch(_t_op) {
                 case FIXED: {
                     if (!config.contains("/target/x")) {
@@ -150,11 +133,11 @@ void skill_handler::_parse_target_op()
                         throw ValueError("Fixed position [ y ] must be specified.");
                     }
                     if (!config.getJson("/target/x").is_number()) {
-                        logger->BAASError("When target is fixed [ /target/x ] must be a number.");
+                        logger->BAASError("When target is fixed, [ /target/x ] must be a number.");
                         throw TypeError("[ /target/x ] TypeError");
                     }
                     if (!config.getJson("/target/y").is_number()) {
-                        logger->BAASError("When target is fixed [ /target/y ] must be a number.");
+                        logger->BAASError("When target is fixed, [ /target/y ] must be a number.");
                         throw TypeError("[ /target/y ] TypeError");
                     }
                     _fixed_x = config.getInt("/target/x");
@@ -176,8 +159,8 @@ void skill_handler::_parse_target_op()
                         throw ValueError("At least one object name is required.");
                     }
                     for (const auto &obj_name : obj_names) {
-                        auto it = data->obj_name_to_index_map.find(obj_name);
-                        if (it == data->obj_name_to_index_map.end()) {
+                        auto  _it = data->obj_name_to_index_map.find(obj_name);
+                        if (_it == data->obj_name_to_index_map.end()) {
                             logger->BAASError("Object [ " + obj_name + " ] is not detect in this workflow.");
                             throw ValueError("Invalid yolo object detected.");
                         }
@@ -196,7 +179,7 @@ void skill_handler::_parse_check_op()
     std::string _c_op_st = this->config.getString("/check/op", "");
     if (check_op_map.find(_c_op_st) == check_op_map.end()) {
         logger->BAASError("Invalid check op : [ " + _c_op_st + " ]");
-        _display_valid_check_op();
+        _log_valid_op("[ Action skill ] [ /check/op ]", logger, check_op_st_list);
         throw ValueError("Invalid check op.");
     }
     _c_op = check_op_map.at(_c_op_st);

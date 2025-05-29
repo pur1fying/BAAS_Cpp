@@ -19,7 +19,6 @@ public:
         PHASE_3,
     };
 
-
     acc_handler(
             BAAS* baas,
             auto_fight_d* data,
@@ -30,9 +29,11 @@ public:
 
     void display() noexcept override;
 
-private:
-
     const static std::map<std::string, Op> op_map;
+
+    const static std::vector<std::string> op_st_list;
+
+private:
 
     void _parse_op();
 

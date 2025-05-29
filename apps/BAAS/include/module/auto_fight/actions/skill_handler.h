@@ -46,9 +46,15 @@ public:
 
     const static std::map<std::string, Release_Op> release_op_map;
 
+    const static std::vector<std::string> release_op_st_list;
+
     const static std::map<std::string, Target_Op> target_op_map;
 
+    const static std::vector<std::string> target_op_st_list;
+
     const static std::map<std::string, Check_Op> check_op_map;
+
+    const static std::vector<std::string> check_op_st_list;
 
 private:
 
@@ -93,13 +99,6 @@ private:
     }
 
     void _parse_check_op();
-
-    inline void _display_valid_check_op() {
-        logger->BAASInfo("Valid check op are displayed as follow : ");
-        int cnt = 0;
-        for (auto& op : check_op_map)
-            logger->BAASInfo(std::to_string(++cnt) + " : \"" + op.first + "\"");
-    }
 
     uint64_t _skill_n_idx;
 

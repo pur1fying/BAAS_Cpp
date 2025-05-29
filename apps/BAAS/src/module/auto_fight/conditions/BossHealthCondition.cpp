@@ -6,24 +6,6 @@
 
 BAAS_NAMESPACE_BEGIN
 
-const std::map<std::string, BossHealthCondition::Op> BossHealthCondition::op_map = {
-        {"C_over", C_OVER},
-        {"C_below", C_BELOW},
-        {"C_in_range", C_IN_RANGE},
-        {"C_increase", C_INCREASE},
-        {"C_decrease", C_DECREASE},
-        {"M_equal", M_EQUAL}
-};
-
-const std::vector<std::string> BossHealthCondition::op_to_st = {
-        "C_over",
-        "C_below",
-        "C_in_range",
-        "C_increase",
-        "C_decrease",
-        "M_equal"
-};
-
 BossHealthCondition::BossHealthCondition(
         BAAS* baas,
         auto_fight_d* data,
@@ -91,7 +73,7 @@ std::optional<bool> BossHealthCondition::try_match()
 void BossHealthCondition::display() const noexcept
 {
     _display_basic_info();
-    logger->BAASInfo("Op      : [ " + op_to_st[_op] + " ]");
+    logger->BAASInfo("Op      : [ " + op_st_list[_op] + " ]");
     switch (_op) {
         case C_IN_RANGE:
             logger->BAASInfo("Range   : [ " + std::to_string(_range_min) + ", " + std::to_string(_range_max) + " ]");

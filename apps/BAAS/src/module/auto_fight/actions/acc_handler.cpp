@@ -3,15 +3,9 @@
 //
 
 #include "module/auto_fight/actions/acc_handler.h"
+#include "module/auto_fight/constants.h"
 
 BAAS_NAMESPACE_BEGIN
-
-const std::map<std::string, acc_handler::Op> acc_handler::op_map = {
-        {"1", PHASE_1},
-        {"2", PHASE_2},
-        {"3", PHASE_3}
-};
-
 
 acc_handler::acc_handler(
         BAAS* baas,
@@ -52,16 +46,17 @@ void acc_handler::_parse_op()
     if (!this->config.contains("op")) {
         logger->BAASError("If you want to do action [ acc ], you must fill [ op ] in config, "
                           "which indicates the target acc phase you expect.");
-        _display_valid_acc_op();
+        _log_valid_op("[ Action acc ] [ /op ]", logger, op_st_list);
         throw ValueError("[ /op ] must be specified.");
     }
     std::string op = this->config.getString("op");
-    if (op_map.find(op) == op_map.end()) {
+    auto it = op_map.find(op);
+    if (it == op_map.end()) {
         logger->BAASError("Invalid acc op : [ " + op + " ]");
-        _display_valid_acc_op();
-        throw ValueError("Invalid acc op.");
+        _log_valid_op("[ Action acc ] [ /op ]", logger, op_st_list);
+        throw ValueError("Invalid action acc op.");
     }
-    _op = op_map.at(op);
+    _op = it->second;
 }
 
 

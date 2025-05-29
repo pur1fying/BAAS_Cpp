@@ -5,16 +5,6 @@
 #include "module/auto_fight/conditions/SkillNameCondition.h"
 
 BAAS_NAMESPACE_BEGIN
- 
-const std::map<std::string, SkillNameCondition::Op> SkillNameCondition::op_map = {
-        {"appear", APPEAR},
-        {"at", AT}
-};
-
-const std::vector<std::string> SkillNameCondition::op_to_st = {
-        "appear",
-        "at"
-};
 
 SkillNameCondition::SkillNameCondition(
         BAAS* baas,
@@ -34,7 +24,7 @@ void SkillNameCondition::reset_state()
 void SkillNameCondition::display() const noexcept
 {
     _display_basic_info();
-    logger->BAASInfo("Op      : [ " + op_to_st[_op] + " ]");
+    logger->BAASInfo("Op      : [ " + op_st_list[_op] + " ]");
     switch (_op) {
         case AT:
             logger->BAASInfo("P       : [ " + std::to_string(_p) + " ]");

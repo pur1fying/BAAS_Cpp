@@ -91,6 +91,10 @@ public:
         return timeout;
     }
 
+    static const std::map<std::string, BaseCondition::ConditionType> cond_type_map;
+
+    static const std::vector<std::string> cond_type_st_list;
+
 protected:
 
     void _display_basic_info() const noexcept;
@@ -99,9 +103,6 @@ protected:
     BAASLogger* logger;
     auto_fight_d* data;
     BAASConfig config;
-
-    static const std::map<std::string, BaseCondition::ConditionType> cond_type_map;
-    static const std::vector<std::string> cond_type_st_list;
 
     bool _is_primitive;
 
