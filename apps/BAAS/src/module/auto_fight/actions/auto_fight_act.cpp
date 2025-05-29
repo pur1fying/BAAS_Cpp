@@ -34,24 +34,25 @@ bool auto_fight_act::_execute(uint64_t act_id) noexcept
 void auto_fight_act::_init_all_act()
 {
     if(act_config.get_config().type() != nlohmann::json::value_t::object) {
-        logger->BAASWarn("Actions config is must be a object.");
-        throw TypeError("Invalid Actions Config Type.");
+        logger->BAASWarn("Workflow [ actions ] config must be a object.");
+        throw TypeError("Invalid [ actions ] Config Type.");
     }
 
     BAASConfig sing_act_config;
 
     for(auto& i : act_config.get_config().items()) {
         sing_act_config = BAASConfig(i.value(), logger);
-        _init_single_act(sing_act_config);
+        _init_single_act(sing_act_config, i.key());
         act_name_idx_map[i.key()] = all_act.size() - 1;
     }
 }
 
-void auto_fight_act::_init_single_act(const BAASConfig& config)
+void auto_fight_act::_init_single_act(const BAASConfig& config, const std::string& key)
 {
     if(!config.get_config().is_array()) {
-        logger->BAASWarn("In workflow [ Actions ], Single [ Action ] config must be an array.");
-        throw TypeError("Invalid Single [ Action ] Config Type.");
+        logger->BAASWarn("Workflow [ single action ] config must be an array.");
+        logger->BAASWarn("Error action key : [ " + key + " ]");
+        throw TypeError("Invalid [ single action ] Config Type.");
     }
 
     BAASConfig single_act_config;

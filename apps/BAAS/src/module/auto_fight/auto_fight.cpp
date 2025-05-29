@@ -342,45 +342,47 @@ void AutoFight::_init_all_cond()
 void AutoFight::_init_self_cond()
 {
     // condition in this json file
-    if (!d_auto_f.d_fight.contains("/conditions")) {
-        logger->BAASWarn("No condition in workflow file.");
+    if (!d_auto_f.d_fight.contains("Workflow json must contain [ conditions ].")) {
+        logger->BAASWarn("Workflow Conditions Not Found");
         return;
     }
 
     BAASConfig all_conditions;
     d_auto_f.d_fight.getBAASConfig("/conditions", all_conditions, logger);
     if(!all_conditions.get_config().is_object()) {
-        logger->BAASError("Elements of [ conditions ] must be object.");
-        throw TypeError("In Workflow file [ conditions ] must be object.");
+        logger->BAASError("Workflow [ conditions ] config must be a object.");
+        throw TypeError("Invalid [ conditions ] Config Type");
     }
     int suc_cnt = 0;
-    bool ret;
     for (auto &cond : all_conditions.get_config().items()) {
-        ret = _init_single_cond(BAASConfig(cond.value(), logger));
-        if (ret) {
-            ++suc_cnt;
-            cond_name_idx_map[cond.key()] = all_cond.size() - 1;
+        if(!cond.value().is_object()) {
+            logger->BAASError("Workflow [ single condition ] config must be an object.");
+            logger->BAASError("Error condition key : [ " + cond.key() + " ]");
+            throw TypeError("Invalid [ single condition ] Config Type");
         }
+        _init_single_cond(BAASConfig(cond.value(), logger));
+        ++suc_cnt;
+        cond_name_idx_map[cond.key()] = all_cond.size() - 1;
     }
 
     logger->BAASInfo("[ SELF ] Successfully Load [ " + std::to_string(suc_cnt) + " ] Conditions");
 }
 
-bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
+void AutoFight::_init_single_cond(const BAASConfig &d_cond)
 {
     if(!d_cond.contains("type")) {
-        logger->BAASInfo("Condition must contains [ type ].");
-        return false;
+        logger->BAASError("[ single condition ] must contains key [ type ].");
+        throw ValueError("[ single condition ] must contains key [ type ].");
     }
     if(d_cond.value_type("type") != nlohmann::detail::value_t::string) {
-        logger->BAASInfo("[ type ] must be string.");
-        return false;
+        logger->BAASError("[ single condition ] key [ type ] must be string.");
+        throw TypeError("[ single condition ] key [ type ] must be string.");
     }
 
     _cond_type = d_cond.getString("type");
     if(!BaseCondition::is_condition_valid(_cond_type)) {
-        logger->BAASInfo("Invalid condition type [ " + _cond_type + " ]");
-        return false;
+        logger->BAASError("Invalid condition type [ " + _cond_type + " ]");
+        throw ValueError("Invalid condition type found in [ single condition ]");
     }
 
     BaseCondition::ConditionType tp = BaseCondition::type_st_to_idx(_cond_type);
@@ -407,7 +409,6 @@ bool AutoFight::_init_single_cond(const BAASConfig &d_cond)
             all_cond.push_back(std::make_unique<SkillNameCondition>(baas, &d_auto_f, d_cond));
             break;
     }
-    return true;
 }
 
 void AutoFight::display_all_cond_info() const noexcept
@@ -442,30 +443,32 @@ void AutoFight::_init_self_state()
 {
     // condition in this json file
     if (!d_auto_f.d_fight.contains("/states")) {
-        logger->BAASWarn("No state in workflow file.");
-        return;
+        logger->BAASError("Workflow json must contain [ states ].");
+        throw ValueError("Workflow States Not Found");
     }
 
     BAASConfig _t_all_state;
     d_auto_f.d_fight.getBAASConfig("/states", _t_all_state, logger);
     if(!_t_all_state.get_config().is_object()) {
-        logger->BAASError("Elements of [ states ] must be object.");
-        throw TypeError("In Workflow file [ states ] must be object.");
+        logger->BAASError("Workflow [ states ] config must be a object.");
+        throw TypeError("Invalid [ states ] Config Type");
     }
     int suc_cnt = 0;
-    bool ret;
     for (auto &stat : _t_all_state.get_config().items()) {
-        ret = _init_single_state(BAASConfig(stat.value(), logger), stat.key());
-        if (ret) {
-            ++suc_cnt;
-            state_name_idx_map[stat.key()] = all_states.size() - 1;
+        if(!stat.value().is_object()) {
+            logger->BAASError("Workflow [ single state ] config must be an object.");
+            logger->BAASError("Error state key : [ " + stat.key() + " ]");
+            throw TypeError("Invalid [ single state ] Config Type");
         }
+        _init_single_state(BAASConfig(stat.value(), logger), stat.key());
+        ++suc_cnt;
+        state_name_idx_map[stat.key()] = all_states.size() - 1;
     }
 
     logger->BAASInfo("[ SELF ] Successfully Load [ " + std::to_string(suc_cnt) + " ] States");
 }
 
-bool AutoFight::_init_single_state(const BAASConfig &d_state, const std::string& name)
+void AutoFight::_init_single_state(const BAASConfig &d_state, const std::string& name)
 {
     state_info _state;
     // action
@@ -553,7 +556,6 @@ bool AutoFight::_init_single_state(const BAASConfig &d_state, const std::string&
     _state.name = name;
 
     all_states.push_back(_state);
-    return true;
 }
 
 // start state

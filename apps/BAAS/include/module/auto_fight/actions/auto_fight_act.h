@@ -34,7 +34,7 @@ private:
 
     void _init_all_act();
 
-    void _init_single_act(const BAASConfig& config);
+    void _init_single_act(const BAASConfig& config, const std::string& key);
 
     std::string _type_name;
 

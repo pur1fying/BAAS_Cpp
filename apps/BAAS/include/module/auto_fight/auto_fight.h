@@ -137,7 +137,7 @@ private:
 
     void _init_self_cond();
 
-    bool _init_single_cond(const BAASConfig& d_cond);
+    void _init_single_cond(const BAASConfig& d_cond);
 
     void _init_cond_and_or_idx();
 
@@ -227,7 +227,7 @@ private:
 
     void _init_self_state();
 
-    bool _init_single_state(const BAASConfig& d_state, const std::string& state_name);
+    void _init_single_state(const BAASConfig& d_state, const std::string& state_name);
 
     void _conv_tans_state_name_st_to_idx();
 
