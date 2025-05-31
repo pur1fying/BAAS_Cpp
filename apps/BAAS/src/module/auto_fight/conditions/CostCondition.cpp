@@ -4,6 +4,8 @@
 
 #include "module/auto_fight/conditions/CostCondition.h"
 
+#include "module/auto_fight/constants.h"
+
 BAAS_NAMESPACE_BEGIN
 
 const std::map<std::string, CostCondition::Op> CostCondition::op_map = {
@@ -73,12 +75,25 @@ void CostCondition::reset_state()
 
 void CostCondition::_parse_op()
 {
-    std::string op = this->config.getString("op");
-    if (op_map.find(op) == op_map.end()) {
-        logger->BAASError("Invalid CostCondition op: " + op);
-        throw ValueError("Invalid CostCondition op.");
+    auto _it = this->config.find("op");
+    if (_it == this->config.end()) {
+        logger->BAASError("[ CostCondition ] config must contain [ op ].");
+        _log_valid_op("[ CostCondition ] [ op ]", logger, op_st_list);
+        throw ValueError("[ Cost ] [ op ] not found.");
     }
-    _op = op_map.at(op);
+    if (!_it->is_string()) {
+        logger->BAASError("[ CostCondition ] [ op ] must be a string.");
+        _log_valid_op("[ CostCondition ] [ op ]", logger, op_st_list);
+        throw TypeError("Invalid [ CostCondition ] [ op ] Config Type.");
+    }
+    std::string op_str = *_it;
+    auto it = op_map.find(op_str);
+    if (it == op_map.end()) {
+        logger->BAASError("Invalid [ CostCondition ] [ op ] : " + op_str);
+        _log_valid_op("[ CostCondition ] [ op ]", logger, op_st_list);
+        throw ValueError("Invalid [ CostCondition ] [ op ].");
+    }
+    _op = it->second;
     switch (_op) {
         case OVER:
 
@@ -99,34 +114,41 @@ void CostCondition::_parse_op()
 
 void CostCondition::_parse_config_value()
 {
-    if(!config.contains("value"))   {
-        logger->BAASError("CostCondition op " + std::to_string(_op) + " requires [ value ].");
-        throw ValueError("CostCondition op " + std::to_string(_op) + " requires [ value ].");
+    auto  _it = this->config.find("value");
+    if (_it == this->config.end()) {
+        logger->BAASError("[ CostCondition ] [ op ] : \"" + op_st_list[_op] + "\" requires [ value ].");
+        throw ValueError("[ CostCondition ] [ value ] not found.");
     }
-    if(!config.get<nlohmann::json>("value").is_number()) {
-        logger->BAASError("CostCondition config [ value ] must be number.");
-        throw TypeError("CostCondition [ value ] TypeError");
+    if (!_it->is_number()) {
+        logger->BAASError("[ CostCondition ] [ value ] must be a number.");
+        throw TypeError("[ CostCondition ] [ value ] TypeError");
     }
-    _value = config.getDouble("value");
+
+    _value = _it->get<double>();
 }
 
 void CostCondition::_parse_config_range()
 {
-    if(!config.contains("range")) {
-        logger->BAASError("CostCondition op " + std::to_string(_op) + " requires [ range ].");
-        throw ValueError("CostCondition op " + std::to_string(_op) + " requires [ range ].");
+    auto _it = this->config.find("range");
+    if (_it == this->config.end()) {
+        logger->BAASError("[ CostCondition ] [ op ] : \"" + op_st_list[_op] + "\" requires [ range ].");
+        throw ValueError("[ CostCondition ] [ range ] not found.");
     }
-    if(config.get_array_size("range") != 2) {
-        logger->BAASError("CostCondition op " + std::to_string(_op) + " requires [ range ] to be a 2-element array.");
-        throw ValueError("CostCondition op " + std::to_string(_op) + " requires [ range ] to be a 2-element array.");
+    if (!_it->is_array()) {
+        logger->BAASError("[ CostCondition ] [ range ] must be an array.");
+        throw TypeError("[ CostCondition ] [ range ] TypeError");
     }
-    nlohmann::json j = config.getJson("range");
-    if(!j[0].is_number() || !j[1].is_number()) {
-        logger->BAASError("CostCondition config [ range ] element must be number.");
-        throw TypeError("CostCondition [ range ] element TypeError");
+    if (_it->size() != 2) {
+        logger->BAASError("[ CostCondition ] [ range ] array size must be 2.");
+        throw ValueError("[ CostCondition ] [ range ] Size Error");
     }
-    _range_min = j[0];
-    _range_max = j[1];
+
+    if(!(*_it)[0].is_number() || !(*_it)[1].is_number()) {
+        logger->BAASError("[ CostCondition ] [ range ] element must be number.");
+        throw TypeError("[ CostCondition ] [ range ] Element Type Error");
+    }
+    _range_min =  (*_it)[0].get<double>();
+    _range_max =  (*_it)[1].get<double>();
 }
 
 void CostCondition::display() const noexcept

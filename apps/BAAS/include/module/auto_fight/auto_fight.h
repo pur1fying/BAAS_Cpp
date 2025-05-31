@@ -133,13 +133,13 @@ public:
 
 private:
 
+    void _condition_pre_check();
+
     void _init_all_cond();
 
     void _init_self_cond();
 
     void _init_single_cond(const BAASConfig& d_cond);
-
-    void _init_cond_and_or_idx();
 
     std::string _cond_type;
 
@@ -152,7 +152,7 @@ private:
     std::vector<bool> _cond_checked;
 
     // name to index in all_conditions
-    std::map<std::string, uint64_t> cond_name_idx_map;
+    std::map<std::string, uint64_t> _cond_name_idx_map;
 
 END_AUTO_FIGHT_CONDITIONS
 
@@ -173,6 +173,8 @@ public:
     void display_state_idx_name_map() const noexcept;
 
 private:
+
+    void _state_pre_check();
 
     bool _state_start_trans_cond_j_loop();
 
@@ -229,17 +231,9 @@ private:
 
     void _init_single_state(const BAASConfig& d_state, const std::string& state_name);
 
-    void _conv_tans_state_name_st_to_idx();
-
-    void _init_state_act_fail_trans();
-
     std::vector<state_info> all_states;
 
-    std::vector<std::vector<std::string>> _state_trans_name_recorder;
-    std::vector<std::optional<std::string>> _state_default_trans_name_recorder;
-    std::vector<std::optional<std::string>> _state_act_fail_trans_name_recorder;
-
-    std::map<std::string, uint64_t> state_name_idx_map;
+    std::map<std::string, uint64_t> _state_name_idx_map;
 
     uint64_t _curr_state_idx;
 
@@ -266,9 +260,10 @@ END_AUTO_FIGHT_STATES
 BEGIN_AUTO_FIGHT_ACTIONS
 public:
 
-
 private:
     void _init_actions();
+
+    void _action_pre_check();
 
     std::unique_ptr<auto_fight_act> _actions;
 

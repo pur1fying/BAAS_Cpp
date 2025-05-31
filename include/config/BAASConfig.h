@@ -61,6 +61,21 @@ public:
 
     void save();
 
+    nlohmann::json::const_iterator begin() const
+    {
+        return config.begin();
+    }
+
+    nlohmann::json::const_iterator end() const
+    {
+        return config.end();
+    }
+
+    nlohmann::json::const_iterator find(const std::string& key) const
+    {
+        return config.find(key);
+    }
+
     inline unsigned int get_array_size(const std::string& key) const
     {
         assert(!key.empty());

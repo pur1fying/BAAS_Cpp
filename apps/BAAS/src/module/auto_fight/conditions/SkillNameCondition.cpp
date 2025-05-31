@@ -4,6 +4,8 @@
 
 #include "module/auto_fight/conditions/SkillNameCondition.h"
 
+#include "module/auto_fight/constants.h"
+
 BAAS_NAMESPACE_BEGIN
 
 SkillNameCondition::SkillNameCondition(
@@ -82,12 +84,25 @@ std::optional<bool> SkillNameCondition::try_match()
 
 void SkillNameCondition::_parse_op()
 {
-    std::string op = this->config.getString("op");
-    if (op_map.find(op) == op_map.end()) {
-        logger->BAASError("Invalid SkillNameCondition op: " + op);
-        throw ValueError("Invalid SkillNameCondition op.");
+    auto it = config.find("op");
+    if (it == config.end()) {
+        logger->BAASError("[ SkillNameCondition ] confiig must contain [ op ].");
+        _log_valid_op("[ SkillNameCondition ] [ op ]", logger, op_st_list);
+        throw ValueError("[ SkillNameCondition ] [ op ] not found.");
     }
-    _op = op_map.at(op);
+    if (!it->is_string()) {
+        logger->BAASError("[ SkillNameCondition ] [ op ] must be a string.");
+        _log_valid_op("[ SkillNameCondition ] [ op ]", logger, op_st_list);
+        throw TypeError("[ SkillNameCondition ] [ op ] TypeError");
+    }
+    std::string op_str = *it;
+    auto _it = op_map.find(op_str);
+    if (_it == op_map.end()) {
+        logger->BAASError("Invalid [ SkillNameCondition ] [ op ] : " + op_str);
+        _log_valid_op("[ SkillNameCondition ] [ op ]", logger, op_st_list);
+        throw ValueError("Invalid [ SkillNameCondition ] [ op ].");
+    }
+    _op = _it->second;
     switch (_op) {
         case AT:
             _parse_p();
@@ -98,16 +113,19 @@ void SkillNameCondition::_parse_op()
 
 void SkillNameCondition::_parse_skill_name()
 {
-    if(!config.contains("name")) {
-        logger->BAASError("SkillNameCondition op " + std::to_string(_op) + " requires [ name ].");
-        throw ValueError("SkillNameCondition op " + std::to_string(_op) + " requires [ name ].");
+    auto it = config.find("name");
+    if ( it == config.end()) {
+        logger->BAASError("[ SkillNameCondition ] confiig must contain [ name ].");
+        _list_valid_name();
+        throw ValueError("[ SkillNameCondition ] [ name ] not found.");
     }
-    if(config.value_type("name") != nlohmann::detail::value_t::string) {
-        logger->BAASError("SkillNameCondition config [ name ] must be string.");
-        throw TypeError("SkillNameCondition [ name ] TypeError");
+    if (!it->is_string()) {
+        logger->BAASError("[ SkillNameCondition ] [ name ] must be a string.");
+        _list_valid_name();
+        throw TypeError("[ SkillNameCondition ] [ name ] TypeError");
     }
-    _skill_name = config.getString("name");
 
+    _skill_name = *it;
     bool find = false;
     for (int i = 0; i < data->all_possible_skills.size(); i++) {
         if(data->all_possible_skills[i].name == _skill_name) {
@@ -118,32 +136,31 @@ void SkillNameCondition::_parse_skill_name()
     }
 
     if(!find) {
-        logger->BAASError("SkillNameCondition config name [ " + _skill_name +
-                          " ] not found in skill template.");
-        throw ValueError("Invalid skill name");
+        logger->BAASError("[ SkillNameCondition ] [ name ] : \"" + _skill_name + "\" not found in all possible skills.");
+        _list_valid_name();
+        throw ValueError("Invalid [ SkillNameCondition ] [ name ].");
     }
 }
 
 void SkillNameCondition::_parse_p()
 {
-    if(!config.contains("p"))   {
-        logger->BAASError("SkillNameCondition op " + std::to_string(_op) + " requires [ p ].");
-        throw ValueError("SkillNameCondition op " + std::to_string(_op) + " requires [ p ].");
+    auto  _it = this->config.find("p");
+    if (_it == this->config.end()) {
+        logger->BAASError("[ SkillNameCondition ] [ op ] : \"" + op_st_list[_op] + "\" requires [ p ].");
+        throw ValueError("[ SkillNameCondition ] [ p ] not found.");
+    }
+    if (!_it->is_number_unsigned()) {
+        logger->BAASError("[ SkillNameCondition ] [ p ] must be an unsigned integer.");
+        throw TypeError("[ SkillNameCondition ] [ p ] TypeError");
     }
     
-    if(config.value_type("p") != nlohmann::json::value_t::number_unsigned) {
-        logger->BAASError("SkillNameCondition config [ p ] must be unsigned integer.");
-        throw TypeError("SkillNameCondition [ p ] TypeError");
-    }
-    
-    _p = config.getInt("p");
+    _p = _it->get<uint64_t>();
     
     if (_p > (data->slot_count - 1)) {
-        logger->BAASError(" value of p [ " + std::to_string(_p) + " ] out of range "
+        logger->BAASError("[ SkillNameCondition ] [ p ] : " + std::to_string(_p) + " out of range "
                           " [0, " + std::to_string(data->slot_count - 1) + "]");
-        throw ValueError("SkillNameCondition value of [ p ] out of range.");
+        throw ValueError("[ SkillNameCondition ] [ p ] out of range");
     }
-    
 }
 
 

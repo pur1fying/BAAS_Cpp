@@ -85,13 +85,12 @@ struct auto_fight_d {
     // boss health
     std::optional<long long> boss_current_health;
     std::optional<long long> boss_max_health;
-
-    std::uint8_t boss_health_update_flag = 0b010;
     /*
      * 0b010: update current health
      * 0b001: update max health
      * 0b100: update both
      */
+    std::uint8_t boss_health_update_flag = 0b010;
 
     // phase 1, 2, 3
     std::optional<uint8_t>   acceleration_state;
@@ -103,6 +102,7 @@ struct auto_fight_d {
 
     // use vector since there is fight with 6 skills
     std::vector<slot_skill>  skills;
+    // record last detected skill in each slot, will not be reset before condition judgement
     std::vector<slot_skill>  skill_last_detect;
 
     std::vector<std::vector<int>> each_slot_possible_templates; 
@@ -121,6 +121,7 @@ struct auto_fight_d {
     std::vector<std::string> all_possible_obj_names;
     std::vector<int> all_possible_obj_idx;
     std::map<std::string, int> obj_name_to_index_map;
+    // last appeared position of each object, will not be reset before condition judgement
     std::map<int, std::optional<yolo_single_res>> obj_last_appeared_pos;
 
     BAASConfig d_fight;

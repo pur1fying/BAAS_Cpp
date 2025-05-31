@@ -42,6 +42,13 @@ private:
 
     void _parse_skill_name();
 
+    inline void _list_valid_name() const noexcept {
+        logger->BAASInfo("Valid skill names are listed below :");
+        int cnt = 0;
+        for (const auto& skill : data->all_possible_skills)
+            logger->BAASInfo(std::to_string(++cnt) + " : \"" + skill.name + "\"");
+    }
+
     void _parse_p();
 
     Op _op;

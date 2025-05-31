@@ -9,6 +9,8 @@
 #include <BAASImageResource.h>
 
 #include "utils.h"
+#include "module/auto_fight/constants.h"
+
 #include "module/auto_fight/screenshot_data/CostUpdater.h"
 #include "module/auto_fight/screenshot_data/SkillCostUpdater.h"
 #include "module/auto_fight/screenshot_data/SkillNameUpdater.h"
@@ -176,7 +178,7 @@ AutoFight::~AutoFight()
     d_update_thread_pool->shutdown();
 }
 
-void AutoFight::init_workflow(const std::filesystem::path &name)
+void AutoFight::init_workflow(const std::filesystem::path& name)
 {
     // load workflow json
     _init_d_fight(name);
@@ -184,11 +186,24 @@ void AutoFight::init_workflow(const std::filesystem::path &name)
     // appeared skills
     _init_skills();
 
-    // conditions
-    _init_all_cond();
-
     // updaters
     _init_data_updaters();
+
+    // check (record all condition / action / state)
+    _action_pre_check();
+    _condition_pre_check();
+    _state_pre_check();
+
+    // show state cond act count
+    logger->sub_title("State Condition Action Count");
+    logger->BAASInfo(std::format("|{:>10}|{:>10}|{:>10}|", "state", "action", "condition"));
+    logger->BAASInfo(std::format("|{:>10}|{:>10}|{:>10}|",
+                                  std::to_string(_state_name_idx_map.size()),
+                                  std::to_string(_actions->size()),
+                                  std::to_string(_cond_name_idx_map.size())));
+
+    // conditions
+    _init_all_cond();
 
     // actions
     _init_actions();
@@ -204,15 +219,15 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
     _template.name = skill_name;
 
     std::vector<std::string> temp;
-    // active templates
-    std::string j_ptr = template_j_ptr_prefix + "/" + skill_name + "/active";
-
-    if (static_config->contains(j_ptr)) temp = static_config->get<std::vector<std::string>>(j_ptr);
-    else temp = default_active_skill_template;
-
     template_info _t_info;
     std::string res_ptr;
     BAASImage _img;
+
+    // active templates
+    std::string j_ptr = template_j_ptr_prefix + "/" + skill_name + "/active";
+    if (static_config->contains(j_ptr)) temp = static_config->get<std::vector<std::string>>(j_ptr);
+    else temp = default_active_skill_template;
+
     for (const auto &group : temp) {
         res_ptr = BAASImageResource::resource_pointer(baas->get_image_resource_prefix(), group, skill_name);
         if(resource->is_loaded(res_ptr)) resource->get(res_ptr, _img);
@@ -242,45 +257,19 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
         _template.skill_inactive_templates.push_back(_t_info);
     }
 
+    if (_template.skill_active_templates.empty() && _template.skill_inactive_templates.empty()) {
+        logger->BAASError("Didn't find any template for skill [ " + skill_name + " ]. Possible reason : ");
+        logger->BAASError("1. Image resource of this skill is not implemented.");
+        logger->BAASError("2. You set the wrong skill name in workflow.");
+        throw ValueError("Skill Template Not Found");
+    }
+
     logger->BAASInfo("Skill Name: [ " + skill_name + " ]");
     logger->BAASInfo("Index     : [ " + std::to_string(d_auto_f.all_possible_skills.size()) + " ]");
-    logger->BAASInfo("Active    : [ " + std::to_string(_template.skill_active_templates.size()) + " ]");
-    logger->BAASInfo("Inactive  : [ " + std::to_string(_template.skill_inactive_templates.size()) + " ]");
+    logger->BAASInfo("Active_T  : [ " + std::to_string(_template.skill_active_templates.size()) + " ]");
+    logger->BAASInfo("Inactive_T: [ " + std::to_string(_template.skill_inactive_templates.size()) + " ]");
 
     d_auto_f.all_possible_skills.push_back(_template);
-}
-
-void AutoFight::_init_cond_and_or_idx()
-{
-    logger->sub_title("Init Condition And / Or Index.");
-    // convert st --> idx
-    std::vector<uint64_t> _t_idx;
-    std::vector<std::string> _t_st;
-    for (int i = 0; i < all_cond.size(); ++i) {
-        // and cond index
-        _t_idx.clear();
-        _t_st = all_cond[i]->get_and_cond_st();
-        for (const auto &st : _t_st) {
-            if (cond_name_idx_map.find(st) == cond_name_idx_map.end()) {
-                logger->BAASError("In Condition [ " + std::to_string(i) +" ] And Cond [ " + st + " ] not found.");
-                throw ValueError("Undefined condition found in [ and ] condition");
-            }
-            _t_idx.push_back(cond_name_idx_map[st]);
-        }
-        all_cond[i]->set_and_cond(_t_idx);
-
-        // or cond index
-        _t_idx.clear();
-        _t_st = all_cond[i]->get_or_cond_st();
-        for (const auto &st : _t_st) {
-            if (cond_name_idx_map.find(st) == cond_name_idx_map.end()) {
-                logger->BAASError("In Condition [ " + std::to_string(i) +" ] Or Cond [ " + st + " ] not found.");
-                throw ValueError("Undefined condition found in [ or ] condition");
-            }
-            _t_idx.push_back(cond_name_idx_map[st]);
-        }
-        all_cond[i]->set_or_cond(_t_idx);
-    }
 }
 
 void AutoFight::_init_d_fight(const std::filesystem::path &name)
@@ -326,6 +315,37 @@ void AutoFight::_init_skills()
     d_auto_f.each_slot_possible_templates.resize(d_auto_f.slot_count);
 }
 
+void AutoFight::_action_pre_check()
+{
+    _actions = std::make_unique<auto_fight_act>(baas, &d_auto_f);
+    _actions->_action_pre_check();
+}
+
+void AutoFight::_condition_pre_check()
+{
+    auto _it = d_auto_f.d_fight.find("conditions");
+    if (_it == d_auto_f.d_fight.end()) {
+        logger->BAASError("Workflow json must contain [ conditions ].");
+        throw ValueError("Workflow Conditions Not Found");
+    }
+    if (!_it->is_object()) {
+        logger->BAASError("Workflow [ conditions ] config must be a object.");
+        throw TypeError("Invalid [ conditions ] Config Type");
+    }
+
+    uint64_t condition_cnt = 0;
+    for (const auto& [key, value] : _it->items()) {
+        if (!value.is_object()) {
+            logger->BAASError("Workflow [ single condition ] config must be an object.");
+            logger->BAASError("Error condition key : [ " + key + " ]");
+            throw TypeError("Invalid [ single condition ] Config Type");
+        }
+        _cond_name_idx_map[key] = condition_cnt;
+        ++condition_cnt;
+    }
+
+}
+
 void AutoFight::_init_all_cond()
 {
     // Condition
@@ -336,56 +356,48 @@ void AutoFight::_init_all_cond()
     _cond_checked.resize(all_cond.size(), false);
     _cond_self_matched.resize(all_cond.size(), false);
     _cond_is_matched_recorder.resize(all_cond.size(), std::nullopt);
-    _init_cond_and_or_idx();
 }
 
 void AutoFight::_init_self_cond()
 {
-    // condition in this json file
-    if (!d_auto_f.d_fight.contains("Workflow json must contain [ conditions ].")) {
-        logger->BAASWarn("Workflow Conditions Not Found");
-        return;
-    }
-
     BAASConfig all_conditions;
     d_auto_f.d_fight.getBAASConfig("/conditions", all_conditions, logger);
-    if(!all_conditions.get_config().is_object()) {
-        logger->BAASError("Workflow [ conditions ] config must be a object.");
-        throw TypeError("Invalid [ conditions ] Config Type");
-    }
-    int suc_cnt = 0;
-    for (auto &cond : all_conditions.get_config().items()) {
-        if(!cond.value().is_object()) {
-            logger->BAASError("Workflow [ single condition ] config must be an object.");
-            logger->BAASError("Error condition key : [ " + cond.key() + " ]");
-            throw TypeError("Invalid [ single condition ] Config Type");
-        }
-        _init_single_cond(BAASConfig(cond.value(), logger));
-        ++suc_cnt;
-        cond_name_idx_map[cond.key()] = all_cond.size() - 1;
-    }
 
-    logger->BAASInfo("[ SELF ] Successfully Load [ " + std::to_string(suc_cnt) + " ] Conditions");
+    for (auto &cond : all_conditions.get_config().items()) {
+        try {
+            _init_single_cond(BAASConfig(cond.value(), logger));
+        }
+        catch (const std::exception &e) {
+            logger->BAASError("Error condition name : [ " + cond.key() + " ]");
+            throw e;
+        }
+    }
 }
 
 void AutoFight::_init_single_cond(const BAASConfig &d_cond)
 {
-    if(!d_cond.contains("type")) {
-        logger->BAASError("[ single condition ] must contains key [ type ].");
-        throw ValueError("[ single condition ] must contains key [ type ].");
-    }
-    if(d_cond.value_type("type") != nlohmann::detail::value_t::string) {
-        logger->BAASError("[ single condition ] key [ type ] must be string.");
-        throw TypeError("[ single condition ] key [ type ] must be string.");
+    auto _it = d_cond.find("type");
+    if(_it == d_cond.end()) {
+        logger->BAASError("[ single condition ] must contain key [ type ].");
+        _log_valid_op("[ single condition ] [ type ]", logger, BaseCondition::cond_type_st_list);
+        throw ValueError("[ single condition ] [ type ] not found.");
     }
 
-    _cond_type = d_cond.getString("type");
-    if(!BaseCondition::is_condition_valid(_cond_type)) {
-        logger->BAASError("Invalid condition type [ " + _cond_type + " ]");
-        throw ValueError("Invalid condition type found in [ single condition ]");
+    if(!_it->is_string()) {
+        logger->BAASError("[ single condition ] [ type ] must be a string.");
+        _log_valid_op("[ single condition ] [ type ]", logger, BaseCondition::cond_type_st_list);
+        throw TypeError("Invalid [ single condition ] [ type ] Config Type.");
     }
 
-    BaseCondition::ConditionType tp = BaseCondition::type_st_to_idx(_cond_type);
+    _cond_type = *_it;
+    auto it = BaseCondition::cond_type_map.find(_cond_type);
+    if(it == BaseCondition::cond_type_map.end()) {
+        logger->BAASError("Invalid [ single condition ] [ type ] : " + _cond_type);
+        _log_valid_op("[ single condition ] [ type ]", logger, BaseCondition::cond_type_st_list);
+        throw ValueError("Invalid [ single condition ] [ type ].");
+    }
+
+    BaseCondition::ConditionType tp = it->second;
     switch (tp) {
         case BaseCondition::ConditionType::COST:
             all_cond.push_back(std::make_unique<CostCondition>(baas, &d_auto_f, d_cond));
@@ -409,13 +421,45 @@ void AutoFight::_init_single_cond(const BAASConfig &d_cond)
             all_cond.push_back(std::make_unique<SkillNameCondition>(baas, &d_auto_f, d_cond));
             break;
     }
+
+    // and / or cond
+
+    std::vector<uint64_t> _t_idx;
+    std::vector<std::string> _t_st;
+    // and cond index
+    _t_idx.clear();
+    _t_st = all_cond.back()->get_and_cond_st();
+    for (const auto &st : _t_st) {
+        auto _and_it = _cond_name_idx_map.find(st);
+        if (_and_it == _cond_name_idx_map.end()) {
+            logger->BAASError("Undefined condition found in [ single condition ] [ and ]");
+            logger->BAASError("Undefined condition name : [ " + st + " ]");
+            throw ValueError("Undefined condition found.");
+        }
+        _t_idx.push_back(_and_it->second);
+    }
+    all_cond.back()->set_and_cond(_t_idx);
+
+    // or cond index
+    _t_idx.clear();
+    _t_st = all_cond.back()->get_or_cond_st();
+    for (const auto &st : _t_st) {
+        auto _or_it = _cond_name_idx_map.find(st);
+        if (_or_it == _cond_name_idx_map.end()) {
+            logger->BAASError("Undefined condition found in [ single condition ] [ or ]");
+            logger->BAASError("Undefined condition name : [ " + st + " ]");
+            throw ValueError("Undefined condition found.");
+        }
+        _t_idx.push_back(_or_it->second);
+    }
+    all_cond.back()->set_or_cond(_t_idx);
 }
 
 void AutoFight::display_all_cond_info() const noexcept
 {
-    logger->hr("Display All Conditions.");
+    logger->hr("Display All Conditions");
     display_cond_idx_name_map();
-    for (const auto &cond : cond_name_idx_map) {
+    for (const auto &cond : _cond_name_idx_map) {
         logger->sub_title(cond.first);
         all_cond[cond.second]->display();
     }
@@ -424,48 +468,24 @@ void AutoFight::display_all_cond_info() const noexcept
 void AutoFight::display_cond_idx_name_map() const noexcept
 {
     logger->sub_title("Condition Index Name Mapping");
-    for (const auto &cond : cond_name_idx_map)
+    for (const auto &cond : _cond_name_idx_map)
         logger->BAASInfo(std::to_string(cond.second) + " : [ " + cond.first + " ] " );
 }
 
 void AutoFight::_init_all_state()
 {
     logger->hr("Init States");
-
-    _init_self_state();
-
     _init_start_state();
 
-    _conv_tans_state_name_st_to_idx();
+    _init_self_state();
 }
 
 void AutoFight::_init_self_state()
 {
-    // condition in this json file
-    if (!d_auto_f.d_fight.contains("/states")) {
-        logger->BAASError("Workflow json must contain [ states ].");
-        throw ValueError("Workflow States Not Found");
-    }
-
     BAASConfig _t_all_state;
     d_auto_f.d_fight.getBAASConfig("/states", _t_all_state, logger);
-    if(!_t_all_state.get_config().is_object()) {
-        logger->BAASError("Workflow [ states ] config must be a object.");
-        throw TypeError("Invalid [ states ] Config Type");
-    }
-    int suc_cnt = 0;
-    for (auto &stat : _t_all_state.get_config().items()) {
-        if(!stat.value().is_object()) {
-            logger->BAASError("Workflow [ single state ] config must be an object.");
-            logger->BAASError("Error state key : [ " + stat.key() + " ]");
-            throw TypeError("Invalid [ single state ] Config Type");
-        }
+    for (auto &stat : _t_all_state.get_config().items())
         _init_single_state(BAASConfig(stat.value(), logger), stat.key());
-        ++suc_cnt;
-        state_name_idx_map[stat.key()] = all_states.size() - 1;
-    }
-
-    logger->BAASInfo("[ SELF ] Successfully Load [ " + std::to_string(suc_cnt) + " ] States");
 }
 
 void AutoFight::_init_single_state(const BAASConfig &d_state, const std::string& name)
@@ -475,11 +495,14 @@ void AutoFight::_init_single_state(const BAASConfig &d_state, const std::string&
     std::string act = d_state.getString("action");
     if (act.empty()) _state.act_id = std::nullopt;
     else {
-        if (!_actions->act_exist(act)) {;
-            logger->BAASError("Action [ " + act + " ] not found.");
-            throw ValueError("Action not found.");
+        auto it = _actions->act_find(act);
+        if (it == _actions->act_end()) {;
+            logger->BAASError("Undefined [ action ] found in [ single state ].");
+            logger->BAASError("Error state  name : [ " + name + " ]");
+            logger->BAASError("Error action name : [ " + act + " ]");
+            throw ValueError("State Action Not Found");
         }
-        _state.act_id = _actions->get_act_id(act);
+        _state.act_id = it->second;
     }
 
     // transitions
@@ -505,7 +528,7 @@ void AutoFight::_init_single_state(const BAASConfig &d_state, const std::string&
 
             std::string _t_st = *it;
 
-            if (cond_name_idx_map.find(_t_st) == cond_name_idx_map.end()) {
+            if (_cond_name_idx_map.find(_t_st) == _cond_name_idx_map.end()) {
                 logger->BAASError(fmt::format("Undefined Condition [ {} ] in state transition [ {} ]", _t_st, name));
                 throw ValueError("Undefined condition found in [ transition ] ");
             }
@@ -522,32 +545,56 @@ void AutoFight::_init_single_state(const BAASConfig &d_state, const std::string&
                 throw TypeError("Invalid [ next ] type in transition.");
             }
 
-            _state.transitions.push_back({cond_name_idx_map[_t_st], 0});
+            _state.transitions.push_back({_cond_name_idx_map[_t_st], 0});
             _trans_next_state_name_recoder.push_back(*it);
         }
 
     }
 
-    // "next" , "default_transition" , "action_fail_transition" int64 value should not be init here
-    if(d_state.contains("default_transition"))  {
-        if(d_state.value_type("default_transition") != nlohmann::detail::value_t::string) {
-            logger->BAASError("In state [ " + name + " ] , value of [ default_transition ] must be string.");
-            throw TypeError("Invalid [ default_transition ] type in state.");
-        }
-        _state_default_trans_name_recorder.emplace_back(d_state.getString("default_transition"));
-    }
-    else _state_default_trans_name_recorder.emplace_back(std::nullopt);
+    // default transition
+    auto _it = d_state.find("default_transition");
+    if(_it != d_state.end())  {
 
-    if(d_state.contains("action_fail_transition")) {
-        if(d_state.value_type("action_fail_transition") != nlohmann::detail::value_t::string) {
-            logger->BAASError("In state [ " + name + " ] , value of [ action_fail_transition ] must be string.");
-            throw TypeError("Invalid [ action_fail_transition ] type in state.");
+        if(!_it->is_string()) {
+            logger->BAASError("In [ single state ] [ default_transition ] must be string.");
+            logger->BAASError("Error state name : [ " + name + " ]");
+            throw TypeError("Invalid [ single state ] [ default_transition ] type");
         }
-        _state_act_fail_trans_name_recorder.emplace_back(d_state.getString("action_fail_transition"));
-    }
-    else _state_act_fail_trans_name_recorder.emplace_back(std::nullopt);
 
-    _state_trans_name_recorder.push_back(_trans_next_state_name_recoder);
+        std::string _t_st = *_it;
+        auto it = _state_name_idx_map.find(_t_st);
+        if(it == _state_name_idx_map.end()) {
+            logger->BAASError("Undefined [ single state ] [ default_transition ] state name found");
+            logger->BAASError("Error state name : [ " + name + " ]");
+            logger->BAASError("Undefined state name : [ " + _t_st + " ]");
+            throw ValueError("Undefined state found in [ single state ] [ default_transition ]");
+        }
+        _state.default_trans = it->second;
+
+    }
+    else _state.default_trans = std::nullopt;
+
+    // act fail transition
+    _it = d_state.find("action_fail_transition");
+    if(_it != d_state.end()) {
+
+        if(!_it->is_string()) {
+            logger->BAASError("In [ single state ] [ action_fail_transition ] must be string.");
+            logger->BAASError("Error state name : [ " + name + " ]");
+            throw TypeError("Invalid [ single state ] [ action_fail_transition ] type");
+        }
+
+        std::string _t_st = *_it;
+        auto it = _state_name_idx_map.find(_t_st);
+        if(it == _state_name_idx_map.end()) {
+            logger->BAASError("Undefined [ single state ] [ action_fail_transition ] state name found");
+            logger->BAASError("Error state name : [ " + name + " ]");
+            logger->BAASError("Undefined state name : [ " + _t_st + " ]");
+            throw ValueError("Undefined state found in [ single state ] [ action_fail_transition ]");
+        }
+
+    }
+    else _state.act_fail_trans = std::nullopt;
 
     // desc
     _state.desc = d_state.getString("desc");
@@ -561,15 +608,22 @@ void AutoFight::_init_single_state(const BAASConfig &d_state, const std::string&
 // start state
 void AutoFight::_init_start_state()
 {
-    if (!d_auto_f.d_fight.contains("start_state")) {
-        logger->BAASError("Didn't find [ start_state ] in auto fight workflow.");
-        throw ValueError("[ start_state ] not found.");
+    auto _it = d_auto_f.d_fight.find("start_state");
+    if (_it == d_auto_f.d_fight.end()) {
+        logger->BAASError("Workflow json must contain [ start_state ].");
+        throw ValueError("Workflow Start State Not Found");
     }
-    start_state_name = d_auto_f.d_fight.getString("start_state");
-    auto it = state_name_idx_map.find(start_state_name);
-    if (it == state_name_idx_map.end()) {
-        logger->BAASError("Undefined [ start state ] --> [ " + start_state_name + " ] .");
-        throw ValueError("Start State Invalid.");
+
+    if (!_it->is_string()) {
+        logger->BAASError("Workflow [ start_state ] config must be a string.");
+        throw TypeError("Invalid [ start_state ] Config Type");
+    }
+
+    start_state_name = *_it;
+    auto it = _state_name_idx_map.find(start_state_name);
+    if (it == _state_name_idx_map.end()) {
+        logger->BAASError("Undefined [ start_state ] --> [ " + start_state_name + " ] .");
+        throw ValueError("Undefined State Found.");
     }
 
     _curr_state_idx = it->second;
@@ -577,46 +631,6 @@ void AutoFight::_init_start_state()
     logger->BAASInfo("Name  : [ " + start_state_name + " ]");
     logger->BAASInfo("Index : [ " + std::to_string(_curr_state_idx) + " ]");
 
-}
-
-void AutoFight::_conv_tans_state_name_st_to_idx()
-{
-
-    for (int i = 0; i < all_states.size(); ++i) {
-        // convert transitions
-        for(int j = 0; j < all_states[i].transitions.size(); ++j) {
-            auto _trans_next_state_name_it = state_name_idx_map.find(_state_trans_name_recorder[i][j]);
-            if (_trans_next_state_name_it == state_name_idx_map.end()) {
-                logger->BAASError("Undefined state [ " + _state_trans_name_recorder[i][j] + " ] found in transitions.");
-                throw ValueError("Invalid State Name.");
-            }
-            all_states[i].transitions[j].next_sta_idx = _trans_next_state_name_it->second;
-        }
-
-        // convert default transitions
-        if (_state_default_trans_name_recorder[i].has_value()) {
-            auto _default_trans_state_name_it = state_name_idx_map.find(_state_default_trans_name_recorder[i].value());
-            if(_default_trans_state_name_it == state_name_idx_map.end()) {
-                logger->BAASError("Undefined state [ " + _state_default_trans_name_recorder[i].value() + " ] "
-                                  "found in [ Default Transition ].");
-                throw ValueError("Invalid State Name.");
-            }
-            all_states[i].default_trans = _default_trans_state_name_it->second;
-        }
-
-        // convert action fail transitions
-        if (_state_act_fail_trans_name_recorder[i].has_value()) {
-            auto _act_fail_trans_state_name_it = state_name_idx_map.find(_state_act_fail_trans_name_recorder[i].value());
-            if (_act_fail_trans_state_name_it == state_name_idx_map.end()) {
-                logger->BAASError("Undefined state [ " + _state_act_fail_trans_name_recorder[i].value() + " ] "
-                                  "found in [ Action Fail Transition ].");
-                throw ValueError("Invalid State Name.");
-            }
-        }
-    }
-
-    _state_trans_name_recorder.clear();
-    _state_default_trans_name_recorder.clear();
 }
 
 void AutoFight::display_all_state() const noexcept
@@ -655,7 +669,7 @@ void AutoFight::display_all_state() const noexcept
 void AutoFight::display_state_idx_name_map() const noexcept
 {
     logger->sub_title("State Index Name Mapping");
-    for (const auto &state : state_name_idx_map)
+    for (const auto &state : _state_name_idx_map)
         logger->BAASInfo(std::to_string(state.second) + " : [ " + state.first + " ] " );
 }
 
@@ -682,6 +696,33 @@ void AutoFight::restart_fight(bool update_room_left_time)
         // TODO:: update room left time
     }
     baas->solve_procedure("fight_confirm_restart", true);
+}
+
+void AutoFight::_state_pre_check()
+{
+    auto _it = d_auto_f.d_fight.find("states");
+    if (_it == d_auto_f.d_fight.end()) {
+        logger->BAASError("Workflow json must contain [ states ].");
+        throw std::runtime_error("Workflow States Not Found");
+    }
+
+    if (!_it->is_object()) {
+        logger->BAASError("Workflow [ states ] config must be a object.");
+        throw std::runtime_error("Invalid [ states ] Config Type");
+    }
+
+    uint64_t state_cnt = 0;
+
+    for (const auto& [key, value] : _it->items()) {
+        if (!value.is_object()) {
+            logger->BAASError("Workflow [ single state ] config must be an object.");
+            logger->BAASError("Error state key : [ " + key + " ]");
+            throw std::runtime_error("Invalid [ single state ] Config Type.");
+        }
+        _state_name_idx_map[key] = state_cnt;
+        ++state_cnt;
+    }
+
 }
 
 /*
@@ -1105,7 +1146,7 @@ bool AutoFight::_try_default_trans()
 
 void AutoFight::_init_actions()
 {
-    _actions = std::make_unique<auto_fight_act>(baas, &d_auto_f);
+    _actions->_init_all_act();
 }
 
 BAAS_NAMESPACE_END

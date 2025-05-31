@@ -20,7 +20,7 @@ void _log_valid_op(
         const std::vector<std::string>& op_st_list
 ) noexcept
 {
-    BAASGlobalLogger->BAASInfo("Valid  <<< " + name + " >>> are listed as below :");
+    BAASGlobalLogger->BAASInfo("Valid  <<< " + name + " >>> are listed below :");
     int cnt = 0;
     for (const auto &op: op_st_list)
         logger->BAASInfo(std::to_string(++cnt) + " : \"" + op + "\"");
@@ -32,7 +32,7 @@ void _get_valid_log_string(
         std::string& out
 ) noexcept
 {
-    out = "Valid  <<< " + name + " >>> are listed as below :\n";
+    out = "Valid  <<< " + name + " >>> are listed below :\n";
     int cnt = 0;
     for (const auto& op: op_st_list)
         out += std::to_string(++cnt) + " : \"" + op + "\"\n";

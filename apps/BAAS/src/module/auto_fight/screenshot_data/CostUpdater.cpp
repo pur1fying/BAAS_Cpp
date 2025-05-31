@@ -51,6 +51,7 @@ void CostUpdater::_init_static_value()
     cost_pixel_min_rgb = static_config->getVec3b("/BAAS/auto_fight/cost/target_pixel_rgb/min");
     cost_pixel_max_rgb = static_config->getVec3b("/BAAS/auto_fight/cost/target_pixel_rgb/max");
     cost_recognize_region = static_config->get_rect("/BAAS/auto_fight/cost/recognize_region");
+
     average_cost = 1.0 * double(cost_recognize_region.size()) * 0.5 * 6;
 }
 

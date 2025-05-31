@@ -29,16 +29,6 @@ public:
         BOSS_HEALTH
     };
 
-    static bool is_condition_valid(const std::string& type) {
-        return cond_type_map.find(type) != cond_type_map.end();
-    }
-
-    static ConditionType type_st_to_idx(const std::string& type) {
-        auto it = cond_type_map.find(type);
-        if (it != cond_type_map.end()) return it->second;
-        throw TypeError("Invalid ConditionType : [ " + type + " ]");
-    }
-
     BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config);
 
     virtual std::optional<bool> try_match();

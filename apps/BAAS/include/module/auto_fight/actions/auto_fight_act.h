@@ -20,19 +20,24 @@ public:
 
     bool _execute(uint64_t act_id) noexcept;
 
-    inline bool act_exist(const std::string& act_name) {
-        return act_name_idx_map.find(act_name) != act_name_idx_map.end();
+    inline auto act_find(const std::string& act_name) {
+        return act_name_idx_map.find(act_name);
     }
 
-    inline uint64_t get_act_id(const std::string& act_name) {
-        auto it = act_name_idx_map.find(act_name);
-        if (it != act_name_idx_map.end())return it->second;
-        else throw ValueError("Action [ " + act_name + " ] not found.");
+    inline auto act_end() const noexcept {
+        return act_name_idx_map.end();
     }
+
+    inline uint64_t size() {
+        return act_name_idx_map.size();
+     }
+
+    void _action_pre_check();
+
+    void _init_all_act();
 
 private:
 
-    void _init_all_act();
 
     void _init_single_act(const BAASConfig& config, const std::string& key);
 

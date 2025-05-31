@@ -48,10 +48,10 @@ void SkillNameUpdater::update()
                 }
             }
             if (_find) {
-                for (int i = 0 ; i < data->slot_count; ++i) {
-                    if (data->skill_last_detect[i].index.has_value()
-                     && data->skill_last_detect[i].index.value() == _tmp_idx) {
-                        data->skill_last_detect[i].reset();
+                for (int j = 0 ; j < data->slot_count; ++j) {
+                    if (data->skill_last_detect[j].index.has_value()
+                     && data->skill_last_detect[j].index.value() == _tmp_idx) {
+                        data->skill_last_detect[j].reset();
                         break;
                     }
                 }
@@ -71,10 +71,10 @@ void SkillNameUpdater::update()
             }
 
             if (_find) {
-                for (int i = 0 ; i < data->slot_count; ++i) {
-                    if (data->skill_last_detect[i].index.has_value()
-                     && data->skill_last_detect[i].index.value() == _tmp_idx) {
-                        data->skill_last_detect[i].reset();
+                for (int j = 0 ; j < data->slot_count; ++j) {
+                    if (data->skill_last_detect[j].index.has_value()
+                     && data->skill_last_detect[j].index.value() == _tmp_idx) {
+                        data->skill_last_detect[j].reset();
                         break;
                     }
                 }

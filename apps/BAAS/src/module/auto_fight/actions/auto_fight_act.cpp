@@ -18,8 +18,16 @@ auto_fight_act::auto_fight_act(BAAS* baas, auto_fight_d* data)
     this->baas = baas;
     this->data = data;
     this->logger = baas->get_logger();
+    auto _it = data->d_fight.find("actions");
+    if (_it == data->d_fight.end()) {
+        logger->BAASError("Workflow json must contain [ actions ].");
+        throw ValueError("Workflow Actions Not Found");
+    }
+    if (_it->type() != nlohmann::json::value_t::object) {
+        logger->BAASError("Workflow [ actions ] config must be a object.");
+        throw TypeError("Invalid [ actions ] Config Type.");
+    }
     data->d_fight.getBAASConfig("actions", act_config);
-    _init_all_act();
 }
 
 bool auto_fight_act::_execute(uint64_t act_id) noexcept
@@ -31,32 +39,34 @@ bool auto_fight_act::_execute(uint64_t act_id) noexcept
     return true;
 }
 
+void auto_fight_act::_action_pre_check()
+{
+    uint64_t act_cnt = 0;
+    for(const auto& [key, value] : act_config.get_config().items()) {
+        if(!value.is_array()) {
+            logger->BAASError("Workflow [ single action ] config must be an array.");
+            logger->BAASError("Error action key : [ " + key + " ]");
+            throw TypeError("Invalid [ single action ] Config Type.");
+        }
+        act_name_idx_map[key] = act_cnt;
+        ++act_cnt;
+    }
+}
+
 void auto_fight_act::_init_all_act()
 {
-    if(act_config.get_config().type() != nlohmann::json::value_t::object) {
-        logger->BAASWarn("Workflow [ actions ] config must be a object.");
-        throw TypeError("Invalid [ actions ] Config Type.");
-    }
-
     BAASConfig sing_act_config;
 
     for(auto& i : act_config.get_config().items()) {
         sing_act_config = BAASConfig(i.value(), logger);
         _init_single_act(sing_act_config, i.key());
-        act_name_idx_map[i.key()] = all_act.size() - 1;
     }
 }
 
 void auto_fight_act::_init_single_act(const BAASConfig& config, const std::string& key)
 {
-    if(!config.get_config().is_array()) {
-        logger->BAASWarn("Workflow [ single action ] config must be an array.");
-        logger->BAASWarn("Error action key : [ " + key + " ]");
-        throw TypeError("Invalid [ single action ] Config Type.");
-    }
-
     BAASConfig single_act_config;
-    all_act.push_back(std::vector<std::unique_ptr<base_handler>>());
+    all_act.emplace_back();
     for(auto& i : config.get_config()) {
         single_act_config = BAASConfig(i, logger);
         _type_name = single_act_config.getString("t");

@@ -2,7 +2,10 @@
 // Created by Administrator on 2025/5/15.
 //
 
+#include <memory>
 #include "module/auto_fight/conditions/BossHealthCondition.h"
+
+#include "module/auto_fight/constants.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -90,44 +93,64 @@ void BossHealthCondition::display() const noexcept
 
 void BossHealthCondition::_parse_config_value()
 {
-    if(!config.contains("value"))   {
-        logger->BAASError("BossHealthCondition op " + std::to_string(_op) + " requires [ value ].");
-        throw ValueError("BossHealthCondition op " + std::to_string(_op) + " requires [ value ].");
+    auto  _it = this->config.find("value");
+    if (_it == this->config.end()) {
+        logger->BAASError("[ BossHealthCondition ] [ op ] : \"" + op_st_list[_op] + "\" requires [ value ].");
+        throw ValueError("[ BossHealthCondition ] [ value ] not found.");
     }
-    if(!config.get<nlohmann::json>("value").is_number()) {
-        logger->BAASError("BossHealthCondition config [ value ] must be number.");
-        throw TypeError("BossHealthCondition [ value ] TypeError");
+    if (!_it->is_number()) {
+        logger->BAASError("[ BossHealthCondition ] [ value ] must be a number.");
+        throw TypeError("[ BossHealthCondition ] [ value ] TypeError");
     }
-    _value = config.getDouble("value");
+
+    _value = _it->get<double>();
 }
 
 void BossHealthCondition::_parse_config_range()
 {
-    if(!config.contains("range")) {
-        logger->BAASError("BossHealthCondition op " + std::to_string(_op) + " requires [ range ].");
-        throw ValueError("BossHealthCondition op " + std::to_string(_op) + " requires [ range ].");
+    auto _it = this->config.find("range");
+    if (_it == this->config.end()) {
+        logger->BAASError("[ BossHealthCondition ] [ op ] : \"" + op_st_list[_op] + "\" requires [ range ].");
+        throw ValueError("[ BossHealthCondition ] [ range ] not found.");
     }
-    if(config.get_array_size("range") != 2) {
-        logger->BAASError("BossHealthCondition op " + std::to_string(_op) + " requires [ range ] to be a 2-element array.");
-        throw ValueError("BossHealthCondition op " + std::to_string(_op) + " requires [ range ] to be a 2-element array.");
+    if (!_it->is_array()) {
+        logger->BAASError("[ BossHealthCondition ] [ range ] must be an array.");
+        throw TypeError("[ BossHealthCondition ] [ range ] TypeError");
     }
-    nlohmann::json j = config.getJson("range");
-    if(!j[0].is_number() || !j[1].is_number()) {
-        logger->BAASError("BossHealthCondition config [ range ] element must be number.");
-        throw TypeError("BossHealthCondition [ range ] element TypeError");
+    if (_it->size() != 2) {
+        logger->BAASError("[ BossHealthCondition ] [ range ] array size must be 2.");
+        throw ValueError("[ BossHealthCondition ] [ range ] Size Error");
     }
-    _range_min = j[0];
-    _range_max = j[1];
+
+    if(!(*_it)[0].is_number() || !(*_it)[1].is_number()) {
+        logger->BAASError("[ BossHealthCondition ] [ range ] element must be number.");
+        throw TypeError("[ BossHealthCondition ] [ range ] Element Type Error");
+    }
+    _range_min =  (*_it)[0].get<double>();
+    _range_max =  (*_it)[1].get<double>();
 }
 
 void BossHealthCondition::_parse_op()
 {
-    std::string op = this->config.getString("op");
-    if (op_map.find(op) == op_map.end()) {
-        logger->BAASError("Invalid BossHealthCondition op: " + op);
-        throw ValueError("Invalid BossHealthCondition op.");
+    auto it = config.find("op");
+    if (it == config.end()) {
+        logger->BAASError("[ BossHealthCondition ] confiig must contain [ op ].");
+        _log_valid_op("[ BossHealthCondition ] [ op ]", logger, op_st_list);
+        throw ValueError("[ BossHealthCondition ] [ op ] not found.");
     }
-    _op = op_map.at(op);
+    if (!it->is_string()) {
+        logger->BAASError("[ BossHealthCondition ] [ op ] must be a string.");
+        _log_valid_op("[ BossHealthCondition ] [ op ]", logger, op_st_list);
+        throw TypeError("[ BossHealthCondition ] [ op ] TypeError");
+    }
+    std::string op_str = *it;
+    auto _it = op_map.find(op_str);
+    if (_it == op_map.end()) {
+        logger->BAASError("Invalid [ BossHealthCondition ] [ op ] : " + op_str);
+        _log_valid_op("[ BossHealthCondition ] [ op ]", logger, op_st_list);
+        throw ValueError("Invalid [ BossHealthCondition ] [ op ].");
+    }
+    _op = _it->second;
     switch (_op) {
         case C_OVER:
 

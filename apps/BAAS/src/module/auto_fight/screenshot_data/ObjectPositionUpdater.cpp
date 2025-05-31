@@ -128,8 +128,8 @@ void ObjectPositionUpdater::_init_yolo_d() {
     data->yolo_pra.yaml_path = BAAS_YOLO_MODEL_DIR / static_config->getString(_j_p + "/yaml_path");
 
     BAASUserConfig* config = baas->get_config();
-    data->yolo_pra.iou_threshold = config->getDouble("/auto_fight/yolo/iou_threshold", 0.5);
-    data->yolo_pra.rect_threshold = config->getDouble("/auto_fight/yolo/rect_threshold", 0.6);
+    data->yolo_pra.iou_threshold = config->getFloat("/auto_fight/yolo/iou_threshold", 0.5);
+    data->yolo_pra.rect_threshold = config->getFloat("/auto_fight/yolo/rect_threshold", 0.6);
 
     data->yolo_pra.gpu_id = config->getInt("/auto_fight/yolo/gpu_id", -1);
     data->yolo_pra.num_thread = config->getInt("/auto_fight/yolo/num_thread", 4);
@@ -163,7 +163,7 @@ void ObjectPositionUpdater::_init_yolo_model()
     _yolo = std::make_unique<BAAS_Yolo_v8>();
     _yolo->init_model(data->yolo_pra);
     auto e_t = BAASUtil::getCurrentTimeMS();
-    logger->BAASInfo("Load  Model T: " + std::to_string(e_t - s_t) + "ms");
+    logger->BAASInfo("Load Model T : " + std::to_string(e_t - s_t) + "ms");
 
     const std::vector<std::string>& cls = _yolo->get_classes();
 

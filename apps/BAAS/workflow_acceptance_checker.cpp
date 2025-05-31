@@ -36,6 +36,8 @@ std::vector<std::string> all_action;
 std::vector<std::string> all_condition;
 std::vector<std::string> all_state;
 
+BAAS_NAMESPACE_BEGIN
+
 void _init();
 
 void _path_check(const std::string& path);
@@ -60,9 +62,17 @@ void _sta_pre_check();
 
 void _actions_check();
 
+void _single_action_check(const nlohmann::json& action, const std::string& name);
+
 void _conditions_check();
 
+void _single_condition_check(const nlohmann::json& condition, const std::string& name);
+
 void _states_check();
+
+void _single_state_check(const nlohmann::json& state, const std::string& name);
+
+BAAS_NAMESPACE_END
 
 int main(int argc, char **argv) {
     system("chcp 65001");
@@ -88,11 +98,40 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+BAAS_NAMESPACE_BEGIN
+
 void check_workflow(const std::string& path) {
 
     _path_check(path);
 
     _act_cond_sta_pre_check();
+
+    _states_check();
+
+}
+
+void _states_check() {
+    for (const auto& [key, value] : wf_j["states"].items())
+        _single_state_check(value, key);
+}
+
+void _single_state_check(const nlohmann::json& state, const std::string& name) {
+    auto it = state.find("action");
+    if (it != state.end()) {
+        if (!it->is_string()) {
+            error_type = "state";
+            error_key = name;
+            global_error_message = "[ single state ] [ /action ] must be string.\nError state name : [ " + name + " ]";
+            throw std::runtime_error("Invalid State Action Type");
+        }
+        string act = *it;
+        if (find(all_action.begin(), all_action.end(), act) == all_action.end()) {
+            error_type = "state";
+            error_key = name;
+            global_error_message = "Undefined [ action ] found in [ single state ].\nError state name : [ " + name + " ]\nError action name : [ " + act + " ]";
+            throw std::runtime_error("State Action Not Found");
+        }
+    }
 
 }
 
@@ -219,3 +258,5 @@ void _sta_pre_check() {
         all_state.push_back(key);
     }
 }
+
+BAAS_NAMESPACE_END
