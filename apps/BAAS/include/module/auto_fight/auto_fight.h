@@ -227,7 +227,7 @@ private:
 
     void _init_self_state();
 
-    void _init_single_state(const BAASConfig& d_state, const std::string& state_name);
+    void _init_single_state(const BAASConfig& d_state);
 
     std::vector<state_info> all_states;
 

@@ -26,12 +26,12 @@ void SkillNameCondition::reset_state()
 void SkillNameCondition::display() const noexcept
 {
     _display_basic_info();
-    logger->BAASInfo("Op      : [ " + op_st_list[_op] + " ]");
+    logger->BAASInfo("Op      : " + op_st_list[_op]);
     switch (_op) {
         case AT:
-            logger->BAASInfo("P       : [ " + std::to_string(_p) + " ]");
+            logger->BAASInfo("P       : " + std::to_string(_p));
         case APPEAR:
-            logger->BAASInfo("Name    : [ " + _skill_name + " ]");
+            logger->BAASInfo("Name    : " + _skill_name);
             break;
     }
 }

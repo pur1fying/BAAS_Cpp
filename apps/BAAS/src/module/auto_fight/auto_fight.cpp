@@ -459,9 +459,12 @@ void AutoFight::display_all_cond_info() const noexcept
 {
     logger->hr("Display All Conditions");
     display_cond_idx_name_map();
+    logger->sub_title("Cond_Cnt : " + std::to_string(_cond_name_idx_map.size()));
+    logger->BAASLine();
     for (const auto &cond : _cond_name_idx_map) {
-        logger->sub_title(cond.first);
+        logger->BAASInfo("Name    : " + cond.first);
         all_cond[cond.second]->display();
+        logger->BAASLine();
     }
 }
 
@@ -484,123 +487,131 @@ void AutoFight::_init_self_state()
 {
     BAASConfig _t_all_state;
     d_auto_f.d_fight.getBAASConfig("/states", _t_all_state, logger);
-    for (auto &stat : _t_all_state.get_config().items())
-        _init_single_state(BAASConfig(stat.value(), logger), stat.key());
+    for (auto &stat : _t_all_state.get_config().items()) {
+        try {
+            _init_single_state(BAASConfig(stat.value(), logger));
+            all_states.back().name = stat.key();
+        }
+        catch (const std::exception &e) {
+            logger->BAASError("Error state name : [ " + stat.key() + " ]");
+            throw e;
+        }
+    }
 }
 
-void AutoFight::_init_single_state(const BAASConfig &d_state, const std::string& name)
+void AutoFight::_init_single_state(const BAASConfig &d_state)
 {
     state_info _state;
     // action
-    std::string act = d_state.getString("action");
-    if (act.empty()) _state.act_id = std::nullopt;
+    auto _it = d_state.find("action");
+    if (_it == d_state.end()) _state.act_id = std::nullopt;
     else {
-        auto it = _actions->act_find(act);
+        if (!_it->is_string()) {
+            logger->BAASError("[ single state ] [ action ] must be a string.");
+            throw TypeError("Invalid [ single state ] [ action ] type");
+        }
+        std::string act_st = *_it;
+        auto it = _actions->act_find(act_st);
         if (it == _actions->act_end()) {;
             logger->BAASError("Undefined [ action ] found in [ single state ].");
-            logger->BAASError("Error state  name : [ " + name + " ]");
-            logger->BAASError("Error action name : [ " + act + " ]");
-            throw ValueError("State Action Not Found");
+            logger->BAASError("Undefined action name : [ " + act_st + " ]");
+            throw ValueError("Undefined action found in [ single state ] [ action ]");
         }
         _state.act_id = it->second;
     }
 
     // transitions
-    std::vector<std::string> _trans_next_state_name_recoder;
-    if(d_state.contains("transitions")) {
-        BAASConfig _t_transitions;
-        d_state.getBAASConfig("transitions", _t_transitions, logger);
-        if(!_t_transitions.get_config().is_array())  {
-            logger->BAASError("In state [ " + name + " ], [ transitions ] must be an array.");
-            throw TypeError("Invalid [ transitions ] type.");
+    _it = d_state.find("transitions");
+    if(_it != d_state.end()) {
+        if(!_it->is_array())  {
+            logger->BAASError("[ single state ] [ transitions ] must be an array.");
+            throw TypeError("Invalid [ single state ] [ transitions ] type");
         }
-        for (auto &trans : _t_transitions.get_config()) {
+        for (auto &trans : *_it) {
+            if (!trans.is_object()) {
+                logger->BAASError("[ single transition ] config must be an object.");
+                throw TypeError("Invalid [ single transition ] Config Type");
+            }
             auto it = trans.find("condition");
             if(it == trans.end()) {
-                logger->BAASError("In state [ " + name + " ],  single transition must contain key [ condition ].");
-                throw TypeError("Didn't find [ condition ] in transition.");
+                logger->BAASError("[ single transition ] config must contain [ condition ].");
+                throw ValueError("[ single transition ] [ condition ] not found.");
             }
-
             if(!it->is_string()) {
-                logger->BAASError("In state [ " + name + " ], value of [ condition ] must be string.");
-                throw TypeError("Invalid [ condition ] type in transition.");
+                logger->BAASError("[ single transition ] [ condition ] must be a string.");
+                throw TypeError("[ single transition ] [ condition ] type error.");
             }
 
             std::string _t_st = *it;
-
-            if (_cond_name_idx_map.find(_t_st) == _cond_name_idx_map.end()) {
-                logger->BAASError(fmt::format("Undefined Condition [ {} ] in state transition [ {} ]", _t_st, name));
-                throw ValueError("Undefined condition found in [ transition ] ");
+            auto _cond_it = _cond_name_idx_map.find(_t_st);
+            if (_cond_it == _cond_name_idx_map.end()) {
+                logger->BAASError("Undefined condition found in [ single transition ] [ condition ]");
+                logger->BAASError("Undefined condition name : [ " + _t_st + " ]");
+                throw ValueError("Undefined condition found in [ single transition ] [ condition ]");
             }
 
             it = trans.find("next");
 
             if(it == trans.end()) {
-                logger->BAASError("In state [ " + name + " ], single transition must contain key [ next ].");
-                throw TypeError("Didn't find [ next ] in transition.");
+                logger->BAASError("[ single transition ] config must contain [ next ].");
+                throw ValueError("[ single transition ] [ next ] not found.");
             }
 
             if(!it->is_string()) {
-                logger->BAASError("In state [ " + name + " ], value of [ next ] must be string.");
-                throw TypeError("Invalid [ next ] type in transition.");
+                logger->BAASError("[ single transition ] [ next ] must be a string.");
+                throw TypeError("Invalid [ single transition ] [ next ] type");
             }
-
-            _state.transitions.push_back({_cond_name_idx_map[_t_st], 0});
-            _trans_next_state_name_recoder.push_back(*it);
+            std::string _next_st = *it;
+            auto _next_it = _state_name_idx_map.find(_next_st);
+            if(_next_it == _state_name_idx_map.end()) {
+                logger->BAASError("Undefined state found in [ single transition ] [ next ]");
+                logger->BAASError("Undefined state name : [ " + _next_st + " ]");
+                throw ValueError("Undefined state found in [ single transition ] [ next ]");
+            }
+            _state.transitions.push_back({_cond_it->second, _next_it->second});
         }
 
     }
 
     // default transition
-    auto _it = d_state.find("default_transition");
-    if(_it != d_state.end())  {
-
+    _it = d_state.find("default_transition");
+    if(_it == d_state.end()) _state.default_trans = std::nullopt;
+    else {
         if(!_it->is_string()) {
-            logger->BAASError("In [ single state ] [ default_transition ] must be string.");
-            logger->BAASError("Error state name : [ " + name + " ]");
+            logger->BAASError("[ single state ] [ default_transition ] must be a string.");
             throw TypeError("Invalid [ single state ] [ default_transition ] type");
         }
 
         std::string _t_st = *_it;
         auto it = _state_name_idx_map.find(_t_st);
         if(it == _state_name_idx_map.end()) {
-            logger->BAASError("Undefined [ single state ] [ default_transition ] state name found");
-            logger->BAASError("Error state name : [ " + name + " ]");
+            logger->BAASError("Undefined state found in [ single state ] [ default_transition ]");
             logger->BAASError("Undefined state name : [ " + _t_st + " ]");
             throw ValueError("Undefined state found in [ single state ] [ default_transition ]");
         }
         _state.default_trans = it->second;
 
     }
-    else _state.default_trans = std::nullopt;
 
     // act fail transition
     _it = d_state.find("action_fail_transition");
-    if(_it != d_state.end()) {
-
+    if (_it == d_state.end()) _state.act_fail_trans = std::nullopt;
+    else {
         if(!_it->is_string()) {
-            logger->BAASError("In [ single state ] [ action_fail_transition ] must be string.");
-            logger->BAASError("Error state name : [ " + name + " ]");
+            logger->BAASError("[ single state ] [ action_fail_transition ] must be a string.");
             throw TypeError("Invalid [ single state ] [ action_fail_transition ] type");
         }
-
         std::string _t_st = *_it;
         auto it = _state_name_idx_map.find(_t_st);
         if(it == _state_name_idx_map.end()) {
-            logger->BAASError("Undefined [ single state ] [ action_fail_transition ] state name found");
-            logger->BAASError("Error state name : [ " + name + " ]");
+            logger->BAASError("Undefined state found in [ single state ] [ action_fail_transition ]");
             logger->BAASError("Undefined state name : [ " + _t_st + " ]");
             throw ValueError("Undefined state found in [ single state ] [ action_fail_transition ]");
         }
-
     }
-    else _state.act_fail_trans = std::nullopt;
 
     // desc
     _state.desc = d_state.getString("desc");
-
-    // name
-    _state.name = name;
 
     all_states.push_back(_state);
 }
@@ -637,7 +648,7 @@ void AutoFight::display_all_state() const noexcept
 {
     logger->hr("Display All States.");
     display_state_idx_name_map();
-        logger->BAASInfo("State_Cnt : [ " + std::to_string(all_states.size()) + " ]");
+        logger->sub_title("State_Cnt : " + std::to_string(all_states.size()) + " ");
         logger->BAASLine();
     for (int i = 0; i < all_states.size(); ++i) {
         logger->BAASInfo("Name      : " + all_states[i].name);

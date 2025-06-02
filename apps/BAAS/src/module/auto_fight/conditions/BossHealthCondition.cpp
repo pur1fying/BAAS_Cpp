@@ -76,7 +76,7 @@ std::optional<bool> BossHealthCondition::try_match()
 void BossHealthCondition::display() const noexcept
 {
     _display_basic_info();
-    logger->BAASInfo("Op      : [ " + op_st_list[_op] + " ]");
+    logger->BAASInfo("Op      : " + op_st_list[_op]);
     switch (_op) {
         case C_IN_RANGE:
             logger->BAASInfo("Range   : [ " + std::to_string(_range_min) + ", " + std::to_string(_range_max) + " ]");
@@ -86,7 +86,7 @@ void BossHealthCondition::display() const noexcept
         case C_INCREASE:
         case C_DECREASE:
         case M_EQUAL:
-            logger->BAASInfo("Value   : [ " + std::to_string(_value) + " ]");
+            logger->BAASInfo("Value   : " + std::to_string(_value));
             break;
     }
 }

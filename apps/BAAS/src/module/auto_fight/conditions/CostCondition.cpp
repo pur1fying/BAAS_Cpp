@@ -164,7 +164,7 @@ void CostCondition::_parse_config_range()
 void CostCondition::display() const noexcept
 {
     _display_basic_info();
-    logger->BAASInfo("Op      : [ " + op_st_list[_op] + " ]");
+    logger->BAASInfo("Op      : " + op_st_list[_op]);
     switch (_op) {
         case IN_RANGE:
             logger->BAASInfo("Range   : [ " + std::to_string(_range_min) + ", " + std::to_string(_range_max) + " ]");
@@ -173,7 +173,7 @@ void CostCondition::display() const noexcept
         case BELOW:
         case INCREASE:
         case DECREASE:
-            logger->BAASInfo("Value   : [ " + std::to_string(_value) + " ]");
+            logger->BAASInfo("Value   : " + std::to_string(_value));
             break;
     }
 }

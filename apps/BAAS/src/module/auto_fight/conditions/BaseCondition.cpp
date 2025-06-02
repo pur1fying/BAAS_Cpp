@@ -53,10 +53,10 @@ void BaseCondition::set_d_update_flag()
 
 void BaseCondition::_display_basic_info() const noexcept
 {
-    logger->BAASInfo("Type    : [ " + cond_type_st_list[type] + " ]");
-    logger->BAASInfo("Timeout : [ " + std::to_string(timeout) + " ]");
-    if (has_and_cond())logger->BAASInfo("A C Cnt : [ " + std::to_string(and_conditions.size()) + " ]");
-    if (has_or_cond()) logger->BAASInfo("O C Cnt : [ " + std::to_string(or_conditions.size()) + " ]");
+    logger->BAASInfo("Type    : " + cond_type_st_list[type]);
+    logger->BAASInfo("Timeout : " + std::to_string(timeout));
+    if (has_and_cond())logger->BAASInfo("A C Cnt : " + std::to_string(and_conditions.size()));
+    if (has_or_cond()) logger->BAASInfo("O C Cnt : " + std::to_string(or_conditions.size()));
     if(!desc.empty())logger->BAASInfo("Desc    : " + desc);
 }
 
