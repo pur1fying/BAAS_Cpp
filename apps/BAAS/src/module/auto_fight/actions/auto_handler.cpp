@@ -3,6 +3,8 @@
 //
 #include "module/auto_fight/actions/auto_handler.h"
 
+#include "module/auto_fight/constants.h"
+
 BAAS_NAMESPACE_BEGIN
 
 auto_handler::auto_handler(
@@ -60,18 +62,24 @@ std::optional<bool> auto_handler::_get_fight_auto_state()
 
 void auto_handler::_parse_op()
 {
-    if (!this->config.contains("op")) {
-        logger->BAASError("If you want to do action [ auto ], you must fill [ op ] in config, "
-                          "which indicates the auto state you expect.");
-        _display_valid_auto_op();
-        throw ValueError("[ /op ] must be specified.");
+    auto _it = this->config.find("op");
+    if (_it == this->config.end()) {
+        logger->BAASError("[ Action Auto ] config must contain [ op ].");
+        _log_valid_op("[ Action Auto ] [ op ]", logger, op_st_list);
+        throw ValueError("[ Action Auto ] [ op ] not found.");
     }
-    std::string op = this->config.getString("op");
-    auto it = op_map.find(op);
+    if (!_it->is_string()) {
+        logger->BAASError("[ Action Auto ] [ op ] must be a string.");
+        _log_valid_op("[ Action Auto ] [ op ]", logger, op_st_list);
+        throw TypeError("Invalid [ Action Auto ] [ op ] Config Type.");
+    }
+
+    std::string _op_st = *_it;
+    auto it = op_map.find(_op_st);
     if (it == op_map.end()) {
-        logger->BAASError("Invalid auto op : [ " + op + " ]");
-        _display_valid_auto_op();
-        throw ValueError("Invalid auto op.");
+        logger->BAASError("Invalid [ Action Auto ] [ op ] : " + _op_st);
+        _log_valid_op("[ Action Auto ] [ op ]", logger, op_st_list);
+        throw ValueError("Invalid [ Action Auto ] [ op ].");
     }
     _op = it->second;
 }

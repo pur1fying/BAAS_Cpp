@@ -43,18 +43,24 @@ void acc_handler::display() noexcept
 
 void acc_handler::_parse_op()
 {
-    if (!this->config.contains("op")) {
-        logger->BAASError("If you want to do action [ acc ], you must fill [ op ] in config, "
-                          "which indicates the target acc phase you expect.");
-        _log_valid_op("[ Action acc ] [ /op ]", logger, op_st_list);
-        throw ValueError("[ /op ] must be specified.");
+    auto _it = this->config.find("op");
+    if (_it == this->config.end()) {
+        logger->BAASError("[ Action Acc ] config must contain [ op ].");
+        _log_valid_op("[ Action Acc ] [ op ]", logger, op_st_list);
+        throw ValueError("[ Action Acc ] [ op ] not found.");
     }
-    std::string op = this->config.getString("op");
-    auto it = op_map.find(op);
+    if (!_it->is_string()) {
+        logger->BAASError("[ Action Acc ] [ op ] must be a string.");
+        _log_valid_op("[ Action Acc ] [ op ]", logger, op_st_list);
+        throw TypeError("Invalid [ Action Acc ] [ op ] Config Type.");
+    }
+
+    std::string _op_st = *_it;
+    auto it = op_map.find(_op_st);
     if (it == op_map.end()) {
-        logger->BAASError("Invalid acc op : [ " + op + " ]");
-        _log_valid_op("[ Action acc ] [ /op ]", logger, op_st_list);
-        throw ValueError("Invalid action acc op.");
+        logger->BAASError("Invalid [ Action Acc ] [ op ] : " + _op_st);
+        _log_valid_op("[ Action Acc ] [ op ]", logger, op_st_list);
+        throw ValueError("Invalid [ Action Acc ] [ op ].");
     }
     _op = it->second;
 }

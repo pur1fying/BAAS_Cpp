@@ -5,6 +5,8 @@
 
 #include "module/auto_fight/actions/auto_fight_act.h"
 
+#include "module/auto_fight/constants.h"
+
 #include "module/auto_fight/actions/auto_handler.h"
 #include "module/auto_fight/actions/acc_handler.h"
 #include "module/auto_fight/actions/skill_handler.h"
@@ -59,7 +61,14 @@ void auto_fight_act::_init_all_act()
 
     for(auto& i : act_config.get_config().items()) {
         sing_act_config = BAASConfig(i.value(), logger);
-        _init_single_act(sing_act_config, i.key());
+        try {
+            _init_single_act(sing_act_config, i.key());
+        }
+        catch (const std::exception& e) {
+            logger->BAASError("Error action name : [ " + i.key() + " ]");
+            logger->BAASError(e.what());
+            throw e;
+        }
     }
 }
 
@@ -69,14 +78,25 @@ void auto_fight_act::_init_single_act(const BAASConfig& config, const std::strin
     all_act.emplace_back();
     for(auto& i : config.get_config()) {
         single_act_config = BAASConfig(i, logger);
-        _type_name = single_act_config.getString("t");
-        if(!base_handler::is_valid_action_type(_type_name)) {
-            logger->BAASError("Invalid Action Type : [ " + _type_name + " ]");
-            base_handler::_display_valid_action_types(logger);
-            throw ValueError("Invalid Action Type.");
+        auto it = single_act_config.find("t");
+        if (it == single_act_config.end()) {
+            logger->BAASError("[ single action ] config must contain [ t ].");
+            _log_valid_op("[ single action ] [ t ]", logger, base_handler::act_type_st_list);
+            throw ValueError("[ single action ] [ t ] not found.");
         }
-        base_handler::ACTION_TYPE tp = base_handler::act_type_st_to_enum(_type_name);
-
+        if (!it->is_string()) {
+            logger->BAASError("[ single action ] [ t ] must be a string.");
+            _log_valid_op("[ single action ] [ t ]", logger, base_handler::act_type_st_list);
+            throw TypeError("Invalid [ single action ] [ t ] Config Type.");
+        }
+        std::string _act_type = *it;
+        auto tp_it = base_handler::act_type_map.find(_act_type);
+        if (tp_it == base_handler::act_type_map.end()) {
+            logger->BAASError("Invalid [ single action ] [ t ] : " + _act_type);
+            _log_valid_op("[ single action ] [ t ]", logger, base_handler::act_type_st_list);
+            throw ValueError("Invalid [ single condition ] [ t ].");
+        }
+        base_handler::ACTION_TYPE tp = tp_it->second;
         switch(tp){
             case base_handler::ACTION_TYPE::ACC:
                 all_act.back().push_back(std::make_unique<acc_handler>(baas, data, single_act_config));

@@ -16,6 +16,15 @@ BaseCondition::BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& c
     this->desc = config.getString("desc", "");
 }
 
+BaseCondition::BaseCondition(BAAS* baas, auto_fight_d* data, long long _timeout)
+{
+    this->data = data;
+    this->timeout = _timeout;
+    this->baas = baas;
+    this->logger = baas->get_logger();
+    this->desc = "";
+}
+
 BaseCondition::~BaseCondition()
 {
 

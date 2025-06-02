@@ -141,8 +141,6 @@ private:
 
     void _init_single_cond(const BAASConfig& d_cond);
 
-    std::string _cond_type;
-
     std::vector<std::unique_ptr<BaseCondition>> all_cond;
 
     std::vector<std::optional<bool>> _cond_is_matched_recorder;

@@ -37,13 +37,6 @@ private:
 
     void _parse_op();
 
-    inline void _display_valid_acc_op() const noexcept {
-        logger->BAASInfo("Valid acc op are as displayed as follow.");
-        int cnt = 0;
-        for (const auto& [key, value] : op_map)
-            logger->BAASInfo(std::to_string(++cnt) + " : \"" + key + "\"");
-    }
-
     Op _op;
 
 };

@@ -240,6 +240,14 @@ public:
         return get<long long>(key, default_value);
     }
 
+    inline unsigned long long getULLong(
+            const std::string& key,
+            unsigned long long default_value = 0
+    )   const
+    {
+        return get<unsigned long long>(key, default_value);
+    }
+
     inline nlohmann::json getJson(
             const std::string& key,
             const nlohmann::json& default_value = nlohmann::json()

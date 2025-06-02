@@ -389,7 +389,7 @@ void AutoFight::_init_single_cond(const BAASConfig &d_cond)
         throw TypeError("Invalid [ single condition ] [ type ] Config Type.");
     }
 
-    _cond_type = *_it;
+    std::string _cond_type = *_it;
     auto it = BaseCondition::cond_type_map.find(_cond_type);
     if(it == BaseCondition::cond_type_map.end()) {
         logger->BAASError("Invalid [ single condition ] [ type ] : " + _cond_type);

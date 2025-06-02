@@ -11,12 +11,6 @@ BAAS_NAMESPACE_BEGIN
 
 class CostCondition : public BaseCondition {
 public:
-    CostCondition(
-            BAAS* baas,
-            auto_fight_d* data,
-            const BAASConfig& config
-    );
-
     enum Op {
         OVER,
         BELOW,
@@ -24,6 +18,22 @@ public:
         INCREASE,
         DECREASE
     };
+
+    CostCondition(
+            BAAS* baas,
+            auto_fight_d* data,
+            const BAASConfig& config
+    );
+
+    CostCondition(
+            BAAS* baas,
+            auto_fight_d* data,
+            Op op,
+            double value,
+            uint64_t timeout = BAAS_AUTO_FIGHT_CONDITION_DEFAULT_TIMEOUT
+    );
+
+
 
     void reset_state() override;
 

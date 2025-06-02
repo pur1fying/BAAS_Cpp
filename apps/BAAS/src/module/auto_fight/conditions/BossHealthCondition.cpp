@@ -134,7 +134,7 @@ void BossHealthCondition::_parse_op()
 {
     auto it = config.find("op");
     if (it == config.end()) {
-        logger->BAASError("[ BossHealthCondition ] confiig must contain [ op ].");
+        logger->BAASError("[ BossHealthCondition ] config must contain [ op ].");
         _log_valid_op("[ BossHealthCondition ] [ op ]", logger, op_st_list);
         throw ValueError("[ BossHealthCondition ] [ op ] not found.");
     }

@@ -31,6 +31,8 @@ public:
 
     BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config);
 
+    BaseCondition(BAAS* baas, auto_fight_d* data, long long _timeout = BAAS_AUTO_FIGHT_CONDITION_DEFAULT_TIMEOUT);
+
     virtual std::optional<bool> try_match();
 
     virtual void reset_state();
@@ -65,10 +67,6 @@ public:
         return config.get<std::vector<std::string>>("and", {});
     }
 
-    inline bool is_primitive() const noexcept {
-        return _is_primitive;
-    }
-
     inline bool has_or_cond() const noexcept {
         return !or_conditions.empty();
     }
@@ -94,18 +92,12 @@ protected:
     auto_fight_d* data;
     BAASConfig config;
 
-    bool _is_primitive;
-
     std::vector<uint64_t> or_conditions;
     std::vector<uint64_t> and_conditions;
-
-    long long cond_j_start_t;
 
     long long timeout;
 
     ConditionType type;
-
-    std::string name;
 
     std::string desc;
 

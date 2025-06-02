@@ -86,7 +86,7 @@ void SkillNameCondition::_parse_op()
 {
     auto it = config.find("op");
     if (it == config.end()) {
-        logger->BAASError("[ SkillNameCondition ] confiig must contain [ op ].");
+        logger->BAASError("[ SkillNameCondition ] config must contain [ op ].");
         _log_valid_op("[ SkillNameCondition ] [ op ]", logger, op_st_list);
         throw ValueError("[ SkillNameCondition ] [ op ] not found.");
     }
@@ -115,13 +115,13 @@ void SkillNameCondition::_parse_skill_name()
 {
     auto it = config.find("name");
     if ( it == config.end()) {
-        logger->BAASError("[ SkillNameCondition ] confiig must contain [ name ].");
-        _list_valid_name();
+        logger->BAASError("[ SkillNameCondition ] config must contain [ name ].");
+        _log_valid_skill_names("[ SkillNameCondition ] [ name ]", logger, data);
         throw ValueError("[ SkillNameCondition ] [ name ] not found.");
     }
     if (!it->is_string()) {
         logger->BAASError("[ SkillNameCondition ] [ name ] must be a string.");
-        _list_valid_name();
+        _log_valid_skill_names("[ SkillNameCondition ] [ name ]", logger, data);
         throw TypeError("[ SkillNameCondition ] [ name ] TypeError");
     }
 
@@ -137,7 +137,7 @@ void SkillNameCondition::_parse_skill_name()
 
     if(!find) {
         logger->BAASError("[ SkillNameCondition ] [ name ] : \"" + _skill_name + "\" not found in all possible skills.");
-        _list_valid_name();
+        _log_valid_skill_names("[ SkillNameCondition ] [ name ]", logger, data);
         throw ValueError("Invalid [ SkillNameCondition ] [ name ].");
     }
 }

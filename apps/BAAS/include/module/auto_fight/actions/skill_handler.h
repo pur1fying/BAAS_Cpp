@@ -100,6 +100,8 @@ private:
 
     void _parse_check_op();
 
+    void _parse_check_value(const nlohmann::json::const_iterator& _check_it);
+
     uint64_t _skill_n_idx;
 
     int _l_r_idx;
@@ -116,10 +118,13 @@ private:
 
     double _c_v;
 
-    double _c_timeout;
+    long long _c_timeout;
 
     std::unique_ptr<BaseCondition> _cost_cond;
 
+    void _parse_fixed_x_y(const nlohmann::json::const_iterator& _target_it);
+
+    void _parse_yolo_obj(const nlohmann::json::const_iterator& _target_it);
 };
 
 

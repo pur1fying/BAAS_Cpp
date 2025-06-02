@@ -26,6 +26,30 @@ void _log_valid_op(
         logger->BAASInfo(std::to_string(++cnt) + " : \"" + op + "\"");
 }
 
+void _log_valid_skill_names(
+        const std::string& name,
+        BAASLogger* logger,
+        const auto_fight_d* data
+) noexcept
+{
+    BAASGlobalLogger->BAASInfo("Valid  <<< " + name + " >>> ( all_possible skills ) are listed below :");
+    int cnt = 0;
+    for (const auto& skill : data->all_possible_skills)
+        logger->BAASInfo(std::to_string(++cnt) + " : \"" + skill.name + "\"");
+}
+
+void _log_valid_yolo_obj(
+        const std::string& name,
+        BAASLogger* logger,
+        const auto_fight_d* data
+) noexcept
+{
+    BAASGlobalLogger->BAASInfo("Valid  <<< " + name + " >>> ( all possible YOLO objects ) are listed below :");
+    int cnt = 0;
+    for (const auto& obj: data->all_possible_obj_names)
+        logger->BAASInfo(std::to_string(++cnt) + " : \"" + obj + "\"");
+}
+
 void _get_valid_log_string(
         const std::string& name,
         const std::vector<std::string>& op_st_list,
@@ -37,6 +61,8 @@ void _get_valid_log_string(
     for (const auto& op: op_st_list)
         out += std::to_string(++cnt) + " : \"" + op + "\"\n";
 }
+
+
 
 // constants of actions
 

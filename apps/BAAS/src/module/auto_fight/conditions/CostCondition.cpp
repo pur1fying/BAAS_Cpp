@@ -34,6 +34,19 @@ CostCondition::CostCondition(
     _parse_op();
 }
 
+CostCondition::CostCondition(
+        BAAS* baas,
+        auto_fight_d* data,
+        CostCondition::Op op,
+        double value,
+        uint64_t timeout
+) : BaseCondition(baas, data, timeout)
+{
+    type = COST;
+    _op = op;
+    _value = value;
+}
+
 std::optional<bool> CostCondition::try_match()
 {
     if (!data->cost.has_value()) return std::nullopt;
@@ -69,7 +82,6 @@ std::optional<bool> CostCondition::try_match()
 
 void CostCondition::reset_state()
 {
-    if (_reset_cost) _last_recorded_cost = std::nullopt;
     _cost_increment = 0;
 }
 
@@ -108,8 +120,6 @@ void CostCondition::_parse_op()
             _parse_config_range();
             break;
     }
-    _reset_cost = this->config.getBool("reset", false);
-
 }
 
 void CostCondition::_parse_config_value()

@@ -12,12 +12,26 @@
 #include <BAASLogger.h>
 #include <core_defines.h>
 
+#include "module/auto_fight/auto_fight_d.h"
+
 BAAS_NAMESPACE_BEGIN
 
 void _log_valid_op(
         const std::string& name,
         BAASLogger* logger,
         const std::vector<std::string>& _op_st_list
+) noexcept;
+
+void _log_valid_skill_names(
+        const std::string& name,
+        BAASLogger* logger,
+        const auto_fight_d* data
+) noexcept;
+
+void _log_valid_yolo_obj(
+        const std::string& name,
+        BAASLogger* logger,
+        const auto_fight_d* data
 ) noexcept;
 
 void _get_valid_log_string(
