@@ -97,13 +97,11 @@ target_include_directories(
         ${CMAKE_BINARY_DIR}
 )
 
-
 target_compile_definitions(
         BAAS_APP PRIVATE
         BAAS_BUILD_DLL
         BENCHMARK_STATIC_DEFINE
 )
-
 
 if (BAAS_APP_USE_CUDA)
     target_compile_definitions(
@@ -223,29 +221,4 @@ if(CURRENT_OS_NAME STREQUAL "Windows")
     set(ICON_RESOURCE "${CMAKE_CURRENT_LIST_DIR}/src/rc/logo.ico")
     set(RES_FILE "${CMAKE_CURRENT_LIST_DIR}/src/rc/app.rc")
     target_sources(BAAS_APP PRIVATE ${RES_FILE})
-endif()
-
-
-
-option(BUILD_BAAS_AUTO_FIGHT_WORKFLOW_CHECKER "Build BAAS Auto Fight Workflow Checker" OFF)
-
-if (BUILD_BAAS_AUTO_FIGHT_WORKFLOW_CHECKER)
-
-    message(STATUS "Build BAAS Auto Fight Workflow Checker")
-
-    add_executable(
-            BAAS_workflow_checker
-            ${BAAS_PROJECT_PATH}/src/BAASLogger.cpp
-            ${BAAS_PROJECT_PATH}/src/BAASGlobals.cpp
-            workflow_acceptance_checker.cpp
-    )
-
-    target_include_directories (
-            BAAS_workflow_checker
-            PRIVATE
-            ${CMAKE_CURRENT_LIST_DIR}/include
-            ${BAAS_PROJECT_PATH}/external
-            ${BAAS_PROJECT_PATH}/include
-            ${CMAKE_BINARY_DIR}
-    )
 endif()

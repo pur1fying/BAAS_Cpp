@@ -633,7 +633,8 @@ void AutoFight::_init_start_state()
     start_state_name = *_it;
     auto it = _state_name_idx_map.find(start_state_name);
     if (it == _state_name_idx_map.end()) {
-        logger->BAASError("Undefined [ start_state ] --> [ " + start_state_name + " ] .");
+        logger->BAASError("Undefined state found in [ start_state ]");
+        logger->BAASError("Undefined state name : [ " + start_state_name + " ]");
         throw ValueError("Undefined State Found.");
     }
 
