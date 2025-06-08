@@ -4,17 +4,14 @@
 #ifndef BAAS_BAASIMAGERESOURCE_H_
 #define BAAS_BAASIMAGERESOURCE_H_
 
-#include <nlohmann/json.hpp>
+#include <opencv2/opencv.hpp>
 
-#include "BAAS.h"
-#include "BAASGlobals.h"
-#include "config/BAASConfig.h"
-#include "utils/BAASImageUtil.h"
-#include "device/BAASConnection.h"
+#include "BAASTypes.h"
 
 BAAS_NAMESPACE_BEGIN
 
 struct BAASImage {
+
     BAASRectangle region;
     uint8_t direction = 0;  // some app rotates the screen
     cv::Mat image;
@@ -87,12 +84,6 @@ public:
     void show();
 
     bool is_loaded(
-            const BAAS* baas,
-            const std::string& group,
-            const std::string& name
-    ) const;
-
-    bool is_loaded(
             const std::string& server,
             const std::string& language,
             const std::string& group,
@@ -149,6 +140,7 @@ public:
     );
 
 private:
+
     static BAASImageResource* instance;
 
     BAASImageResource();
@@ -163,7 +155,7 @@ class GetResourceError : public std::exception {
 public:
     explicit GetResourceError(const std::string& msg) : msg(msg) {}
 
-    const char *what() const noexcept override
+    const char* what() const noexcept override
     {
         return msg.c_str();
     }

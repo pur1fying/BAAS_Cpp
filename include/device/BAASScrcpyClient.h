@@ -329,16 +329,16 @@ enum ScrcpyConst {
 
 class BAASScrcpyClient {
 public:
-    static BAASScrcpyClient *get_client(BAASConnection *connection);
+    static BAASScrcpyClient* get_client(BAASConnection* connection);
 
-    static void release_client(BAASConnection *connection);
+    static void release_client(BAASConnection* connection);
 
     // continuous start and stop seems to have memory leak problem, reason unknown
     bool start();
 
     bool stop();
 
-    bool screenshot(cv::Mat &output);
+    bool screenshot(cv::Mat& output);
 
     inline long long get_last_frame_arrive_time()
     {
@@ -376,7 +376,7 @@ public:
             int repeat = 0
     );
 
-    void text(const std::string &text);
+    void text(const std::string& text);
 
     void touch(
             int x,
@@ -403,7 +403,7 @@ public:
     std::string get_clipboard();
 
     void set_clipboard(
-            const std::string &text,
+            const std::string& text,
             bool paste = false
     );
 
@@ -474,11 +474,11 @@ private:
         resolution.second = height;
     }
 
-    explicit BAASScrcpyClient(BAASConnection *connection);
+    explicit BAASScrcpyClient(BAASConnection* connection);
 
-    static std::map<BAASConnection *, BAASScrcpyClient *> clients;
+    static std::map<BAASConnection*, BAASScrcpyClient*> clients;
 
-    BAASLogger *logger;
+    BAASLogger* logger;
 
     cv::Mat last_frame;
 
@@ -510,9 +510,9 @@ private:
 
     std::mutex control_socket_mutex;
 
-    BAASConnection *connection;
+    BAASConnection* connection;
 
-    BAASAdbConnection *serverStream;
+    BAASAdbConnection* serverStream;
 
     bool deploy_server();
 
@@ -522,23 +522,23 @@ private:
 
     char ret_buffer[1 << 16];
 
-    BAASAdbDevice *device = nullptr;
+    BAASAdbDevice* device = nullptr;
 
-    char *rawH264;
+    char* rawH264;
 
     std::thread screenshotThread;
 
-    const AVCodec *codec;
+    const AVCodec* codec;
 
-    AVCodecParserContext *parser;
+    AVCodecParserContext* parser;
 
-    AVCodecContext *codecContext;
+    AVCodecContext* codecContext;
 
-    AVPacket *packet;
+    AVPacket* packet;
 
-    AVFrame *frame;
+    AVFrame* frame;
 
-    inline void control_socket_send(std::string &msg)
+    inline void control_socket_send(std::string& msg)
     {
         std::lock_guard<std::mutex> lock(control_socket_mutex);
         send(controlSocket, msg.c_str(), int(msg.size()), 0);
@@ -550,12 +550,12 @@ class ScrcpyError : public std::exception {
 public:
     ScrcpyError() = default;
 
-    explicit ScrcpyError(const char *msg)
+    explicit ScrcpyError(const char* msg)
     {
         message = msg;
     }
 
-    [[nodiscard]] const char *what() const noexcept override
+    [[nodiscard]] const char* what() const noexcept override
     {
         if (message.empty()) return "Scrcpy Error";
         return message.c_str();

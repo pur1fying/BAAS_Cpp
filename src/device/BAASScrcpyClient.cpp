@@ -11,9 +11,9 @@ using namespace std::filesystem;
 
 BAAS_NAMESPACE_BEGIN
 
-map<BAASConnection *, BAASScrcpyClient *> BAASScrcpyClient::clients;
+map<BAASConnection*, BAASScrcpyClient*> BAASScrcpyClient::clients;
 
-BAASScrcpyClient::BAASScrcpyClient(BAASConnection *connection)
+BAASScrcpyClient::BAASScrcpyClient(BAASConnection* connection)
 {
     this->connection = connection;
     logger = connection->get_logger();
@@ -24,7 +24,7 @@ bool BAASScrcpyClient::deploy_server()
 {
     try {
         connection->adb_push(scrcpyJarPath.string(), scrcpyJar_REMOTE_DIR.string());
-    } catch (AdbError &e) {
+    } catch (AdbError& e) {
         string msg(e.what());
         logger->BAASError("Fail to push scrcpy-server : " + msg);
         return false;
@@ -65,7 +65,7 @@ bool BAASScrcpyClient::deploy_server()
             else throw ScrcpyError("Unknown Server Error");
         }
     }
-    catch (AdbError &e) {
+    catch (AdbError& e) {
         string msg(e.what());
         logger->BAASError("Fail to start scrcpy server : " + msg);
         return false;
@@ -76,13 +76,13 @@ bool BAASScrcpyClient::deploy_server()
 // control socket and video socket
 bool BAASScrcpyClient::init_socket()
 {
-    BAASAdbConnection *video_stream, *control_stream;
+    BAASAdbConnection* video_stream,* control_stream;
     logger->BAASInfo("Create Video Stream.");
     for (int i = 1; i <= 30; ++i) {
         try {
             video_stream = device->createConnection(Network::LOCAL_ABSTRACT, "scrcpy");
             break;
-        } catch (AdbError &e) {
+        } catch (AdbError& e) {
             video_stream = nullptr;
             logger->BAASInfo(e.what());
             BAASChronoUtil::sleepMS(100);
@@ -116,7 +116,7 @@ bool BAASScrcpyClient::init_socket()
     u_long mode = 1;
 
     logger->BAASInfo(
-            "Set video socket blocking : " + to_string(ioctlsocket(video_stream->getConnection(), FIONBIO, &mode)));
+            "Set video socket blocking : " + to_string(ioctlsocket(video_stream->getConnection(), FIONBIO,& mode)));
 
     video_stream->setCloseSocketWhenDestruct(false);
     control_stream->setCloseSocketWhenDestruct(false);
@@ -151,7 +151,7 @@ bool BAASScrcpyClient::screenshot_loop()
                     throw ScrcpyError("Cannot allocate packet or frame");
                 }
                 ret = av_parser_parse2(
-                        parser, codecContext, &packet->data, &packet->size, (uint8_t *) rawH264, dataSize,
+                        parser, codecContext,& packet->data,& packet->size, (uint8_t* ) rawH264, dataSize,
                         AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0
                 );
                 dataSize -= ret;
@@ -179,7 +179,7 @@ bool BAASScrcpyClient::screenshot_loop()
                     }
                     int cv_line_size[1];
                     cv_line_size[0] = int(last_frame.step1());
-                    SwsContext *conversion = sws_getContext(
+                    SwsContext* conversion = sws_getContext(
                             width, height, (AVPixelFormat) frame->format, width, height, AV_PIX_FMT_BGR24,
                             SWS_FAST_BILINEAR, nullptr, nullptr, nullptr
                     );
@@ -187,7 +187,7 @@ bool BAASScrcpyClient::screenshot_loop()
                         ffmpeg_release_resource();
                         throw ScrcpyError("Cannot create SwsContext");
                     }
-                    sws_scale(conversion, frame->data, frame->linesize, 0, height, &last_frame.data, cv_line_size);
+                    sws_scale(conversion, frame->data, frame->linesize, 0, height,& last_frame.data, cv_line_size);
                     sws_freeContext(conversion);
                     frame_mutex.unlock();
                     set_last_frame_arrive_time();
@@ -195,10 +195,10 @@ bool BAASScrcpyClient::screenshot_loop()
             }
         }
         ffmpeg_release_resource();
-    } catch (AdbError &e) {
+    } catch (AdbError& e) {
         logger->BAASError(e.what());
         return false;
-    } catch (ScrcpyError &e) {
+    } catch (ScrcpyError& e) {
         logger->BAASError(e.what());
         return false;
     }
@@ -209,7 +209,7 @@ bool BAASScrcpyClient::screenshot_loop()
     return true;
 }
 
-bool BAASScrcpyClient::screenshot(cv::Mat &output)
+bool BAASScrcpyClient::screenshot(cv::Mat& output)
 {
     long long currentTime = BAASChronoUtil::getCurrentTimeMS();
 
@@ -265,7 +265,7 @@ bool BAASScrcpyClient::stop()
     return true;
 }
 
-BAASScrcpyClient *BAASScrcpyClient::get_client(BAASConnection *connection)
+BAASScrcpyClient* BAASScrcpyClient::get_client(BAASConnection* connection)
 {
     if (clients.find(connection) == clients.end()) {
         clients[connection] = new BAASScrcpyClient(connection);
@@ -273,7 +273,7 @@ BAASScrcpyClient *BAASScrcpyClient::get_client(BAASConnection *connection)
     return clients[connection];
 }
 
-void BAASScrcpyClient::release_client(BAASConnection *connection)
+void BAASScrcpyClient::release_client(BAASConnection* connection)
 {
     auto it = clients.find(connection);
     if (it != clients.end()) {
@@ -332,7 +332,7 @@ void BAASScrcpyClient::keycode(
     control_socket_send(msg);
 }
 
-void BAASScrcpyClient::text(const string &text)
+void BAASScrcpyClient::text(const string& text)
 {
     uint8_t inject = ScrcpyConst::TYPE_INJECT_TEXT;
 
@@ -413,7 +413,7 @@ std::string BAASScrcpyClient::get_clipboard()
 {
     // clear control socket
     u_long mode = 1;
-    ioctlsocket(controlSocket, FIONBIO, &mode);
+    ioctlsocket(controlSocket, FIONBIO,& mode);
     char buffer[1024];
     int len;
     while (true) {
@@ -426,7 +426,7 @@ std::string BAASScrcpyClient::get_clipboard()
         }
     }
     mode = 0;
-    ioctlsocket(controlSocket, FIONBIO, &mode);
+    ioctlsocket(controlSocket, FIONBIO,& mode);
 
     // get clipboard
     uint8_t inject = ScrcpyConst::TYPE_GET_CLIPBOARD;
@@ -445,7 +445,7 @@ std::string BAASScrcpyClient::get_clipboard()
 }
 
 void BAASScrcpyClient::set_clipboard(
-        const string &text,
+        const string& text,
         const bool paste
 )
 {
@@ -496,7 +496,7 @@ void BAASScrcpyClient::swipe(
     vector<pair<int, int>> points;
     insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
 
-    int sleep_time = int(step_delay * 1000);
+    int sleep_time = int(step_delay*  1000);
 
     touch(start_x, start_y, ScrcpyConst::ACTION_DOWN);
 

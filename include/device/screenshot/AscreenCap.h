@@ -13,11 +13,11 @@ class AScreenCap : public BaseScreenshot {
 
 public:
 
-    explicit AScreenCap(BAASConnection *connection);
+    explicit AScreenCap(BAASConnection* connection);
 
     void init() override;
 
-    void screenshot(cv::Mat &img) override;
+    void screenshot(cv::Mat& img) override;
 
     void exit() override;
 

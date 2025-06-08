@@ -19,7 +19,7 @@
 #include "BAASConnection.h"
 
 typedef int (*nemuConnect)(
-        const wchar_t *,
+        const wchar_t*,
         int
 );
 
@@ -80,14 +80,16 @@ private:
 };
 
 class BAASNemu {
+
 public:
-    static BAASNemu *get_instance(BAASConnection *connection);
+
+    static BAASNemu* get_instance(BAASConnection* connection);
 
     static void release(int connectionId);
 
-    explicit BAASNemu(BAASConnection *connection);
+    explicit BAASNemu(BAASConnection* connection);
 
-    explicit BAASNemu(std::string &installPath);
+    explicit BAASNemu(std::string& installPath);
 
     void reconnect();
 
@@ -95,12 +97,12 @@ public:
 
     void disconnect();
 
-    void screenshot(cv::Mat &image);
+    void screenshot(cv::Mat& image);
 
     int get_resolution(
             int connectionId,
             int displayId,
-            std::pair<int, int> &resolution
+            std::pair<int, int>& resolution
     );
 
     void click(
@@ -140,11 +142,11 @@ public:
     void up() const;
 
     void convertXY(
-            int &x,
-            int &y
+            int& x,
+            int& y
     ) const;
 
-    void convertXY(BAASPoint &point) const;
+    void convertXY(BAASPoint& point) const;
 
     void update_resolution();
 
@@ -154,9 +156,10 @@ public:
     }
 
 private:
+
     void init_dll();
 
-    BAASLogger *logger;
+    BAASLogger* logger;
 
     std::string mumu_install_path;
 
@@ -172,7 +175,7 @@ private:
 
     bool alive = false;
 
-    static std::map<int, BAASNemu *> connections;
+    static std::map<int, BAASNemu*> connections;
 
     HINSTANCE hDllInst;
 

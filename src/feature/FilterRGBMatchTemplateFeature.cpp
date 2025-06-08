@@ -4,6 +4,8 @@
 
 #include "feature/FilterRGBMatchTemplateFeature.h"
 
+#include "utils/BAASImageUtil.h"
+
 using namespace std;
 using namespace cv;
 using namespace nlohmann;
@@ -25,7 +27,7 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
-FilterRGBMatchTemplateFeature::FilterRGBMatchTemplateFeature(BAASConfig *config) : BaseFeature(config)
+FilterRGBMatchTemplateFeature::FilterRGBMatchTemplateFeature(BAASConfig* config) : BaseFeature(config)
 {
     template_group = config->getString("group");
     assert(!template_group.empty());
@@ -67,8 +69,8 @@ FilterRGBMatchTemplateFeature::FilterRGBMatchTemplateFeature(BAASConfig *config)
 
 
 bool FilterRGBMatchTemplateFeature::appear(
-        const BAAS *baas,
-        BAASConfig &output
+        const BAAS* baas,
+        BAASConfig& output
 )
 {
     vector<string> log;
@@ -139,7 +141,7 @@ bool FilterRGBMatchTemplateFeature::appear(
 }
 
 
-double FilterRGBMatchTemplateFeature::self_average_cost(const BAAS *baas)
+double FilterRGBMatchTemplateFeature::self_average_cost(const BAAS* baas)
 {
     string image_key = baas->get_image_resource_prefix() + group_name;
     if(!resource->is_loaded(image_key)) return 0;

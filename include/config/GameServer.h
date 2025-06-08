@@ -5,7 +5,11 @@
 #ifndef BAAS_CONFIG_GAMESERVER_H_
 #define BAAS_CONFIG_GAMESERVER_H_
 
-#include "config/BAASStaticConfig.h"
+#include <map>
+#include <string>
+#include <vector>
+
+#include "core_defines.h"
 
 BAAS_NAMESPACE_BEGIN
 

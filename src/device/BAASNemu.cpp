@@ -10,9 +10,9 @@
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
-std::map<int, BAASNemu *> BAASNemu::connections;
+std::map<int, BAASNemu*> BAASNemu::connections;
 
-BAASNemu *BAASNemu::get_instance(BAASConnection *connection)
+BAASNemu* BAASNemu::get_instance(BAASConnection* connection)
 {
     string mm_path = connection->emulator_folder_path();
     int id = MuMu_serial2instance_id(connection->get_serial());
@@ -26,7 +26,7 @@ BAASNemu *BAASNemu::get_instance(BAASConnection *connection)
     return new BAASNemu(connection);
 }
 
-BAASNemu::BAASNemu(BAASConnection *connection)
+BAASNemu::BAASNemu(BAASConnection* connection)
 {
     logger = connection->get_logger();
     mumu_install_path = connection->emulator_folder_path();
@@ -36,9 +36,9 @@ BAASNemu::BAASNemu(BAASConnection *connection)
     connect();
 }
 
-BAASNemu::BAASNemu(string &installPath)
+BAASNemu::BAASNemu(string& installPath)
 {
-    logger = (BAASLogger *) BAASGlobalLogger;
+    logger = (BAASLogger*) BAASGlobalLogger;
     mumu_install_path = installPath;
     instance_id = 0;
     display_id = 0;
@@ -50,9 +50,7 @@ BAASNemu::BAASNemu(string &installPath)
 void BAASNemu::connect()
 {
     for (auto &connection: connections) {
-        if (connection.second
-                      ->mumu_install_path == mumu_install_path && connection.second
-                                                                            ->instance_id == instance_id) {
+        if (connection.second->mumu_install_path == mumu_install_path && connection.second->instance_id == instance_id) {
             logger->BAASWarn("Already connected");
             return;
         }
@@ -91,7 +89,7 @@ void BAASNemu::disconnect()
 }
 
 
-void BAASNemu::screenshot(cv::Mat &image)
+void BAASNemu::screenshot(cv::Mat& image)
 {
     if (nemu_capture_display(
             connection_id,
@@ -114,7 +112,7 @@ void BAASNemu::screenshot(cv::Mat &image)
 int BAASNemu::get_resolution(
         int connectionId,
         int displayId,
-        std::pair<int, int> &resolution
+        std::pair<int, int>& resolution
 )
 {
     return nemu_capture_display(connectionId, displayId, 0, &resolution.first, &resolution.second, nullptr);
@@ -202,8 +200,8 @@ void BAASNemu::down(BAASPoint point) const
 }
 
 void BAASNemu::convertXY(
-        int &x,
-        int &y
+        int& x,
+        int& y
 ) const
 {
     if (resolution.first < resolution.second) return;
@@ -214,7 +212,7 @@ void BAASNemu::convertXY(
     printf("x: %d, y: %d\n", x, y);
 }
 
-void BAASNemu::convertXY(BAASPoint &point) const
+void BAASNemu::convertXY(BAASPoint& point) const
 {
     int temp = point.x;
     point.x = resolution.second - point.y;

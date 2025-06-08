@@ -11,7 +11,7 @@ using namespace std;
 BAAS_NAMESPACE_BEGIN
 string AScreenCap::shot_cmd = " --pack 2 --stdout";
 
-AScreenCap::AScreenCap(BAASConnection *connection) : BaseScreenshot(connection)
+AScreenCap::AScreenCap(BAASConnection* connection) : BaseScreenshot(connection)
 {
     this->connection = connection;
     byte_pointer = 0;
@@ -66,7 +66,7 @@ void AScreenCap::init()
     logger->BAASInfo("AScreenCap init success");
 }
 
-void AScreenCap::screenshot(cv::Mat &img)
+void AScreenCap::screenshot(cv::Mat& img)
 {
     // 100ms +
     ret_buffer = connection->adb_shell_bytes(shot_cmd);

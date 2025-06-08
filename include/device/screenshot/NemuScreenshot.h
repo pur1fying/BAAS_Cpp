@@ -10,18 +10,21 @@
 
 BAAS_NAMESPACE_BEGIN
 class NemuScreenshot : public BaseScreenshot {
+
 public:
-    NemuScreenshot(BAASConnection *connection);
+
+    NemuScreenshot(BAASConnection* connection);
 
     void init() override;
 
-    void screenshot(cv::Mat &output) override;
+    void screenshot(cv::Mat& output) override;
 
     void exit() override;
 
     bool is_lossy() override;
 
 private:
+
     BAASNemu *nemu_connection;
 
 };

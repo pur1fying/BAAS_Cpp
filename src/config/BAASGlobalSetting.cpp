@@ -13,11 +13,11 @@ using json = nlohmann::json;
 
 BAAS_NAMESPACE_BEGIN
 
-BAASGlobalSetting *global_setting = nullptr;
+BAASGlobalSetting* global_setting = nullptr;
 
-BAASGlobalSetting *BAASGlobalSetting::globalSetting = nullptr;
+BAASGlobalSetting* BAASGlobalSetting::globalSetting = nullptr;
 
-BAASGlobalSetting *BAASGlobalSetting::getGlobalSetting()
+BAASGlobalSetting* BAASGlobalSetting::getGlobalSetting()
 {
     if (globalSetting == nullptr) {
         globalSetting = new BAASGlobalSetting();
@@ -27,7 +27,7 @@ BAASGlobalSetting *BAASGlobalSetting::getGlobalSetting()
 
 BAASGlobalSetting::BAASGlobalSetting() : BAASConfig(
         BAAS_CONFIG_DIR / "global_setting.json",
-        (BAASLogger *) BAASGlobalLogger
+        (BAASLogger*) BAASGlobalLogger
 )
 {
     create_modify_history_file();

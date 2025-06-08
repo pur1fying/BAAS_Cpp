@@ -5,8 +5,9 @@
 #ifndef BAAS_FEATURE_MATCHTEMPLATEFEATURE_H_
 #define BAAS_FEATURE_MATCHTEMPLATEFEATURE_H_
 
-#include "feature/BaseFeature.h"
+#include "BAAS.h"
 #include "BAASImageResource.h"
+#include "feature/BaseFeature.h"
 
 #define BAAS_MATCH_TEMPLATE_FEATURE 0
 

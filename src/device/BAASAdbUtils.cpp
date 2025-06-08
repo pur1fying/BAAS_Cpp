@@ -24,8 +24,8 @@ const string Network::LOCAL_ABSTRACT = "localabstract";
 
 // Connection
 bool BAASAdbConnection::checkServer(
-        std::string &host,
-        std::string &port
+        std::string& host,
+        std::string& port
 )
 {
     SOCKET connection = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -44,8 +44,8 @@ BAASAdbConnection::BAASAdbConnection()
 }
 
 BAASAdbConnection::BAASAdbConnection(
-        const string &host,
-        const string &port,
+        const string& host,
+        const string& port,
         double socketTimeout
 )
 {
@@ -57,7 +57,7 @@ BAASAdbConnection::BAASAdbConnection(
 }
 
 BAASAdbConnection::BAASAdbConnection(
-        const string &serial,
+        const string& serial,
         double socketTimeout
 )
 {
@@ -88,7 +88,7 @@ string BAASAdbConnection::readFully(int length) const
     return res;
 }
 
-bool BAASAdbConnection::readUntilClose(string &res) const
+bool BAASAdbConnection::readUntilClose(string& res) const
 {
     res = "";
     string temp;
@@ -100,7 +100,7 @@ bool BAASAdbConnection::readUntilClose(string &res) const
     return true;
 }
 
-bool BAASAdbConnection::sendMessage(const string &data) const
+bool BAASAdbConnection::sendMessage(const string& data) const
 {
     string msgLengthHex = BAASStringUtil::int2hex(int(data.length()));
     msgLengthHex = msgLengthHex + data;
@@ -185,7 +185,7 @@ BAASAdbBaseClient::BAASAdbBaseClient()
 }
 
 BAASAdbBaseClient::BAASAdbBaseClient(
-        const std::string &serial,
+        const std::string& serial,
         double socketTimeout
 )
 {
@@ -198,8 +198,8 @@ BAASAdbBaseClient::BAASAdbBaseClient(
 }
 
 BAASAdbBaseClient::BAASAdbBaseClient(
-        const std::string &host,
-        const std::string &port,
+        const std::string& host,
+        const std::string& port,
         double socketTimeout
 )
 {
@@ -209,7 +209,7 @@ BAASAdbBaseClient::BAASAdbBaseClient(
     this->socketTimeout = socketTimeout;
 }
 
-BAASAdbConnection *BAASAdbBaseClient::makeConnection(double socketTimeout)
+BAASAdbConnection* BAASAdbBaseClient::makeConnection(double socketTimeout)
 {
     if (socketTimeout == 0) socketTimeout = this->socketTimeout;
     return new BAASAdbConnection(host, port, socketTimeout);
@@ -235,7 +235,7 @@ bool BAASAdbBaseClient::serverKill()
 }
 
 std::string BAASAdbBaseClient::connect(
-        const std::string &address,
+        const std::string& address,
         double timeout
 )
 {
@@ -246,7 +246,7 @@ std::string BAASAdbBaseClient::connect(
 }
 
 std::string BAASAdbBaseClient::disconnect(
-        const std::string &address,
+        const std::string& address,
         double timeout
 )
 {
@@ -261,25 +261,25 @@ std::string BAASAdbBaseClient::disconnect(
     }
 }
 
-const std::string &BAASAdbBaseClient::getHost() const
+const std::string& BAASAdbBaseClient::getHost() const
 {
     return host;
 }
 
-const std::string &BAASAdbBaseClient::getPort() const
+const std::string& BAASAdbBaseClient::getPort() const
 {
     return port;
 }
 
-const std::string &BAASAdbBaseClient::getSerial() const
+const std::string& BAASAdbBaseClient::getSerial() const
 {
     return serial;
 }
 
 // BaseDevice
 BAASAdbBaseDevice::BAASAdbBaseDevice(
-        BAASAdbBaseClient *client,
-        const string &serial,
+        BAASAdbBaseClient* client,
+        const string& serial,
         const int transportId
 )
 {
@@ -288,8 +288,8 @@ BAASAdbBaseDevice::BAASAdbBaseDevice(
     this->transportId = transportId;
 }
 
-BAASAdbConnection *BAASAdbBaseDevice::openTransport(
-        const string &command = "",
+BAASAdbConnection* BAASAdbBaseDevice::openTransport(
+        const string& command = "",
         double socketTimeout
 )
 {
@@ -307,7 +307,7 @@ BAASAdbConnection *BAASAdbBaseDevice::openTransport(
 }
 
 string BAASAdbBaseDevice::getCommandResult(
-        const string &command,
+        const string& command,
         double socketTimeout
 )
 {
@@ -339,11 +339,11 @@ string BAASAdbBaseDevice::getFeatures(double socketTimeout)
 }
 
 BAASAdbConnection *BAASAdbBaseDevice::createConnection(
-        const string &network,
-        const string &address
+        const string& network,
+        const string& address
 )
 {
-    BAASAdbConnection *conn = openTransport();
+    BAASAdbConnection* conn = openTransport();
     vector<string> allNetworks = {
             Network::TCP,
             Network::UNIX,
@@ -362,8 +362,8 @@ BAASAdbConnection *BAASAdbBaseDevice::createConnection(
 }
 
 
-BAASAdbConnection *BAASAdbBaseDevice::shellStream(
-        const string &command,
+BAASAdbConnection* BAASAdbBaseDevice::shellStream(
+        const string& command,
         double socketTimeout
 )
 {  // run shell and get stream
@@ -373,8 +373,8 @@ BAASAdbConnection *BAASAdbBaseDevice::shellStream(
     return conn;
 }
 
-BAASAdbConnection *BAASAdbBaseDevice::shellStream(
-        const vector <string> &commandList,
+BAASAdbConnection* BAASAdbBaseDevice::shellStream(
+        const vector<string>& commandList,
         double socketTimeout
 )
 {
@@ -384,8 +384,8 @@ BAASAdbConnection *BAASAdbBaseDevice::shellStream(
 }
 
 bool BAASAdbBaseDevice::shellBytes(
-        const string &command,
-        string &out,
+        const string& command,
+        string& out,
         double socketTimeout
 )
 
@@ -397,8 +397,8 @@ bool BAASAdbBaseDevice::shellBytes(
 }
 
 bool BAASAdbBaseDevice::shellBytes(
-        const vector <string> &commandList,
-        string &out,
+        const vector<string>& commandList,
+        string& out,
         double socketTimeout
 )
 {
@@ -409,8 +409,8 @@ bool BAASAdbBaseDevice::shellBytes(
 }
 
 BAASAdbConnection *BAASAdbBaseDevice::prepareSync(
-        const string &path,
-        const string &cmd
+        const string& path,
+        const string& cmd
 )
 {
     string msg = "host:transport:" + serial;
@@ -424,7 +424,7 @@ BAASAdbConnection *BAASAdbBaseDevice::prepareSync(
     return conn;
 }
 
-int BAASAdbBaseDevice::stat(const string &path)
+int BAASAdbBaseDevice::stat(const string& path)
 {
     BAASAdbConnection *conn = prepareSync(path, STAT);
     conn->checkSTAT();
@@ -437,8 +437,8 @@ int BAASAdbBaseDevice::stat(const string &path)
 
 
 int BAASAdbBaseDevice::push(
-        const string &src,
-        const string &dst,
+        const string& src,
+        const string& dst,
         const int mode,
         bool check
 )
@@ -501,8 +501,8 @@ BAASAdbBaseDevice::~BAASAdbBaseDevice() = default;
 
 
 BAASAdbDevice::BAASAdbDevice(
-        BAASAdbBaseClient *client,
-        const std::string &serial,
+        BAASAdbBaseClient* client,
+        const std::string& serial,
         const int transportId
 ) : BAASAdbBaseDevice(client, serial, transportId)
 {
@@ -518,7 +518,7 @@ BAASAdbClient::BAASAdbClient() : BAASAdbBaseClient("127.0.0.1:5037", 3000.0)
 
 }
 
-void BAASAdbClient::list_device(std::vector<std::pair<std::string, int>> &devices)
+void BAASAdbClient::list_device(std::vector<std::pair<std::string, int>>& devices)
 {
     devices.clear();
     BAASAdbConnection conn = BAASAdbConnection("127.0.0.1", "5037", 3000.0);
@@ -543,9 +543,9 @@ void BAASAdbClient::list_device(std::vector<std::pair<std::string, int>> &device
     }
 }
 
-std::vector<BAASAdbDevice *> BAASAdbClient::iter_device()
+std::vector<BAASAdbDevice*> BAASAdbClient::iter_device()
 {
-    vector<BAASAdbDevice *> devices;
+    vector<BAASAdbDevice*> devices;
     vector<pair<string, int>> dList;
     list_device(dList);
     for (auto &device: dList) {
@@ -557,13 +557,13 @@ std::vector<BAASAdbDevice *> BAASAdbClient::iter_device()
     return devices;
 }
 
-BAASAdbDevice *BAASAdbClient::device(const std::string &serial)
+BAASAdbDevice* BAASAdbClient::device(const std::string& serial)
 {
     return new BAASAdbDevice(this, serial);
 }
 
 BAASAdbClient::BAASAdbClient(
-        const string &serial,
+        const string& serial,
         double socketTimeout
 ) : BAASAdbBaseClient(serial, socketTimeout)
 {
@@ -571,14 +571,13 @@ BAASAdbClient::BAASAdbClient(
 }
 
 BAASAdbClient::BAASAdbClient(
-        const string &host,
-        const string &port,
+        const string& host,
+        const string& port,
         double socketTimeout
 ) : BAASAdbBaseClient(host, port, socketTimeout)
 {
 
 }
-
 
 BAASAdbClient adb;
 

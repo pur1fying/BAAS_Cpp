@@ -440,16 +440,7 @@ void BAASImageUtil::gen_not_black_region_mask(
         const BAASRectangle &region
 )
 {
-    gen_not_black_region_mask(
-            src, mask, Rect(
-                    region.ul
-                          .x, region.ul
-                                    .y, region.lr
-                                              .x - region.ul
-                                                         .x, region.lr
-                                                                   .y - region.ul
-                                                                              .y
-            ));
+    gen_not_black_region_mask(src, mask, Rect(region.ul.x, region.ul.y, region.lr.x - region.ul.x, region.lr.y - region.ul.y));
 }
 
 void BAASImageUtil::gen_not_black_region_mask(

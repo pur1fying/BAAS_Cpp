@@ -12,7 +12,7 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
-BaseFeature::BaseFeature(BAASConfig *config)
+BaseFeature::BaseFeature(BAASConfig* config)
 {
     and_feature_ptr.clear();
     or_feature_ptr.clear();
@@ -20,14 +20,14 @@ BaseFeature::BaseFeature(BAASConfig *config)
 }
 
 bool BaseFeature::appear(
-        const BAAS *baas,
-        BAASConfig &output
+        const BAAS* baas,
+        BAASConfig& output
 )
 {
     throw std::runtime_error("Base Feature class appear should not be called.");
 }
 
-double BaseFeature::self_average_cost(const BAAS *baas)
+double BaseFeature::self_average_cost(const BAAS* baas)
 {
     throw std::runtime_error("Base Feature class self_average_cost should not be called.");
 }
@@ -53,12 +53,12 @@ double BaseFeature::all_average_cost(const BAAS* baas)
     return sum / int(all_costs.size());
 }
 
-std::vector<BaseFeature *> BaseFeature::get_and_feature_ptr()
+std::vector<BaseFeature*> BaseFeature::get_and_feature_ptr()
 {
     return and_feature_ptr;
 }
 
-std::vector<BaseFeature *> BaseFeature::get_or_feature_ptr()
+std::vector<BaseFeature*> BaseFeature::get_or_feature_ptr()
 {
     return or_feature_ptr;
 }

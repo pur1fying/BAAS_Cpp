@@ -16,6 +16,9 @@ namespace Ort
 }
 #endif // __CUDA__
 
+#include <opencv2/dnn.hpp>
+#include <opencv2/imgproc.hpp>
+
 #include "BAASLogger.h"
 #include "ocr/OcrUtils.h"
 #include "BAASExceptions.h"
@@ -311,10 +314,7 @@ void BAAS_Yolo_v8::_init_yaml()
 {
     // Open the YAML file
     std::ifstream file(yaml_path.c_str());
-    if (!file.is_open()) {
-        std::cerr << "Failed to open file" << std::endl;
-        throw PathError("Yolo Config File Not Found");
-    }
+    if (!file.is_open()) throw PathError("Yolo Config File Not Found");
 
     // Read the file line by line
     std::string line;

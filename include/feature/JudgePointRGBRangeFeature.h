@@ -38,9 +38,7 @@ private:
 
     };
 
-
-
-    static void _decode_single_rgb_info(const nlohmann::json& j, std::vector<RGBInfo> &out);
+    static void _decode_single_rgb_info(const nlohmann::json& j, std::vector<RGBInfo>& out);
 
 public:
 
@@ -53,18 +51,19 @@ public:
 
     static const std::map<int, Op> op_map;
 
-    explicit JudgePointRGBRangeFeature(BAASConfig *config);
+    explicit JudgePointRGBRangeFeature(BAASConfig* config);
 
     void show() override;
 
     bool appear(
-            const BAAS *baas,
-            BAASConfig &output
+            const BAAS* baas,
+            BAASConfig& output
     ) override;
 
     [[nodiscard]] double self_average_cost(
             const BAAS* baas
     ) override;
+
 private:
 
     Op _op;
@@ -79,15 +78,18 @@ private:
 };
 
 class JudgePointRGBRangeFeatureError : public std::exception {
+
 public:
+
     explicit JudgePointRGBRangeFeatureError(const std::string& message) : message(message) {}
 
-    [[nodiscard]] const char *what() const noexcept override
+    [[nodiscard]] const char* what() const noexcept override
     {
         return message.c_str();
     }
 
 private:
+
     std::string message;
 };
 

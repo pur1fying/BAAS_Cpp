@@ -2,7 +2,9 @@
 // Created by pc on 2024/4/12.
 //
 #include "BAASGlobals.h"
+
 #include "version.h"
+#include "BAASLogger.h"
 
 using namespace std::filesystem;
 using namespace std;

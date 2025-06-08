@@ -17,15 +17,14 @@ BAAS_NAMESPACE_BEGIN
 vector <string> BAASScreenshot::available_methods;
 
 BAASScreenshot::BAASScreenshot(
-        const std::string &method,
-        BAASConnection *connection,
+        const std::string& method,
+        BAASConnection* connection,
         const double interval
 )
 {
     assert(connection != nullptr);
     this->connection = connection;
-    logger = this->connection
-                 ->get_logger();
+    logger = this->connection->get_logger();
 
     available_methods = static_config->get<std::vector<std::string>>("available_screenshot_methods");
     logger->BAASInfo("Available screenshot methods : ");
@@ -42,14 +41,14 @@ void BAASScreenshot::init()
     screenshot_instance->init();
 }
 
-void BAASScreenshot::screenshot(cv::Mat &img)
+void BAASScreenshot::screenshot(cv::Mat& img)
 {
     ensure_interval();
     screenshot_instance->screenshot(img);
     last_screenshot_time = BAASChronoUtil::getCurrentTimeMS();
 }
 
-void BAASScreenshot::immediate_screenshot(cv::Mat &img)
+void BAASScreenshot::immediate_screenshot(cv::Mat& img)
 {
     screenshot_instance->screenshot(img);
 }
@@ -84,7 +83,7 @@ bool BAASScreenshot::is_lossy()
 }
 
 void BAASScreenshot::set_screenshot_method(
-        const std::string &method,
+        const std::string& method,
         bool exit
 )
 {

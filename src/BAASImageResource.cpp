@@ -2,7 +2,13 @@
 // Created by pc on 2024/5/29.
 //
 
-#include <BAASImageResource.h>
+#include "BAASImageResource.h"
+
+#include "BAASLogger.h"
+#include "BAASGlobals.h"
+#include "BAASExceptions.h"
+#include "config/BAASConfig.h"
+#include "utils/BAASImageUtil.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -251,15 +257,6 @@ inline bool BAASImageResource::check_shape(
 BAASImageResource::BAASImageResource()
 {
     images.clear();
-}
-
-bool BAASImageResource::is_loaded(
-        const BAAS* baas,
-        const string& group,
-        const string& name
-) const
-{
-    return is_loaded(baas->get_image_resource_prefix() + group + "." + name);
 }
 
 BAAS_NAMESPACE_END

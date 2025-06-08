@@ -6,8 +6,8 @@
 #include <string>
 #include <filesystem>
 
-#include "opencv2/opencv.hpp"
-#include "nlohmann/detail/string_concat.hpp"
+#include <opencv2/opencv.hpp>
+#include <nlohmann/detail/string_concat.hpp>
 
 #include "BAASTypes.h"
 #include "BAASLogger.h"

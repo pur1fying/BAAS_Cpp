@@ -10,12 +10,14 @@
 BAAS_NAMESPACE_BEGIN
 
 class AdbScreenshot : public BaseScreenshot {
+
 public:
-    explicit AdbScreenshot(BAASConnection *connection);
+
+    explicit AdbScreenshot(BAASConnection* connection);
 
     void init() override;
 
-    void screenshot(cv::Mat &img) override;
+    void screenshot(cv::Mat& img) override;
 
     void exit() override;
 

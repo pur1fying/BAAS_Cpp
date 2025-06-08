@@ -6,8 +6,6 @@
 #define BAAS_PROCEDURE_BASEPROCEDURE_H_
 
 #include "feature/BAASFeature.h"
-#include "device/screenshot/BAASScreenshot.h"
-#include "device/control/BAASControl.h"
 
 #define BAAS_ACTION_TYPE_DO_NOTHING 0
 #define BAAS_ACTION_TYPE_CLICK 1
@@ -19,7 +17,9 @@ BAAS_NAMESPACE_BEGIN
 class BAAS;
 
 class BaseProcedure {
+
 public:
+
     explicit BaseProcedure(BAAS* baas, const BAASConfig& possible_feature);
 
     virtual void implement(
@@ -37,6 +37,7 @@ public:
     }
 
 protected:
+
     BAASConfig possible_feature;
 
     BAAS* baas;

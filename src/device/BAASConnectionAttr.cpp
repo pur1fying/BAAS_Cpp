@@ -12,7 +12,7 @@ using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg)
+BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig* cfg)
 {
     logger = cfg->get_logger();
     config = cfg;
@@ -21,7 +21,7 @@ BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg)
     serial_check();
 }
 
-BAASConnectionAttr::BAASConnectionAttr(const std::string &cfg_path)
+BAASConnectionAttr::BAASConnectionAttr(const std::string& cfg_path)
 {
     config = new BAASUserConfig(cfg_path);
     logger = config->get_logger();
@@ -77,7 +77,7 @@ void BAASConnectionAttr::revise_serial()
     BAASStringUtil::stringReplace("auto127.0.0.1", "127.0.0.1", serial);
 }
 
-int BAASConnectionAttr::LDPlayer_serial2instance_id(const string &serial)
+int BAASConnectionAttr::LDPlayer_serial2instance_id(const string& serial)
 {
     pair<string, string> pair_serial = BAASConnection::port_emu_pair_serial(serial);
     int port = serial2port(pair_serial.first);

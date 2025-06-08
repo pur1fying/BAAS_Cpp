@@ -10,9 +10,10 @@
 BAAS_NAMESPACE_BEGIN
 
 class BaseControl {
+
 public:
 
-    explicit BaseControl(BAASConnection *connection);
+    explicit BaseControl(BAASConnection* connection);
 
     virtual void init();
 
@@ -38,11 +39,11 @@ public:
     virtual void exit();
 
 protected:
-    BAASConnection *connection;
+    BAASConnection* connection;
 
     std::mutex control_mtx;
 
-    BAASLogger *logger;
+    BAASLogger* logger;
 };
 
 BAAS_NAMESPACE_END

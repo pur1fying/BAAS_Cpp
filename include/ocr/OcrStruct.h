@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/types.hpp>
 
 #include "core_defines.h"
 

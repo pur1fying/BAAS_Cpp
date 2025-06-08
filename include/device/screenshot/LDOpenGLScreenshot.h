@@ -11,19 +11,22 @@
 BAAS_NAMESPACE_BEGIN
 
 class LDOpenGLScreenshot : public BaseScreenshot {
+
 public:
-    explicit LDOpenGLScreenshot(BAASConnection *connection);
+
+    explicit LDOpenGLScreenshot(BAASConnection* connection);
 
     void init() override;
 
-    void screenshot(cv::Mat &output) override;
+    void screenshot(cv::Mat& output) override;
 
     void exit() override;
 
     bool is_lossy() override;
 
 private:
-    BAASLdopengl *ldopengl_connection;
+
+    BAASLdopengl* ldopengl_connection;
 
     int instance_id;
 };

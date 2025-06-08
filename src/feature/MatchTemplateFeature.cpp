@@ -5,6 +5,8 @@
 
 #include "feature/MatchTemplateFeature.h"
 
+#include "utils/BAASImageUtil.h"
+
 using namespace std;
 using namespace cv;
 using namespace nlohmann;

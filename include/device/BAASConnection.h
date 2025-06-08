@@ -124,7 +124,7 @@ public:
         return server;
     }
 
-    [[nodiscard]] inline const std::string &get_language() const
+    [[nodiscard]] inline const std::string& get_language() const
     {
         return language;
     }

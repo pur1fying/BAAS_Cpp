@@ -11,8 +11,10 @@
 BAAS_NAMESPACE_BEGIN
 
 class ScrcpyControl : public BaseControl {
+
 public:
-    explicit ScrcpyControl(BAASConnection *connection);
+
+    explicit ScrcpyControl(BAASConnection* connection);
 
     void init() override;
 
@@ -37,11 +39,11 @@ public:
 
     void exit() override;
 
-
 private:
-    BAASConnection *connection;
 
-    BAASScrcpyClient *client;
+    BAASConnection* connection;
+
+    BAASScrcpyClient* client;
 };
 
 BAAS_NAMESPACE_END

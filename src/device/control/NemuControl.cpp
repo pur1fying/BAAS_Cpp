@@ -7,7 +7,7 @@
 
 BAAS_NAMESPACE_BEGIN
 
-NemuControl::NemuControl(BAASConnection *connection) : BaseControl(connection)
+NemuControl::NemuControl(BAASConnection* connection) : BaseControl(connection)
 {
 
 }

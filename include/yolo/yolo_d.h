@@ -9,7 +9,7 @@
 #include <vector>
 #include <filesystem>
 
-#include "opencv2/opencv.hpp"
+#include <opencv2/core/types.hpp>
 
 #include "core_defines.h"
 

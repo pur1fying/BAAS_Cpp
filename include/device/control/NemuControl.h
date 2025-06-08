@@ -14,7 +14,7 @@ class NemuControl : public BaseControl {
 
 public:
 
-    explicit NemuControl(BAASConnection *connection);
+    explicit NemuControl(BAASConnection* connection);
 
     void init() override;
 
@@ -40,7 +40,8 @@ public:
     void exit() override;
 
 private:
-    BAASNemu *nemu_connection;
+
+    BAASNemu* nemu_connection;
 };
 
 BAAS_NAMESPACE_END

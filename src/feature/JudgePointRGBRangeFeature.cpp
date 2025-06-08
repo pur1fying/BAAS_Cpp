@@ -4,6 +4,8 @@
 
 #include "feature/JudgePointRGBRangeFeature.h"
 
+#include "BAAS.h"
+#include "utils/BAASImageUtil.h"
 
 /*  example
  * "feature_name" : {
@@ -24,7 +26,7 @@ using namespace std;
 using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
- static int count = 0;
+
 const std::map<int, JudgePointRGBRangeFeature::Op> JudgePointRGBRangeFeature::op_map = {
         {0, Op::ALL},
         {1, Op::ANY},
@@ -33,8 +35,8 @@ const std::map<int, JudgePointRGBRangeFeature::Op> JudgePointRGBRangeFeature::op
 };
 
 bool JudgePointRGBRangeFeature::appear(
-        const BAAS *baas,
-        BAASConfig &output
+        const BAAS* baas,
+        BAASConfig& output
 )
 {
     vector<string> log;
@@ -127,7 +129,6 @@ bool JudgePointRGBRangeFeature::appear(
                         check_around,
                         around_range)
                         ){
-                    count++;
                     return true;
                 }
             return false;
@@ -137,7 +138,7 @@ bool JudgePointRGBRangeFeature::appear(
     return false;
 }
 
-JudgePointRGBRangeFeature::JudgePointRGBRangeFeature(BAASConfig *config) : BaseFeature(config)
+JudgePointRGBRangeFeature::JudgePointRGBRangeFeature(BAASConfig* config) : BaseFeature(config)
 {
     json j = config->get_config();
     check_around = config->getBool("check_around", false);
@@ -161,7 +162,7 @@ JudgePointRGBRangeFeature::JudgePointRGBRangeFeature(BAASConfig *config) : BaseF
 
 }
 
-double JudgePointRGBRangeFeature::self_average_cost(const baas::BAAS *baas)
+double JudgePointRGBRangeFeature::self_average_cost(const BAAS* baas)
 {
     string server_language = baas->rgb_feature_key;
     auto it = rgb_info.find(server_language);

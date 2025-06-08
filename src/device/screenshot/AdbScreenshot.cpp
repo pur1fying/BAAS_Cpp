@@ -8,7 +8,8 @@
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
-AdbScreenshot::AdbScreenshot(BAASConnection *connection) : BaseScreenshot(connection)
+
+AdbScreenshot::AdbScreenshot(BAASConnection* connection) : BaseScreenshot(connection)
 {
 
 }
@@ -20,7 +21,7 @@ void AdbScreenshot::init()
     assert(ret == "000");
 }
 
-void AdbScreenshot::screenshot(cv::Mat &img)
+void AdbScreenshot::screenshot(cv::Mat& img)
 {
     string ret = connection->adb_shell_bytes("screencap -p");
     if (ret.size() < 500)

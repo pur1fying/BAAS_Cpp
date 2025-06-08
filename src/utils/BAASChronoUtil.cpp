@@ -4,6 +4,8 @@
 
 #include "utils/BAASChronoUtil.h"
 
+#include <chrono>
+
 BAAS_NAMESPACE_BEGIN
 
 long long BAASChronoUtil::getCurrentTimeMS()

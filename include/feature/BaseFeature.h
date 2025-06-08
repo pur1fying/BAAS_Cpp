@@ -5,11 +5,6 @@
 #ifndef BAAS_FEATURE_BASEFEATURE_H_
 #define BAAS_FEATURE_BASEFEATURE_H_
 
-#include <vector>
-#include <string>
-#include <opencv2/opencv.hpp>
-#include <optional>
-
 #include "config/BAASConfig.h"
 
 // used to create different feature and combine them
@@ -19,7 +14,9 @@ BAAS_NAMESPACE_BEGIN
 class BAAS;
 
 class BaseFeature {
+
 public:
+
     inline std::vector<std::string> get_and_features() {
         return this->config->get<std::vector<std::string>>("and_features", {});
     }
@@ -30,7 +27,7 @@ public:
 
     explicit BaseFeature() = default;
 
-    explicit BaseFeature(BAASConfig *config);
+    explicit BaseFeature(BAASConfig* config);
 
     virtual ~BaseFeature();
 
@@ -39,9 +36,9 @@ public:
         return _is_primitive;
     }
 
-    std::vector<BaseFeature *> get_and_feature_ptr();
+    std::vector<BaseFeature*> get_and_feature_ptr();
 
-    std::vector<BaseFeature *> get_or_feature_ptr();
+    std::vector<BaseFeature*> get_or_feature_ptr();
 
     inline bool has_and_feature() {
         return !and_feature_ptr.empty();
@@ -55,8 +52,8 @@ public:
 
     // compare func
     virtual bool appear(
-            const BAAS *baas,
-            BAASConfig &output
+            const BAAS* baas,
+            BAASConfig& output
     );
 
     // used to judge the compare order of feature
@@ -69,30 +66,31 @@ public:
             const BAAS* baas
     );
 
-    [[nodiscard]] inline BAASConfig *get_config()
+    [[nodiscard]] inline BAASConfig* get_config()
     {
         return config;
     }
 
-    inline void set_path(const std::string &_path)
+    inline void set_path(const std::string& _path)
     {
         this->path = _path;
     }
 
-    inline void set_name(const std::string &_name)
+    inline void set_name(const std::string& _name)
     {
         this->name = _name;
     }
 
-    inline const std::string &get_name()
+    inline const std::string& get_name()
     {
         return name;
     }
 
-    inline const std::string &get_path()
+    inline const std::string& get_path()
     {
         return path;
     }
+
 protected:
 
     inline void _display_basic_info() {
@@ -107,7 +105,7 @@ protected:
 
     std::vector<BaseFeature*> or_feature_ptr;
 
-    BAASConfig *config;
+    BAASConfig* config;
 
     std::optional<bool> this_round_result;
 

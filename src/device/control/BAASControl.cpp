@@ -11,9 +11,9 @@ BAAS_NAMESPACE_BEGIN
 vector <string> BAASControl::available_methods;
 
 BAASControl::BAASControl(
-        const std::string &method,
+        const std::string& method,
         double screen_ratio,
-        BAASConnection *connection
+        BAASConnection* connection
 )
 {
     assert(connection != nullptr);

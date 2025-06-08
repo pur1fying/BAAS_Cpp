@@ -40,10 +40,10 @@ private:
 
     void create_modify_history_file();
 
-    static BAASGlobalSetting *globalSetting;
+    static BAASGlobalSetting* globalSetting;
 };
 
-extern BAASGlobalSetting *global_setting;
+extern BAASGlobalSetting* global_setting;
 
 BAAS_NAMESPACE_END
 

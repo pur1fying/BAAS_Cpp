@@ -5,8 +5,9 @@
 #ifndef BAAS_FEATURE_FILTERRGBMATCHTEMPLATEFEATURE_H_
 #define BAAS_FEATURE_FILTERRGBMATCHTEMPLATEFEATURE_H_
 
-#include "feature/BaseFeature.h"
+#include "BAAS.h"
 #include "BAASImageResource.h"
+#include "feature/BaseFeature.h"
 
 #define BAAS_FILTER_RGB_MATCH_TEMPLATE_FEATURE 1
 
@@ -16,11 +17,11 @@ class FilterRGBMatchTemplateFeature : public BaseFeature {
 
 public:
 
-    explicit FilterRGBMatchTemplateFeature(BAASConfig *config);
+    explicit FilterRGBMatchTemplateFeature(BAASConfig* config);
 
     bool appear(
-            const BAAS *baas,
-            BAASConfig &output
+            const BAAS* baas,
+            BAASConfig& output
     );
 
     void show() override;
@@ -39,6 +40,7 @@ public:
     }
 
 private:
+
     std::string template_group, template_name, group_name;
 
     cv::Vec3b mean_rgb_diff;
@@ -49,8 +51,10 @@ private:
 };
 
 class  FilterRGBMatchTemplateError : public std::exception {
+
 public:
-    explicit FilterRGBMatchTemplateError(const std::string &message) : message(message) {}
+
+    explicit FilterRGBMatchTemplateError(const std::string& message) : message(message) {}
 
     [[nodiscard]] const char *what() const noexcept override
     {
@@ -58,6 +62,7 @@ public:
     }
 
 private:
+
     std::string message;
 };
 BAAS_NAMESPACE_END

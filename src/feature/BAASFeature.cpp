@@ -21,11 +21,11 @@ BAAS_NAMESPACE_BEGIN
  */
 std::map<std::string, std::unique_ptr<BaseFeature>> BAASFeature::features;
 
-BAASFeature *BAASFeature::instance = nullptr;
+BAASFeature* BAASFeature::instance = nullptr;
 
-BAASFeature *baas_features = nullptr;
+BAASFeature* baas_features = nullptr;
 
-BAASFeature *BAASFeature::get_instance()
+BAASFeature* BAASFeature::get_instance()
 {
     if (instance == nullptr) {
         instance = new BAASFeature();
@@ -45,7 +45,7 @@ void BAASFeature::load()
     // data stored in json and load
     filesystem::path temp_path;
     int total_loaded = 0;
-    for (const auto &entry: filesystem::recursive_directory_iterator(BAAS_FEATURE_DIR)) {
+    for (const auto& entry: filesystem::recursive_directory_iterator(BAAS_FEATURE_DIR)) {
         temp_path = entry.path().string();
         if (filesystem::is_regular_file(entry) && temp_path.extension().string() == ".json")
             total_loaded += load_from_json(temp_path);
@@ -59,15 +59,15 @@ BAASFeature::BAASFeature()
     init_feature_ptr();
 }
 
-int BAASFeature::load_from_json(const std::filesystem::path &path)
+int BAASFeature::load_from_json(const std::filesystem::path& path)
 {
-    BAASConfig _feature(path, (BAASLogger *) BAASGlobalLogger);
+    BAASConfig _feature(path, (BAASLogger* ) BAASGlobalLogger);
     json j = _feature.get_config();
     assert(j.is_object());
-    BAASConfig *temp;
+    BAASConfig* temp;
     int loaded = 0;
-    for (auto &i: j.items()) {
-        temp = new BAASConfig(i.value(), (BAASLogger *) BAASGlobalLogger);
+    for (auto& i: j.items()) {
+        temp = new BAASConfig(i.value(), (BAASLogger* ) BAASGlobalLogger);
         auto it = features.find(i.key());
         if (it != features.end()) {
             BAASGlobalLogger->BAASError("Feature [ " + i.key() + " ] already exists");
@@ -106,14 +106,14 @@ int BAASFeature::load_from_json(const std::filesystem::path &path)
 void BAASFeature::show()
 {
     BAASGlobalLogger->hr("Show All Feature Param.");
-    for (auto &i: features) {
+    for (auto& i: features) {
         BAASGlobalLogger->BAASInfo("[ " + i.first + " ]");
         i.second->show();
     }
 }
 
 
-BaseFeature *BAASFeature::get_feature_ptr(const std::string &feature_name)
+BaseFeature* BAASFeature::get_feature_ptr(const std::string& feature_name)
 {
     auto it = features.find(feature_name);
     if (it == features.end()) throw BAASFeatureError("Feature [ " + feature_name + " ] not found");
@@ -122,7 +122,7 @@ BaseFeature *BAASFeature::get_feature_ptr(const std::string &feature_name)
 
 bool BAASFeature::reset_then_feature_appear(
         BAAS* baas,
-        const string &feature_name
+        const string& feature_name
 )
 {
     baas->reset_feature(feature_name);
@@ -131,9 +131,9 @@ bool BAASFeature::reset_then_feature_appear(
 }
 
 bool BAASFeature::feature_appear(
-        BAAS *baas,
-        const std::string &feature_name,
-        BAASConfig &output,
+        BAAS* baas,
+        const std::string& feature_name,
+        BAASConfig& output,
         bool show_log
 )
 {
@@ -148,7 +148,7 @@ bool BAASFeature::feature_appear(
      * self true and or
      * self false and or
      *
-    */
+     */
     auto feature = features.find(feature_name);
 
     auto feature_state = baas->feature_state_map.find(feature_name);
@@ -170,7 +170,7 @@ bool BAASFeature::feature_appear(
         bool result;
         std::unique_ptr<BAASConfig> temp = std::make_unique<BAASConfig>(
                 feature->second->get_config()->get_config(),
-                (BAASLogger *) BAASGlobalLogger
+                (BAASLogger* ) BAASGlobalLogger
         );
         try {
             result = feature->second->appear(baas, output);
@@ -180,11 +180,11 @@ bool BAASFeature::feature_appear(
                 BAASGlobalLogger->BAASInfo(log);
             }
             if (feature->second->is_primitive()
-            || ( result && feature->second->has_or_feature()  && !feature->second->has_and_feature())
-            || (!result && feature->second->has_and_feature() && !feature->second->has_or_feature()))
+            || ( result && feature->second->has_or_feature() && !feature->second->has_and_feature())
+            || (!result && feature->second->has_and_feature()&& !feature->second->has_or_feature()))
                 return result;
 
-        } catch (json::exception &e) {
+        } catch (json::exception& e) {
             BAASGlobalLogger->BAASError("Feature [ " + feature_name + " ] compare error : " + e.what());
             throw BAASFeatureError("Feature [ " + feature_name + " ] compare error : " + e.what());
         }
@@ -195,18 +195,18 @@ bool BAASFeature::feature_appear(
     vector<BaseFeature*> bundle = feature->second->or_feature_ptr;
 
     if (!bundle.empty())
-        for (const auto &i: bundle)
+        for (const auto& i: bundle)
             feature_queue.emplace_back(i->all_average_cost(baas), make_pair(i, true));
 
     bundle = feature->second->and_feature_ptr;
     bool has_and = !bundle.empty();
     if (!bundle.empty())
-        for (const auto &i: bundle)
+        for (const auto& i: bundle)
             feature_queue.emplace_back(i->all_average_cost(baas), make_pair(i, false));
 
     sort(feature_queue.begin(), feature_queue.end());   // sort by cost
 
-    for (const auto &i: feature_queue) {
+    for (const auto& i: feature_queue) {
         if (i.second.second) {   // or feature appear
             if (i.second.first->appear(baas,output)) {
                 feature_state->second.round_feature_appear_state = true;
@@ -234,7 +234,7 @@ bool BAASFeature::feature_appear(
 std::vector<std::string> BAASFeature::get_feature_list()
 {
     std::vector<std::string> feature_list;
-    for (auto &i: features) {
+    for (auto& i: features) {
         feature_list.push_back(i.first);
     }
     return feature_list;
@@ -244,9 +244,9 @@ void BAASFeature::init_feature_ptr()
 {
     BAASGlobalLogger->sub_title("Init Feature Pointer.");
     std::vector<std::string> feature_list;
-    for (auto &i: features) {
+    for (auto& i: features) {
         feature_list = i.second->get_and_features();
-        for (const auto &j: feature_list) {
+        for (const auto& j: feature_list) {
             if (features.find(j) == features.end()) {
                 BAASGlobalLogger->BAASError("[ " + i.first + " ] And Feature [ " + j + " ] not found");
                 continue;
@@ -255,7 +255,7 @@ void BAASFeature::init_feature_ptr()
         }
 
         feature_list = i.second->get_or_features();
-        for (const auto &j: feature_list) {
+        for (const auto& j: feature_list) {
             if (features.find(j) == features.end()) {
                 BAASGlobalLogger->BAASError("[ " + i.first + " ] Or Feature [ " + j + " ] not found");
                 continue;
@@ -263,8 +263,7 @@ void BAASFeature::init_feature_ptr()
             i.second->or_feature_ptr.push_back(features[j].get());
         }
 
-        i.second->_is_primitive = i.second->and_feature_ptr.empty()
-                                    && i.second->or_feature_ptr.empty();
+        i.second->_is_primitive = i.second->and_feature_ptr.empty() && i.second->or_feature_ptr.empty();
     }
 }
 

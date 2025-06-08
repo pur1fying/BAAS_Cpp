@@ -4,6 +4,8 @@
 
 #include "config/GameServer.h"
 
+#include "config/BAASStaticConfig.h"
+
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN

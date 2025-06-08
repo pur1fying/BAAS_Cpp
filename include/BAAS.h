@@ -16,9 +16,11 @@
 BAAS_NAMESPACE_BEGIN
 
 class BAAS {
+
 public:
+
     void register_module_implement_func(
-            const std::string&module_name,
+            const std::string& module_name,
             std::function<bool(BAAS*)> module
     );
 
@@ -45,7 +47,7 @@ public:
             const BAASRectangle& region
     );
 
-    void get_each_round_type(std::vector<int> &round_type);
+    void get_each_round_type(std::vector<int>& round_type);
 
     std::optional<int> point2type(const BAASPoint& point);
 

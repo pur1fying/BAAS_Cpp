@@ -14,9 +14,9 @@ BAAS_NAMESPACE_BEGIN
 
 class BAASConnectionAttr {
 public:
-    explicit BAASConnectionAttr(BAASUserConfig *cfg);
+    explicit BAASConnectionAttr(BAASUserConfig* cfg);
 
-    explicit BAASConnectionAttr(const std::string &cfg_path);
+    explicit BAASConnectionAttr(const std::string& cfg_path);
 
     static std::string adb_binary();
 
@@ -90,7 +90,7 @@ public:
 
     ~BAASConnectionAttr();
 
-    [[nodiscard]] inline BAASLogger *get_logger() const
+    [[nodiscard]] inline BAASLogger* get_logger() const
     {
         return logger;
     }
@@ -100,13 +100,13 @@ public:
         return serial;
     }
 
-    static int LDPlayer_serial2instance_id(const std::string &serial);
+    static int LDPlayer_serial2instance_id(const std::string& serial);
 
 protected:
 
-    BAASUserConfig *config;
+    BAASUserConfig* config;
 
-    BAASLogger *logger;
+    BAASLogger* logger;
 
     std::string serial;
 
