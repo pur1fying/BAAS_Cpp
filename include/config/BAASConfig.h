@@ -10,16 +10,15 @@
 #define CONFIG_TYPE_CONFIG_NAME_CHANGE 2
 #define CONFIG_TYPE_DEFAULT_GLOBAL_SETTING 3
 
-#include <filesystem>
+#include <regex>
 #include <vector>
 #include <fstream>
-#include <regex>
+#include <filesystem>
 
 #include "nlohmann/json.hpp"
 
-#include "BAASUtil.h"
 #include "BAASLogger.h"
-#include "BAASImageUtil.h"
+#include "BAASTypes.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -287,8 +286,16 @@ public:
     {
         std::string str_path = getString(key, default_value.string());
 #ifdef _WIN32
+        const size_t size = str_path.size();
+        if (size == 0) return std::filesystem::path();
         std::wstring wstr_path;
-        BAASUtil::str2wstr(str_path, wstr_path);
+        const size_t expected_utf16_words = simdutf::utf16_length_from_utf8(str_path.c_str(), size);
+        wstr_path.resize(expected_utf16_words);
+        const size_t real = simdutf::convert_utf8_to_utf16le(
+                str_path.c_str(),
+                size,
+                reinterpret_cast<char16_t*>(wstr_path.data())
+        );
         std::filesystem::path p = wstr_path;
 #else
         std::filesystem::path p = str_path;

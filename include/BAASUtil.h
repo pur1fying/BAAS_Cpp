@@ -294,13 +294,13 @@ public:
         const size_t expected_utf8_bytes = simdutf::utf8_length_from_utf16(
                                                     reinterpret_cast<const char16_t*>(in.c_str()),
                                                     size
-                                                    );
+                                           );
         out.resize(expected_utf8_bytes);
         simdutf::convert_utf16le_to_utf8(
                 reinterpret_cast<const char16_t*>(in.c_str()),
                 size,
                 out.data()
-                );
+        );
 #else
 #endif
     }
