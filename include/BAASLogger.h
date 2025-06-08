@@ -7,14 +7,13 @@
 
 #include <map>
 #include <filesystem>
-#include <iostream>
 
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/spdlog.h>
 
 #include "core_defines.h"
-#include "utils/BAASUtil.h"
+#include "utils/BAASStringUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -178,11 +177,6 @@ public:
 
     static void clearLogData();
 
-    inline void show_enable()
-    {
-        std::cout << "console : " << (enable & 0b1) << " file : " << (enable & 0b10) << std::endl;
-    }
-
     inline static std::filesystem::path get_folder_path()
     {
         return folder_path;
@@ -215,6 +209,7 @@ public:
     ~GlobalLogger();
 
 private:
+
     static std::filesystem::path folder_path;
 
     static GlobalLogger* global_logger;

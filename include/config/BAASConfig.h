@@ -20,7 +20,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class BAASConfig {
+
 public:
+
     explicit BAASConfig() = default;
 
     // init with raw json data
@@ -667,7 +669,7 @@ protected:
         }
     }
 
-    inline void _preprocess_value()
+    void _preprocess_value()
     {
         std::string jp;
         _preprocess(jp, config);

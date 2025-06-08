@@ -5,8 +5,6 @@
 #ifndef BAAS_DEVICE_BAASCONNECTIONATTR_H_
 #define BAAS_DEVICE_BAASCONNECTIONATTR_H_
 
-#include <regex>
-
 #include "utils.h"
 #include "utils/BAASStringUtil.h"
 #include "config/BAASUserConfig.h"

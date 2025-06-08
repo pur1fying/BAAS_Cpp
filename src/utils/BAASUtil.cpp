@@ -1,14 +1,16 @@
 //
 // Created by pc on 2024/4/12.
 //
-#include "utils/BAASUtil.h"
+#include "utils/BAASRandomUtil.h"
 
-using namespace std::chrono;
+#include <random>
+#include <fstream>
+
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-double BAASUtil::genRandDouble(
+double BAASRandomUtil::genRandDouble(
         const double &min,
         const double &max
 )
@@ -19,7 +21,7 @@ double BAASUtil::genRandDouble(
     return dis(gen);
 }
 
-int BAASUtil::genRandInt(
+int BAASRandomUtil::genRandInt(
         const int &min,
         const int &max
 )
@@ -30,16 +32,7 @@ int BAASUtil::genRandInt(
     return dis(gen);
 }
 
-bool BAASUtil::endsWith(
-        const string &src,
-        const string &suffix
-)
-{
-    if (src.length() < suffix.length()) return false;
-    return src.substr(src.length() - suffix.length()) == suffix;
-}
-
-std::istream &BAASUtil::safeGetLine(
+std::istream &BAASRandomUtil::safeGetLine(
         istream &is,
         string &t
 )

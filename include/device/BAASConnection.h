@@ -17,6 +17,7 @@ BAAS_NAMESPACE_BEGIN
 class BAASConnection : public BAASConnectionAttr {
 
 public:
+
     explicit BAASConnection(BAASUserConfig* cfg);
 
     explicit BAASConnection(const std::string& cfg_path);

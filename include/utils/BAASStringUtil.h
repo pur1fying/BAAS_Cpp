@@ -6,7 +6,6 @@
 #define BAAS_UTILS_BAASSTRINGUTIL_H_
 
 #include <regex>
-#include <string>
 
 #include <simdutf.h>
 
@@ -35,17 +34,17 @@ public:
      * @example "0x001B" -> 27 (1 * 16^1 + 11 * 16^0)
      */
     static int hex2int(
-            const std::string &input,
+            const std::string& input,
             int length
     );
 
     static int unsignedBinary2int(
-            const std::string &input,
+            const std::string& input,
             int length
     );
 
     static int binary2int(
-            const std::string &input,
+            const std::string& input,
             int length
     );
 
@@ -54,66 +53,66 @@ public:
     static std::string int2String(int a);
 
     static void stringReplace(
-            const std::string &OLD,
-            const std::string &NEW,
-            std::string &src,
-            std::string &dst
+            const std::string& OLD,
+            const std::string& NEW,
+            std::string& src,
+            std::string& dst
     );
 
     static void stringReplace(
-            const std::string &OLD,
-            const std::string &NEW,
-            std::string &src
+            const std::string& OLD,
+            const std::string& NEW,
+            std::string& src
     );
 
     static void stringSplit(
-            const std::string &src,
-            const std::string &separator,
-            std::vector<std::string> &dst
+            const std::string& src,
+            const std::string& separator,
+            std::vector<std::string>& dst
     );
 
     static void stringSplit(
-            const std::string &src,
+            const std::string& src,
             const char separator,
-            std::vector<std::string> &dst
+            std::vector<std::string>& dst
     );
 
     static void stringJoin(
-            const std::vector<std::string> &src,
-            const std::string &joiner,
-            std::string &dst
+            const std::vector<std::string>& src,
+            const std::string& joiner,
+            std::string& dst
     );
 
-    static bool allNumberChar(const std::string &src);
+    static bool allNumberChar(const std::string& src);
 
     static void re_find_all(
-            const std::string &src,
-            const std::string &pattern,
-            std::vector<std::smatch> &dst
+            const std::string& src,
+            const std::string& pattern,
+            std::vector<std::smatch>& dst
     );
 
     static void re_find_all(
-            const std::string &src,
-            const std::string &pattern,
-            std::vector<std::string> &dst
+            const std::string& src,
+            const std::string& pattern,
+            std::vector<std::string>& dst
     );
 
     static void re_find(
-            const std::string &src,
-            const std::string &pattern,
-            std::string &dst
+            const std::string& src,
+            const std::string& pattern,
+            std::string& dst
     );
 
     static bool re_match(
-            const std::string &src,
-            const std::string &pattern
+            const std::string& src,
+            const std::string& pattern
     );
 
-    static uint32_t st2u32(const std::string &src);
+    static uint32_t st2u32(const std::string& src);
 
     template<typename T>
     static inline void append_big_endian(
-            std::string &dst,
+            std::string& dst,
             T src
     )
     {
@@ -126,7 +125,7 @@ public:
 
     template<typename T>
     static inline void append_little_endian(
-            std::string &dst,
+            std::string& dst,
             T src
     )
     {
@@ -135,7 +134,7 @@ public:
         }
     }
 
-    inline static void str2wstr(const std::string& in, std::wstring & out)
+    inline static void str2wstr(const std::string& in, std::wstring& out)
     {
 #ifdef _WIN32
         const size_t size = in.size();
@@ -154,7 +153,7 @@ public:
 #endif
     }
 
-    inline static void wstr2str(const std::wstring& in, std::string & out)
+    inline static void wstr2str(const std::wstring& in, std::string& out)
     {
 #ifdef _WIN32
         const size_t size = in.size();

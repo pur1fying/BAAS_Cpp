@@ -5,8 +5,6 @@
 #ifndef BAAS_UTILS_BAASCHRONOUTIL_H_
 #define BAAS_UTILS_BAASCHRONOUTIL_H_
 
-#include <chrono>
-#include <string>
 #include <thread>
 
 #include "core_defines.h"

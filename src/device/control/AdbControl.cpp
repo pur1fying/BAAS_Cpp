@@ -8,7 +8,7 @@ using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-AdbControl::AdbControl(BAASConnection *connection) : BaseControl(connection)
+AdbControl::AdbControl(BAASConnection* connection) : BaseControl(connection)
 {
 
 }

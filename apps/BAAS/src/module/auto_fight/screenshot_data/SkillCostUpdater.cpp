@@ -5,6 +5,7 @@
 #include "module/auto_fight/screenshot_data/SkillCostUpdater.h"
 
 #include <ocr/BAASOcr.h>
+#include <utils/BAASImageUtil.h>
 #include <config/BAASStaticConfig.h>
 
 BAAS_NAMESPACE_BEGIN

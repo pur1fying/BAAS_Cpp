@@ -2,6 +2,7 @@
 //
 #include "device/control/BAASControl.h"
 
+#include "utils/BAASRandomUtil.h"
 #include "config/BAASStaticConfig.h"
 
 using namespace std;
@@ -202,12 +203,12 @@ void BAASControl::set_x_y_offset(
         case OFFSET_TYPE_NOCHANGE:
             break;
         case OFFSET_TYPE_RECTANGLE: {
-            x += BAASUtil::genRandInt(-size, size);
-            y += BAASUtil::genRandInt(-size, size);
+            x += BAASRandomUtil::genRandInt(-size, size);
+            y += BAASRandomUtil::genRandInt(-size, size);
             break;
         }
         case OFFSET_TYPE_CIRCLE: {
-            double angle = BAASUtil::genRandDouble(0, 2 * M_PI);
+            double angle = BAASRandomUtil::genRandDouble(0, 2 * M_PI);
             x += int(size * cos(angle));
             y += int(size * sin(angle));
             break;

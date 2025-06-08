@@ -5,7 +5,6 @@
 #ifndef BAAS_DEVICE_SCREENSHOT_BASESCREENSHOT_H_
 #define BAAS_DEVICE_SCREENSHOT_BASESCREENSHOT_H_
 
-#include "opencv2/opencv.hpp"
 #include "device/BAASConnection.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -14,12 +13,12 @@ class BaseScreenshot {
 
 public:
 
-    explicit BaseScreenshot(BAASConnection *connection);
+    explicit BaseScreenshot(BAASConnection* connection);
 
     virtual void init();
 
     // return image must be 3 channels
-    virtual void screenshot(cv::Mat &img);
+    virtual void screenshot(cv::Mat& img);
 
     virtual void exit();
 
@@ -28,13 +27,13 @@ public:
 
 protected:
 
-    BAASConnection *connection;
+    BAASConnection* connection;
 
     cv::Mat image;
 
     std::mutex screenshot_mtx;
 
-    BAASLogger *logger;
+    BAASLogger* logger;
 };
 
 BAAS_NAMESPACE_END

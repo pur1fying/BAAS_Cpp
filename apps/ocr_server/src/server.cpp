@@ -5,7 +5,6 @@
 
 #include <thread>
 
-#include <BAASLogger.h>
 #include <ocr/BAASOCR.h>
 #include <ocr/OcrUtils.h>
 #include <BAASExternalIPC.h>

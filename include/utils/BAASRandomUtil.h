@@ -1,25 +1,15 @@
 //
 // Created by pc on 2024/4/12.
 //
-#ifndef BAAS_UTILS_BAASUTIL_H_
-#define BAAS_UTILS_BAASUTIL_H_
-
-
-
-#include <chrono>
-#include <filesystem>
-#include <locale>
-#include <codecvt>
-#include <random>
-#include <regex>
-#include <thread>
+#ifndef BAAS_UTILS_BAASRANDOMUTIL_H_
+#define BAAS_UTILS_BAASRANDOMUTIL_H_
 
 #include "core_defines.h"
 #include "BAASStringUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
-class BAASUtil {
+class BAASRandomUtil {
 
 public:
 
@@ -31,11 +21,6 @@ public:
     static int genRandInt(
             const int &min,
             const int &max
-    );
-
-    static bool endsWith(
-            const std::string &src,
-            const std::string &suffix
     );
 
     // from tinyObjLoader
@@ -50,4 +35,4 @@ public:
 
 BAAS_NAMESPACE_END
 
-#endif //BAAS_UTILS_BAASUTIL_H_
+#endif //BAAS_UTILS_BAASRANDOMUTIL_H_

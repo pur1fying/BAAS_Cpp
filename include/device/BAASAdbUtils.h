@@ -22,7 +22,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class Network {
+
 public:
+
     static const std::string TCP;
     static const std::string UNIX;
     static const std::string DEV;
@@ -33,7 +35,9 @@ public:
 };
 
 class BAASAdbConnection {
+
 public:
+
     static bool checkServer(
             std::string &host,
             std::string &port
@@ -76,6 +80,7 @@ public:
     bool setCloseSocketWhenDestruct(bool state);
 
 protected:
+
     std::string host;
 
     std::string port;
@@ -89,10 +94,13 @@ protected:
     double socketTimeout;
 
     bool closeSocketWhenDestruct = true;
+
 };
 
 class ConnectionRefusedError : public std::exception {
+
 public:
+
     [[nodiscard]] const char *what() const noexcept override
     {
         return "Connection refused";
@@ -100,7 +108,9 @@ public:
 };
 
 class AdbError : public std::exception {
+
 public:
+
     AdbError() = default;
 
     explicit AdbError(const char *msg)
@@ -115,11 +125,14 @@ public:
     }
 
 private:
+
     std::string message;
 };
 
 class BAASAdbBaseClient {
+
 public:
+
     BAASAdbBaseClient();
 
     explicit BAASAdbBaseClient(
@@ -133,7 +146,7 @@ public:
             double socketTimeout = 3000.0
     );
 
-    BAASAdbConnection *makeConnection(double socketTimeout = 0);
+    BAASAdbConnection* makeConnection(double socketTimeout = 0);
 
     /*
         40 will match 1.0.40

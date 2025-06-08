@@ -7,7 +7,6 @@
 
 #include "BaseControl.h"
 #include "device/BAASScrcpyClient.h"
-#include "device/control/BaseControl.h"
 
 BAAS_NAMESPACE_BEGIN
 

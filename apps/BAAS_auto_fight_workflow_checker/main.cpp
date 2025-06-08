@@ -2,11 +2,11 @@
 // Created by Administrator on 2025/5/29.
 //
 
-#include "fstream"
+#include <fstream>
 
-#include "BAASLogger.h"
-#include "utils.h"
-#include "simdutf.h"
+#include <utils.h>
+#include <simdutf.h>
+#include <BAASLogger.h>
 
 using namespace baas;
 using namespace std;
@@ -27,6 +27,7 @@ std::vector<std::string> global_error_message;
 
 // workflow json
 nlohmann::json wf_j;
+//BAASConfig wf_config;
 
 // output json
 nlohmann::json out_j;
@@ -151,7 +152,9 @@ void _cond_pre_check();
 
 void _sta_pre_check();
 
-void _actions_check();
+void _actions_check() {
+
+}
 
 void _single_action_check(const nlohmann::json& action);
 
@@ -268,8 +271,8 @@ void _init() {
 void _path_check(const std::string& path) {
 
 #ifdef WIN32
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    std::wstring wpath = converter.from_bytes(path);
+    std::wstring wpath;
+    BAASStringUtil::str2wstr(path, wpath);
     std::filesystem::path _p(wpath);
 #elif UNIX_LIKE_PLATFORM
     std::filesystem::path _p(path);
@@ -289,6 +292,7 @@ void _parse_json(std::filesystem::path& path)  {
     std::ifstream file(path);
     try {
         wf_j = nlohmann::json::parse(file);
+//        wf_config = BAASConfig(wf_j, (BAASLogger*) BAASGlobalLogger);
     } catch (nlohmann::json::parse_error &e) {
         error_type = "json_prase";
         global_error_message.emplace_back("Workflow json parse error : " + std::string(e.what()));

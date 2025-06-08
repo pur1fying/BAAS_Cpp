@@ -5,6 +5,7 @@
 #include "BAAS.h"
 
 #include "ocr/BAASOCR.h"
+#include "utils/BAASImageUtil.h"
 #include "procedure/AppearThenClickProcedure.h"
 
 using namespace std;

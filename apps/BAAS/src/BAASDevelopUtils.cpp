@@ -3,8 +3,11 @@
 //
 
 #include "BAASDevelopUtils.h"
-#include "BAASGlobals.h"
 
+#include <random>
+
+#include "BAASGlobals.h"
+#include "utils/BAASImageUtil.h"
 
 using namespace std;
 using namespace cv;

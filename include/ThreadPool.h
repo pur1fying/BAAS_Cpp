@@ -1,19 +1,14 @@
 #ifndef BAAS_THREADPOOL_H_
 #define BAAS_THREADPOOL_H_
 
-#include <functional>
 #include <future>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <utility>
-#include <vector>
 
 #include "SafeQueue.h"
 
 BAAS_NAMESPACE_BEGIN
 
 class ThreadPool {
+
 private:
   class ThreadWorker {
   private:

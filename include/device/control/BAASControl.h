@@ -7,9 +7,7 @@
 
 #include "AdbControl.h"
 #include "NemuControl.h"
-#include "BaseControl.h"
 #include "ScrcpyControl.h"
-#include "utils/BAASImageUtil.h"
 
 #define OFFSET_TYPE_NOCHANGE 0
 #define OFFSET_TYPE_RECTANGLE 1

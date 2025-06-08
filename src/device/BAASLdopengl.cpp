@@ -10,18 +10,18 @@ using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-map<int, BAASLdopengl *> BAASLdopengl::connections;
+map<int, BAASLdopengl*> BAASLdopengl::connections;
 
-BAASLdopengl *BAASLdopengl::get_instance(BAASConnection *connection)
+BAASLdopengl* BAASLdopengl::get_instance(BAASConnection* connection)
 {
-    static BAASLdopengl *instance = nullptr;
+    static BAASLdopengl* instance = nullptr;
     if (instance == nullptr) {
         instance = new BAASLdopengl(connection);
     }
     return instance;
 }
 
-BAASLdopengl::BAASLdopengl(std::string &installPath)
+BAASLdopengl::BAASLdopengl(std::string& installPath)
 {
     logger = (BAASLogger *) BAASGlobalLogger;
     ldplayer_install_path = installPath;
@@ -101,7 +101,7 @@ void BAASLdopengl::init_dll()
     }
 }
 
-BAASLdopengl::BAASLdopengl(BAASConnection *connection)
+BAASLdopengl::BAASLdopengl(BAASConnection* connection)
 {
     logger = connection->get_logger();
     ldplayer_install_path = connection->emulator_folder_path();
@@ -123,7 +123,7 @@ void BAASLdopengl::release(int connectionId)
     }
 }
 
-void BAASLdopengl::screenshot(cv::Mat &image)
+void BAASLdopengl::screenshot(cv::Mat& image)
 {
     void *ptr = shot_instance->cap();
     if (ptr == nullptr) {

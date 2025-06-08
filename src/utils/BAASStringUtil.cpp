@@ -28,7 +28,7 @@ string BAASStringUtil::int2binary(int a)
 }
 
 int BAASStringUtil::hex2int(
-        const string &input,
+        const string& input,
         int length
 )
 {
@@ -42,7 +42,7 @@ int BAASStringUtil::hex2int(
 }
 
 int BAASStringUtil::unsignedBinary2int(
-        const string &input,
+        const string& input,
         int length
 )
 {
@@ -58,7 +58,7 @@ int BAASStringUtil::unsignedBinary2int(
 }
 
 int BAASStringUtil::binary2int(
-        const string &input,
+        const string& input,
         int length
 )
 {
@@ -80,6 +80,7 @@ string BAASStringUtil::changeEndian(int a)
 
 string BAASStringUtil::int2String(int a)
 {
+    if (a == 0) return "0";
     string st = "";
     while (a) {
         st += a % 10 + '0';
@@ -90,10 +91,10 @@ string BAASStringUtil::int2String(int a)
 
 
 void BAASStringUtil::stringReplace(
-        const std::string &OLD,
-        const std::string &NEW,
-        string &src,
-        string &dst
+        const std::string& OLD,
+        const std::string& NEW,
+        string& src,
+        string& dst
 )
 {
     if (&src != &dst) {
@@ -107,9 +108,9 @@ void BAASStringUtil::stringReplace(
 }
 
 void BAASStringUtil::stringReplace(
-        const string &OLD,
-        const string &NEW,
-        string &tar
+        const string& OLD,
+        const string& NEW,
+        string& tar
 )
 {
     int start = 0;
@@ -120,9 +121,9 @@ void BAASStringUtil::stringReplace(
 }
 
 void BAASStringUtil::stringSplit(
-        const string &src,
-        const string &separator,
-        vector<std::string> &dst
+        const string& src,
+        const string& separator,
+        vector<std::string>& dst
 )
 {
     dst.clear();
@@ -140,9 +141,9 @@ void BAASStringUtil::stringSplit(
 }
 
 void BAASStringUtil::stringJoin(
-        const vector<std::string> &src,
-        const string &joiner,
-        string &dst
+        const vector<std::string>& src,
+        const string& joiner,
+        string& dst
 )
 {
     dst.clear();
@@ -165,9 +166,9 @@ bool BAASStringUtil::count_bit(int num)
 }
 
 void BAASStringUtil::stringSplit(
-        const string &src,
+        const string& src,
         const char separator,
-        vector<std::string> &dst
+        vector<std::string>& dst
 )
 {
     dst.clear();
@@ -185,7 +186,7 @@ void BAASStringUtil::stringSplit(
 }
 
 
-bool BAASStringUtil::allNumberChar(const string &src)
+bool BAASStringUtil::allNumberChar(const string& src)
 {
     auto it = src.begin();
     if (*it == '-') it++;
@@ -196,9 +197,9 @@ bool BAASStringUtil::allNumberChar(const string &src)
 }
 
 void BAASStringUtil::re_find_all(
-        const string &src,
-        const string &pattern,
-        vector<std::smatch> &dst
+        const string& src,
+        const string& pattern,
+        vector<std::smatch>& dst
 )
 {
     std::regex regex_pattern(pattern);
@@ -212,9 +213,9 @@ void BAASStringUtil::re_find_all(
 }
 
 void BAASStringUtil::re_find_all(
-        const string &src,
-        const string &pattern,
-        vector<std::string> &dst
+        const string& src,
+        const string& pattern,
+        vector<std::string>& dst
 )
 {
     dst.clear();
@@ -225,14 +226,13 @@ void BAASStringUtil::re_find_all(
 
     while (std::regex_search(search_start, src.cend(), match, regex_pattern)) {
         dst.push_back(match[1].str());
-        search_start = match.suffix()
-                            .first;
+        search_start = match.suffix().first;
     }
 }
 
 void BAASStringUtil::re_find(
-        const string &src,
-        const string &pattern,
+        const string& src,
+        const string& pattern,
         string &dst
 )
 {
@@ -244,15 +244,15 @@ void BAASStringUtil::re_find(
 }
 
 bool BAASStringUtil::re_match(
-        const string &src,
-        const string &pattern
+        const string& src,
+        const string& pattern
 )
 {
     std::regex regex_pattern(pattern);
     return std::regex_match(src, regex_pattern);
 }
 
-uint32_t BAASStringUtil::st2u32(const string &src)
+uint32_t BAASStringUtil::st2u32(const string& src)
 {
     uint32_t ret;
     memcpy(&ret, src.data(), sizeof(uint32_t));

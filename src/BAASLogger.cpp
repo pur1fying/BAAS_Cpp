@@ -7,6 +7,7 @@
 #include <spdlog/async.h>
 
 #include "BAASGlobals.h"
+#include "BAASExceptions.h"
 
 using namespace std;
 
@@ -72,8 +73,9 @@ GlobalLogger::GlobalLogger()
         file.close();
         fileLogger = spdlog::basic_logger_mt("file_logger", (folder_path / "global_log.txt").string());
     }
-    catch (const spdlog::spdlog_ex &ex) {
-        cout << "Log init failed: " << ex.what() << endl;
+    catch (const spdlog::spdlog_ex& ex) {
+        std::string msg = "Logger Init Failed : " + std::string(ex.what());
+        throw RuntimeError(msg);
     }
     spdlog::set_default_logger(consoleLogger);
     spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] %v");
@@ -86,9 +88,7 @@ void GlobalLogger::clearLogData()
 {
     for (filesystem::directory_iterator itr(BAAS_OUTPUT_DIR); itr != filesystem::directory_iterator(); ++itr) {
         if ((itr->path().string() != folder_path) && filesystem::is_directory(itr->path())) {
-            BAASGlobalLogger->BAASInfo(
-                    "Remove folder : [ " + itr->path().string() + " ]."
-            );
+            BAASGlobalLogger->BAASInfo("Remove folder : [ " + itr->path().string() + " ].");
             filesystem::remove_all(itr->path());
         }
     }

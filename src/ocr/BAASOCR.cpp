@@ -192,11 +192,12 @@ std::vector<int> BAASOCR::init(
 {
     // use config in global setting
     if (!gpu_id.has_value())
-        gpu_id = global_setting->get("/ocr/gpu_id", -1);
+        gpu_id = global_setting->ocr_gpu_id();
     if (!num_thread.has_value())
-        num_thread = global_setting->getInt("/ocr/num_thread", 0);
+        num_thread = global_setting->ocr_num_thread();
     if (!enable_cpu_memory_arena.has_value())
-        enable_cpu_memory_arena = global_setting->getBool("/ocr/enable_cpu_memory_arena", false);
+        enable_cpu_memory_arena = global_setting->ocr_enable_cpu_memory_arena();
+
     std::vector<int> res;
     for (auto &i: languages)
         res.push_back(
