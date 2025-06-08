@@ -9,7 +9,6 @@
 #include "BAASLogger.h"
 #include "core_defines.h"
 
-
 BAAS_NAMESPACE_BEGIN
 
 extern std::filesystem::path BAAS_AUTO_FIGHT_WORKFLOW_DIR;

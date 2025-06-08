@@ -98,7 +98,7 @@ namespace ShareMem{
          * @return 1成功 0失败
          * @details 传入要写入数据的指针，函数会讲数据拷贝进共享内存，修改同时flag为CAN_READ，允许其他进程调用接收函数接受图像。
          */
-        int PutShareBody(u_char *data_ptr, unsigned long data_size) const;
+        int PutShareBody(uint8_t *data_ptr, unsigned long data_size) const;
 
         /*!
          * @brief 获取数据体的实际大小
@@ -118,7 +118,7 @@ namespace ShareMem{
          * @details 这个函数仅获取共享内存中data_body的指针，不会改变flag的值。
          * @return 共享内存数据的指针
          */
-        u_char * GetShareBodyAddress() const;
+        uint8_t * GetShareBodyAddress() const;
 
         /*!
          * @brief 获取共享内存读写状态

@@ -2,12 +2,14 @@
 // Created by pc on 2024/8/9.
 //
 
+#include "config/BAASStaticConfig.h"
 #include "device/screenshot/BAASScreenshot.h"
 #include "device/screenshot/AscreenCap.h"
 #include "device/screenshot/AdbScreenshot.h"
 #include "device/screenshot/ScrcpyScreenshot.h"
 #include "device/screenshot/NemuScreenshot.h"
 #include "device/screenshot/LdopenglScreenshot.h"
+
 
 using namespace std;
 
@@ -29,7 +31,7 @@ BAASScreenshot::BAASScreenshot(
     logger->BAASInfo("Available screenshot methods : ");
     logger->BAASInfo(available_methods);
 
-    last_screenshot_time = BAASUtil::getCurrentTimeMS();
+    last_screenshot_time = BAASChronoUtil::getCurrentTimeMS();
     screenshot_instance = nullptr;
     set_screenshot_method(method);
     set_interval(interval);
@@ -44,7 +46,7 @@ void BAASScreenshot::screenshot(cv::Mat &img)
 {
     ensure_interval();
     screenshot_instance->screenshot(img);
-    last_screenshot_time = BAASUtil::getCurrentTimeMS();
+    last_screenshot_time = BAASChronoUtil::getCurrentTimeMS();
 }
 
 void BAASScreenshot::immediate_screenshot(cv::Mat &img)
@@ -54,10 +56,10 @@ void BAASScreenshot::immediate_screenshot(cv::Mat &img)
 
 void BAASScreenshot::ensure_interval() const
 {
-    long long current_time = BAASUtil::getCurrentTimeMS();
+    long long current_time = BAASChronoUtil::getCurrentTimeMS();
     int difference = interval - int(current_time - last_screenshot_time);
     if (difference > 0) {
-        BAASUtil::sleepMS(difference);
+        BAASChronoUtil::sleepMS(difference);
     }
 }
 

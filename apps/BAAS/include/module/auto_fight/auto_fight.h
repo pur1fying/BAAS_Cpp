@@ -74,9 +74,9 @@ public:
     }
 
     inline void update_screenshot(){
-        auto t_start = BAASUtil::getCurrentTimeMS();
+        auto t_start = BAASChronoUtil::getCurrentTimeMS();
         baas->i_update_screenshot_array();
-        auto t_end = BAASUtil::getCurrentTimeMS();
+        auto t_end = BAASChronoUtil::getCurrentTimeMS();
         logger->BAASInfo("[ Screenshot ] update | Time: " + std::to_string(t_end - t_start) + "ms");
     }
 

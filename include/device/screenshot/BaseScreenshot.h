@@ -11,7 +11,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class BaseScreenshot {
+
 public:
+
     explicit BaseScreenshot(BAASConnection *connection);
 
     virtual void init();
@@ -25,6 +27,7 @@ public:
     virtual bool is_lossy();
 
 protected:
+
     BAASConnection *connection;
 
     cv::Mat image;

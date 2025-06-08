@@ -77,10 +77,10 @@ void BAASDevelopUtils::fight_screenshot_extract(BAAS* baas, const screenshot_ext
 
     baas->solve_procedure("UI-FROM_PAGE_formation_TO_PAGE_fighting", true);
 
-    auto start_time_ms = BAASUtil::getCurrentTimeMS();
+    auto start_time_ms = BAASChronoUtil::getCurrentTimeMS();
 
     if(params.pre_wait > 0)
-        BAASUtil::sleepMS(int(params.pre_wait * 1000));
+        BAASChronoUtil::sleepMS(int(params.pre_wait * 1000));
 
     std::vector<long long> timestamps;
 
@@ -102,8 +102,8 @@ void BAASDevelopUtils::fight_screenshot_extract(BAAS* baas, const screenshot_ext
 
 
     for (int i = 0; i < params.img_count; ++i) {
-        if(BAASUtil::getCurrentTimeMS() < timestamps[i]) {
-            BAASUtil::sleepMS(int(timestamps[i] - BAASUtil::getCurrentTimeMS()));
+        if(BAASChronoUtil::getCurrentTimeMS() < timestamps[i]) {
+            BAASChronoUtil::sleepMS(int(timestamps[i] - BAASChronoUtil::getCurrentTimeMS()));
         }
 
         baas->i_update_screenshot_array();

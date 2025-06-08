@@ -70,7 +70,7 @@ void AppearThenClickProcedure::implement(
     last_clicked_counter.clear();
     output.clear();
 
-    start_time = BAASUtil::getCurrentTimeMS();
+    start_time = BAASChronoUtil::getCurrentTimeMS();
     last_appeared_time = start_time;
     last_tentative_click_time = start_time;
 
@@ -83,7 +83,7 @@ void AppearThenClickProcedure::implement(
         }
         else skip_first_screenshot = false;
 
-        this_round_start_time = BAASUtil::getCurrentTimeMS();
+        this_round_start_time = BAASChronoUtil::getCurrentTimeMS();
         if (this_round_start_time - start_time >= max_execute_time) {
             logger->hr("Max execute time " + to_string(max_execute_time) + "ms reached.");
             logger->BAASError("Looking for End features : ");
@@ -104,7 +104,7 @@ void AppearThenClickProcedure::implement(
 
         if (enable_tentative_click && (this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time)) {
             baas->click(tentative_click_x, tentative_click_y, 1, 1, 5, 0.0, 0.0, 0.0, "Tentative Click");
-            last_tentative_click_time = BAASUtil::getCurrentTimeMS();
+            last_tentative_click_time = BAASChronoUtil::getCurrentTimeMS();
         }
 
         for (const auto & end_feature_name : end_feature_names) {
@@ -121,7 +121,7 @@ void AppearThenClickProcedure::implement(
             if (baas->feature_appear(current_comparing_feature_name, temp_output, show_log)) {
                 logger->BAASInfo("Feature [ " + possibles_feature_names[i] + " ] appeared. ");
                 last_appeared_feature_name = possibles_feature_names[i];
-                last_appeared_time = BAASUtil::getCurrentTimeMS();
+                last_appeared_time = BAASChronoUtil::getCurrentTimeMS();
                 solve_feature_action_click(i);
                 last_tentative_click_time = last_appeared_time;
                 break;
@@ -135,11 +135,11 @@ void AppearThenClickProcedure::wait_loading()
 {
     long long t_loading;
     baas->update_screenshot_array();
-    long long start = BAASUtil::getCurrentTimeMS();
+    long long start = BAASChronoUtil::getCurrentTimeMS();
     string zero, ld;
     while (baas->is_running()) {
         if (BAASFeature::reset_then_feature_appear(baas, "common_loading_appear")) {
-            t_loading = BAASUtil::getCurrentTimeMS() - start;
+            t_loading = BAASChronoUtil::getCurrentTimeMS() - start;
             ld = to_string(t_loading);
             zero = string(6 - ld.length(), ' ');
             if (ld.length() <= 6)
@@ -170,7 +170,7 @@ void AppearThenClickProcedure::solve_feature_action_click(int index)
 
     // interval
     if (last_clicked_feature_name == last_appeared_feature_name &&
-        (int(BAASUtil::getCurrentTimeMS() - last_clicked_time) < param.interval))
+        (int(BAASChronoUtil::getCurrentTimeMS() - last_clicked_time) < param.interval))
         return;
 
     baas->click(
@@ -188,7 +188,7 @@ void AppearThenClickProcedure::solve_feature_action_click(int index)
     insert_last_clicked_queue(last_appeared_feature_name);  // this clicked
     pop_last_clicked_queue(max_click);                      // pop last clicked and check max click
 
-    last_clicked_time = BAASUtil::getCurrentTimeMS();
+    last_clicked_time = BAASChronoUtil::getCurrentTimeMS();
     last_clicked_feature_name = last_appeared_feature_name;
 }
 

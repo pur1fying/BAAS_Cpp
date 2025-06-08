@@ -47,18 +47,16 @@ void AScreenCap::init()
     ret_buffer = connection->adb_shell_bytes(shot_cmd);
 
     reposition_byte_pointer();
-    uint32_t id = BAASUtil::st2u32(ret_buffer.substr(byte_pointer, sizeof(uint32_t)));
+    uint32_t id = BAASStringUtil::st2u32(ret_buffer.substr(byte_pointer, sizeof(uint32_t)));
     if (id != 0x315A4D42) {
         logger->BAASError("AScreenCap Verify Code Error : expected 0x315A4D42, got " + to_string(id));
         available = false;
         throw AScreenCapError("Verify Error");
     }
 
-    int s = int(BAASUtil::st2u32(ret_buffer.substr(byte_pointer + 1 * sizeof(uint32_t), sizeof(uint32_t)))); // size
-    int w = int(
-            BAASUtil::st2u32(ret_buffer.substr(byte_pointer + 3 * sizeof(uint32_t), sizeof(uint32_t)))); // width
-    int h = int(
-            BAASUtil::st2u32(ret_buffer.substr(byte_pointer + 4 * sizeof(uint32_t), sizeof(uint32_t)))); // height
+    int s = int(BAASStringUtil::st2u32(ret_buffer.substr(byte_pointer + 1 * sizeof(uint32_t), sizeof(uint32_t)))); // size
+    int w = int(BAASStringUtil::st2u32(ret_buffer.substr(byte_pointer + 3 * sizeof(uint32_t), sizeof(uint32_t)))); // width
+    int h = int(BAASStringUtil::st2u32(ret_buffer.substr(byte_pointer + 4 * sizeof(uint32_t), sizeof(uint32_t)))); // height
     logger->BAASInfo("Window Size : " + to_string(w) + " x " + to_string(h));
 
     decompress_buffer_size = s;
@@ -87,18 +85,16 @@ void AScreenCap::uninstall()
 void AScreenCap::decompress()
 {
     reposition_byte_pointer();
-    uint32_t id = BAASUtil::st2u32(ret_buffer.substr(byte_pointer, sizeof(uint32_t)));
+    uint32_t id = BAASStringUtil::st2u32(ret_buffer.substr(byte_pointer, sizeof(uint32_t)));
     if (id != 0x315A4D42) {
         logger->BAASError("AScreenCap Verify Code Error : expected 0x315A4D42, got " + to_string(id));
         available = false;
         throw AScreenCapError("Verify Error");
     }
 
-    int s = int(BAASUtil::st2u32(ret_buffer.substr(byte_pointer + 1 * sizeof(uint32_t), sizeof(uint32_t)))); // size
-    int w = int(
-            BAASUtil::st2u32(ret_buffer.substr(byte_pointer + 3 * sizeof(uint32_t), sizeof(uint32_t)))); // width
-    int h = int(
-            BAASUtil::st2u32(ret_buffer.substr(byte_pointer + 4 * sizeof(uint32_t), sizeof(uint32_t)))); // height
+    int s = int(BAASStringUtil::st2u32(ret_buffer.substr(byte_pointer + 1 * sizeof(uint32_t), sizeof(uint32_t)))); // size
+    int w = int(BAASStringUtil::st2u32(ret_buffer.substr(byte_pointer + 3 * sizeof(uint32_t), sizeof(uint32_t)))); // width
+    int h = int(BAASStringUtil::st2u32(ret_buffer.substr(byte_pointer + 4 * sizeof(uint32_t), sizeof(uint32_t)))); // height
 
     LZ4_decompress_safe(
             ret_buffer.c_str() + byte_pointer + 5 * sizeof(uint32_t), decompress_buffer, s, decompress_buffer_size

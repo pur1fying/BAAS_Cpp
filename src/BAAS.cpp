@@ -117,8 +117,8 @@ void BAAS::wait_region_static(
     Mat last_frame, this_frame, last_frame_gray, this_frame_gray, diff;
     int static_frame_cnt = 0;
     long long needed_static_time = int(min_static_time * 1000);
-    long long start_time = BAASUtil::getCurrentTimeMS();
-    long long static_start_time = BAASUtil::getCurrentTimeMS();
+    long long start_time = BAASChronoUtil::getCurrentTimeMS();
+    long long static_start_time = BAASChronoUtil::getCurrentTimeMS();
     long long exe_time = int(max_execute_time * 1000);
     get_latest_screenshot(last_frame, region);
 
@@ -126,7 +126,7 @@ void BAAS::wait_region_static(
 
     int diff_pixel_cnt = int(double(region.width() * region.height()) * 1.0 * (1.0 - frame_diff_ratio));
     while (flag_run) {
-        this_round_time = BAASUtil::getCurrentTimeMS();
+        this_round_time = BAASChronoUtil::getCurrentTimeMS();
         if (this_round_time - start_time >= exe_time) {
             throw RequestHumanTakeOver("Wait region static timeout");
         }
@@ -143,7 +143,7 @@ void BAAS::wait_region_static(
             static_frame_cnt++;
         } else {
             static_frame_cnt = 0;
-            static_start_time = BAASUtil::getCurrentTimeMS();
+            static_start_time = BAASChronoUtil::getCurrentTimeMS();
         }
         last_frame = this_frame.clone();
     }

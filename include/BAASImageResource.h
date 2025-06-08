@@ -7,9 +7,9 @@
 #include <nlohmann/json.hpp>
 
 #include "BAAS.h"
-#include "BAASImageUtil.h"
 #include "BAASGlobals.h"
 #include "config/BAASConfig.h"
+#include "utils/BAASImageUtil.h"
 #include "device/BAASConnection.h"
 
 BAAS_NAMESPACE_BEGIN

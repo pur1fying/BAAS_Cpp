@@ -6,6 +6,8 @@
 
 #include <format>
 
+#include <config/BAASStaticConfig.h>
+
 #include "utils.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -23,7 +25,7 @@ ObjectPositionUpdater::ObjectPositionUpdater(
 
 void ObjectPositionUpdater::update()
 {
-    long long _t = BAASUtil::getCurrentTimeMS();
+    long long _t = BAASChronoUtil::getCurrentTimeMS();
     if (_t - _yolo_last_update_t > _yolo_update_itv) {
         baas->get_latest_screenshot(origin_screenshot);
         _yolo->run_session(origin_screenshot, result, nms_op);
@@ -153,16 +155,16 @@ void ObjectPositionUpdater::_init_time_cost()
     // gpu
     if(data->yolo_pra.gpu_id >= 0) average_cost = 2e8;
     // cpu
-    else                           average_cost = 2e9 / min(data->yolo_pra.num_thread * 0.5, 2.0);
+    else                           average_cost = 2e9 / (data->yolo_pra.num_thread * 0.5 > 2.0 ? 2.0 : data->yolo_pra.num_thread * 0.5);
 }
 
 void ObjectPositionUpdater::_init_yolo_model()
 {
     logger->BAASInfo("[ Model Init ]");
-    auto s_t = BAASUtil::getCurrentTimeMS();
+    auto s_t = BAASChronoUtil::getCurrentTimeMS();
     _yolo = std::make_unique<BAAS_Yolo_v8>();
     _yolo->init_model(data->yolo_pra);
-    auto e_t = BAASUtil::getCurrentTimeMS();
+    auto e_t = BAASChronoUtil::getCurrentTimeMS();
     logger->BAASInfo("Load Model T : " + std::to_string(e_t - s_t) + "ms");
 
     const std::vector<std::string>& cls = _yolo->get_classes();
@@ -189,9 +191,9 @@ void ObjectPositionUpdater::_init_yolo_model()
 void ObjectPositionUpdater::_warm_up_session()
 {
     logger->BAASInfo("[ Session WarmUp ]");
-    auto s_t = BAASUtil::getCurrentTimeMS();
+    auto s_t = BAASChronoUtil::getCurrentTimeMS();
     _yolo->warm_up();
-    auto e_t = BAASUtil::getCurrentTimeMS();
+    auto e_t = BAASChronoUtil::getCurrentTimeMS();
     logger->BAASInfo("WarmUp T    : " + std::to_string(e_t - s_t) + "ms");
 }
 

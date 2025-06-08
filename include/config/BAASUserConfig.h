@@ -10,7 +10,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class BAASUserConfig : public BAASConfig {
+
 public:
+
     explicit BAASUserConfig(int config_type) : BAASConfig(config_type)
     {
 

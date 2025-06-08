@@ -4,6 +4,8 @@
 
 #include "device/BAASLdopengl.h"
 
+#include "utils/BAASSystemUtil.h"
+
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
@@ -45,7 +47,7 @@ void BAASLdopengl::detect_ldplayer_instance()
         throw LDOpenGLError("ldconsole.exe not found");
     }
     cmd += " list2";
-    string ret = BAASUtil::executeCommandAndGetOutput(cmd);
+    string ret = BAASSystemUtil::executeCommandAndGetOutput(cmd);
     cout << ret << endl;
 
     istringstream iss(ret);

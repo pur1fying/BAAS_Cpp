@@ -229,10 +229,10 @@ void skill_handler::_parse_skill_n_idx()
 
 bool skill_handler::_C_decrease_check_loop()
 {
-    long long _start_t = BAASUtil::getCurrentTimeMS();
+    long long _start_t = BAASChronoUtil::getCurrentTimeMS();
 
     while (true) {
-        long long _time_elapsed = BAASUtil::getCurrentTimeMS() - _start_t;
+        long long _time_elapsed = BAASChronoUtil::getCurrentTimeMS() - _start_t;
         if (_time_elapsed >= _cost_cond->get_timeout()) {
             logger->sub_title("Skill Action C_decrease Check Timeout.");
             return false;

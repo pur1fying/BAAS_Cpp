@@ -1,9 +1,8 @@
 //
 // Created by pc on 2024/11/5.
 //
-#include "string"
 
-#include "nlohmann/json.hpp"
+#include <fstream>
 
 #include "BAASGlobals.h"
 #include "config/BAASConfig.h"
@@ -13,6 +12,7 @@ using namespace std;
 using json = nlohmann::json;
 
 BAAS_NAMESPACE_BEGIN
+
 BAASGlobalSetting *global_setting = nullptr;
 
 BAASGlobalSetting *BAASGlobalSetting::globalSetting = nullptr;

@@ -23,7 +23,7 @@ file(
         ${BAAS_PROJECT_PATH}/src/ocr/*.cpp
         ${BAAS_PROJECT_PATH}/src/BAASGlobals.cpp
         ${BAAS_PROJECT_PATH}/src/BAASLogger.cpp
-        ${BAAS_PROJECT_PATH}/src/BAASUtil.cpp
+        ${BAAS_PROJECT_PATH}/src/utils/*cpp
         ${BAAS_PROJECT_PATH}/src/simdutf.cpp
         ${BAAS_PROJECT_PATH}/src/BAASExternalIPC.cpp
 )

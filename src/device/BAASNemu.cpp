@@ -4,6 +4,9 @@
 
 #include "device/BAASNemu.h"
 
+#include "device/utils.h"
+#include "utils/BAASChronoutil.h"
+
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
@@ -12,7 +15,7 @@ std::map<int, BAASNemu *> BAASNemu::connections;
 BAASNemu *BAASNemu::get_instance(BAASConnection *connection)
 {
     string mm_path = connection->emulator_folder_path();
-    int id = BAASUtil::MuMu_serial2instance_id(connection->get_serial());
+    int id = MuMu_serial2instance_id(connection->get_serial());
     for (auto &conn: connections)
         if (conn.second->mumu_install_path == mm_path && conn.second->instance_id == id) {
             connection->get_logger()->BAASInfo("Nemu path [ " + conn.second->mumu_install_path + " ], "
@@ -27,7 +30,7 @@ BAASNemu::BAASNemu(BAASConnection *connection)
 {
     logger = connection->get_logger();
     mumu_install_path = connection->emulator_folder_path();
-    instance_id = BAASUtil::MuMu_serial2instance_id(connection->get_serial());
+    instance_id = MuMu_serial2instance_id(connection->get_serial());
     display_id = 0;
     init_dll();
     connect();
@@ -54,7 +57,9 @@ void BAASNemu::connect()
             return;
         }
     }
-    connection_id = nemu_connect(BAASUtil::stringToWString(mumu_install_path).c_str(), instance_id);
+    std::wstring w_mumu_install_path;
+    BAASStringUtil::str2wstr(mumu_install_path, w_mumu_install_path);
+    connection_id = nemu_connect(w_mumu_install_path.c_str(), instance_id);
     if (connection_id == 0) {
         logger->BAASError("Nemu connect failed");
         throw NemuIpcError("Nemu connect failed");
@@ -140,7 +145,7 @@ void BAASNemu::long_click(
     update_resolution();
 //    convertXY(x, y);
     down(x, y);
-    BAASUtil::sleepMS(int(duration * 1000));
+    BAASChronoUtil::sleepMS(int(duration * 1000));
     up();
 }
 
@@ -166,14 +171,14 @@ void BAASNemu::swipe(
 //    convertXY(end_x, end_y);
 
     vector<pair<int, int>> points;
-    BAASUtil::insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
+    insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
 
     int sleep_time = int(step_duration * 1000);
 
     down(start_x, start_y);
 
     for (int i = 1; i < points.size(); i++) {
-        BAASUtil::sleepMS(sleep_time);
+        BAASChronoUtil::sleepMS(sleep_time);
         down(points[i].first, points[i].second);
     }
 

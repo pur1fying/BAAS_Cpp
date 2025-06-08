@@ -10,7 +10,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class AScreenCap : public BaseScreenshot {
+
 public:
+
     explicit AScreenCap(BAASConnection *connection);
 
     void init() override;
@@ -22,6 +24,7 @@ public:
     bool is_lossy() override;
 
 private:
+
     void uninstall();
 
     static std::string shot_cmd;

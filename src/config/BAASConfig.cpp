@@ -2,6 +2,7 @@
 // Created by pc on 2024/4/12.
 //
 #include <string>
+#include <fstream>
 
 #include "config/BAASConfig.h"
 #include "BAASGlobals.h"
@@ -193,7 +194,7 @@ void BAASConfig::_preprocess(
                 );
             } else {
                 // try to convert to number
-                if (BAASUtil::allNumberChar(str)) {
+                if (BAASStringUtil::allNumberChar(str)) {
                     if (str.find('.') == string::npos) {
                         try {
                             value = stoi(str);
@@ -240,7 +241,7 @@ void BAASConfig::remove(const string& key)
         config.erase(it);
     } else {
         vector<string> keys;
-        BAASUtil::stringSplit(key, '/', keys);
+        BAASStringUtil::stringSplit(key, '/', keys);
         json &tar = config;
         int siz = int(keys.size()) - 1;
         for (int i = 0; i <= siz - 1; ++i) {
@@ -419,6 +420,22 @@ void BAASConfig::_init_config()
         BAASGlobalLogger->BAASError("parse error : " + string(e.what()));
         throw ValueError("Config Parse Error.");
     }
+}
+
+void BAASConfig::save_modify_history()
+{
+    if (modified.empty() || modify_history_path.empty()) return;
+    std::ifstream in(modify_history_path);
+    nlohmann::json j = nlohmann::json::parse(in);
+    in.close();
+    std::string time_str = GlobalLogger::current_time_string();
+    auto it = j.find(time_str);
+    if (it != j.end())it->push_back(modified);
+    else j[time_str] = modified;
+    std::ofstream out(modify_history_path, std::ios::out | std::ios::trunc);
+    out << j.dump(4);
+    out.close();
+    modified.clear();
 }
 
 

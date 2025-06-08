@@ -3,8 +3,11 @@
 //
 
 #include "device/BAASConnection.h"
-#include "device/BAASAdbUtils.h"
+
 #include "BAASImageResource.h"
+#include "config/GameServer.h"
+#include "device/BAASAdbUtils.h"
+#include "config/BAASStaticConfig.h"
 
 using namespace std;
 
@@ -146,7 +149,7 @@ void BAASConnection::detect_device()
         vector<string> may_mumu_d;
         for (int i = 1; i <= 2; ++i) {
             for (auto &j: available)
-                if (BAASUtil::isMuMuFamily(j)) may_mumu_d.push_back(j);
+                if (isMuMuFamily(j)) may_mumu_d.push_back(j);
             if (may_mumu_d.size() == 1) {
                 logger->BAASWarn("Redirect MuMu12 from [ " + serial + " ] to [ " + may_mumu_d[0] + " ]");
                 serial = may_mumu_d[0];
@@ -175,9 +178,9 @@ void BAASConnection::detect_device()
     if (is_mumu12_family()) {
         bool matched = false;
         int device_port, this_port;
-        this_port = BAASUtil::serial2port(serial);
+        this_port = serial2port(serial);
         for (auto &i: available) {
-            device_port = BAASUtil::serial2port(i);
+            device_port = serial2port(i);
             if (device_port == this_port) {
                 matched = true;
                 break;
@@ -187,7 +190,7 @@ void BAASConnection::detect_device()
             logger->BAASWarn("MuMu12 device [ " + serial + " ] not online, search port near by.");
             int diff;
             for (auto &i: available) {
-                device_port = BAASUtil::serial2port(i);
+                device_port = serial2port(i);
                 diff = abs(device_port - this_port);
                 if (diff <= 2) {
                     logger->BAASInfo("Assume MuMu12 device serial switch from [ " + serial + " ] to [ " + i + " ]");
@@ -226,7 +229,7 @@ void BAASConnection::adb_connect()
         logger->BAASInfo(serial + " is an emulator-* serial, skip adb connect.");
         return;
     } else {
-        if (BAASUtil::re_match(serial, R"([a-zA-Z0-9]+$)")) {
+        if (BAASStringUtil::re_match(serial, R"([a-zA-Z0-9]+$)")) {
             logger->BAASInfo("Serial [ " + serial + " seems to be a Android serial, skip adb connect");
             return;
         }
@@ -267,7 +270,7 @@ void BAASConnection::brute_force_connect(vector <pair<string, int >> &devices)
 
 std::pair<std::string, std::string> BAASConnection::port_emu_pair_serial(const string &serial)
 {
-    int port = BAASUtil::serial2port(serial);
+    int port = serial2port(serial);
     if (serial.starts_with("127.0.0.1:") && port >= 5555 && port <= 5555 + 32)
         return {"127.0.0.1:" + to_string(port), "emulator-" + to_string(port - 1)};
     else if (serial.starts_with("emulator-") && port >= 5554 && port <= 5554 + 32)
@@ -338,16 +341,16 @@ bool BAASConnection::is_mumu_over_version_356()
     return false;
 }
 
-void BAASConnection::list_package(vector <std::string> &packages)
+void BAASConnection::list_package(vector <std::string>& packages)
 {
     logger->BAASInfo("Get Package List");
     // faster : 10ms
     string res = adb_shell_bytes(R"(pm list packages)");
-    BAASUtil::re_find_all(res, R"(package:([^\s]+))", packages);
+    BAASStringUtil::re_find_all(res, R"(package:([^\s]+))", packages);
     if (!packages.empty()) return;
     // slower ,but list system packages : 200 - 500ms
     res = adb_shell_bytes(R"(dumpsys package | grep "Package \[")");
-    BAASUtil::re_find_all(res, R"(Package \[([^\]]+)\])", packages);
+    BAASStringUtil::re_find_all(res, R"(Package \[([^\]]+)\])", packages);
 }
 
 void BAASConnection::list_all_known_packages(vector <std::string> &packages)
@@ -444,7 +447,7 @@ void BAASConnection::current_app(
     string res = adb_shell_bytes("dumpsys activity top");
     vector<smatch> m;
     string pat = R"(ACTIVITY ([^\s]+)/([^/\s]+) \w+ pid=(\d+))";
-    BAASUtil::re_find_all(res, pat, m);
+    BAASStringUtil::re_find_all(res, pat, m);
     if (m.empty()) {
         logger->BAASError("No current app found.");
         throw RequestHumanTakeOver("Couldn't get focused app.");

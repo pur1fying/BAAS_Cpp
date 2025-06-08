@@ -8,18 +8,17 @@
 #include <fstream>
 
 #ifdef __CUDA__
-
 #include <cuda_fp16.h>
 namespace Ort
 {
     template<>
     struct TypeToTensorType<half> { static constexpr ONNXTensorElementDataType type = ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16; };
 }
-
 #endif // __CUDA__
 
 #include "BAASLogger.h"
 #include "ocr/OcrUtils.h"
+#include "BAASExceptions.h"
 
 BAAS_NAMESPACE_BEGIN
 

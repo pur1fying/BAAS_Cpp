@@ -2,7 +2,13 @@
 // Created by pc on 2024/5/27.
 //
 #include "device/BAASAdbUtils.h"
+
 #include "BAASLogger.h"
+#include "device/utils.h"
+#include "BAASExceptions.h"
+#include "utils/BAASSystemUtil.h"
+#include "utils/BAASChronoUtil.h"
+#include "utils/BAASStringUtil.h"
 
 using namespace std;
 
@@ -55,10 +61,8 @@ BAASAdbConnection::BAASAdbConnection(
         double socketTimeout
 )
 {
-    pair<string, string> hostPort = BAASUtil::serialToHostPort(serial);
-    if (hostPort.first
-                .empty() || hostPort.second
-                                    .empty())
+    pair<string, string> hostPort = serialToHostPort(serial);
+    if (hostPort.first.empty() || hostPort.second.empty())
         throw ValueError("Invalid serial : " + serial);
     this->serial = serial;
     this->host = hostPort.first;
@@ -98,7 +102,7 @@ bool BAASAdbConnection::readUntilClose(string &res) const
 
 bool BAASAdbConnection::sendMessage(const string &data) const
 {
-    string msgLengthHex = BAASUtil::int2hex(int(data.length()));
+    string msgLengthHex = BAASStringUtil::int2hex(int(data.length()));
     msgLengthHex = msgLengthHex + data;
     send(connection, msgLengthHex.c_str(), int(msgLengthHex.length()), 0);
     return true;
@@ -122,7 +126,7 @@ bool BAASAdbConnection::checkSTAT() const
 
 string BAASAdbConnection::readAdbReturnMessage() const
 {
-    int length = BAASUtil::hex2int(readFully(4), 4);
+    int length = BAASStringUtil::hex2int(readFully(4), 4);
     string message = readFully(length);
     return message;
 }
@@ -144,7 +148,7 @@ SOCKET BAASAdbConnection::safeCreateSocket()
     try {
         return createSocket();
     } catch (ConnectionRefusedError &e) {
-        BAASUtil::executeCommandWithoutOutPut("adb start-server");
+        BAASSystemUtil::executeCommandWithoutOutPut("adb start-server");
     }
     for (int i = 0; i < 30; i++) {
         try { return createSocket(); }
@@ -217,7 +221,7 @@ int BAASAdbBaseClient::serverVersion()
     conn.sendMessage("host:version");
     conn.checkOKAY();
     string versionHex = conn.readAdbReturnMessage();
-    return BAASUtil::hex2int(versionHex, versionHex.length());
+    return BAASStringUtil::hex2int(versionHex, versionHex.length());
 }
 
 bool BAASAdbBaseClient::serverKill()
@@ -375,7 +379,7 @@ BAASAdbConnection *BAASAdbBaseDevice::shellStream(
 )
 {
     string cmd;
-    BAASUtil::stringJoin(commandList, " ", cmd);
+    BAASStringUtil::stringJoin(commandList, " ", cmd);
     return shellStream(cmd, socketTimeout);
 }
 
@@ -386,7 +390,7 @@ bool BAASAdbBaseDevice::shellBytes(
 )
 
 {
-    BAASAdbConnection *conn = shellStream(command, socketTimeout);
+    BAASAdbConnection* conn = shellStream(command, socketTimeout);
     conn->readUntilClose(out);
     delete conn;
     return true;
@@ -399,7 +403,7 @@ bool BAASAdbBaseDevice::shellBytes(
 )
 {
     string cmd;
-    BAASUtil::stringJoin(commandList, " ", cmd);
+    BAASStringUtil::stringJoin(commandList, " ", cmd);
     shellBytes(cmd, out, socketTimeout);
     return true;
 }
@@ -415,7 +419,7 @@ BAASAdbConnection *BAASAdbBaseDevice::prepareSync(
     conn->checkOKAY();
     conn->sendMessage("sync:");
     conn->checkOKAY();
-    msg = cmd + BAASUtil::changeEndian(int(path.length())) + path;
+    msg = cmd + BAASStringUtil::changeEndian(int(path.length())) + path;
     send(conn->getConnection(), msg.c_str(), int(msg.length()), 0);
     return conn;
 }
@@ -425,8 +429,8 @@ int BAASAdbBaseDevice::stat(const string &path)
     BAASAdbConnection *conn = prepareSync(path, STAT);
     conn->checkSTAT();
     string data = conn->readFully(12);
-    int temp = BAASUtil::binary2int(data.substr(4, 4), 4);
-    int sizeInt = BAASUtil::binary2int(BAASUtil::changeEndian(temp), 4);
+    int temp = BAASStringUtil::binary2int(data.substr(4, 4), 4);
+    int sizeInt = BAASStringUtil::binary2int(BAASStringUtil::changeEndian(temp), 4);
     delete conn;
     return sizeInt;
 }
@@ -454,12 +458,12 @@ int BAASAdbBaseDevice::push(
             file.read(buffer, 4096);
             int readSize = int(file.gcount());
             if (readSize == 0) {
-                string time = BAASUtil::changeEndian(BAASUtil::getCurrentTimeStamp());
+                string time = BAASStringUtil::changeEndian(BAASChronoUtil::getCurrentTimeStamp());
                 head = "DONE" + time;
                 send(connection, head.c_str(), int(head.length()), 0);
                 break;
             }
-            head = "DATA" + BAASUtil::changeEndian(readSize);
+            head = "DATA" + BAASStringUtil::changeEndian(readSize);
             send(connection, head.c_str(), int(head.length()), 0);
             send(connection, buffer, readSize, 0);
         }

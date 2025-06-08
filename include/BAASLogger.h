@@ -14,7 +14,7 @@
 #include <spdlog/spdlog.h>
 
 #include "core_defines.h"
-#include "BAASUtil.h"
+#include "utils/BAASUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -46,7 +46,7 @@ public:
     {
 #ifdef _WIN32
         std::string message;
-        BAASUtil::wstr2str(path.wstring(), message);
+        BAASStringUtil::wstr2str(path.wstring(), message);
         _out(message, level);
 #else
         _out(path.string(), level);

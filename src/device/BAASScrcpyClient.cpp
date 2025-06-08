@@ -85,7 +85,7 @@ bool BAASScrcpyClient::init_socket()
         } catch (AdbError &e) {
             video_stream = nullptr;
             logger->BAASInfo(e.what());
-            BAASUtil::sleepMS(100);
+            BAASChronoUtil::sleepMS(100);
         }
     }
     if (video_stream == nullptr) {
@@ -109,8 +109,8 @@ bool BAASScrcpyClient::init_socket()
     buffer = video_stream->readFully(4);
 
     set_resolution(
-            uint16_t(BAASUtil::unsignedBinary2int(buffer.substr(0, 2), 2)),
-            uint16_t(BAASUtil::unsignedBinary2int(buffer.substr(2, 2), 2)));
+            uint16_t(BAASStringUtil::unsignedBinary2int(buffer.substr(0, 2), 2)),
+            uint16_t(BAASStringUtil::unsignedBinary2int(buffer.substr(2, 2), 2)));
 
     logger->BAASInfo("Resolution : " + to_string(resolution.first) + "x" + to_string(resolution.second));
     u_long mode = 1;
@@ -211,11 +211,11 @@ bool BAASScrcpyClient::screenshot_loop()
 
 bool BAASScrcpyClient::screenshot(cv::Mat &output)
 {
-    long long currentTime = BAASUtil::getCurrentTimeMS();
+    long long currentTime = BAASChronoUtil::getCurrentTimeMS();
 
     while (get_last_frame_arrive_time() < currentTime) {
         if (!alive)throw RuntimeError("Scrcpy Client is not alive");
-        BAASUtil::sleepMS(1);
+        BAASChronoUtil::sleepMS(1);
     }
 
     frame_mutex.lock();
@@ -299,16 +299,16 @@ void BAASScrcpyClient::touch(
     uint16_t cst1 = 0xFFFF;
     uint32_t cst2 = 0x1;
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
-    BAASUtil::append_big_endian(msg, action);
-    BAASUtil::append_big_endian(msg, touch_id);
-    BAASUtil::append_big_endian(msg, x);
-    BAASUtil::append_big_endian(msg, y);
-    BAASUtil::append_big_endian(msg, resol.first);
-    BAASUtil::append_big_endian(msg, resol.second);
-    BAASUtil::append_big_endian(msg, cst1);
-    BAASUtil::append_big_endian(msg, cst2);
-    BAASUtil::append_big_endian(msg, cst2);
+    BAASStringUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, action);
+    BAASStringUtil::append_big_endian(msg, touch_id);
+    BAASStringUtil::append_big_endian(msg, x);
+    BAASStringUtil::append_big_endian(msg, y);
+    BAASStringUtil::append_big_endian(msg, resol.first);
+    BAASStringUtil::append_big_endian(msg, resol.second);
+    BAASStringUtil::append_big_endian(msg, cst1);
+    BAASStringUtil::append_big_endian(msg, cst2);
+    BAASStringUtil::append_big_endian(msg, cst2);
 
     control_socket_send(msg);
 }
@@ -323,11 +323,11 @@ void BAASScrcpyClient::keycode(
     uint32_t cst = 0;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
-    BAASUtil::append_big_endian(msg, action);
-    BAASUtil::append_big_endian(msg, keycode);
-    BAASUtil::append_big_endian(msg, repeat);
-    BAASUtil::append_big_endian(msg, cst);
+    BAASStringUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, action);
+    BAASStringUtil::append_big_endian(msg, keycode);
+    BAASStringUtil::append_big_endian(msg, repeat);
+    BAASStringUtil::append_big_endian(msg, cst);
 
     control_socket_send(msg);
 }
@@ -337,8 +337,8 @@ void BAASScrcpyClient::text(const string &text)
     uint8_t inject = ScrcpyConst::TYPE_INJECT_TEXT;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
-    BAASUtil::append_big_endian(msg, int(text.size()));
+    BAASStringUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, int(text.size()));
 
     msg += text;
 
@@ -357,13 +357,13 @@ void BAASScrcpyClient::scroll(
     pair<uint16_t, uint16_t> resol = get_resolution();
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
-    BAASUtil::append_big_endian(msg, x);
-    BAASUtil::append_big_endian(msg, y);
-    BAASUtil::append_big_endian(msg, resol.first);
-    BAASUtil::append_big_endian(msg, resol.second);
-    BAASUtil::append_big_endian(msg, h);
-    BAASUtil::append_big_endian(msg, v);
+    BAASStringUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, x);
+    BAASStringUtil::append_big_endian(msg, y);
+    BAASStringUtil::append_big_endian(msg, resol.first);
+    BAASStringUtil::append_big_endian(msg, resol.second);
+    BAASStringUtil::append_big_endian(msg, h);
+    BAASStringUtil::append_big_endian(msg, v);
 
     control_socket_send(msg);
 }
@@ -373,8 +373,8 @@ void BAASScrcpyClient::back_or_turn_screen_on(uint8_t action)
     uint8_t inject = ScrcpyConst::TYPE_BACK_OR_SCREEN_ON;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
-    BAASUtil::append_big_endian(msg, action);
+    BAASStringUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, action);
 
     control_socket_send(msg);
 }
@@ -384,7 +384,7 @@ void BAASScrcpyClient::expand_notification_panel()
     uint8_t inject = ScrcpyConst::TYPE_EXPAND_NOTIFICATION_PANEL;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, inject);
 
     control_socket_send(msg);
 }
@@ -394,7 +394,7 @@ void BAASScrcpyClient::expand_settings_panel()
     uint8_t inject = ScrcpyConst::TYPE_EXPAND_SETTINGS_PANEL;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, inject);
 
     control_socket_send(msg);
 }
@@ -404,7 +404,7 @@ void BAASScrcpyClient::collapse_panels()
     uint8_t inject = ScrcpyConst::TYPE_COLLAPSE_PANELS;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, inject);
 
     control_socket_send(msg);
 }
@@ -431,7 +431,7 @@ std::string BAASScrcpyClient::get_clipboard()
     // get clipboard
     uint8_t inject = ScrcpyConst::TYPE_GET_CLIPBOARD;
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, inject);
 
     control_socket_send(msg);
 
@@ -453,9 +453,9 @@ void BAASScrcpyClient::set_clipboard(
     uint8_t paste_flag = paste ? 1 : 0;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
-    BAASUtil::append_big_endian(msg, paste_flag);
-    BAASUtil::append_big_endian(msg, int(text.size()));
+    BAASStringUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, paste_flag);
+    BAASStringUtil::append_big_endian(msg, int(text.size()));
     msg += text;
 
     control_socket_send(msg);
@@ -467,8 +467,8 @@ void BAASScrcpyClient::set_screen_power_mode(int8_t mode)
     uint8_t inject = ScrcpyConst::TYPE_SET_SCREEN_POWER_MODE;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
-    BAASUtil::append_big_endian(msg, mode);
+    BAASStringUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, mode);
 
     control_socket_send(msg);
 }
@@ -478,7 +478,7 @@ void BAASScrcpyClient::rotate_device()
     uint8_t inject = ScrcpyConst::TYPE_ROTATE_DEVICE;
 
     string msg;
-    BAASUtil::append_big_endian(msg, inject);
+    BAASStringUtil::append_big_endian(msg, inject);
 
     control_socket_send(msg);
 }
@@ -494,7 +494,7 @@ void BAASScrcpyClient::swipe(
 )
 {
     vector<pair<int, int>> points;
-    BAASUtil::insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
+    insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
 
     int sleep_time = int(step_delay * 1000);
 
@@ -502,7 +502,7 @@ void BAASScrcpyClient::swipe(
 
     for (int i = 1; i < points.size() - 1; ++i) {
         touch(points[i].first, points[i].second, ScrcpyConst::ACTION_MOVE);
-        BAASUtil::sleepMS(sleep_time);
+        BAASChronoUtil::sleepMS(sleep_time);
     }
 
     touch(end_x, end_y, ScrcpyConst::ACTION_UP);

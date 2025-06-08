@@ -39,12 +39,12 @@ struct BAASPoint {
     {
         if (!j.is_array()) {
             throw nlohmann::json::type_error::create(302,
-                                                     nlohmann::detail::concat("type must be array, but is ", j.type_name()), &j);
+                                   nlohmann::detail::concat("type must be array, but is ", j.type_name()), &j);
         }
         if (j.size() != 2) {
             throw nlohmann::json::out_of_range::create(401,
-                                                       nlohmann::detail::concat("Invalid json size for BAASPoint : [ ",
-                                                                                std::to_string(j.size()), " ] , expected : [ 2 ]."), &j);
+                                   nlohmann::detail::concat("Invalid json size for BAASPoint : [ ",
+                                                             std::to_string(j.size()), " ] , expected : [ 2 ]."), &j);
         }
         point.x = j[0].get<int>();
         point.y = j[1].get<int>();

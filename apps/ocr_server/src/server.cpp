@@ -5,11 +5,12 @@
 
 #include <thread>
 
-#include "BAASLogger.h"
-#include "ocr/BAASOCR.h"
-#include "ocr/OcrUtils.h"
-#include "BAASExternalIPC.h"
-#include "config/BAASGlobalSetting.h"
+#include <BAASLogger.h>
+#include <ocr/BAASOCR.h>
+#include <ocr/OcrUtils.h>
+#include <BAASExternalIPC.h>
+#include <utils/BAASChronoUtil.h>
+#include <config/BAASGlobalSetting.h>
 
 using namespace baas;
 
@@ -85,7 +86,7 @@ void Server::handle_init_model(
         httplib::Response &res
 )
 {
-    long long t_start = BAASUtil::getCurrentTimeMS();
+    long long t_start = BAASChronoUtil::getCurrentTimeMS();
     BAASGlobalLogger->sub_title("Init Model");
 
     BAASConfig temp = BAASConfig(nlohmann::json::parse(req.body), (BAASLogger*)BAASGlobalLogger);
@@ -101,7 +102,7 @@ void Server::handle_init_model(
         num_thread = temp.getInt("num_thread", 4);
         EnableCpuMemoryArena = temp.getBool("EnableCpuMemoryArena", false);
         std::vector<int> ret = baas_ocr->init(languages, gpu_id, num_thread, EnableCpuMemoryArena);
-        long long t_end = BAASUtil::getCurrentTimeMS();
+        long long t_end = BAASChronoUtil::getCurrentTimeMS();
         j_ret["ret"] = ret;
         j_ret["time"] = int(t_end - t_start);
         res.status = 200;
@@ -122,7 +123,7 @@ void Server::handle_release_model(
         httplib::Response &res
 )
 {
-    long long t_start = BAASUtil::getCurrentTimeMS();
+    long long t_start = BAASChronoUtil::getCurrentTimeMS();
     BAASGlobalLogger->sub_title("Release Model");
 
     nlohmann::json body = nlohmann::json::parse(req.body);
@@ -135,7 +136,7 @@ void Server::handle_release_model(
         nlohmann::json j_ret;
         languages = temp.get<std::vector<std::string>>("language");
         ret = baas_ocr->release(languages);
-        long long t_end = BAASUtil::getCurrentTimeMS();
+        long long t_end = BAASChronoUtil::getCurrentTimeMS();
         res.status = 200;
         j_ret["ret"] = ret;
         j_ret["time"] = int(t_end - t_start);
@@ -157,7 +158,7 @@ void Server::handle_ocr(
 )
 {
     try{
-        long long t_start = BAASUtil::getCurrentTimeMS();
+        long long t_start = BAASChronoUtil::getCurrentTimeMS();
         BAASGlobalLogger->sub_title("OCR");
         BAASConfig temp;
         if (req.has_file("data")){
@@ -202,16 +203,16 @@ void Server::handle_ocr(
 
         // ocr
         OcrResult result;
-        auto t_mid = BAASUtil::getCurrentTimeMS();
+        auto t_mid = BAASChronoUtil::getCurrentTimeMS();
         baas_ocr->ocr(language, image, result, (BAASLogger*)BAASGlobalLogger, candidates);
-        BAASGlobalLogger->BAASInfo("OCR time : " + std::to_string(BAASUtil::getCurrentTimeMS() - t_mid) + "ms");
+        BAASGlobalLogger->BAASInfo("OCR time : " + std::to_string(BAASChronoUtil::getCurrentTimeMS() - t_mid) + "ms");
 
         // return
         nlohmann::json j_ret;
         auto ret_options = temp.getUInt8("ret_options", 0b111);
         BAASGlobalLogger->BAASInfo("ret_options : " + std::to_string(ret_options));
         baas::BAASOCR::ocrResult2json(result, j_ret, ret_options);
-        auto t_end = BAASUtil::getCurrentTimeMS();
+        auto t_end = BAASChronoUtil::getCurrentTimeMS();
         j_ret["time"] = int(t_end - t_start);
         res.status = 200;
         res.set_content(j_ret.dump(), "application/json");
@@ -228,7 +229,7 @@ void Server::handle_ocr_for_single_line(
 )
 {
     try{
-        long long t_start = BAASUtil::getCurrentTimeMS();
+        long long t_start = BAASChronoUtil::getCurrentTimeMS();
         BAASGlobalLogger->sub_title("OCR for single line");
         BAASConfig temp;
         if (req.has_file("data")){
@@ -278,7 +279,7 @@ void Server::handle_ocr_for_single_line(
 
         // return
         nlohmann::json j_ret;
-        auto t_end = BAASUtil::getCurrentTimeMS();
+        auto t_end = BAASChronoUtil::getCurrentTimeMS();
         j_ret["ocr_time"] = ocr_time;
         j_ret["text"] = result.text;
         j_ret["char_scores"] = result.charScores;
@@ -298,7 +299,7 @@ void Server::handle_get_text_boxes(
 )
 {
     try{
-        long long t_start = BAASUtil::getCurrentTimeMS();
+        long long t_start = BAASChronoUtil::getCurrentTimeMS();
         BAASGlobalLogger->sub_title("Get Text Boxes");
         BAASConfig temp;
         if (req.has_file("data")){
@@ -342,7 +343,7 @@ void Server::handle_get_text_boxes(
         // get text boxes
         std::vector<TextBox> result;
         baas_ocr->get_text_boxes(language, image, result);
-        auto t_end = BAASUtil::getCurrentTimeMS();
+        auto t_end = BAASChronoUtil::getCurrentTimeMS();
         int text_boxes_time = int(t_end - t_start);
         BAASGlobalLogger->BAASInfo("Get text boxes time : " + std::to_string(text_boxes_time) + "ms");
         // return
@@ -369,12 +370,12 @@ void Server::handle_release_all(
         httplib::Response &res
 )
 {
-    long long t_start = BAASUtil::getCurrentTimeMS();
+    long long t_start = BAASChronoUtil::getCurrentTimeMS();
     BAASGlobalLogger->sub_title("Release All model");
     baas::baas_ocr->release_all();
     res.status = 200;
 
-    long long t_end = BAASUtil::getCurrentTimeMS();
+    long long t_end = BAASChronoUtil::getCurrentTimeMS();
     res.set_content(std::to_string(int(t_end - t_start)), "text/plain");
 }
 
@@ -390,7 +391,7 @@ int Server::req_get_image(
         cv::Mat &ret
 )
 {
-    long long t_start = BAASUtil::getCurrentTimeMS();
+    long long t_start = BAASChronoUtil::getCurrentTimeMS();
     if (!image_info.contains("pass_method")){
         BAASGlobalLogger->BAASError("Body must contains 'pass_method' key.");
         return 1;
@@ -477,7 +478,7 @@ int Server::req_get_image(
         BAASGlobalLogger->BAASError("Failed to decode image.");
         return 1;
     }
-    BAASGlobalLogger->BAASInfo("Decode image time : " + std::to_string(BAASUtil::getCurrentTimeMS() - t_start) + "ms");
+    BAASGlobalLogger->BAASInfo("Decode image time : " + std::to_string(BAASChronoUtil::getCurrentTimeMS() - t_start) + "ms");
     return 0;
 }
 

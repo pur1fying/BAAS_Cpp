@@ -8,15 +8,15 @@
 
 #include <Windows.h>
 #include <map>
-#include <filesystem>
 #include <mutex>
 #include <thread>
+#include <filesystem>
 
 #include "opencv2/opencv.hpp"
 
+#include "BAASTypes.h"
 #include "BAASGlobals.h"
 #include "BAASConnection.h"
-#include "BAASImageUtil.h"
 
 typedef int (*nemuConnect)(
         const wchar_t *,

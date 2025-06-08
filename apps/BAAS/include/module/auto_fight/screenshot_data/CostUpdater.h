@@ -13,7 +13,7 @@ class CostUpdater : public BaseDataUpdater {
 
 public:
 
-    explicit CostUpdater(BAAS *baas, auto_fight_d *data);
+    explicit CostUpdater(BAAS* baas, auto_fight_d* data);
 
     void update() override;
 

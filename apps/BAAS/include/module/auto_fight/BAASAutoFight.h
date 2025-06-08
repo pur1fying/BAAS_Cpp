@@ -8,7 +8,7 @@
 #include <map>
 
 #include "BAAS.h"
-#include "BAASImageUtil.h"
+#include "utils/BAASImageUtil.h"
 #include "BAASImageResource.h"
 
 BAAS_NAMESPACE_BEGIN

@@ -56,7 +56,6 @@ file(
         DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
 )
 
-
 if (MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
     add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
@@ -67,7 +66,6 @@ endif()
 
 option(BAAS_APP_USE_CUDA "BAAS_APP Use CUDA" OFF)
 message(STATUS "BAAS_APP Use CUDA: ${USE_CUDA}")
-
 
 file(
         GLOB_RECURSE

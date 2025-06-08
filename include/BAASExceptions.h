@@ -4,9 +4,9 @@
 #ifndef BAAS_BAASEXCEPTIONS_H_
 #define BAAS_BAASEXCEPTIONS_H_
 
+#include <string>
 #include <iostream>
 #include <stdexcept>
-#include <string>
 
 #include "core_defines.h"
 

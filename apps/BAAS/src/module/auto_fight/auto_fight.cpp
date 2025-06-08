@@ -7,6 +7,7 @@
 #include <format>
 
 #include <BAASImageResource.h>
+#include <config/BAASStaticConfig.h>
 
 #include "utils.h"
 #include "module/auto_fight/constants.h"
@@ -746,7 +747,7 @@ void AutoFight::_state_pre_check()
 bool AutoFight::_state_start_trans_cond_j_loop()
 {
     _state_reset_all_cond();
-    _state_cond_j_start_t = BAASUtil::getCurrentTimeMS();
+    _state_cond_j_start_t = BAASChronoUtil::getCurrentTimeMS();
     _state_cond_j_loop_running_flg = true;
 
     while(_state_cond_j_loop_running_flg) {
@@ -1106,7 +1107,7 @@ bool AutoFight::_recursive_check_cond_timeout(uint64_t cond_idx)
 
 void AutoFight::_state_update_cond_j_loop_start_t()
 {
-    _state_cond_j_loop_start_t = BAASUtil::getCurrentTimeMS();
+    _state_cond_j_loop_start_t = BAASChronoUtil::getCurrentTimeMS();
     _state_cond_j_elapsed_t = _state_cond_j_loop_start_t - _state_cond_j_start_t;
 }
 

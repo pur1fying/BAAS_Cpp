@@ -3,6 +3,8 @@
 //
 #include "device/control/NemuControl.h"
 
+#include "device/utils.h"
+
 BAAS_NAMESPACE_BEGIN
 
 NemuControl::NemuControl(BAASConnection *connection) : BaseControl(connection)
@@ -44,7 +46,7 @@ void NemuControl::swipe(
 {
     int step_len;
     double sleep_delay;
-    BAASUtil::calc_swipe_params(x1, y1, x2, y2, duration, step_len, sleep_delay);
+    calc_swipe_params(x1, y1, x2, y2, duration, step_len, sleep_delay);
 
     nemu_connection->swipe(x1, y1, x2, y2, step_len, sleep_delay);
 }

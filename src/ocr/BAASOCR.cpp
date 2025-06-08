@@ -134,7 +134,7 @@ void BAASOCR::ocr(
 
     if (logger != nullptr and !candidates.empty()) {
         std::string temp;
-        BAASUtil::stringJoin(unique_candidates, "", temp);
+        BAASStringUtil::stringJoin(unique_candidates, "", temp);
         logger->BAASInfo("Ocr Candidates [ " + temp + " ]");
     }
     result = res->second->detect(
@@ -169,7 +169,7 @@ void BAASOCR::ocr_for_single_line(
     string_unique_utf8_characters(candidates, unique_candidates);
     if (logger != nullptr and !candidates.empty()) {
         std::string temp;
-        BAASUtil::stringJoin(unique_candidates, "", temp);
+        BAASStringUtil::stringJoin(unique_candidates, "", temp);
         logger->BAASInfo("Ocr Candidates [ " + temp + " ]");
     }
 
@@ -294,7 +294,7 @@ void BAASOCR::string_unique_utf8_characters(
     if (text.empty()) return;
     output.clear();
     std::vector<std::string> matches;
-    BAASUtil::re_find_all(text, REGEX_UTF8PATTERN, matches);
+    BAASStringUtil::re_find_all(text, REGEX_UTF8PATTERN, matches);
     for (auto &i: matches) output.push_back(i);
     sort(output.begin(), output.end());
     std::set<std::string> unique(output.begin(), output.end());

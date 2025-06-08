@@ -1,13 +1,13 @@
 
-#ifndef BAAS_BAASIMAGEUTIL_H_
-#define BAAS_BAASIMAGEUTIL_H_
+#ifndef BAAS_UTILS_BAASIMAGEUTIL_H_
+#define BAAS_UTILS_BAASIMAGEUTIL_H_
 
 #include <map>
 #include <string>
 #include <filesystem>
 
-#include <opencv2/opencv.hpp>
-#include <nlohmann/detail/string_concat.hpp>
+#include "opencv2/opencv.hpp"
+#include "nlohmann/detail/string_concat.hpp"
 
 #include "BAASTypes.h"
 #include "BAASLogger.h"
@@ -18,6 +18,10 @@ BAAS_NAMESPACE_BEGIN
 class BAASImageUtil {
 
 public:
+
+    static bool checkImageBroken(const std::string &path);
+
+    static std::pair<int, int> deleteBrokenImage(const std::string &path);
 
     static bool load(
             const std::string &path,
@@ -166,12 +170,12 @@ public:
             const cv::Mat &target,
             int x,
             int y,
-            u_char r_min,
-            u_char r_max,
-            u_char g_min,
-            u_char g_max,
-            u_char b_min,
-            u_char b_max,
+            uint8_t r_min,
+            uint8_t r_max,
+            uint8_t g_min,
+            uint8_t g_max,
+            uint8_t b_min,
+            uint8_t b_max,
             double ratio,
             bool checkAround,
             int aroundRange = 1
@@ -222,4 +226,4 @@ public:
 
 BAAS_NAMESPACE_END
 
-#endif //BAAS_BAASIMAGEUTIL_H_
+#endif //BAAS_UIILS_BAASIMAGEUTIL_H_

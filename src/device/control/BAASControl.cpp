@@ -2,7 +2,8 @@
 //
 #include "device/control/BAASControl.h"
 
-#include <chrono>
+#include "config/BAASStaticConfig.h"
+
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
@@ -92,17 +93,17 @@ void BAASControl::click(
     y = int(double(y) * 1.0 * ratio);
 
     if (pre_wait > 0)
-        BAASUtil::sleepMS(int(pre_wait * 1000));
+        BAASChronoUtil::sleepMS(int(pre_wait * 1000));
 
     int itv = int(click_interval * 1000);
     for (int i = 0; i < count; i++) {
         control->click(x, y);
         if (i < count - 1)
-            BAASUtil::sleepMS(itv);
+            BAASChronoUtil::sleepMS(itv);
     }
 
     if (post_wait > 0)
-        BAASUtil::sleepMS(int(post_wait * 1000));
+        BAASChronoUtil::sleepMS(int(post_wait * 1000));
 }
 
 void BAASControl::long_click(

@@ -17,6 +17,7 @@ extern "C" {
 
 #include "BAASConnection.h"
 #include "BAASAdbUtils.h"
+#include "utils/BAASChronoUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -348,7 +349,7 @@ public:
     inline void set_last_frame_arrive_time()
     {
         std::lock_guard<std::mutex> lock(time_mutex);
-        last_frame_arrive_time = BAASUtil::getCurrentTimeMS();
+        last_frame_arrive_time = BAASChronoUtil::getCurrentTimeMS();
     }
 
     inline std::pair<uint16_t, uint16_t> get_resolution()

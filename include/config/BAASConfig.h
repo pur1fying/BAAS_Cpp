@@ -10,15 +10,12 @@
 #define CONFIG_TYPE_CONFIG_NAME_CHANGE 2
 #define CONFIG_TYPE_DEFAULT_GLOBAL_SETTING 3
 
-#include <regex>
-#include <vector>
-#include <fstream>
-#include <filesystem>
+#include <opencv2/opencv.hpp>
 
-#include "nlohmann/json.hpp"
-
-#include "BAASLogger.h"
+// json included in this file
 #include "BAASTypes.h"
+#include "BAASLogger.h"
+#include "BAASExceptions.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -697,21 +694,7 @@ protected:
         throw TypeError(msg);
     }
 
-    inline void save_modify_history()
-    {
-        if (modified.empty() || modify_history_path.empty()) return;
-        std::ifstream in(modify_history_path);
-        nlohmann::json j = nlohmann::json::parse(in);
-        in.close();
-        std::string time_str = GlobalLogger::current_time_string();
-        auto it = j.find(time_str);
-        if (it != j.end())it->push_back(modified);
-        else j[time_str] = modified;
-        std::ofstream out(modify_history_path, std::ios::out | std::ios::trunc);
-        out << j.dump(4);
-        out.close();
-        modified.clear();
-    }
+    void save_modify_history();
 
     BAASLogger* logger;
     nlohmann::json config, modified;

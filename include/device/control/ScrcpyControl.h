@@ -5,9 +5,9 @@
 #ifndef BAAS_DEVICE_CONTROL_SCRCPYCONTROL_H_
 #define BAAS_DEVICE_CONTROL_SCRCPYCONTROL_H_
 
-#include "device/control/BaseControl.h"
-#include "device/BAASScrcpyClient.h"
 #include "BaseControl.h"
+#include "device/BAASScrcpyClient.h"
+#include "device/control/BaseControl.h"
 
 BAAS_NAMESPACE_BEGIN
 

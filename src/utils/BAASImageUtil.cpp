@@ -1,4 +1,4 @@
-#include "BAASImageUtil.h"
+#include "utils/BAASImageUtil.h"
 
 #include <numbers>
 
@@ -6,6 +6,43 @@ using namespace std;
 using namespace cv;
 
 BAAS_NAMESPACE_BEGIN
+
+bool BAASImageUtil::checkImageBroken(const std::string &path)
+{
+    if (!filesystem::exists(path)) {
+        throw PathError("File : [ " + path + " ] not exists");
+    }
+    cv::Mat image = cv::imread(path);
+    if (image.empty()) {
+        BAASGlobalLogger->BAASError("Broken Image Path : " + path);
+        return false;
+    }
+    return true;
+}
+
+pair<int, int> BAASImageUtil::deleteBrokenImage(const std::string &path)
+{
+    int totalFiles = 0, brokenFiles = 0;
+    if (filesystem::is_directory(path)) {
+        for (auto &p: filesystem::directory_iterator(path)) {
+            totalFiles++;
+            if (!checkImageBroken(
+                    p.path()
+                     .string())) {
+                brokenFiles++;
+                filesystem::remove(p.path());
+            }
+        }
+    } else {
+        totalFiles = 1;
+        if (!filesystem::exists(path))throw ValueError("File not exists");
+        if (!checkImageBroken(path)) {
+            brokenFiles = 1;
+            filesystem::remove(path);
+        }
+    }
+    return make_pair(brokenFiles, totalFiles);
+}
 
 bool BAASImageUtil::load(
         const std::string &path,
@@ -257,12 +294,12 @@ bool BAASImageUtil::judge_rgb_range(
         const Mat &target,
         int x,
         int y,
-        u_char r_min,
-        u_char r_max,
-        u_char g_min,
-        u_char g_max,
-        u_char b_min,
-        u_char b_max,
+        uint8_t r_min,
+        uint8_t r_max,
+        uint8_t g_min,
+        uint8_t g_max,
+        uint8_t b_min,
+        uint8_t b_max,
         double ratio,
         bool checkAround,
         int aroundRange

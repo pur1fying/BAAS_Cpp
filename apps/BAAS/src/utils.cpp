@@ -8,6 +8,7 @@
 #include "BAASGlobals.h"
 #include "ocr/BAASOCR.h"
 #include "feature/BAASFeature.h"
+#include "utils/BAASSystemUtil.h"
 
 #include "module/auto_fight/BAASAutoFight.h"
 
@@ -19,7 +20,7 @@ std::filesystem::path BAAS_YOLO_MODEL_DIR;
 
 void init_globals()
 {
-    BAASUtil::initWinsock();
+    BAASSystemUtil::initWinsock();
     init_path();
 
     BAAS_AUTO_FIGHT_WORKFLOW_DIR = BAAS_RESOURCE_DIR / "auto_fight_workflow";

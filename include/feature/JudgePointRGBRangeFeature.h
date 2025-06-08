@@ -19,12 +19,12 @@ private:
     struct RGBInfo{
         int x;
         int y;
-        u_char r_min;
-        u_char r_max;
-        u_char g_min;
-        u_char g_max;
-        u_char b_min;
-        u_char b_max;
+        uint8_t r_min;
+        uint8_t r_max;
+        uint8_t g_min;
+        uint8_t g_max;
+        uint8_t b_min;
+        uint8_t b_max;
 
         static constexpr auto _p_format = "({:>4},{:>4})";
         static constexpr auto _rgb_format = "({:>3},{:>3},{:>3},{:>3},{:>3},{:>3})";

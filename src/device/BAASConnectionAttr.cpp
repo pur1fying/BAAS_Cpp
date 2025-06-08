@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "config/BAASStaticConfig.h"
 #include "device/BAASConnection.h"
 #include "device/BAASConnectionAttr.h"
 
@@ -58,28 +59,28 @@ void BAASConnectionAttr::serial_check()
 
 void BAASConnectionAttr::revise_serial()
 {
-    BAASUtil::stringReplace(" ", "", serial);
-    BAASUtil::stringReplace("。", ".", serial);
-    BAASUtil::stringReplace("，", ".", serial);
-    BAASUtil::stringReplace(",", ".", serial);
-    BAASUtil::stringReplace("：", ":", serial);
+    BAASStringUtil::stringReplace(" ", "", serial);
+    BAASStringUtil::stringReplace("。", ".", serial);
+    BAASStringUtil::stringReplace("，", ".", serial);
+    BAASStringUtil::stringReplace(",", ".", serial);
+    BAASStringUtil::stringReplace("：", ":", serial);
     try {
         int port = std::stoi(serial);
         if (port > 1000 && port < 65536) serial = "127.0.0.1" + std::to_string(port);
     } catch (std::exception &e) {}
     if (serial.find("模拟") != std::string::npos) {
         string m;
-        BAASUtil::re_find(serial, R"(\d+\.\d+\.\d+\.\d+)", m);
+        BAASStringUtil::re_find(serial, R"(\d+\.\d+\.\d+\.\d+)", m);
         if (!m.empty()) serial = m;
     }
-    BAASUtil::stringReplace("12127.0.0.1", "127.0.0.1", serial);
-    BAASUtil::stringReplace("auto127.0.0.1", "127.0.0.1", serial);
+    BAASStringUtil::stringReplace("12127.0.0.1", "127.0.0.1", serial);
+    BAASStringUtil::stringReplace("auto127.0.0.1", "127.0.0.1", serial);
 }
 
 int BAASConnectionAttr::LDPlayer_serial2instance_id(const string &serial)
 {
     pair<string, string> pair_serial = BAASConnection::port_emu_pair_serial(serial);
-    int port = BAASUtil::serial2port(pair_serial.first);
+    int port = serial2port(pair_serial.first);
     if (5555 <= port && port <= 5555 + 32) return int((port - 5555) / 2);
     return -1;
 }

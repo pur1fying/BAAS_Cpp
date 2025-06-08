@@ -2,10 +2,10 @@
 // Created by pc on 2025/4/29.
 //
 
-#include <ocr/BAASOcr.h>
-
 #include "module/auto_fight/screenshot_data/SkillCostUpdater.h"
 
+#include <ocr/BAASOcr.h>
+#include <config/BAASStaticConfig.h>
 
 BAAS_NAMESPACE_BEGIN
 
@@ -44,7 +44,7 @@ constexpr std::string SkillCostUpdater::data_name()
 
 double SkillCostUpdater::estimated_time_cost()
 {
-    return double(BAASUtil::count_bit(data->skill_cost_update_flag)) * 1.0 * 1e8;
+    return double(BAASStringUtil::count_bit(data->skill_cost_update_flag)) * 1.0 * 1e8;
 }
 
 void SkillCostUpdater::update()

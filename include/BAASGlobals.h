@@ -30,8 +30,6 @@ extern std::filesystem::path scrcpyJar_REMOTE_DIR;
 
 extern std::string scrcpyJarName;
 
-extern std::filesystem::path MuMuInstallPath;
-
 extern std::filesystem::path BAAS_OUTPUT_DIR;
 
 extern std::filesystem::path ASCREENCAP_BIN_DIR;

@@ -7,7 +7,9 @@
 
 #include <regex>
 
-#include "config.h"
+#include "utils.h"
+#include "utils/BAASStringUtil.h"
+#include "config/BAASUserConfig.h"
 
 // connection information with config
 BAAS_NAMESPACE_BEGIN
@@ -26,7 +28,7 @@ public:
 
     inline int port()
     {
-        return BAASUtil::serial2port(serial);
+        return serial2port(serial);
     }
 
     inline bool is_mumu12_family()
@@ -60,17 +62,17 @@ public:
 
     inline bool is_network_device()
     {
-        return BAASUtil::re_match(serial, R"(\d+\.\d+\.\d+\.\d+:\d+)");
+        return BAASStringUtil::re_match(serial, R"(\d+\.\d+\.\d+\.\d+:\d+)");
     }
 
     inline bool is_over_http() const
     {
-        return BAASUtil::re_match(serial, R"(^https?://)");
+        return BAASStringUtil::re_match(serial, R"(^https?://)");
     }
 
     inline bool is_chinac_phone_cloud() const
     {
-        return BAASUtil::re_match(serial, R"(:30[0-9]$)");
+        return BAASStringUtil::re_match(serial, R"(:30[0-9]$)");
     }
 
     inline bool is_bluestacks4_hyperv()
@@ -103,6 +105,7 @@ public:
     static int LDPlayer_serial2instance_id(const std::string &serial);
 
 protected:
+
     BAASUserConfig *config;
 
     BAASLogger *logger;

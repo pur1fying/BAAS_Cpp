@@ -4,6 +4,8 @@
 
 #include "module/auto_fight/screenshot_data/SkillNameUpdater.h"
 
+#include <config/BAASStaticConfig.h>
+
 BAAS_NAMESPACE_BEGIN
 
 SkillNameUpdater::SkillNameUpdater(

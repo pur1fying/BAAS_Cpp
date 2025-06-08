@@ -8,13 +8,12 @@
 #ifdef _WIN32
 #include "WinSock2.h"
 #include "WS2tcpip.h"
-#endif
+#endif // _WIN32
+
+#include "core_defines.h"
 
 #include <vector>
 #include <fstream>
-
-#include "BAASExceptions.h"
-#include "BAASUtil.h"
 
 #define OKAY "OKAY"
 #define FAIL "FAIL"

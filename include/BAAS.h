@@ -5,10 +5,10 @@
 #ifndef BAAS_BAAS_H_
 #define BAAS_BAAS_H_
 
-#include "device/screenshot/BAASScreenshot.h"
-#include "device/control/BAASControl.h"
 #include "ocr/OcrStruct.h"
 #include "procedure/BaseProcedure.h"
+#include "device/control/BAASControl.h"
+#include "device/screenshot/BAASScreenshot.h"
 
 #define PROCEDURE_BEGIN
 #define PROCEDURE_END
