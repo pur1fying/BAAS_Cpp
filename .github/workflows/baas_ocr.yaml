@@ -1,4 +1,4 @@
-name: CI
+name: baas ocr ci/cd
 
 
 on: 
