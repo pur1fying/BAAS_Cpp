@@ -5,9 +5,7 @@
 #ifndef BAAS_DEVICE_CONTROL_BAASCONTROL_H_
 #define BAAS_DEVICE_CONTROL_BAASCONTROL_H_
 
-#include "AdbControl.h"
-#include "NemuControl.h"
-#include "ScrcpyControl.h"
+#include "BaseControl.h"
 
 #define OFFSET_TYPE_NOCHANGE 0
 #define OFFSET_TYPE_RECTANGLE 1
@@ -18,6 +16,7 @@ BAAS_NAMESPACE_BEGIN
 class BAASControl {
 
 public:
+
     explicit BAASControl(
             const std::string& method,
             double screen_ratio,
@@ -121,6 +120,7 @@ public:
     );
 
 private:
+
     BAASLogger* logger;
 
     double ratio;
@@ -129,7 +129,7 @@ private:
 
     std::string control_method;
 
-    static std::vector<std::string> available_methods;
+    static const std::set<std::string> available_methods;
 
     BaseControl* control;
 };

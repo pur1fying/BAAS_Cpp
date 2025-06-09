@@ -10,7 +10,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class BAASScreenshot {
+
 public:
+
     BAASScreenshot(
             const std::string& method,
             BAASConnection* connection,
@@ -57,7 +59,7 @@ private:
 
     long long last_screenshot_time = 0;
 
-    static std::vector<std::string> available_methods;
+    const static std::set<std::string> available_methods;
 };
 
 BAAS_NAMESPACE_END

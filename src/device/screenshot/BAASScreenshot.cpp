@@ -2,19 +2,29 @@
 // Created by pc on 2024/8/9.
 //
 
-#include "config/BAASStaticConfig.h"
 #include "device/screenshot/BAASScreenshot.h"
+
+#include "config/BAASStaticConfig.h"
 #include "device/screenshot/AscreenCap.h"
 #include "device/screenshot/AdbScreenshot.h"
 #include "device/screenshot/ScrcpyScreenshot.h"
+#ifdef _WIN32
 #include "device/screenshot/NemuScreenshot.h"
 #include "device/screenshot/LdopenglScreenshot.h"
-
+#endif // _WIN32
 
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
-vector <string> BAASScreenshot::available_methods;
+const set<string> BAASScreenshot::available_methods = {
+         "scrcpy"
+        ,"adb"
+        ,"ascreencap"
+#ifdef _WIN32
+        ,"nemu"
+        ,"ldopengl"
+#endif // _WIN32
+};
 
 BAASScreenshot::BAASScreenshot(
         const std::string& method,
@@ -26,9 +36,11 @@ BAASScreenshot::BAASScreenshot(
     this->connection = connection;
     logger = this->connection->get_logger();
 
-    available_methods = static_config->get<std::vector<std::string>>("available_screenshot_methods");
     logger->BAASInfo("Available screenshot methods : ");
-    logger->BAASInfo(available_methods);
+    int cnt = 0;
+    for (const auto& m: available_methods) {
+        logger->BAASInfo("[" + to_string(++cnt) + "] : " + m);
+    }
 
     last_screenshot_time = BAASChronoUtil::getCurrentTimeMS();
     screenshot_instance = nullptr;
@@ -87,7 +99,7 @@ void BAASScreenshot::set_screenshot_method(
         bool exit
 )
 {
-    if (std::find(available_methods.begin(), available_methods.end(), method) == available_methods.end()) {
+    if (available_methods.find(method) == available_methods.end()) {
         logger->BAASCritical("Unsupported screenshot method : [ " + method + " ]");
         throw RequestHumanTakeOver("Unsupported screenshot method: " + method);
     }
@@ -107,17 +119,23 @@ void BAASScreenshot::set_screenshot_method(
 
     logger->BAASInfo("Screenshot method : [ " + method + " ]");
     screenshot_method = method;
-    if (method == "nemu") {
+    if (method == "ascreencap") {
         screenshot_instance = new NemuScreenshot(connection);
-    } else if (method == "scrcpy") {
+    }
+    else if (method == "scrcpy") {
         screenshot_instance = new ScrcpyScreenshot(connection);
-    } else if (method == "adb") {
+    }
+    else if (method == "adb") {
         screenshot_instance = new AdbScreenshot(connection);
-    } else if (method == "ascreencap") {
+    }
+#ifdef _WIN32
+    else if (method == "nemu") {
         screenshot_instance = new AScreenCap(connection);
-    } else if (method == "ldopengl") {
+    }
+    else if (method == "ldopengl") {
         screenshot_instance = new LDOpenGLScreenshot(connection);
     }
+#endif // _WIN32
     init();
 }
 

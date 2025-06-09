@@ -4,6 +4,8 @@
 
 #include "module/auto_fight/actions/skill_handler.h"
 
+#include <utils/BAASChronoUtil.h>
+
 #include "module/auto_fight/constants.h"
 #include "module/auto_fight/screenshot_data/BaseDataUpdater.h"
 

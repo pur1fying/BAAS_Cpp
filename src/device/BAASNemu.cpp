@@ -2,6 +2,8 @@
 // Created by pc on 2024/5/22.
 //
 
+#ifdef _WIN32
+
 #include "device/BAASNemu.h"
 
 #include "device/utils.h"
@@ -284,3 +286,5 @@ void BAASNemu::release(int connectionId)
 }
 
 BAAS_NAMESPACE_END
+
+#endif // _WIN32

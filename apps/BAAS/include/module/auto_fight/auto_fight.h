@@ -73,12 +73,7 @@ public:
         d_auto_f.reset_all();
     }
 
-    inline void update_screenshot(){
-        auto t_start = BAASChronoUtil::getCurrentTimeMS();
-        baas->i_update_screenshot_array();
-        auto t_end = BAASChronoUtil::getCurrentTimeMS();
-        logger->BAASInfo("[ Screenshot ] update | Time: " + std::to_string(t_end - t_start) + "ms");
-    }
+    void update_screenshot();
 
     inline void set_boss_health_update_flag(uint8_t flag) {
         d_auto_f.boss_health_update_flag = flag;

@@ -110,8 +110,6 @@
     "com.nexon.bluearchiveone" : ".MxUnityPlayerActivity",
     "com.YostarJP.BlueArchive" : "com.yostarjp.bluearchive.MxUnityPlayerActivity"
   },
-  "available_screenshot_methods": ["adb", "scrcpy", "ascreencap", "nemu", "ldopengl"],
-  "available_control_methods": ["adb", "scrcpy", "nemu"],
   "google_store_package_name": "com.android.vending",
   "ocr_model_name": {
     "zh-cn_v3": {

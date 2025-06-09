@@ -5,11 +5,7 @@
 #ifndef BAAS_DEVICE_BAASADBUTILS_H_
 #define BAAS_DEVICE_BAASADBUTILS_H_
 
-#ifdef _WIN32
-#include "WinSock2.h"
-#include "WS2tcpip.h"
-#endif // _WIN32
-
+#include "BAASSokcet.h"
 #include "core_defines.h"
 
 #include <vector>
@@ -48,12 +44,12 @@ public:
     BAASAdbConnection(
             const std::string& host,
             const std::string& port,
-            double socketTimeout = 3000.0
+            double socket_timeout = 3000.0
     );
 
     explicit BAASAdbConnection(
             const std::string& serial,
-            double socketTimeout = 3000.0
+            double socket_timeout = 3000.0
     );
 
     [[nodiscard]] std::string readFully(int length) const;
@@ -87,11 +83,11 @@ protected:
 
     std::string serial;
 
-    SOCKET connection;
+    BAASSocket_t connection;
 
     sockaddr_in serverAddr;
 
-    double socketTimeout;
+    double socket_timeout;
 
     bool closeSocketWhenDestruct = true;
 

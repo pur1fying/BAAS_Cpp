@@ -1,9 +1,8 @@
 //
 // Created by pc on 2024/4/19.
 
-
-
 #include "device/BAASScrcpyClient.h"
+
 #include "BAASGlobals.h"
 
 using namespace std;
@@ -257,11 +256,11 @@ bool BAASScrcpyClient::stop()
     delete serverStream;
 
     if (videoSocket != INVALID_SOCKET)
-        closesocket(videoSocket);
+        close_socket(videoSocket);
 
     if (controlSocket != INVALID_SOCKET)
-        closesocket(controlSocket);
-    logger->BAASInfo("Scrcpy Client stopped.");
+        close_socket(controlSocket);
+    logger->BAASInfo("Scrcpy Client Stopped.");
     return true;
 }
 

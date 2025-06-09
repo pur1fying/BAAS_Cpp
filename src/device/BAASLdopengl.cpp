@@ -2,6 +2,8 @@
 // Created by pc on 2024/8/14.
 //
 
+#ifdef _WIN32
+
 #include "device/BAASLdopengl.h"
 
 #include "utils/BAASSystemUtil.h"
@@ -115,9 +117,7 @@ void BAASLdopengl::release(int connectionId)
 {
     auto it = connections.find(connectionId);
     if (it != connections.end()) {
-        it->second
-          ->shot_instance
-          ->release();
+        it->second->shot_instance->release();
         delete it->second;
         connections.erase(it);
     }
@@ -125,7 +125,7 @@ void BAASLdopengl::release(int connectionId)
 
 void BAASLdopengl::screenshot(cv::Mat& image)
 {
-    void *ptr = shot_instance->cap();
+    void* ptr = shot_instance->cap();
     if (ptr == nullptr) {
         logger->BAASError("LDOpenGL screenshot failed");
         throw LDOpenGLError("screenshot failed");
@@ -136,3 +136,5 @@ void BAASLdopengl::screenshot(cv::Mat& image)
 }
 
 BAAS_NAMESPACE_END
+
+#endif // _WIN32

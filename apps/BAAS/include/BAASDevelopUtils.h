@@ -5,7 +5,9 @@
 #ifndef BAAS_BAASDEVELOPUTILS_H_
 #define BAAS_BAASDEVELOPUTILS_H_
 
-#include "BAAS.h"
+#include "BAASTypes.h"
+
+#include <opencv2/opencv.hpp>
 
 #define SKILL1_FULL BAASRectangle(845, 601, 923, 662)
 #define SKILL1_LEFT BAASRectangle(845, 601, 886, 662)
@@ -20,6 +22,8 @@
 #define SKILL3_RIGHT BAASRectangle(1089, 601, 1127, 662)
 
 BAAS_NAMESPACE_BEGIN
+
+class BAAS;
 
 enum {
     SKILL_FULL = 0,
@@ -47,7 +51,9 @@ struct screenshot_extract_params {
 };
 
 class BAASDevelopUtils {
+
 public:
+
     static void shotStudentSkill(
             BAAS* baas,
             const std::string &name = "student",

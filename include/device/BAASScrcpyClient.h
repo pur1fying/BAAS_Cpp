@@ -5,10 +5,6 @@
 #ifndef BAAS_DEVICE_BAASSCRCPYCLIENT_H_
 #define BAAS_DEVICE_BAASSCRCPYCLIENT_H_
 
-#include <thread>
-#include <filesystem>
-#include <map>
-
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
@@ -504,9 +500,9 @@ private:
 
     std::string encoderName;
 
-    SOCKET videoSocket;
+    BAASSocket_t videoSocket;
 
-    SOCKET controlSocket;
+    BAASSocket_t controlSocket;
 
     std::mutex control_socket_mutex;
 

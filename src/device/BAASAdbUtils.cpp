@@ -46,19 +46,19 @@ BAASAdbConnection::BAASAdbConnection()
 BAASAdbConnection::BAASAdbConnection(
         const string& host,
         const string& port,
-        double socketTimeout
+        double socket_timeout
 )
 {
     this->host = host;
     this->port = port;
     this->serial = host + ":" + port;
-    this->socketTimeout = socketTimeout;
+    this->socket_timeout = socket_timeout;
     this->connection = safeCreateSocket();
 }
 
 BAASAdbConnection::BAASAdbConnection(
         const string& serial,
-        double socketTimeout
+        double socket_timeout
 )
 {
     pair<string, string> hostPort = serialToHostPort(serial);
@@ -67,7 +67,7 @@ BAASAdbConnection::BAASAdbConnection(
     this->serial = serial;
     this->host = hostPort.first;
     this->port = hostPort.second;
-    this->socketTimeout = socketTimeout;
+    this->socket_timeout = socket_timeout;
     this->connection = safeCreateSocket();
 }
 
@@ -139,7 +139,7 @@ SOCKET BAASAdbConnection::createSocket()
     inet_pton(AF_INET, host.c_str(), &serverAddr.sin_addr);
     if (connect(connection, (sockaddr *) &serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
         throw ConnectionRefusedError();
-    setsockopt(connection, SOL_SOCKET, SO_RCVTIMEO, (char *) &socketTimeout, sizeof(socketTimeout));
+    setsockopt(connection, SOL_SOCKET, SO_RCVTIMEO, (char *) &socket_timeout, sizeof(socket_timeout));
     return connection;
 }
 
@@ -164,7 +164,7 @@ SOCKET BAASAdbConnection::getConnection() const
 BAASAdbConnection::~BAASAdbConnection()
 {
     if (closeSocketWhenDestruct) {
-        closesocket(connection);
+        close_socket(connection);
     }
 }
 

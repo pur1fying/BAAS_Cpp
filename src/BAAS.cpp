@@ -4,8 +4,10 @@
 
 #include "BAAS.h"
 
+#include "BAASGlobals.h"
 #include "ocr/BAASOCR.h"
 #include "utils/BAASImageUtil.h"
+#include "utils/BAASChronoUtil.h"
 #include "procedure/AppearThenClickProcedure.h"
 
 using namespace std;

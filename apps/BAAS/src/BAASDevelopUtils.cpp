@@ -6,8 +6,11 @@
 
 #include <random>
 
+
+#include "BAAS.h"
 #include "BAASGlobals.h"
 #include "utils/BAASImageUtil.h"
+#include "utils/BAASChronoUtil.h"
 
 using namespace std;
 using namespace cv;

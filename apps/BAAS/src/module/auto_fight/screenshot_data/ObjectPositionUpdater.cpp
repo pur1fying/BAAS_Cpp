@@ -6,6 +6,7 @@
 
 #include <format>
 
+#include <utils/BAASChronoUtil.h>
 #include <config/BAASStaticConfig.h>
 
 #include "utils.h"

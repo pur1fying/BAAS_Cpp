@@ -7,6 +7,7 @@
 #include <format>
 
 #include <BAASImageResource.h>
+#include <utils/BAASChronoUtil.h>
 #include <config/BAASStaticConfig.h>
 
 #include "utils.h"
@@ -1160,6 +1161,14 @@ bool AutoFight::_try_default_trans()
 void AutoFight::_init_actions()
 {
     _actions->_init_all_act();
+}
+
+void AutoFight::update_screenshot()
+{
+    auto t_start = BAASChronoUtil::getCurrentTimeMS();
+    baas->i_update_screenshot_array();
+    auto t_end = BAASChronoUtil::getCurrentTimeMS();
+    logger->BAASInfo("[ Screenshot ] update | Time: " + std::to_string(t_end - t_start) + "ms");
 }
 
 BAAS_NAMESPACE_END

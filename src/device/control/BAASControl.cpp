@@ -2,13 +2,25 @@
 //
 #include "device/control/BAASControl.h"
 
+#include "device/control/AdbControl.h"
+#ifdef _WIN32
+#include "device/control/NemuControl.h"
+#endif // _WIN32
+#include "device/control/ScrcpyControl.h"
+
 #include "utils/BAASRandomUtil.h"
 #include "config/BAASStaticConfig.h"
 
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
-vector <string> BAASControl::available_methods;
+const set<string> BAASControl::available_methods = {
+     "adb"
+    ,"scrcpy"
+#ifdef _WIN32
+    ,"nemu"
+#endif // _WIN32
+};
 
 BAASControl::BAASControl(
         const std::string& method,
@@ -20,10 +32,10 @@ BAASControl::BAASControl(
     this->connection = connection;
     logger = connection->get_logger();
 
-    available_methods = static_config->get<std::vector<std::string>>("available_control_methods");
     logger->BAASInfo("Available control methods : ");
-    logger->BAASInfo(available_methods);
-
+    int cnt = 0;
+    for (const auto& m: available_methods)
+        logger->BAASInfo(to_string(++cnt) + " : " + m);
 
     this->ratio = screen_ratio;
 
@@ -163,13 +175,13 @@ void BAASControl::set_control_method(
         bool exit
 )
 {
-    if (std::find(available_methods.begin(), available_methods.end(), method) == available_methods.end()) {
+    if(available_methods.find(method) == available_methods.end()) {
         logger->BAASCritical("Unsupported control method : [ " + method + " ]");
         throw RequestHumanTakeOver("Unsupported control method: " + method);
     }
 
     if (method == control_method) {
-        logger->BAASInfo("Control method is already set to " + method);
+        logger->BAASInfo("Control method is already set to : [ " + method + " ]");
         return;
     }
 
@@ -184,11 +196,15 @@ void BAASControl::set_control_method(
     control_method = method;
     if (control_method == "adb") {
         control = new AdbControl(connection);
-    } else if (control_method == "scrcpy") {
+    }
+    else if (control_method == "scrcpy") {
         control = new ScrcpyControl(connection);
-    } else if (control_method == "nemu") {
+    }
+#ifdef _WIN32
+    else if (control_method == "nemu") {
         control = new NemuControl(connection);
     }
+#endif // _WIN32
     init();
 }
 
