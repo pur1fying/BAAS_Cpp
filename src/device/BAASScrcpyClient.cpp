@@ -114,8 +114,7 @@ bool BAASScrcpyClient::init_socket()
     logger->BAASInfo("Resolution : " + to_string(resolution.first) + "x" + to_string(resolution.second));
     u_long mode = 1;
 
-    logger->BAASInfo(
-            "Set video socket blocking : " + to_string(ioctlsocket(video_stream->getConnection(), FIONBIO,& mode)));
+    logger->BAASInfo("Set video socket blocking : " + to_string(set_nonblocking(video_stream->getConnection(), mode)));
 
     video_stream->setCloseSocketWhenDestruct(false);
     control_stream->setCloseSocketWhenDestruct(false);
@@ -411,21 +410,25 @@ void BAASScrcpyClient::collapse_panels()
 std::string BAASScrcpyClient::get_clipboard()
 {
     // clear control socket
-    u_long mode = 1;
-    ioctlsocket(controlSocket, FIONBIO,& mode);
+    set_nonblocking(controlSocket, true);
     char buffer[1024];
     int len;
     while (true) {
         len = recv(controlSocket, buffer, sizeof(buffer), 0);
         if (len == SOCKET_ERROR) {
+#ifdef _WIN32
             int error = WSAGetLastError();
             if (error == WSAEWOULDBLOCK || error == WSAENOTCONN) {
                 break;
             }
+#elif UNIX_LIKE_PLATFORM
+            if (errno == EAGAIN || errno == EWOULDBLOCK || errno == ENOTCONN) {
+                break;
+            }
+#endif
         }
     }
-    mode = 0;
-    ioctlsocket(controlSocket, FIONBIO,& mode);
+    set_nonblocking(controlSocket, false);
 
     // get clipboard
     uint8_t inject = ScrcpyConst::TYPE_GET_CLIPBOARD;

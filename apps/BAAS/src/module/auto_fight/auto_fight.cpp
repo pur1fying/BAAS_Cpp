@@ -215,7 +215,7 @@ void AutoFight::init_workflow(const std::filesystem::path& name)
 
 }
 
-void AutoFight::_init_single_skill_template(std::string &skill_name)
+void AutoFight::_init_single_skill_template(std::string& skill_name)
 {
     skill_template _template;
     _template.name = skill_name;
@@ -274,7 +274,7 @@ void AutoFight::_init_single_skill_template(std::string &skill_name)
     d_auto_f.all_possible_skills.push_back(_template);
 }
 
-void AutoFight::_init_d_fight(const std::filesystem::path &name)
+void AutoFight::_init_d_fight(const std::filesystem::path& name)
 {
     // consider chinese name
     if(name.empty())  {
@@ -306,6 +306,10 @@ void AutoFight::_init_skills()
     logger->hr("Init Skills");
     auto skill_names = d_auto_f.d_fight.get<std::vector<std::string>>("/formation/all_appeared_skills");
     for (int i = 0; i < skill_names.size(); ++i) {
+        if (d_auto_f.skill_name_to_index_map.contains(skill_names[i])) {
+            logger->BAASWarn("Duplicate skill : [ " + skill_names[i] + " ] found in [ /formation/all_appeared_skills ]");
+            throw ValueError("Duplicate Skill Name.");
+        }
         d_auto_f.skill_name_to_index_map[skill_names[i]] = i;
         _init_single_skill_template(skill_names[i]);
     }
@@ -376,7 +380,7 @@ void AutoFight::_init_self_cond()
     }
 }
 
-void AutoFight::_init_single_cond(const BAASConfig &d_cond)
+void AutoFight::_init_single_cond(const BAASConfig& d_cond)
 {
     auto _it = d_cond.find("type");
     if(_it == d_cond.end()) {

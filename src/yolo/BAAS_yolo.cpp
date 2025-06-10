@@ -150,7 +150,7 @@ void BAAS_Yolo_v8::init_model(const yolo_d& d)
         std::wstring modelPath = std::filesystem::path(d.model_path).wstring();
         session = std::make_unique<Ort::Session>(env, modelPath.c_str(), sessionOptions);
 #else
-        session = std::make_unique<Ort::Session>(env, d.model_path.c_str(), sessionOption);
+        session = std::make_unique<Ort::Session>(env, d.model_path.c_str(), sessionOptions);
 #endif // _WIN32
 
         inputNamesPtr = getInputNames(session);

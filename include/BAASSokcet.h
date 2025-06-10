@@ -13,11 +13,21 @@
 #include <ws2tcpip.h>
 
 #elif UNIX_LIKE_PLATFORM
-#include <sys/socket.h>
+#include <unistd.h>
+#include <arpa/inet.h>    
 #include <sys/types.h>
+#include <sys/fcntl.h>
+#include <sys/socket.h>
+#include <netinet/in.h> 
+
 #ifndef INVALID_SOCKET
 #define INVALID_SOCKET (-1)
-#endif
+#endif // INVALID_SOCKET
+
+#ifndef SOCKET_ERROR
+#define SOCKET_ERROR (-1)
+#endif // SOCKET_ERROR
+
 #endif // _WIN32
 
 BAAS_NAMESPACE_BEGIN
@@ -31,9 +41,24 @@ using BAASSocket_t = int;
 inline int close_socket(BAASSocket_t connection) {
 #ifdef _WIN32
     return closesocket(connection);
-#else
+#elif UNIX_LIKE_PLATFORM
     return close(connection);
-#endif
+#endif // _WIN32
+}
+
+
+inline bool set_nonblocking(BAASSocket_t sock, bool nonblocking) {
+#ifdef _WIN32
+    u_long mode = nonblocking ? 1 : 0;
+    return ioctlsocket(sock, FIONBIO, &mode) == 0;
+#elif UNIX_LIKE_PLATFORM
+    int flags = fcntl(sock, F_GETFL, 0);
+    if (flags == -1) return false;
+    if (nonblocking)
+        return fcntl(sock, F_SETFL, flags | O_NONBLOCK) == 0;
+    else
+        return fcntl(sock, F_SETFL, flags & ~O_NONBLOCK) == 0;
+#endif // _WIN32
 }
 
 BAAS_NAMESPACE_END

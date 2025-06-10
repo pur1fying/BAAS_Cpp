@@ -42,7 +42,7 @@ private:
 
     void _init_skills();
 
-    void _init_single_skill_template(std::string &skill_name);
+    void _init_single_skill_template(std::string& skill_name);
 
     const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
 

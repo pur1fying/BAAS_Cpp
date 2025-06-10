@@ -65,7 +65,7 @@ void BAASConnection::detect_device()
             }
         }
         // brute force connect
-        if (serial == "auto"& & n_available == 0) {
+        if (serial == "auto" && n_available == 0) {
             logger->BAASWarn("No available device found.");
             brute_force_connect(d);
         } else break;

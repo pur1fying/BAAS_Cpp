@@ -34,12 +34,6 @@ void _log_valid_yolo_obj(
         const auto_fight_d* data
 ) noexcept;
 
-void _get_valid_log_string(
-        const std::string& name,
-        const std::vector<std::string>& _op_st_list,
-        std::string& out
-) noexcept;
-
 BAAS_NAMESPACE_END
 
 #endif //BAAS_CPP_MODULE_AUTO_FIGHT_CONSTANTS_H_

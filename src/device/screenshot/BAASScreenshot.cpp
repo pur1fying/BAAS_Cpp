@@ -120,7 +120,7 @@ void BAASScreenshot::set_screenshot_method(
     logger->BAASInfo("Screenshot method : [ " + method + " ]");
     screenshot_method = method;
     if (method == "ascreencap") {
-        screenshot_instance = new NemuScreenshot(connection);
+        screenshot_instance = new AScreenCap(connection);
     }
     else if (method == "scrcpy") {
         screenshot_instance = new ScrcpyScreenshot(connection);
@@ -130,7 +130,7 @@ void BAASScreenshot::set_screenshot_method(
     }
 #ifdef _WIN32
     else if (method == "nemu") {
-        screenshot_instance = new AScreenCap(connection);
+        screenshot_instance = new NemuScreenshot(connection);
     }
     else if (method == "ldopengl") {
         screenshot_instance = new LDOpenGLScreenshot(connection);

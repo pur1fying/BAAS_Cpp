@@ -12,7 +12,6 @@ extern "C" {
 }
 
 #include "BAASConnection.h"
-#include "BAASAdbUtils.h"
 #include "utils/BAASChronoUtil.h"
 
 BAAS_NAMESPACE_BEGIN

@@ -1,6 +1,8 @@
 //
 // Created by pc on 2024/8/3.
 //
+#ifdef _WIN32
+
 #include "device/control/NemuControl.h"
 
 #include "device/utils.h"
@@ -57,3 +59,5 @@ void NemuControl::exit()
 }
 
 BAAS_NAMESPACE_END
+
+#endif // _WIN32

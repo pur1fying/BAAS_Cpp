@@ -65,11 +65,11 @@ public:
     // ret message has a len in the head of the message
     [[nodiscard]] std::string readAdbReturnMessage() const;
 
-    SOCKET createSocket();
+    BAASSocket_t createSocket();
 
-    SOCKET safeCreateSocket();
+    BAASSocket_t safeCreateSocket();
 
-    [[nodiscard]] SOCKET getConnection() const;
+    [[nodiscard]] BAASSocket_t getConnection() const;
 
     ~BAASAdbConnection();
 

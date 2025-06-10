@@ -2,6 +2,8 @@
 // Created by pc on 2024/8/3.
 //
 
+#ifdef _WIN32
+
 #include "device/screenshot/NemuScreenshot.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -36,3 +38,5 @@ bool NemuScreenshot::is_lossy()
 }
 
 BAAS_NAMESPACE_END
+
+#endif // _WIN32

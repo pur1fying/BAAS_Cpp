@@ -19,8 +19,11 @@ file(
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
 
+
 add_executable(
         BAAS_workflow_checker
+        # ${BAAS_CORE_SOURCES}
+        ${BAAS_APP_BAAS_CPP_DIR}/src/module/auto_fight/constants.cpp
         ${BAAS_PROJECT_PATH}/src/BAASLogger.cpp
         ${BAAS_PROJECT_PATH}/src/BAASGlobals.cpp
         ${BAAS_PROJECT_PATH}/src/simdutf.cpp

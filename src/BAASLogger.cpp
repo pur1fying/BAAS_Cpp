@@ -15,7 +15,7 @@ BAAS_NAMESPACE_BEGIN
 
 std::filesystem::path GlobalLogger::folder_path;
 
-GlobalLogger *GlobalLogger::global_logger = nullptr;
+GlobalLogger* GlobalLogger::global_logger = nullptr;
 
 const string BAAS_LOGGER_HR_LINE = std::string(80, '-');
 
@@ -35,8 +35,8 @@ std::string GlobalLogger::current_time_string()
 }
 
 void gen_hr_msg(
-        const string &msg,
-        string &out
+        const string& msg,
+        string& out
 )
 {
     int msg_len = int(msg.length());
@@ -107,11 +107,11 @@ GlobalLogger::~GlobalLogger()
     BAASGlobalLogger = nullptr;
 }
 
-GlobalLogger *BAASGlobalLogger = nullptr;
+GlobalLogger* BAASGlobalLogger = nullptr;
 
-map<string, BAASLogger *> BAASLogger::instances;
+map<string, BAASLogger*> BAASLogger::instances;
 
-BAASLogger *BAASLogger::get(const std::string &name)
+BAASLogger* BAASLogger::get(const std::string& name)
 {
     auto it = instances.find(name);
     if (it != instances.end()) return it->second;
@@ -120,7 +120,7 @@ BAASLogger *BAASLogger::get(const std::string &name)
     return instances[name];
 }
 
-BAASLogger::BAASLogger(const string &name) : GlobalLogger(1)
+BAASLogger::BAASLogger(const string& name) : GlobalLogger(1)
 {
     enable = 0b11;
     consoleLogger = spdlog::stdout_color_mt(name + "_console");

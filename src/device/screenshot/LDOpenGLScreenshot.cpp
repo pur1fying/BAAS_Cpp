@@ -2,6 +2,8 @@
 // Created by pc on 2024/8/14.
 //
 
+#ifdef _WIN32
+
 #include "device/screenshot/LDOpenGLScreenshot.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -34,4 +36,4 @@ bool LDOpenGLScreenshot::is_lossy()
 
 BAAS_NAMESPACE_END
 
-
+#endif // _WIN32

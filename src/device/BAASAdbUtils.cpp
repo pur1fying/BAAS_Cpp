@@ -28,13 +28,13 @@ bool BAASAdbConnection::checkServer(
         std::string& port
 )
 {
-    SOCKET connection = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    BAASSocket_t connection = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     sockaddr_in serverAddr{};
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(atoi(port.c_str()));
     inet_pton(AF_INET, host.c_str(), &serverAddr.sin_addr);
     if (connect(connection, (sockaddr *) &serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) return false;
-    closesocket(connection);
+    close_socket(connection);
     return true;
 }
 
@@ -131,7 +131,7 @@ string BAASAdbConnection::readAdbReturnMessage() const
     return message;
 }
 
-SOCKET BAASAdbConnection::createSocket()
+BAASSocket_t BAASAdbConnection::createSocket()
 {
     connection = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     serverAddr.sin_family = AF_INET;
@@ -143,7 +143,7 @@ SOCKET BAASAdbConnection::createSocket()
     return connection;
 }
 
-SOCKET BAASAdbConnection::safeCreateSocket()
+BAASSocket_t BAASAdbConnection::safeCreateSocket()
 {
     try {
         return createSocket();
@@ -156,7 +156,7 @@ SOCKET BAASAdbConnection::safeCreateSocket()
     }
 }
 
-SOCKET BAASAdbConnection::getConnection() const
+BAASSocket_t BAASAdbConnection::getConnection() const
 {
     return connection;
 }
@@ -453,7 +453,7 @@ int BAASAdbBaseDevice::push(
     char buffer[4096];
     string head;
     try {
-        SOCKET connection = conn->getConnection();
+        BAASSocket_t connection = conn->getConnection();
         while (true) {
             file.read(buffer, 4096);
             int readSize = int(file.gcount());

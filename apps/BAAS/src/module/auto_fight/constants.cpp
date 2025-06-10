@@ -50,19 +50,6 @@ void _log_valid_yolo_obj(
         logger->BAASInfo(std::to_string(++cnt) + " : \"" + obj + "\"");
 }
 
-void _get_valid_log_string(
-        const std::string& name,
-        const std::vector<std::string>& op_st_list,
-        std::string& out
-) noexcept
-{
-    out = "Valid  <<< " + name + " >>> are listed below :\n";
-    int cnt = 0;
-    for (const auto& op: op_st_list)
-        out += std::to_string(++cnt) + " : \"" + op + "\"\n";
-}
-
-
 
 // constants of actions
 
