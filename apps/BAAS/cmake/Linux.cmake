@@ -1,10 +1,11 @@
-BAAS_sub_title_LOG("BAAS_ocr_server Linux Configure")
+BAAS_sub_title_LOG("BAAS_APP Linux Configure")
 
 target_link_directories(
-        BAAS_ocr_server
+        BAAS_APP
         PRIVATE
         ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}
 )
+
 
 SET(
         DLL_COMMON
@@ -17,19 +18,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     SET(
             DLL_RELEASE
             libopencv_world.so.409
-    )
-endif ()
-
-if (BAAS_OCR_SERVER_USE_CUDA)
-    SET(
-            DLL_COMMON
-            ${DLL_COMMON}
-            onnxruntime_providers_cuda
-    )
-    target_compile_definitions(
-            BAAS_ocr_server
-            PRIVATE
-            __CUDA__
     )
 endif ()
 
@@ -50,20 +38,21 @@ foreach (dll ${DLL_RAW})
     file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endforeach ()
 
+
 set_target_properties(
-    BAAS_ocr_server 
-    PROPERTIES 
-    INSTALL_RPATH "\$ORIGIN"
-    BUILD_RPATH "\$ORIGIN"  
+        BAAS_APP
+        PROPERTIES
+        INSTALL_RPATH "\$ORIGIN"
+        BUILD_RPATH "\$ORIGIN"
 )
 
 set(
-    CMAKE_BUILD_RPATH_USE_ORIGIN 
-    TRUE
+        CMAKE_BUILD_RPATH_USE_ORIGIN
+        TRUE
 )
 
 target_link_libraries(
-        BAAS_ocr_server
+        BAAS_APP
         PRIVATE
         ${DLL_RAW}
 )

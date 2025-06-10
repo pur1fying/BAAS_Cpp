@@ -5,14 +5,10 @@
 #include "feature/BAASFeature.h"
 #include "queue"
 #include "BAASDevelopUtils.h"
-#include <windows.h>
 #include <iostream>
 
 #include "BAASImageResource.h"
-
 #include <yolo/BAAS_yolo.h>
-
-#pragma comment(lib, "ws2_32.lib")
 
 using namespace cv;
 using namespace std;

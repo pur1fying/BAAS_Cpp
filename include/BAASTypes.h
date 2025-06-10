@@ -5,6 +5,8 @@
 #ifndef BAAS_BAASTYPES_H_
 #define BAAS_BAASTYPES_H_
 
+#include <format>
+
 #include <nlohmann/json.hpp>
 
 #include "core_defines.h"

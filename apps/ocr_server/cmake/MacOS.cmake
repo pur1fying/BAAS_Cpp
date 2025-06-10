@@ -1,4 +1,4 @@
-BAAS_sub_title_LOG("MacOS Lib Configure")
+BAAS_sub_title_LOG("BAAS_ocr_server MacOS Configure")
 
 target_link_directories(
         BAAS_ocr_server

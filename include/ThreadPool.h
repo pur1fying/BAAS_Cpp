@@ -2,6 +2,7 @@
 #define BAAS_THREADPOOL_H_
 
 #include <future>
+#include <functional>
 
 #include "SafeQueue.h"
 

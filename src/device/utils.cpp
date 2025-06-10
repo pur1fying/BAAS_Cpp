@@ -4,6 +4,7 @@
 
 #include "device/utils.h"
 
+#include <cmath>
 #include <stdexcept>
 
 BAAS_NAMESPACE_BEGIN

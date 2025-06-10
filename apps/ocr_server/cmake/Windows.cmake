@@ -1,4 +1,4 @@
-BAAS_sub_title_LOG("Windows Lib Configure")
+BAAS_sub_title_LOG("BAAS_ocr_server Windows Configure")
 
 if (MSVC)
     add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
