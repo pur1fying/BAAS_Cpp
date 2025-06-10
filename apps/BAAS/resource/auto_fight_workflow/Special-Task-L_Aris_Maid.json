@@ -13,7 +13,7 @@
       "Ui",
       "Ako",
       "Himari"
-    ],
+    ]
   },
   "start_state": "state_release_skill_1",
   "states": {

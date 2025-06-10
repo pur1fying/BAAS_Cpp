@@ -3,7 +3,7 @@ BAAS_sub_title_LOG("BAAS_ocr_server Linux Configure")
 target_link_directories(
         BAAS_ocr_server
         PRIVATE
-        ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}
+        ${BAAS_DEFAULT_SEARCH_DLL_PATH}
 )
 
 SET(

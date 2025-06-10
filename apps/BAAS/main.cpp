@@ -26,6 +26,10 @@ int main(int argc, char **argv)
         BAASFeature::show();
         baas::BAAS::check_config(config_name);
         BAAS baas(config_name);
+        cv::Mat img;
+        baas.update_screenshot_array();
+        baas.get_latest_screenshot(img);
+        cv::imwrite("screenshot.png", img);
         // image resource
         resource->show();
 

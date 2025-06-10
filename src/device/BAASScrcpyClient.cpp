@@ -148,10 +148,19 @@ bool BAASScrcpyClient::screenshot_loop()
                     ffmpeg_release_resource();
                     throw ScrcpyError("Cannot allocate packet or frame");
                 }
+                logger->BAASInfo("Parsing H264 data, size: " + to_string(dataSize));
                 ret = av_parser_parse2(
-                        parser, codecContext,& packet->data,& packet->size, (uint8_t* ) rawH264, dataSize,
-                        AV_NOPTS_VALUE, AV_NOPTS_VALUE, 0
+                        parser, 
+                        codecContext,
+                        &packet->data,
+                        &packet->size, 
+                        (uint8_t*)rawH264, 
+                        dataSize,
+                        AV_NOPTS_VALUE, 
+                        AV_NOPTS_VALUE,
+                        0
                 );
+                logger->BAASInfo("Parsed H264 data, ret: " + to_string(ret) + ", packet size: " + to_string(packet->size));
                 dataSize -= ret;
                 rawH264 += ret;
                 if (packet->size == 0) {
@@ -210,7 +219,6 @@ bool BAASScrcpyClient::screenshot_loop()
 bool BAASScrcpyClient::screenshot(cv::Mat& output)
 {
     long long currentTime = BAASChronoUtil::getCurrentTimeMS();
-
     while (get_last_frame_arrive_time() < currentTime) {
         if (!alive)throw RuntimeError("Scrcpy Client is not alive");
         BAASChronoUtil::sleepMS(1);

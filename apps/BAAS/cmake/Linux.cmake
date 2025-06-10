@@ -3,9 +3,8 @@ BAAS_sub_title_LOG("BAAS_APP Linux Configure")
 target_link_directories(
         BAAS_APP
         PRIVATE
-        ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}
+        ${BAAS_DEFAULT_SEARCH_DLL_PATH}
 )
-
 
 SET(
         DLL_COMMON

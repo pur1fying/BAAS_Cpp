@@ -26,13 +26,12 @@ if ( NOT DEFINED CURRENT_OS_NAME)
 endif()
 
 BAAS_sub_title_LOG("OS : ${CURRENT_OS_NAME}")
-set(BAAS_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${CURRENT_OS_NAME}")
-set(BAAS_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${CURRENT_OS_NAME}")
+set(BAAS_DEFAULT_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${CURRENT_OS_NAME}")
+set(BAAS_DEFAULT_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${CURRENT_OS_NAME}")
 
 cmake_minimum_required(VERSION 3.22)
 
 project(BAAS VERSION 1.1.0)
-
 
 # git configuration
 get_git_info(GIT_BRANCH git rev-parse --abbrev-ref HEAD)
@@ -106,13 +105,6 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
-file(
-        GLOB
-        ADB_BINARY
-        ${CMAKE_CURRENT_LIST_DIR}/resource/platform-tools/adb.exe
-        ${CMAKE_CURRENT_LIST_DIR}/resource/platform-tools/AdbWinApi.dll
-        ${CMAKE_CURRENT_LIST_DIR}/resource/platform-tools/AdbWinUsbApi.dll
-)
 
 file(
         GLOB
@@ -165,6 +157,7 @@ add_library(
 )
 
 if (ADB_BINARY_RESOURCE_REQUIRED)
+    set_ADB_BINARY()
     file(
             COPY
             ${ADB_BINARY}

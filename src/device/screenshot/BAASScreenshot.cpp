@@ -39,7 +39,7 @@ BAASScreenshot::BAASScreenshot(
     logger->BAASInfo("Available screenshot methods : ");
     int cnt = 0;
     for (const auto& m: available_methods) {
-        logger->BAASInfo("[" + to_string(++cnt) + "] : " + m);
+        logger->BAASInfo(to_string(++cnt) + " : " + m);
     }
 
     last_screenshot_time = BAASChronoUtil::getCurrentTimeMS();

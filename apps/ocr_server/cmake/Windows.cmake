@@ -11,7 +11,7 @@ endif()
 target_link_directories(
         BAAS_ocr_server
         PRIVATE
-        ${BAAS_PROJECT_PATH}/lib/${CURRENT_OS_NAME}
+        ${BAAS_DEFAULT_SEARCH_LIB_PATH}
 )
 
 SET(

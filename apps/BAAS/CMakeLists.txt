@@ -76,7 +76,6 @@ add_executable(
 )
 
 
-
 target_include_directories(
         BAAS_APP
         PRIVATE

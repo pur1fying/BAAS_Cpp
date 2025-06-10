@@ -148,7 +148,11 @@ BAASSocket_t BAASAdbConnection::safeCreateSocket()
     try {
         return createSocket();
     } catch (ConnectionRefusedError &e) {
+#ifdef _WIN32
         BAASSystemUtil::executeCommandWithoutOutPut("adb start-server");
+#elif UNIX_LIKE_PLATFORM
+        BAASSystemUtil::executeCommandWithoutOutPut("./adb start-server");
+#endif
     }
     for (int i = 0; i < 30; i++) {
         try { return createSocket(); }

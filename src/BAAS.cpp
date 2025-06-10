@@ -57,9 +57,9 @@ BAAS::BAAS(std::string& config_name)
     connection = new BAASConnection(config);
 
     screenshot = new BAASScreenshot(config->screenshot_method(), connection, config->screenshot_interval());
-
+    logger->BAASInfo("Screenshot method: " + config->screenshot_method());
     screen_ratio = screenshot->get_screen_ratio();
-
+    
     control = new BAASControl(config->control_method(), screen_ratio, connection);
 
     server = connection->get_server();

@@ -1,9 +1,17 @@
 BAAS_sub_title_LOG("BAAS_APP Windows Configure")
 
+file(
+        GLOB
+        ADB_BINARY
+        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{CURRENT_OS_NAME}/platform-tools/adb.exe
+        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{CURRENT_OS_NAME}/platform-tools/AdbWinApi.dll
+        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{CURRENT_OS_NAME}/platform-tools/AdbWinUsbApi.dll
+)
+
 target_link_directories(
         BAAS_APP
         PRIVATE
-        ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}
+        ${BAAS_DEFAULT_SEARCH_LIB_PATH}
 )
 
 if (BAAS_APP_USE_CUDA)
