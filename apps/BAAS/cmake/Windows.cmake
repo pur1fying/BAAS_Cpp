@@ -36,31 +36,31 @@ endif ()
 SET(
         LIB_COMMON
         avcodec
-        #        avdevice
-        #        avfilter
-        #        avformat
+#        avdevice
+#        avfilter
+#        avformat
         avutil
+#        postproc
+#        swresample
+        swscale
         liblz4
         onnxruntime
-        #        postproc
-        #        swresample
-        swscale
         ws2_32
         shlwapi
 )
 
 SET(
         DLL_COMMON
-        avcodec-62
-        #        avdevice-62
-        #        avfilter-11
-        #        avformat-62
-        avutil-60
+        avcodec-60
+#        avdevice-60
+#        avfilter-9
+#        avformat-60
+        avutil-58
+#        postproc-57
+        swresample-4
+        swscale-7
         liblz4
         onnxruntime
-        #        postproc-59
-        swresample-6
-        swscale-9
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
