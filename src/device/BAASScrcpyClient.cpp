@@ -148,7 +148,6 @@ bool BAASScrcpyClient::screenshot_loop()
                     ffmpeg_release_resource();
                     throw ScrcpyError("Cannot allocate packet or frame");
                 }
-                logger->BAASInfo("Parsing H264 data, size: " + to_string(dataSize));
                 ret = av_parser_parse2(
                         parser, 
                         codecContext,
@@ -160,7 +159,6 @@ bool BAASScrcpyClient::screenshot_loop()
                         AV_NOPTS_VALUE,
                         0
                 );
-                logger->BAASInfo("Parsed H264 data, ret: " + to_string(ret) + ", packet size: " + to_string(packet->size));
                 dataSize -= ret;
                 rawH264 += ret;
                 if (packet->size == 0) {
@@ -194,7 +192,16 @@ bool BAASScrcpyClient::screenshot_loop()
                         ffmpeg_release_resource();
                         throw ScrcpyError("Cannot create SwsContext");
                     }
-                    sws_scale(conversion, frame->data, frame->linesize, 0, height,& last_frame.data, cv_line_size);
+                    sws_scale(
+                            conversion,
+                            frame->data,
+                            frame->linesize,
+                            0, height,
+                            &last_frame.data,
+                            cv_line_size
+                    );
+                    cv::imshow("Scrcpy Screenshot", last_frame);
+                    cv::waitKey(1);
                     sws_freeContext(conversion);
                     frame_mutex.unlock();
                     set_last_frame_arrive_time();

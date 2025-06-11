@@ -323,7 +323,9 @@ enum ScrcpyConst {
 
 
 class BAASScrcpyClient {
+
 public:
+
     static BAASScrcpyClient* get_client(BAASConnection* connection);
 
     static void release_client(BAASConnection* connection);
@@ -416,6 +418,7 @@ public:
     );
 
 private:
+
     inline bool ffmpeg_init()
     {
         codec = avcodec_find_decoder(AV_CODEC_ID_H264);
