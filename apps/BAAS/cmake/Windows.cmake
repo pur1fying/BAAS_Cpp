@@ -59,6 +59,12 @@ SET(
 #        postproc-57
         swresample-4
         swscale-7
+        # msys2 dependencies
+        libbz2-1
+        libiconv-2
+        liblzma-5
+        libwinpthread-1
+        zlib1
         liblz4
         onnxruntime
 )
