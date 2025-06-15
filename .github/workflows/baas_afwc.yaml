@@ -67,7 +67,7 @@ jobs:
         id: cmake_build
         run: |
           Write-Output "::group::Generate makefile"
-          cmake -S . -B build -DBUILD_BAAS_AW_CHECKER=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
+          cmake -S . -B build -DBUILD_BAAS_AW_CHECKER=${{env.BUILD_BAAS_AW_CHECKER}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
           Write-Output "::endgroup::"
           Write-Output "::group::Build"
           cmake --build build --config Release -j 4      # TODO: add number of threads
