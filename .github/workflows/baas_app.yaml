@@ -1,0 +1,92 @@
+name: baas app ci/cd
+
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create new release'
+        required: true
+        type: boolean
+  push:
+    branches:
+      - main
+    paths: 
+      - 'apps/BAAS/CMakeLists.txt'
+  pull_request:
+    branches: 
+      - main
+    types: 
+      - opened
+      - synchronize
+      - reopened
+    paths-ignore: 
+      - 'docs/**'
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+
+permissions:
+  contents: write # for creating release
+
+
+env:
+  BUILD_TYPE: Release
+  BUILD_APP_BAAS: ON
+  BAAS_APP_USE_CUDA: ON
+  RUNNER_TEMP_DIR: './tmp'
+  ONNXRUNTIME_URL: 'https://github.com/microsoft/onnxruntime/releases/download/v1.22.0/onnxruntime-win-x64-gpu-1.22.0.zip'
+
+
+jobs: 
+  Windows-latest-cmake-x64:
+    name: 'Build Binary for Windows x64'
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ./baas_cpp
+    steps:
+      - name: Clone Source Repo
+        id: checkout_main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: "baas_cpp"
+
+      - name: Install Build Dependencies
+        id: install_build_depends
+        run: |
+          choco install ninja
+
+      - name: Fetch onnxruntime
+        id: fetch_onnxruntime
+        shell: msys2 {0}
+        run: |
+          wget -O onnxruntime.zip ${{env.ONNXRUNTIME_URL}}
+          unzip onnxruntime.zip -d ${{env.RUNNER_TEMP_DIR}}
+          mv ${{env.RUNNER_TEMP_DIR}}/lib/onnxruntime_providers_cuda.dll dll/Windows/
+
+      - name: Setup MSVC Dev Cmd   # Setup Developer Command Prompt for Microsotf Visual C++
+        uses: TheMrMilchmann/setup-msvc-dev@v3
+        with:
+          arch: x64
+
+      - name: Build
+        id: cmake_build
+        run: |
+          Write-Output "::group::Generate makefile"
+          cmake -S . -B build -DBUILD_APP_BAAS=${{env.BUILD_APP_BAAS}} -DBAAS_APP_USE_CUDA=${{env.BAAS_APP_USE_CUDA}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
+          Write-Output "::endgroup::"
+          Write-Output "::group::Build"
+          cmake --build build --config Release -j 4      # TODO: add number of threads
+          Write-Output "::endgroup::"
+
+      - name: Upload artifacts
+        # if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./baas_cpp/build/bin
+          name: baas-app-bin-windows-x64
