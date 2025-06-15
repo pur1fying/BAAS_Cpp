@@ -66,7 +66,7 @@ option(BUILD_APP_BAAS               "Build BAAS app          "  OFF)
 option(BUILD_APP_ISA                "Build ISA  app          "  OFF)
 
 # other
-option(BUILD_BAAS_OCR           "build the ocr server app"               ON)
+option(BUILD_BAAS_OCR           "build the ocr server app"               OFF)
 option(BUILD_BAAS_AW_CHECKER    "build BAAS Auto Fight Workflow Checker" OFF)
 
 check_app_options(
