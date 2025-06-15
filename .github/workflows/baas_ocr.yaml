@@ -11,10 +11,17 @@ on:
   push:
     branches:
       - main
-    paths: ['resource/**', 'apps/ocr_server/test/**', '.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp', '**/*.cmake']
+    paths: 
+      - 'apps/ocr_server/CMakeLists.txt'
   pull_request:
-    types: [opened, synchronize, reopened]
-    paths: ['resource/**', 'apps/ocr_server/test/**', '.github/workflows/build.yaml', '**/CMakeLists.txt', '**/Makefile', '**/*.h', '**/*.hpp', '**/*.c', '**/*.cpp', '**/*.cmake']
+    branches: 
+      - main
+    types: 
+      - opened
+      - synchronize
+      - reopened
+    paths-ignore: 
+      - 'docs/**'
 
 
 concurrency:
