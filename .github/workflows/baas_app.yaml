@@ -37,7 +37,6 @@ env:
   BUILD_TYPE: Release
   BUILD_APP_BAAS: ON
   BAAS_APP_USE_CUDA: ON
-  RUNNER_TEMP_DIR: './tmp'
   ONNXRUNTIME_URL: 'https://github.com/microsoft/onnxruntime/releases/download/v1.22.0/onnxruntime-win-x64-gpu-1.22.0.zip'
 
 
@@ -61,13 +60,23 @@ jobs:
         run: |
           choco install ninja
 
+      - name: Setup MSYS2
+        id: setup_msys2
+        uses: msys2/setup-msys2@v2
+        with: 
+          msystem: UCRT64
+          update: true
+          install: >-
+            wget 
+            unzip
+
       - name: Fetch onnxruntime
         id: fetch_onnxruntime
         shell: msys2 {0}
         run: |
-          wget -O onnxruntime.zip ${{env.ONNXRUNTIME_URL}}
-          unzip onnxruntime.zip -d ${{env.RUNNER_TEMP_DIR}}
-          mv ${{env.RUNNER_TEMP_DIR}}/lib/onnxruntime_providers_cuda.dll dll/Windows/
+          wget -q -O onnxruntime.zip ${{env.ONNXRUNTIME_URL}}
+          unzip onnxruntime.zip
+          mv ./onnxruntime-win-x64-gpu-1.22.0/lib/onnxruntime_providers_cuda.dll dll/Windows/
 
       - name: Setup MSVC Dev Cmd   # Setup Developer Command Prompt for Microsotf Visual C++
         uses: TheMrMilchmann/setup-msvc-dev@v3
