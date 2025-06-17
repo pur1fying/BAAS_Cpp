@@ -4,6 +4,7 @@
 #include "device/BAASScrcpyClient.h"
 
 #include "BAASGlobals.h"
+#include "device/BAASAdbUtils.h"
 
 using namespace std;
 using namespace std::filesystem;
@@ -35,9 +36,9 @@ bool BAASScrcpyClient::deploy_server()
             "com.genymobile.scrcpy.Server",
             "2.4",                                 // Server version
             "log_level=info",                                 // Log level
-            fmt::format("max_size={}", maxWidth),            // Max screen width
-            fmt::format("max_fps={}", maxFPS),              // Max frame rate
-            fmt::format("video_bit_rate={}", bitrate),             // Bit rate
+            std::format("max_size={}", maxWidth),            // Max screen width
+            std::format("max_fps={}", maxFPS),              // Max frame rate
+            std::format("video_bit_rate={}", bitrate),             // Bit rate
             "video_encoder=OMX.google.h264.encoder",
             "video_codec=h264",                            // Video codec
             "tunnel_forward=true",

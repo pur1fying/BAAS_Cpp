@@ -3,6 +3,8 @@
 //
 #include "BAASGlobals.h"
 
+#include <iostream>
+
 #include "version.h"
 #include "BAASLogger.h"
 

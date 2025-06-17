@@ -10,6 +10,14 @@ set(OCR_MODEL_RESOURCE_REQUIRED     ON PARENT_SCOPE)
 set(STATIC_CONFIG_RESOURCE_REQUIRED ON PARENT_SCOPE)
 set(GLOBAL_CONFIG_RESOURCE_REQUIRED ON PARENT_SCOPE)
 
+if (MSVC)
+    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/MP>")
+    add_compile_options(/W0)
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
+endif()
+
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/version.h.in
         ${CMAKE_BINARY_DIR}/BAAS_OCR_Version.h
@@ -34,6 +42,7 @@ add_executable(
         ${BAAS_OCR_SERVER_CORE_SOURCES}
 )
 
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/${CURRENT_OS_NAME}.cmake)
 
 target_include_directories(
         BAAS_ocr_server PRIVATE
@@ -41,7 +50,6 @@ target_include_directories(
         ${CMAKE_BINARY_DIR}
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/${CURRENT_OS_NAME}.cmake)
 
 if(CURRENT_OS_NAME STREQUAL "Windows")
     set(ICON_RESOURCE "${CMAKE_CURRENT_LIST_DIR}/src/rc/logo.ico")

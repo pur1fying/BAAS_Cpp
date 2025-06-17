@@ -677,7 +677,7 @@ void AutoFight::display_all_state() const noexcept
         if(!all_states[i].transitions.empty()) {
         logger->BAASInfo("CondIdx  NextIdx");
         for (const auto& tran : all_states[i].transitions)
-            logger->BAASInfo(fmt::format("{:>7}  {:>7}", tran.cond_idx, tran.next_sta_idx));
+            logger->BAASInfo(std::format("{:>7}  {:>7}", tran.cond_idx, tran.next_sta_idx));
         }
 
         logger->BAASLine();

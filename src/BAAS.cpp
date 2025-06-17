@@ -4,6 +4,8 @@
 
 #include "BAAS.h"
 
+#include <fstream>
+
 #include "BAASGlobals.h"
 #include "ocr/BAASOCR.h"
 #include "utils/BAASImageUtil.h"

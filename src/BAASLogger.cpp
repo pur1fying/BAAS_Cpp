@@ -62,14 +62,18 @@ GlobalLogger* GlobalLogger::getGlobalLogger()
 GlobalLogger::GlobalLogger()
 {
     try {
-        spdlog::init_thread_pool(8192, 1);
         enable = 0b11;
+#ifndef __EMSCRIPTEN__
+        spdlog::init_thread_pool(8192, 1);
+#endif // __EMSCRIPTEN__
         consoleLogger = spdlog::stdout_color_mt("console");
         if (!filesystem::exists(BAAS_OUTPUT_DIR)) filesystem::create_directory(BAAS_OUTPUT_DIR);
         string currTime = current_time_string();
         folder_path = BAAS_OUTPUT_DIR / currTime;
         filesystem::create_directory(folder_path);
         fstream file(folder_path / "global_log.txt", ios::out);
+        // iterate current dir and print all file recursive
+        std::filesystem::path current_path = filesystem::current_path();
         file.close();
         fileLogger = spdlog::basic_logger_mt("file_logger", (folder_path / "global_log.txt").string());
     }

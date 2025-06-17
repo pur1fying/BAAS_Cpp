@@ -1,22 +1,33 @@
 //
 // Created by Administrator on 2025/5/29.
 //
-
+//
+//
 #include <fstream>
 
-#include <utils.h>
 #include <simdutf.h>
-#include <BAASLogger.h>
 #include <BAASGlobals.h>
 #include <config/BAASConfig.h>
 #include <module/auto_fight/conditions/BaseCondition.h>
 
+#include <string>
+#include <nlohmann/json.hpp>
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#else
+#define EMSCRIPTEN_KEEPALIVE
+#endif // __EMSCRIPTEN__
+
 using namespace baas;
 using namespace std;
 
+
+extern const char* embedded_skill_name_json_str;
+extern const char* embedded_data_yaml_str;
+
 enum WORKFLOW_CHECK_ERROR_TYPE {
     WORKFLOW_PATH_NOT_EXIST,
-    JSON_PARSE, 
+    JSON_PARSE,
     SKILL_NAME_DUPLICATE,
     SKILL_TEMPLATE_NOT_FOUND,
     YOLO_OBJECT_POSITION_DUPLICATE,
@@ -30,7 +41,6 @@ enum WORKFLOW_CHECK_ERROR_TYPE {
     CONDITION,
 
 };
-
 
 /*
  * error type
@@ -74,7 +84,7 @@ BAAS_NAMESPACE_BEGIN
 void _log_valid_op_string(
         const std::string& name,
         const std::vector<std::string>& op_st_list
-) noexcept 
+) noexcept
 {
     global_error_message.emplace_back("Valid  <<< " + name + " >>> are listed below :");
     int cnt = 0;
@@ -209,6 +219,7 @@ BAAS_NAMESPACE_END
 int main(int argc, char **argv) {
     system("chcp 65001");
     _init();
+
     if (argc < 2) {
         BAASGlobalLogger->BAASInfo("Usage : ");
         BAASGlobalLogger->BAASInfo("1. Enter workflow path to check if the workflow is valid.");
@@ -297,6 +308,9 @@ void _single_state_check(const nlohmann::json& state, const string& name) {
 void _init() {
     init_path();
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
+#ifdef __EMSCRIPTEN__
+    BAASGlobalLogger->set_enable(0b01); // disable file logger
+#endif //__EMSCRIPTEN__
     log_git_info();
     _init_all_yolo_obj_names();
     BAASGlobalLogger->BAASInfo("YOLO Object Cnt: " + to_string(all_yolo_obj_names.size()));
@@ -310,7 +324,7 @@ void _path_check(const string& path) {
     wstring wpath;
     BAASStringUtil::str2wstr(path, wpath);
     filesystem::path _p(wpath);
-#elif UNIX_LIKE_PLATFORM
+#elif defined(__EMSCRIPTEN__) || defined(UNIX_LIKE_PLATFORM)
     filesystem::path _p(path);
 #endif // WIN32
 
@@ -470,10 +484,10 @@ void _init_all_yolo_obj_names()
 
 void _single_state_check(const nlohmann::json& state)
 {
-    
+
 }
 
-void _init_formation_all_appeared_skills() 
+void _init_formation_all_appeared_skills()
 {
     auto skill_names = wf_config.get<vector<string>>("/formation/all_appeared_skills");
     for (const auto& skill_name : skill_names) {
@@ -559,6 +573,23 @@ void _single_condition_check(const nlohmann::json& d_cond) {
         global_error_message.push_back("[ single condition ] must contain key [ type ].");
         _log_valid_op_string("[ single condition ] [ type ]", BaseCondition::cond_type_st_list);
         throw ValueError("[ single condition ] [ type ] not found.");
+    }
+}
+
+
+extern "C" {
+    EMSCRIPTEN_KEEPALIVE const char* is_valid_workflow(const char* str) {
+        cout << "is_valid_workflow called with input: " << str << endl;
+        try {
+            wf_j = nlohmann::json::parse(str);
+            wf_config = BAASConfig(wf_j, (BAASLogger*) BAASGlobalLogger);
+        } catch (const nlohmann::json::parse_error&) {
+            error_type = JSON_PARSE;
+            return "Workflow json parse error";
+        }
+        _init();
+
+        return "Workflow json parsed successfully.";
     }
 }
 

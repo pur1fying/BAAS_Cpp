@@ -5,7 +5,7 @@
 #ifndef BAAS_DEVICE_BAASADBUTILS_H_
 #define BAAS_DEVICE_BAASADBUTILS_H_
 
-#include "BAASSokcet.h"
+#include "BAASSocket.h"
 #include "core_defines.h"
 
 #include <vector>

@@ -482,7 +482,7 @@ int BAASAdbBaseDevice::push(
     if (check) {
         int remoteSize = stat(dst);
         if (remoteSize != fileSize) {
-            string msg = fmt::format("Push FAILED. Remote size: {0}, local size: {1}", remoteSize, fileSize);
+            string msg = std::format("Push FAILED. Remote size: {0}, local size: {1}", remoteSize, fileSize);
             BAASGlobalLogger->BAASError("Push file failed.");
             delete conn;
             file.close();

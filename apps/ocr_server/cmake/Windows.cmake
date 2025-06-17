@@ -1,13 +1,5 @@
 BAAS_sub_title_LOG("BAAS_ocr_server Windows Configure")
 
-if (MSVC)
-    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/MP>")
-    add_compile_options(/W0)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
-endif()
-
 target_link_directories(
         BAAS_ocr_server
         PRIVATE

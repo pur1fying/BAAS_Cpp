@@ -5,7 +5,6 @@
 #ifndef BAAS_DEVICE_BAASCONNECTION_H_
 #define BAAS_DEVICE_BAASCONNECTION_H_
 
-#include "device/BAASAdbUtils.h"
 #include "BAASConnectionAttr.h"
 
 /*
@@ -13,6 +12,9 @@
  */
 
 BAAS_NAMESPACE_BEGIN
+
+class BAASAdbConnection;
+class BAASAdbDevice;
 
 class BAASConnection : public BAASConnectionAttr {
 

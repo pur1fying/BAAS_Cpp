@@ -11,6 +11,7 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
+#include "BAASSocket.h"
 #include "BAASConnection.h"
 #include "utils/BAASChronoUtil.h"
 
