@@ -1,6 +1,6 @@
 BAAS_hr_LOG("APP BAAS")
 
-project(BAAS_APP VERSION 1.1.0)
+project(BAAS_APP VERSION 1.1.1)
 
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/version.h.in
