@@ -53,16 +53,6 @@ jobs:
           fetch-depth: 0
           path: "baas_cpp"
 
-      - name: Install GCC 13
-        run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-          sudo apt update
-          sudo apt install g++-13 -y
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 100
-
-      - name: Check compiler version
-        run: g++ --version
-
       - name: Clone Prebuild Repo
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         id: checkout_prebuild
@@ -79,6 +69,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install build-essential
+
+      - name: Install GCC 13
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          sudo apt-get update
+          sudo apt-get install g++-13 -y
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 100
+
+      - name: Check GCC Version
+        run: g++ --version
 
       - name: Build
         id: cmake_build
@@ -205,7 +205,7 @@ jobs:
           rm -r -f ./build/bin/output
           rm -r -f ./build/bin/config          
 
-      - name: Upload artifacts
+      - name: Upload Artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
         with:
@@ -303,7 +303,7 @@ jobs:
           Remove-Item -Path ".\build\bin\output" -Recurse -Force
           Remove-Item -Path ".\build\bin\config" -Recurse -Force
 
-      - name: Upload artifacts
+      - name: Upload Artifacts
         if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
         with:
