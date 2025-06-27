@@ -201,8 +201,8 @@ bool BAASScrcpyClient::screenshot_loop()
                             &last_frame.data,
                             cv_line_size
                     );
-                    cv::imshow("Scrcpy Screenshot", last_frame);
-                    cv::waitKey(1);
+//                    cv::imshow("Scrcpy Screenshot", last_frame);
+//                    cv::waitKey(1);
                     sws_freeContext(conversion);
                     frame_mutex.unlock();
                     set_last_frame_arrive_time();
