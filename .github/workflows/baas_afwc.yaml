@@ -40,42 +40,57 @@ env:
 
 jobs: 
   Windows-latest-cmake-x64:
-    name: 'Build Binary for Windows x64'
-    runs-on: windows-latest
+    name: 'Build Wasm'
+    runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./baas_cpp
+        working-directory: baas
     steps:
       - name: Clone Source Repo
         id: checkout_main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          path: "baas_cpp"
+          path: baas
+
+      - name: Clone Emsdk Repo
+        id: clone_emsdk_repo
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
+          repository: "emscripten-core/emsdk"
+          ref: "main"
+          path: emsdk
+
+      - name: Install Emsdk
+        id: install_emsdk
+        working-directory: emsdk
+        run: |
+          ./emsdk install latest
 
       - name: Install Build Dependencies
         id: install_build_depends
         run: |
-          choco install ninja
-
-      - name: Setup MSVC Dev Cmd   # Setup Developer Command Prompt for Microsotf Visual C++
-        uses: TheMrMilchmann/setup-msvc-dev@v3
-        with:
-          arch: x64
+          sudo apt-get update
+          sudo apt-get install build-essential
 
       - name: Build
         id: cmake_build
         run: |
-          Write-Output "::group::Generate makefile"
-          cmake -S . -B build -DBUILD_BAAS_AW_CHECKER=${{env.BUILD_BAAS_AW_CHECKER}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
-          Write-Output "::endgroup::"
-          Write-Output "::group::Build"
-          cmake --build build --config Release -j 4      # TODO: add number of threads
-          Write-Output "::endgroup::"
+          ../emsdk/emsdk activate latest
+          source ../emsdk/emsdk_env.sh
+          emcmake cmake -B build -DBUILD_BAAS_AW_CHECKER=$BUILD_BAAS_AW_CHECKER -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE="../emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+          cmake --build build --config Release --target BAAS_workflow_checker -j $(nproc)
 
-      - name: Upload artifacts
+      - name: Clean Up
+        id: clean_up
+        run: |
+          cd build/bin
+          ls | grep -v '\.js$' | grep -v '\.wasm$' | xargs rm -f --
+
+      - name: Upload Artifacts
         # if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
         uses: actions/upload-artifact@v4
         with:
-          path: ./baas_cpp/build/bin
-          name: baas-afwc-bin-windows-x64
+          path: baas/build/bin
+          name: baas-afwc-wasm
