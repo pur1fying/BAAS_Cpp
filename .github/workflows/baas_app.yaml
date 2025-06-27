@@ -83,7 +83,7 @@ jobs:
           arch: x64
 
       - name: Build with CUDA ON
-        id: cmake_build ( CUDA ON )
+        id: cmake_build_CUDA_ON
         run: |
           Write-Output "::group::Generate (CUDA ON)"
           cmake -S . -B build_cuda_on -DBUILD_APP_BAAS=${{env.BUILD_APP_BAAS}} -DBAAS_APP_USE_CUDA=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja
@@ -93,7 +93,7 @@ jobs:
           Write-Output "::endgroup::"
 
       - name: Build with CUDA OFF
-        id: cmake_build ( CUDA OFF )
+        id: cmake_build_CUDA_OFF
         run: |
           Write-Output "::group::Generate (CUDA OFF)"
           cmake -S . -B build_cuda_off -DBUILD_APP_BAAS=${{env.BUILD_APP_BAAS}} -DBAAS_APP_USE_CUDA=OFF -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja
