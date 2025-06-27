@@ -11,16 +11,16 @@ on:
   push:
     branches:
       - main
-    paths: 
+    paths:
       - 'apps/BAAS/CMakeLists.txt'
   pull_request:
-    branches: 
+    branches:
       - main
-    types: 
+    types:
       - opened
       - synchronize
       - reopened
-    paths-ignore: 
+    paths-ignore:
       - 'docs/**'
 
 
@@ -36,11 +36,10 @@ permissions:
 env:
   BUILD_TYPE: Release
   BUILD_APP_BAAS: ON
-  BAAS_APP_USE_CUDA: ON
   ONNXRUNTIME_URL: 'https://github.com/microsoft/onnxruntime/releases/download/v1.22.0/onnxruntime-win-x64-gpu-1.22.0.zip'
 
 
-jobs: 
+jobs:
   Windows-latest-cmake-x64:
     name: 'Build Binary for Windows x64'
     runs-on: windows-latest
@@ -63,7 +62,7 @@ jobs:
       - name: Setup MSYS2
         id: setup_msys2
         uses: msys2/setup-msys2@v2
-        with: 
+        with:
           msystem: UCRT64
           update: true
           install: >-
@@ -83,19 +82,34 @@ jobs:
         with:
           arch: x64
 
-      - name: Build
-        id: cmake_build
+      - name: Build with CUDA ON
+        id: cmake_build ( CUDA ON )
         run: |
-          Write-Output "::group::Generate makefile"
-          cmake -S . -B build -DBUILD_APP_BAAS=${{env.BUILD_APP_BAAS}} -DBAAS_APP_USE_CUDA=${{env.BAAS_APP_USE_CUDA}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
+          Write-Output "::group::Generate (CUDA ON)"
+          cmake -S . -B build_cuda_on -DBUILD_APP_BAAS=${{env.BUILD_APP_BAAS}} -DBAAS_APP_USE_CUDA=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja
           Write-Output "::endgroup::"
-          Write-Output "::group::Build"
-          cmake --build build --config Release -j 4      # TODO: add number of threads
+          Write-Output "::group::Build (CUDA ON)"
+          cmake --build build_cuda_on --config Release -j 4
           Write-Output "::endgroup::"
 
-      - name: Upload artifacts
-        # if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+      - name: Build with CUDA OFF
+        id: cmake_build ( CUDA OFF )
+        run: |
+          Write-Output "::group::Generate (CUDA OFF)"
+          cmake -S . -B build_cuda_off -DBUILD_APP_BAAS=${{env.BUILD_APP_BAAS}} -DBAAS_APP_USE_CUDA=OFF -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja
+          Write-Output "::endgroup::"
+          Write-Output "::group::Build (CUDA OFF)"
+          cmake --build build_cuda_off --config Release -j 4
+          Write-Output "::endgroup::"
+
+      - name: Upload artifact (CUDA ON)
         uses: actions/upload-artifact@v4
         with:
-          path: ./baas_cpp/build/bin
-          name: baas-app-bin-windows-x64
+          path: ./baas_cpp/build_cuda_on/bin
+          name: baas-app-bin-windows-x64-cuda
+
+      - name: Upload artifact (CUDA OFF)
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./baas_cpp/build_cuda_off/bin
+          name: baas-app-bin-windows-x64-nocuda
