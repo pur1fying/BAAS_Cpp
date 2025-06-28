@@ -83,7 +83,7 @@ jobs:
       - name: Fetch onnxruntime
         id: fetch_onnxruntime
         run: | 
-          Invoke-WebRequest -Uri $env:ONNXRUNTIME_URL -OutFile onnxruntime.zip
+          Invoke-WebRequest -Uri ${{ env.ONNXRUNTIME_URL }} -OutFile onnxruntime.zip
           Expand-Archive -Path onnxruntime.zip -DestinationPath . -Force
           Move-Item -Path ".\onnxruntime-win-x64-gpu-1.22.0\lib\onnxruntime_providers_cuda.dll" -Destination "dll\Windows\" -Force
 
@@ -96,7 +96,7 @@ jobs:
         id: cmake_build_CUDA_ON
         run: |
           Write-Output "::group::Generate (CUDA ON)"
-          cmake -S . -B build_cuda_on -DBUILD_APP_BAAS=$env:BUILD_APP_BAAS -DBAAS_APP_USE_CUDA=ON -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE -G Ninja
+          cmake -S . -B build_cuda_on -DBUILD_APP_BAAS=${{ env.BUILD_APP_BAAS }} -DBAAS_APP_USE_CUDA=ON -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -G Ninja
           Write-Output "::endgroup::"
           Write-Output "::group::Build (CUDA ON)"
           cmake --build build_cuda_on --config Release -j 4
@@ -106,7 +106,7 @@ jobs:
         id: cmake_build_CUDA_OFF
         run: |
           Write-Output "::group::Generate (CUDA OFF)"
-          cmake -S . -B build_cuda_off -DBUILD_APP_BAAS=$env:BUILD_APP_BAAS -DBAAS_APP_USE_CUDA=OFF -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE -G Ninja
+          cmake -S . -B build_cuda_off -DBUILD_APP_BAAS=${{ env.BUILD_APP_BAAS }} -DBAAS_APP_USE_CUDA=OFF -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -G Ninja
           Write-Output "::endgroup::"
           Write-Output "::group::Build (CUDA OFF)"
           cmake --build build_cuda_off --config Release -j 4
