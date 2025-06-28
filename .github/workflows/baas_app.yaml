@@ -120,11 +120,20 @@ jobs:
         id: download_artifact
         uses: actions/download-artifact@v4
       
+      - name: Zip Artifact
+        id: zip_artifact
+        run: |
+          tree -d -L 2
+          zip -r baas-app-bin-windows-x64-cuda.zip baas-app-bin-windows-x64-CUDA-ON/
+          zip -r baas-app-bin-windows-x64.zip baas-app-bin-windows-x64-CUDA-OFF/
+
       - name: release
         id: release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: pre-release
-          files: ./*
+          files: |
+            baas-app-bin-windows-x64-cuda.zip
+            baas-app-bin-windows-x64.zip
           prerelease: true
           generate_release_notes: true
