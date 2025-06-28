@@ -41,76 +41,47 @@ env:
 
 jobs:
   Windows-latest-cmake-x64:
+    strategy:
+      matrix:
+        BAAS_APP_USE_CUDA: [ON, OFF]
     name: 'Build Binary for Windows x64'
     runs-on: windows-latest
     defaults:
       run:
-        working-directory: ./baas_cpp
+        working-directory: baas
     steps:
       - name: Clone Source Repo
         id: checkout_main
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: main
-          path: "baas_cpp"
-
-      - name: Install Build Dependencies
-        id: install_build_depends
-        run: |
-          choco install ninja
-
-      - name: Setup MSYS2
-        id: setup_msys2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: UCRT64
-          update: true
-          install: >-
-            wget 
-            unzip
+          ref: "main"
+          path: "baas"
 
       - name: Fetch onnxruntime
         id: fetch_onnxruntime
-        shell: msys2 {0}
-        run: |
-          wget -q -O onnxruntime.zip ${{env.ONNXRUNTIME_URL}}
-          unzip onnxruntime.zip
-          mv ./onnxruntime-win-x64-gpu-1.22.0/lib/onnxruntime_providers_cuda.dll dll/Windows/
+        run: | 
+          Invoke-WebRequest -Uri ${{ env.ONNXRUNTIME_URL }} -OutFile onnxruntime.zip
+          Expand-Archive -Path onnxruntime.zip -DestinationPath . -Force
+          Move-Item -Path ".\onnxruntime-win-x64-gpu-1.22.0\lib\onnxruntime_providers_cuda.dll" -Destination "dll\Windows\" -Force
 
       - name: Setup MSVC Dev Cmd   # Setup Developer Command Prompt for Microsotf Visual C++
         uses: TheMrMilchmann/setup-msvc-dev@v3
         with:
           arch: x64
 
-      - name: Build with CUDA ON
-        id: cmake_build_CUDA_ON
+      - name: Build
+        id: cmake_build
         run: |
-          Write-Output "::group::Generate (CUDA ON)"
-          cmake -S . -B build_cuda_on -DBUILD_APP_BAAS=${{env.BUILD_APP_BAAS}} -DBAAS_APP_USE_CUDA=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja
+          Write-Output "::group::Generate CUDA ${{ matrix.BAAS_APP_USE_CUDA }}"
+          cmake -S . -B build -DBUILD_APP_BAAS=${{ env.BUILD_APP_BAAS }} -DBAAS_APP_USE_CUDA=${{ matrix.BAAS_APP_USE_CUDA }} -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} -G Ninja
           Write-Output "::endgroup::"
-          Write-Output "::group::Build (CUDA ON)"
-          cmake --build build_cuda_on --config Release -j 4
+          Write-Output "::group::Build"
+          cmake --build build --config Release -j 4
           Write-Output "::endgroup::"
 
-      - name: Build with CUDA OFF
-        id: cmake_build_CUDA_OFF
-        run: |
-          Write-Output "::group::Generate (CUDA OFF)"
-          cmake -S . -B build_cuda_off -DBUILD_APP_BAAS=${{env.BUILD_APP_BAAS}} -DBAAS_APP_USE_CUDA=OFF -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja
-          Write-Output "::endgroup::"
-          Write-Output "::group::Build (CUDA OFF)"
-          cmake --build build_cuda_off --config Release -j 4
-          Write-Output "::endgroup::"
-
-      - name: Upload artifact (CUDA ON)
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          path: ./baas_cpp/build_cuda_on/bin
-          name: baas-app-bin-windows-x64-cuda
-
-      - name: Upload artifact (CUDA OFF)
-        uses: actions/upload-artifact@v4
-        with:
-          path: ./baas_cpp/build_cuda_off/bin
-          name: baas-app-bin-windows-x64-nocuda
+          path: baas/build/bin
+          name: baas-app-bin-windows-x64-CUDA-${{ matrix.BAAS_APP_USE_CUDA }}
