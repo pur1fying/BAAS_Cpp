@@ -12,7 +12,9 @@ on:
     branches:
       - main
     paths:
-      - 'apps/BAAS/CMakeLists.txt'
+      # trigger when BAAS / BAAS_APP version change
+      - 'cmake/Version.cmake'
+      - 'apps/BAAS/cmake/Version.cmake'
   pull_request:
     branches:
       - main
