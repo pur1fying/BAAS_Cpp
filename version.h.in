@@ -1,5 +1,5 @@
-#ifndef BAAS_VERSION_H_
-#define BAAS_VERSION_H_
+#ifndef BAAS_BAAS_VERSION_H_
+#define BAAS_BAAS_VERSION_H_
 
 #include "core_defines.h"
 
@@ -16,4 +16,4 @@ BAAS_NAMESPACE_BEGIN
 
 BAAS_NAMESPACE_END
 
-#endif // BAAS_VERSION_H_
+#endif // BAAS_BAAS_VERSION_H_

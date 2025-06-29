@@ -5,8 +5,9 @@
 #ifndef BAAS_BAASGLOBALS_H_
 #define BAAS_BAASGLOBALS_H_
 
+#include <filesystem>
+
 #include "core_defines.h"
-#include "BAASLogger.h"
 
 BAAS_NAMESPACE_BEGIN
 

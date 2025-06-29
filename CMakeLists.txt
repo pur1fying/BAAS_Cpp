@@ -31,7 +31,18 @@ set(BAAS_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${CURRENT_OS_NAME}")
 
 cmake_minimum_required(VERSION 3.22)
 
-project(BAAS VERSION 1.1.0)
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/Version.cmake")
+project(BAAS VERSION ${BAAS_VERSION})
+
+configure_file(
+        version.h.in
+        BAAS_version.h
+)
+
+configure_file(
+        version.txt.in
+        BAAS_version.txt
+)
 
 
 # git configuration
@@ -54,10 +65,6 @@ message(STATUS "Commit      : ${GIT_COMMIT_TITLE}")
 message(STATUS "Date        : ${GIT_COMMIT_DATE}")
 message(STATUS "Build time  : ${BUILD_TIME}")
 
-configure_file(
-    version.h.in
-    version.h
-)
 
 set(CMAKE_CXX_STANDARD 20)
 

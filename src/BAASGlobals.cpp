@@ -1,10 +1,14 @@
 //
 // Created by pc on 2024/4/12.
 //
-#include "ocr/BAASOCR.h"
 #include "BAASGlobals.h"
+
+#include <iostream>
+
 #include "config.h"
-#include "version.h"
+#include "BAASLogger.h"
+#include "ocr/BAASOCR.h"
+#include "BAAS_version.h"
 #include "feature/BAASFeature.h"
 #include "procedure/BAASProcedure.h"
 

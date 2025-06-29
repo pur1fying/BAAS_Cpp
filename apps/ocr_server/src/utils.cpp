@@ -3,13 +3,11 @@
 //
 #include "utils.h"
 
-#include "config.h"
-#include "ocr/BAASOCR.h"
-#include "version.h"
-#include "BAAS_OCR_Version.h"
-#include "BAASGlobals.h"
-#include "BAASExternalIPC.h"
-#include <server.h>
+#include <config.h>
+#include <ocr/BAASOCR.h>
+#include <BAASExternalIPC.h>
+
+#include "BAAS_OCR_version.h"
 
 using namespace baas;
 OCR_NAMESPACE_BEGIN
