@@ -1,0 +1,9 @@
+{
+  "group": "commission",
+  "path": "commission",
+  "image": {
+    "formation-menu": {
+      "region": [100, 9, 310, 40]
+    }
+  }
+}

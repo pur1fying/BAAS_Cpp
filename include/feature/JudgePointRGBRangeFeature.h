@@ -6,44 +6,90 @@
 #define BAAS_FEATURE_JUDGEPOINTRGBRANGEFEATURE_H_
 
 #include "feature/BaseFeature.h"
+#include "BAASImageResource.h"
 
 #define BAAS_JUDGE_POINT_RGB_RANGE_FEATURE 2
 
 BAAS_NAMESPACE_BEGIN
 
 class JudgePointRGBRangeFeature : public BaseFeature {
-public:
-    explicit JudgePointRGBRangeFeature(BAASConfig *config);
 
-    static bool compare(
-            BAASConfig *parameter,
-            const cv::Mat &image,
-            BAASConfig &output
-    );
+private:
+
+    struct RGBInfo{
+        int x;
+        int y;
+        uint8_t r_min;
+        uint8_t r_max;
+        uint8_t g_min;
+        uint8_t g_max;
+        uint8_t b_min;
+        uint8_t b_max;
+
+        static constexpr auto _p_format = "({:>4},{:>4})";
+        static constexpr auto _rgb_format = "({:>3},{:>3},{:>3},{:>3},{:>3},{:>3})";
+
+        [[nodiscard]] std::string get_position() const {
+            return std::format(_p_format, x, y);
+        }
+        [[nodiscard]] std::string get_rgb_range() const {
+            return std::format(_rgb_format, r_min, r_max, g_min, g_max, b_min, b_max);
+        }
+
+    };
+
+    static void _decode_single_rgb_info(const nlohmann::json& j, std::vector<RGBInfo>& out);
+
+public:
+
+    enum Op {
+        ALL,
+        ANY,
+        ALL_NOT,
+        ANY_NOT
+    };
+
+    static const std::map<int, Op> op_map;
+
+    explicit JudgePointRGBRangeFeature(BAASConfig* config);
+
+    void show() override;
+
+    bool appear(
+            const BAAS* baas,
+            BAASConfig& output
+    ) override;
 
     [[nodiscard]] double self_average_cost(
-            const cv::Mat &image,
-            const std::string &server,
-            const std::string &language
+            const BAAS* baas
     ) override;
 
 private:
-    std::map<std::string, std::optional<double>> self_average_cost_map;
 
-    std::map<std::string, std::vector<std::pair<int, int>>> position;
-    std::map<std::string, std::vector<std::vector<int>>> rgb_range;
+    Op _op;
+
+    bool check_around;
+
+    int around_range;
+
+    int feature_direction;
+
+    std::map<std::string, std::vector<RGBInfo>> rgb_info;
 };
 
 class JudgePointRGBRangeFeatureError : public std::exception {
-public:
-    explicit JudgePointRGBRangeFeatureError(const std::string &message) : message(message) {}
 
-    [[nodiscard]] const char *what() const noexcept override
+public:
+
+    explicit JudgePointRGBRangeFeatureError(const std::string& message) : message(message) {}
+
+    [[nodiscard]] const char* what() const noexcept override
     {
         return message.c_str();
     }
 
 private:
+
     std::string message;
 };
 

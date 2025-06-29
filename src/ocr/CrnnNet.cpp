@@ -395,11 +395,8 @@ void CrnnNet::getTextIndexes(
 
 void CrnnNet::set_cpu_memory_arena(bool state)
 {
-    if (state) {
-        sessionOptions.EnableCpuMemArena();
-    } else {
-        sessionOptions.DisableCpuMemArena();
-    }
+    if (state)sessionOptions.EnableCpuMemArena();
+    else      sessionOptions.DisableCpuMemArena();
 }
 
 

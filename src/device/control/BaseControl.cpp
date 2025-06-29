@@ -6,7 +6,7 @@
 
 BAAS_NAMESPACE_BEGIN
 
-BaseControl::BaseControl(BAASConnection *connection)
+BaseControl::BaseControl(BAASConnection* connection)
 {
     this->connection = connection;
     logger = connection->get_logger();

@@ -1,7 +1,6 @@
 //
 // Created by pc on 2024/8/6.
 
-#ifdef BAAS_APP_BUILD_FEATURE
 
 #include "feature/BAASFeature.h"
 #include "feature/MatchTemplateFeature.h"
@@ -15,31 +14,23 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
-std::vector<std::function<bool(
-        BAASConfig *,
-        const cv::Mat &,
-        BAASConfig &
-)>> BAASFeature::compare_functions;
+/*
+ * Different from feature_state_map in class BAAS, feature is static, global.
+ * feature_state_map should be a member (non-static). Because feature state is defined at run time, feature is defined
+ * before program run.
+ */
+std::map<std::string, std::unique_ptr<BaseFeature>> BAASFeature::features;
 
-std::map<std::string, BaseFeature *> BAASFeature::features;
+BAASFeature* BAASFeature::instance = nullptr;
 
-BAASFeature *BAASFeature::instance = nullptr;
+BAASFeature* baas_features = nullptr;
 
-BAASFeature *baas_features = nullptr;
-
-BAASFeature *BAASFeature::get_instance()
+BAASFeature* BAASFeature::get_instance()
 {
     if (instance == nullptr) {
         instance = new BAASFeature();
     }
     return instance;
-}
-
-void BAASFeature::init_funcs()
-{
-    compare_functions.emplace_back(MatchTemplateFeature::compare);
-    compare_functions.emplace_back(FilterRGBMatchTemplateFeature::compare);
-    compare_functions.emplace_back(JudgePointRGBRangeFeature::compare);
 }
 
 void BAASFeature::load()
@@ -52,12 +43,11 @@ void BAASFeature::load()
     }
     // load from image_info folder
     // data stored in json and load
-    string temp_path;
+    filesystem::path temp_path;
     int total_loaded = 0;
-    for (const auto &entry: filesystem::recursive_directory_iterator(BAAS_FEATURE_DIR)) {
-        temp_path = entry.path()
-                         .string();
-        if (filesystem::is_regular_file(entry) && temp_path.ends_with(".json"))
+    for (const auto& entry: filesystem::recursive_directory_iterator(BAAS_FEATURE_DIR)) {
+        temp_path = entry.path().string();
+        if (filesystem::is_regular_file(entry) && temp_path.extension().string() == ".json")
             total_loaded += load_from_json(temp_path);
     }
     BAASGlobalLogger->BAASInfo("Totally loaded [ " + to_string(total_loaded) + " ] features");
@@ -65,19 +55,19 @@ void BAASFeature::load()
 
 BAASFeature::BAASFeature()
 {
-    init_funcs();
     load();
+    init_feature_ptr();
 }
 
-int BAASFeature::load_from_json(const string &path)
+int BAASFeature::load_from_json(const std::filesystem::path& path)
 {
-    BAASConfig _feature(path, (BAASLogger *) BAASGlobalLogger);
+    BAASConfig _feature(path, (BAASLogger* ) BAASGlobalLogger);
     json j = _feature.get_config();
     assert(j.is_object());
-    BAASConfig *temp;
+    BAASConfig* temp;
     int loaded = 0;
-    for (auto &i: j.items()) {
-        temp = new BAASConfig(i.value(), (BAASLogger *) BAASGlobalLogger);
+    for (auto& i: j.items()) {
+        temp = new BAASConfig(i.value(), (BAASLogger* ) BAASGlobalLogger);
         auto it = features.find(i.key());
         if (it != features.end()) {
             BAASGlobalLogger->BAASError("Feature [ " + i.key() + " ] already exists");
@@ -85,7 +75,7 @@ int BAASFeature::load_from_json(const string &path)
             continue;
         }
         int tp = temp->getInt("feature_type", -1);
-        BaseFeature *f = nullptr;
+        BaseFeature* f = nullptr;
         switch (tp) {
             case -1:
                 f = new BaseFeature(temp);
@@ -104,8 +94,9 @@ int BAASFeature::load_from_json(const string &path)
                 break;
         }
         if (f != nullptr) {
-            f->set_path(path);
-            features[i.key()] = f;
+            f->set_path(path.string());
+            f->set_name(i.key());
+            features[i.key()] = std::unique_ptr<BaseFeature>(f);
             loaded++;
         }
     }
@@ -114,190 +105,167 @@ int BAASFeature::load_from_json(const string &path)
 
 void BAASFeature::show()
 {
-    for (auto &i: features)
-        BAASGlobalLogger->BAASInfo("Feature [ " + i.first + " ]\n" + i.second->get_config()->get_config().dump(4));
+    BAASGlobalLogger->hr("Show All Feature Param.");
+    for (auto& i: features) {
+        BAASGlobalLogger->BAASInfo("[ " + i.first + " ]");
+        i.second->show();
+    }
 }
 
-bool BAASFeature::appear(
-        BAASConnection *connection,
-        const string &name,
-        const cv::Mat &image,
-        BAASConfig &output,
+
+BaseFeature* BAASFeature::get_feature_ptr(const std::string& feature_name)
+{
+    auto it = features.find(feature_name);
+    if (it == features.end()) throw BAASFeatureError("Feature [ " + feature_name + " ] not found");
+    return it->second.get();
+}
+
+bool BAASFeature::reset_then_feature_appear(
+        BAAS* baas,
+        const string& feature_name
+)
+{
+    baas->reset_feature(feature_name);
+    BAASConfig temp;
+    return feature_appear(baas, feature_name, temp, false);
+}
+
+bool BAASFeature::feature_appear(
+        BAAS* baas,
+        const std::string& feature_name,
+        BAASConfig& output,
         bool show_log
 )
 {
+    /*
+     *
+     * self true
+     * self false
+     * self true and
+     * self false and
+     * self true or
+     * self false or
+     * self true and or
+     * self false and or
+     *
+     */
+    auto feature = features.find(feature_name);
 
-    return appear(connection->get_server(), connection->get_language(), name, image, output, show_log);
-}
+    auto feature_state = baas->feature_state_map.find(feature_name);
 
-bool BAASFeature::appear(
-        const string &server,
-        const string &language,
-        const string &name,
-        const cv::Mat &image,
-        BAASConfig &output,
-        bool show_log
-)
-{
-    auto it = features.find(name);
-    if (it == features.end()) {
-        if (show_log) BAASGlobalLogger->BAASError("Feature [ " + name + " ] not found");
+    if (feature == features.end()) {
+        if (show_log) BAASGlobalLogger->BAASError("Feature [ " + feature_name + " ] not found");
         return false;
     }
 
-    if (!it->second
-           ->get_enabled()) {
-        if (show_log) BAASGlobalLogger->BAASInfo("Feature [ " + name + " ] is disabled");
-        return false;
+    if (feature_state->second.round_feature_appear_state.has_value()) {
+        if (show_log) BAASGlobalLogger->BAASInfo("Feature [ " + feature_name + " ] already checked, use cached result");
+        return feature_state->second.round_feature_appear_state.value();
     }
 
-    if (it->second
-          ->is_checked_this_round()) {
-        if (show_log) BAASGlobalLogger->BAASInfo("Feature [ " + name + " ] already checked, use cached result");
-        return it->second
-                 ->get_this_round_result();
-    }
-
-    int type = it->second
-                 ->get_config()
-                 ->getInt("feature_type", -1);
-    assert(type <= (int(compare_functions.size()) - 1));
-
+    // check self
+    int type = feature->second->get_config()->getInt("feature_type", -1);
     bool has_self = (type != -1);
     if (type != -1) {
         bool result;
-        BAASConfig *temp;
-        temp = new BAASConfig(
-                it->second
-                  ->get_config()
-                  ->get_config(), (BAASLogger *) BAASGlobalLogger
+        std::unique_ptr<BAASConfig> temp = std::make_unique<BAASConfig>(
+                feature->second->get_config()->get_config(),
+                (BAASLogger* ) BAASGlobalLogger
         );
-        temp->insert("server", server);
-        temp->insert("language", language);
         try {
-            result = compare_functions[type](temp, image, output);
-            delete temp;
+            result = feature->second->appear(baas, output);
+            feature_state->second.round_feature_appear_state = result;
             if (show_log) {
                 auto log = output.template get<vector<string>>("log", {});
                 BAASGlobalLogger->BAASInfo(log);
             }
-            if (!result)
-                return it->second
-                         ->set_checked_this_round(false);
-        } catch (json::exception &e) {
-            delete temp;
-            BAASGlobalLogger->BAASError("Feature [ " + name + " ] compare error : " + e.what());
-            throw BAASFeatureError("Feature [ " + name + " ] compare error : " + e.what());
+            if (feature->second->is_primitive()
+            || ( result && feature->second->has_or_feature() && !feature->second->has_and_feature())
+            || (!result && feature->second->has_and_feature()&& !feature->second->has_or_feature()))
+                return result;
+
+        } catch (json::exception& e) {
+            BAASGlobalLogger->BAASError("Feature [ " + feature_name + " ] compare error : " + e.what());
+            throw BAASFeatureError("Feature [ " + feature_name + " ] compare error : " + e.what());
         }
     }
 
-    vector<pair<double, pair<string, bool>>> feature_queue;     // <cost, <name, is_or>>
-    vector<string> bundle = it->second->get_or_features();
-    if (!bundle.empty())
-        for (const auto &i: bundle)
-            feature_queue.emplace_back(
-                    BAASFeature::get_feature(i)->all_average_cost(image, server, language), make_pair(i, true));
+    // check and/or features
+    vector<pair<double, pair<BaseFeature*, bool>>> feature_queue;     // <cost, <name, is_or>>
+    vector<BaseFeature*> bundle = feature->second->or_feature_ptr;
 
-    bundle = it->second->get_and_features();
+    if (!bundle.empty())
+        for (const auto& i: bundle)
+            feature_queue.emplace_back(i->all_average_cost(baas), make_pair(i, true));
+
+    bundle = feature->second->and_feature_ptr;
     bool has_and = !bundle.empty();
     if (!bundle.empty())
-        for (const auto &i: bundle)
-            feature_queue.emplace_back(
-                    BAASFeature::get_feature(i)->all_average_cost(image, server, language), make_pair(i, false));
+        for (const auto& i: bundle)
+            feature_queue.emplace_back(i->all_average_cost(baas), make_pair(i, false));
 
     sort(feature_queue.begin(), feature_queue.end());   // sort by cost
 
-    for (const auto &i: feature_queue) {
-        if (i.second
-             .second) {   // or feature appear
-            if (appear(
-                    server, language, i.second
-                                       .first, image, output, show_log
-            ))
-                return it->second
-                         ->set_checked_this_round(true);
+    for (const auto& i: feature_queue) {
+        if (i.second.second) {   // or feature appear
+            if (i.second.first->appear(baas,output)) {
+                feature_state->second.round_feature_appear_state = true;
+                return true;
+            }
         } else {                // and feature didn't appear
-            if (!appear(
-                    server, language, i.second
-                                       .first, image, output, show_log
-            ))
-                return it->second
-                         ->set_checked_this_round(false);
+            if (!i.second.first->appear(baas,output)) {
+                feature_state->second.round_feature_appear_state = false;
+                return false;
+            }
         }
     }
     //  if has or feature, then or feature didn't appear
     //  if has and feature, then and feature all appear
 
-    if (has_self || has_and)
-        return it->second
-                 ->set_checked_this_round(true);   // self and and feature all appear
+    if (has_self || has_and) {
+        feature_state->second.round_feature_appear_state = true;   // self and and feature all appear
+        return true;
+    }
 
-    return it->second
-             ->set_checked_this_round(false);           // or feature didn't appear
+    feature_state->second.round_feature_appear_state = false;       // or feature didn't appear
+    return false;
 }
 
-BaseFeature *BAASFeature::get_feature(const string &name)
+std::vector<std::string> BAASFeature::get_feature_list()
 {
-    auto it = features.find(name);
-    if (it == features.end()) throw BAASFeatureError("Feature [ " + name + " ] not found");
-    return it->second;
+    std::vector<std::string> feature_list;
+    for (auto& i: features) {
+        feature_list.push_back(i.first);
+    }
+    return feature_list;
 }
 
-void BAASFeature::reset_feature(const std::string &name)
+void BAASFeature::init_feature_ptr()
 {
-    auto it = features.find(name);
-    if (it == features.end()) return;
+    BAASGlobalLogger->sub_title("Init Feature Pointer.");
+    std::vector<std::string> feature_list;
+    for (auto& i: features) {
+        feature_list = i.second->get_and_features();
+        for (const auto& j: feature_list) {
+            if (features.find(j) == features.end()) {
+                BAASGlobalLogger->BAASError("[ " + i.first + " ] And Feature [ " + j + " ] not found");
+                continue;
+            }
+            i.second->and_feature_ptr.push_back(features[j].get());
+        }
 
-    it->second->reset_checked();
+        feature_list = i.second->get_or_features();
+        for (const auto& j: feature_list) {
+            if (features.find(j) == features.end()) {
+                BAASGlobalLogger->BAASError("[ " + i.first + " ] Or Feature [ " + j + " ] not found");
+                continue;
+            }
+            i.second->or_feature_ptr.push_back(features[j].get());
+        }
 
-    vector<string> bundle = it->second->get_and_features();
-    for (const auto &i: bundle)
-        reset_feature(i);
-
-    bundle = it->second->get_or_features();
-    for (const auto &i: bundle)
-        reset_feature(i);
-
-}
-
-bool BAASFeature::reset_then_feature_appear(
-        BAAS* baas,
-        const string &feature_name
-)
-{
-    BAASFeature::reset_feature(feature_name);
-    return feature_appear(baas, feature_name);
-}
-
-bool BAASFeature::feature_appear(
-        BAAS* baas,
-        const string &feature_name,
-        BAASConfig &output,
-        bool show_log
-)
-{
-    if (!baas->flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    return BAASFeature::appear(
-            baas->get_connection(),
-            feature_name,baas->latest_screenshot,
-            output,
-            show_log
-            );
-}
-
-bool BAASFeature::feature_appear(BAAS* baas, const string &feature_name)
-{
-    if (!baas->flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-    BAASConfig output;
-    return appear(
-            baas->get_connection(),
-            feature_name,
-            baas->latest_screenshot,
-            output,
-            baas->script_show_image_compare_log
-            );
+        i.second->_is_primitive = i.second->and_feature_ptr.empty() && i.second->or_feature_ptr.empty();
+    }
 }
 
 BAAS_NAMESPACE_END
 
-#endif //BAAS_APP_BUILD_FEATURE

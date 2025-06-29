@@ -2,11 +2,13 @@
 // Created by pc on 2024/8/14.
 //
 
+#ifdef _WIN32
+
 #include "device/screenshot/LDOpenGLScreenshot.h"
 
 BAAS_NAMESPACE_BEGIN
 
-LDOpenGLScreenshot::LDOpenGLScreenshot(BAASConnection *connection) : BaseScreenshot(connection)
+LDOpenGLScreenshot::LDOpenGLScreenshot(BAASConnection* connection) : BaseScreenshot(connection)
 {
 
 }
@@ -17,7 +19,7 @@ void LDOpenGLScreenshot::init()
     instance_id = ldopengl_connection->get_instance_id();
 }
 
-void LDOpenGLScreenshot::screenshot(cv::Mat &output)
+void LDOpenGLScreenshot::screenshot(cv::Mat& output)
 {
     ldopengl_connection->screenshot(output);
 }
@@ -34,4 +36,4 @@ bool LDOpenGLScreenshot::is_lossy()
 
 BAAS_NAMESPACE_END
 
-
+#endif // _WIN32

@@ -26,8 +26,8 @@ if ( NOT DEFINED CURRENT_OS_NAME)
 endif()
 
 BAAS_sub_title_LOG("OS : ${CURRENT_OS_NAME}")
-set(BAAS_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${CURRENT_OS_NAME}")
-set(BAAS_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${CURRENT_OS_NAME}")
+set(BAAS_DEFAULT_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${CURRENT_OS_NAME}")
+set(BAAS_DEFAULT_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${CURRENT_OS_NAME}")
 
 cmake_minimum_required(VERSION 3.22)
 
@@ -43,7 +43,6 @@ configure_file(
         version.txt.in
         BAAS_version.txt
 )
-
 
 # git configuration
 get_git_info(GIT_BRANCH git rev-parse --abbrev-ref HEAD)
@@ -68,12 +67,19 @@ message(STATUS "Build time  : ${BUILD_TIME}")
 
 set(CMAKE_CXX_STANDARD 20)
 
-
 # app options
-option(BUILD_BAAS               "build BAAS app"            OFF)
-option(BUILD_BAAS_OCR           "build the ocr server app"  ON)
-option(BUILD_TEST               "build the test"            OFF)
+option(BUILD_APP_BAAS               "Build BAAS app          "  OFF)
+option(BUILD_APP_ISA                "Build ISA  app          "  OFF)
 
+# other
+option(BUILD_BAAS_OCR           "build the ocr server app"               OFF)
+option(BUILD_BAAS_AW_CHECKER    "build BAAS Auto Fight Workflow Checker" OFF)
+
+check_app_options(
+        BUILD_APP_BAAS
+        BUILD_APP_ISA
+        BUILD_BAAS_AW_CHECKER
+)
 
 set(BIN_RESOURCE_REQUIRED OFF)
 set(ADB_BINARY_RESOURCE_REQUIRED OFF)
@@ -91,6 +97,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include_directories(
         ${BAAS_PROJECT_PATH}/external
         ${BAAS_PROJECT_PATH}/include
+        ${BAAS_PROJECT_PATH}/external/cuda
 )
 
 file(
@@ -108,23 +115,10 @@ file(
 
 file(
         GLOB
-        ADB_BINARY
-        ${CMAKE_CURRENT_LIST_DIR}/resource/platform-tools/adb.exe
-        ${CMAKE_CURRENT_LIST_DIR}/resource/platform-tools/AdbWinApi.dll
-        ${CMAKE_CURRENT_LIST_DIR}/resource/platform-tools/AdbWinUsbApi.dll
-)
-
-file(
-        GLOB
         GLOBAL_CONFIG_FILE
         ${CMAKE_CURRENT_LIST_DIR}/resource/global_setting.json
 )
-file(
-        GLOB
-        USER_CONFIG_FILE
-        ${CMAKE_CURRENT_LIST_DIR}/resource/user_setting.json
-        ${CMAKE_CURRENT_LIST_DIR}/resource/default_config.json
-)
+
 file(
         GLOB
         STATIC_CONFIG_FILE
@@ -138,17 +132,29 @@ file(
         DESTINATION ${CMAKE_BINARY_DIR}/resource
 )
 
+set(BAAS_APP_BAAS_CPP_DIR  "${CMAKE_CURRENT_LIST_DIR}/apps/BAAS")
+set(BAAS_APP_ISA_DIR       "${CMAKE_CURRENT_LIST_DIR}/apps/ISA")
+set(BAAS_OCR_SERVER_DIR    "${CMAKE_CURRENT_LIST_DIR}/apps/ocr_server")
+set(BAAS_AW_CHECKER_DIR    "${CMAKE_CURRENT_LIST_DIR}/apps/BAAS_auto_fight_workflow_checker")
+
 # --------------  BAAS APP  ------------------
-if (BUILD_BAAS)
+if (BUILD_APP_BAAS)
     add_subdirectory(apps/BAAS)
 endif()
+
+# --------------  ISA APP  -------------------
+if (BUILD_APP_ISA)
+    add_subdirectory(apps/ISA)
+endif()
+
 # --------------  OCR SERVER  ----------------
 if (BUILD_BAAS_OCR)
     add_subdirectory(apps/ocr_server)
 endif()
-# --------------  TEST  ----------------------
-if (BUILD_TEST)
-    add_subdirectory(apps/test)
+
+# --------------  BAAS AUTO FIGHT WORKFLOW CHECKER  ----------------
+if (BUILD_BAAS_AW_CHECKER)
+    add_subdirectory(apps/BAAS_auto_fight_workflow_checker)
 endif()
 
 add_library(
@@ -158,10 +164,11 @@ add_library(
 )
 
 if (ADB_BINARY_RESOURCE_REQUIRED)
+    set_ADB_BINARY()
     file(
             COPY
             ${ADB_BINARY}
-            DESTINATION ${CMAKE_BINARY_DIR}
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     )
 endif ()
 
@@ -169,7 +176,7 @@ if (GLOBAL_CONFIG_RESOURCE_REQUIRED)
     file(
             COPY
             ${GLOBAL_CONFIG_FILE}
-            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -177,7 +184,7 @@ if (USER_CONFIG_RESOURCE_REQUIRED)
     file(
             COPY
             ${USER_CONFIG_FILE}
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -185,39 +192,15 @@ if (STATIC_CONFIG_RESOURCE_REQUIRED)
     file(
             COPY
             ${STATIC_CONFIG_FILE}
-            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
-
-if(BAAS_IMAGE_RESOURCE_REQUIRED)
-    file(
-            COPY
-            ${CMAKE_CURRENT_LIST_DIR}/resource/image
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
-    )
-endif()
 
 if (BIN_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/bin
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
-    )
-endif ()
-
-if (BAAS_FEATURE_RESOURCE_REQUIRED)
-    file(
-            COPY
-            ${CMAKE_CURRENT_LIST_DIR}/resource/features
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
-    )
-endif ()
-
-if (BAAS_PROCEDURE_RESOURCE_REQUIRED)
-    file(
-            COPY
-            ${CMAKE_CURRENT_LIST_DIR}/resource/procedure
-            DESTINATION ${CMAKE_BINARY_DIR}/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()
 
@@ -225,6 +208,6 @@ if (OCR_MODEL_RESOURCE_REQUIRED)
     file(
             COPY
             ${CMAKE_CURRENT_LIST_DIR}/resource/ocr_models
-            DESTINATION ${CMAKE_BINARY_DIR}/bin/resource
+            DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resource
     )
 endif ()

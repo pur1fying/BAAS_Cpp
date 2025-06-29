@@ -9,11 +9,11 @@ using json = nlohmann::json;
 
 BAAS_NAMESPACE_BEGIN
 
-BAASUserConfig *config_template = nullptr;
+BAASUserConfig* config_template = nullptr;
 
 void BAASUserConfig::config_update()
 {
-    logger->BAASInfo("CONFIG KEY UPDATE");
+    logger->sub_title("User Config Key Update.");
     my_flatten();
     config_template->my_flatten();
 

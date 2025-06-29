@@ -8,7 +8,7 @@ using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-AdbControl::AdbControl(BAASConnection *connection) : BaseControl(connection)
+AdbControl::AdbControl(BAASConnection* connection) : BaseControl(connection)
 {
 
 }
@@ -25,10 +25,7 @@ void AdbControl::click(
         int y
 )
 {
-    long long start = BAASUtil::getCurrentTimeMS();
     connection->adb_shell_bytes("input tap " + to_string(x) + " " + to_string(y));
-    if (BAASUtil::getCurrentTimeMS() - start < 50)
-        this_thread::sleep_for(chrono::milliseconds(50));
 }
 
 void AdbControl::swipe(

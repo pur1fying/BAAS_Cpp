@@ -1,0 +1,96 @@
+name: baas afwc ci/cd
+
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create new release'
+        required: true
+        type: boolean
+  push:
+    branches:
+      - main
+    paths: 
+      - 'apps/BAAS_auto_fight_workflow_checker/CMakeLists.txt'
+  pull_request:
+    branches: 
+      - main
+    types: 
+      - opened
+      - synchronize
+      - reopened
+    paths-ignore: 
+      - 'docs/**'
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
+  cancel-in-progress: true
+
+
+permissions:
+  contents: write # for creating release
+
+
+env:
+  BUILD_TYPE: Release
+  BUILD_BAAS_AW_CHECKER: ON
+
+
+jobs: 
+  Windows-latest-cmake-x64:
+    name: 'Build Wasm'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: baas
+    steps:
+      - name: Clone Source Repo
+        id: checkout_main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: baas
+
+      - name: Clone Emsdk Repo
+        id: clone_emsdk_repo
+        uses: actions/checkout@v4
+        with: 
+          fetch-depth: 0
+          repository: "emscripten-core/emsdk"
+          ref: "main"
+          path: emsdk
+
+      - name: Install Emsdk
+        id: install_emsdk
+        working-directory: emsdk
+        run: |
+          ./emsdk install latest
+
+      - name: Install Build Dependencies
+        id: install_build_depends
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential
+
+      - name: Build
+        id: cmake_build
+        run: |
+          ../emsdk/emsdk activate latest
+          source ../emsdk/emsdk_env.sh
+          emcmake cmake -B build -DBUILD_BAAS_AW_CHECKER=$BUILD_BAAS_AW_CHECKER -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DCMAKE_TOOLCHAIN_FILE="../emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+          cmake --build build --config Release --target BAAS_workflow_checker -j $(nproc)
+
+      - name: Clean Up
+        id: clean_up
+        run: |
+          cd build/bin
+          ls | grep -v '\.js$' | grep -v '\.wasm$' | xargs rm -f --
+
+      - name: Upload Artifacts
+        # if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          path: baas/build/bin
+          name: baas-afwc-wasm

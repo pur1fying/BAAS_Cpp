@@ -1,0 +1,98 @@
+{
+  "name": "Special-Task-L Aris Maid Workflow",
+  "yolo_setting": {
+    "model": "best.onnx"
+  },
+  "formation": {
+    "front": ["Aris (Maid)", "Wakamo", "Kayoko (New Year)", "Ui"],
+    "back": ["Ako", "Himari"],
+    "all_appeared_skills": [
+      "Aris (Maid)",
+      "Wakamo",
+      "Kayoko (New Year)",
+      "Ui",
+      "Ako",
+      "Himari"
+    ]
+  },
+  "start_state": "state_release_skill_1",
+  "states": {
+    "state_release_skill_1": {
+      "transitions": [
+        {
+          "condition": "cost_over_5",
+          "next": "state_check_boss_health_after_release_skill_1"
+        }
+      ],
+      "desc": "release skill 1"
+    },
+    "state_check_boss_health_after_release_skill_1": {
+      "default_transition": "state_release_skill_2",
+      "desc": "check boss health after release skill 1"
+    },
+    "state_release_skill_2": {
+      "transitions": [
+        {
+          "condition": "cost_below_10",
+          "next": "state_check_boss_health_after_release_skill_1"
+        }
+      ],
+      "default_transition": "end",
+      "desc": "release skill 2"
+    },
+    "end": {
+
+    }
+  },
+  "conditions": {
+    "cost_over_5": {
+      "type": "cost",
+      "op": "over",
+      "value": 5.0,
+      "desc": "trigger when cost over 5.0",
+      "timeout": 3000
+    },
+    "cost_below_3": {
+      "type": "cost",
+      "op": "below",
+      "value": 3.0,
+      "desc": "trigger when cost below 3.0",
+      "timeout": 3000
+    },
+    "cost_below_10": {
+      "type": "cost",
+      "op": "below",
+      "value": 10.0,
+      "desc": "trigger when cost below 10.0",
+      "timeout": 3000
+    },
+    "cost_in_range_5.0_10.0_2": {
+      "type": "cost",
+      "op": "below",
+      "value": 10.0,
+      "desc": "This condition has same effect with cost_in_range_5.0_10.0",
+      "timeout": 3000,
+      "and": ["cost_over_5"]
+    },
+    "cost_increase_6": {
+      "type": "cost",
+      "op": "increase",
+      "value": 6,
+      "desc": "trigger when cost increase at least 6.0",
+      "timeout": 3000
+    },
+    "cost_decrease_2.5": {
+      "type": "cost",
+      "op": "decrease",
+      "desc": "trigger when cost decrease at least 2.5",
+      "value": 2.5
+    },
+    "cost_in_range_5.0_10.0": {
+      "type": "cost",
+      "op": "in_range",
+      "range": [5.0, 10.0],
+      "desc": "trigger when cost in range [5.0, 10.0]",
+      "timeout": 3000
+    }
+  }
+}

@@ -6,7 +6,6 @@
  *  This class is bound to define any feature you want, use json as in/out to ensure flexibility.
  *  this feature can be image, ocr result, or deep learning model.
  */
-#ifdef BAAS_APP_BUILD_FEATURE
 
 #ifndef BAAS_FEATURE_BAASFEATURE_H_
 #define BAAS_FEATURE_BAASFEATURE_H_
@@ -17,67 +16,44 @@
 
 BAAS_NAMESPACE_BEGIN
 
-class BAAS;
-
 class BAASFeature {
 public:
-    static BAASFeature *get_instance();
 
     static void show();
 
-    static bool appear(
-            BAASConnection *connection,
-            const std::string &name,
-            const cv::Mat &image,
-            BAASConfig &output,
-            bool show_log = false
-    );
+    static void init_feature_ptr();
 
-    static bool appear(
-            const std::string &server,
-            const std::string &language,
-            const std::string &name,
-            const cv::Mat &image,
-            BAASConfig &output,
-            bool show_log = false
-    );
+    static BAASFeature* get_instance();
 
-    static void reset_feature( const std::string &name);
+    static BaseFeature* get_feature_ptr(const std::string& feature_name);
 
-    static BaseFeature *get_feature(const std::string &name);
-
-    static bool reset_then_feature_appear(BAAS* baas, const std::string &feature_name);
-
-    static bool feature_appear(
+    static bool reset_then_feature_appear(
             BAAS* baas,
-            const std::string &feature_name,
-            BAASConfig &output,
-            bool show_log = false
+            const std::string& feature_name
     );
 
     static bool feature_appear(
             BAAS* baas,
-            const std::string &feature_name
+            const std::string& feature_name,
+            BAASConfig& output,
+            bool show_log = false
     );
+
+    static std::vector<std::string> get_feature_list();
+
+    inline static bool contains(const std::string& feature_name) {
+        return !(features.find(feature_name) == features.end());
+    }
 
 private:
 
-    static void init_funcs();
-
     static void load();
 
-    static int load_from_json(const std::string &path);
+    static int load_from_json(const std::filesystem::path &json_path);
 
     BAASFeature();
 
-    // parameters, image from emulator, output, return means the feature is found or not
-    static std::vector<std::function<bool(
-            BAASConfig *parameters,
-            const cv::Mat &image,
-            BAASConfig &output
-    )>> compare_functions;
-
-    static std::map<std::string, BaseFeature *> features;
+    static std::map<std::string, std::unique_ptr<BaseFeature>> features;
 
     static BAASFeature *instance;
 };
@@ -96,4 +72,3 @@ BAAS_NAMESPACE_END
 
 #endif //BAAS_FEATURE_BAASFEATURE_H_
 
-#endif //BAAS_APP_BUILD_FEATURE

@@ -11,7 +11,7 @@ BAAS_NAMESPACE_BEGIN
 
 class BAASStaticConfig : public BAASConfig {
 public:
-    static BAASStaticConfig *getStaticConfig();
+    static BAASStaticConfig* getStaticConfig();
 
     inline std::vector<std::string> adb_binary_dirs() noexcept
     {
@@ -26,10 +26,10 @@ public:
 private:
     BAASStaticConfig();
 
-    static BAASStaticConfig *staticConfig;
+    static BAASStaticConfig* staticConfig;
 };
 
-extern BAASStaticConfig *static_config;
+extern BAASStaticConfig* static_config;
 
 BAAS_NAMESPACE_END
 

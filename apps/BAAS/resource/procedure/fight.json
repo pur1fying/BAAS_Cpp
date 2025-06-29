@@ -1,0 +1,149 @@
+{
+  "UI-GO-TO_fight_pause_page": {
+    "procedure_type": 0,
+    "max_stuck_time": 20,
+    "ends": "fight_pause-notice_appear",
+    "possibles": [
+      ["fight_pause-button_appear", 1231, 48, 0.3]
+    ]
+  },
+
+  "fight_execute_restart": {
+    "procedure_type": 0,
+    "max_stuck_time": 30,
+    "ends": "fight_pause-button_appear",
+    "possibles": [
+      ["fight_pause-notice_appear", 563, 515, 0.3],
+      ["fight_restart-notice_appear", 772, 503, 0.0, 0.0, 1.0]
+    ]
+  },
+
+  "fight_get_auto_state": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": [
+        "fight_auto_on",
+        "fight_auto_off"
+    ]
+  },
+
+  "fight_set_auto_on": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_auto_on",
+    "possibles": [
+      ["fight_auto_off", 1249, 689, 0.3]
+    ]
+  },
+
+  "fight_set_auto_off": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_auto_off",
+    "possibles": [
+      ["fight_auto_on", 1249, 689, 0.3]
+    ]
+  },
+
+  "fight_set_acc_phase_1": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_acc_phase1",
+    "possibles": [
+      ["fight_acc_phase2", 1254, 610, 0.3, 0.0, 0.0, 2, 0.1],
+      ["fight_acc_phase3", 1254, 610, 0.3]
+    ]
+  },
+
+  "fight_set_acc_phase_2": {
+      "procedure_type": 0,
+      "max_stuck_time": 3,
+      "ends": "fight_acc_phase2",
+      "possibles": [
+        ["fight_acc_phase3", 1254, 610, 0.3, 0.0, 0.0, 2, 0.1],
+        ["fight_acc_phase1", 1254, 610, 0.3]
+      ]
+  },
+
+  "fight_set_acc_phase_3": {
+      "procedure_type": 0,
+      "max_stuck_time": 3,
+      "ends": "fight_acc_phase3",
+      "possibles": [
+        ["fight_acc_phase1", 1254, 610, 0.3, 0.0, 0.0, 2, 0.1],
+        ["fight_acc_phase2", 1254, 610, 0.3]
+      ]
+  },
+
+  "fight_select_slot_0": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_slot_0_selected",
+    "possibles": [
+      ["fight_pause-button_appear", 926, 586, 0.3]
+    ]
+  },
+
+  "fight_select_slot_1": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_slot_1_selected",
+    "possibles": [
+      ["fight_pause-button_appear", 1024, 586, 0.3]
+    ]
+  },
+
+  "fight_select_slot_2": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_slot_2_selected",
+    "possibles": [
+      ["fight_pause-button_appear", 1127, 586, 0.3]
+    ]
+  },
+
+  "fight_release_skill_slot_0": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_skill_0_release_finish",
+    "possibles": [
+      ["fight_slot_0_selected", -1, -1, 0.3]
+    ]
+  },
+
+  "fight_release_skill_slot_1": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_skill_1_release_finish",
+    "possibles": [
+      ["fight_slot_1_selected", -1, -1, 0.3]
+    ]
+  },
+
+  "fight_release_skill_slot_2": {
+    "procedure_type": 0,
+    "max_stuck_time": 3,
+    "ends": "fight_skill_2_release_finish",
+    "possibles": [
+      ["fight_slot_2_selected", -1, -1, 0.3]
+    ]
+  },
+
+  "fight_try_skip_animation": {
+    "procedure_type": 0,
+    "max_execute_time": 3,
+    "ends": "common_skip-animation-notice_appear",
+    "possibles": [
+      ["fight_pause-button_appear", -1, -1]
+    ]
+  },
+
+  "fight_confirm_skip_animation": {
+    "procedure_type": 0,
+    "max_execute_time": 5,
+    "ends": "fight_skip_animation_confirmed",
+    "possibles": [
+      ["common_skip-animation-notice_appear", 762, 507, 0.3]
+    ]
+  }
+}

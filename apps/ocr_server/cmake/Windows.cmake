@@ -1,17 +1,9 @@
-BAAS_sub_title_LOG("Windows Lib Configure")
-
-if (MSVC)
-    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/MP>")
-    add_compile_options(/W0)
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
-endif()
+BAAS_sub_title_LOG("BAAS_ocr_server Windows Configure")
 
 target_link_directories(
         BAAS_ocr_server
         PRIVATE
-        ${BAAS_PROJECT_PATH}/lib/${CURRENT_OS_NAME}
+        ${BAAS_DEFAULT_SEARCH_LIB_PATH}
 )
 
 SET(

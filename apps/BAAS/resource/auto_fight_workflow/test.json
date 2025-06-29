@@ -1,0 +1,53 @@
+{
+  "yolo_setting": {
+    "model": "best.onnx"
+  },
+  "formation": {
+    "front": ["Aris (Maid)", "Wakamo", "Kayoko (New Year)", "Ui"],
+    "back": ["Ako", "Himari"],
+    "all_appeared_skills": [
+      "Aris (Maid)",
+      "Wakamo",
+      "Kayoko (New Year)",
+      "Ui",
+      "Ako",
+      "Himari"
+    ]
+  },
+  "start_state": "start",
+  "states": {
+
+    "start": {
+      "action": "skip_animation",
+      "action_fail_transition": "restart",
+      "default_transition": "end"
+    },
+
+    "restart": {
+      "action": "restart",
+      "default_transition": "start"
+    },
+
+    "end": {
+
+    }
+  },
+  "conditions": {
+
+  },
+
+  "actions": {
+    "skip_animation": [
+      {
+        "t": "skip_animation",
+        "timeout": 3.0
+      }
+    ],
+
+    "restart": [
+      {
+        "t": "restart"
+      }
+    ]
+  }
+}

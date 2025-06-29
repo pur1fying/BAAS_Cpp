@@ -1,0 +1,88 @@
+{
+  "name": "如何在费用到达5时释放水星野技能",
+  "yolo_setting": {
+    "model": "best.onnx",
+    "update_interval": 100
+  },
+  "formation": {
+    "front": ["Hoshino (Swimsuit)", "Aru", "Shun", "Ui"],
+    "back": ["Ako", "Himari"],
+    "slot_count": 3,
+    "all_appeared_skills": [
+      "Hoshino (Swimsuit)",
+      "Aru",
+      "Shun",
+      "Ui",
+      "Ako",
+      "Himari"
+    ]
+  },
+  "start_state": "start",
+  "states": {
+
+    "start": {
+      "transitions": [
+        {
+          "condition": "Skill [ Hoshino ] Appear",
+          "next": "wait_cost_to [ 5.0 ]"
+        }
+      ],
+      "default_transition": "end"
+    },
+
+    "wait_cost_to [ 5.0 ]": {
+      "transitions": [
+        {
+          "condition": "Cost Over [ 5.0 ]",
+          "next": "[1] release_skill [ Hoshino (Swimsuit) ]"
+        }
+      ]
+    },
+
+    "[1] release_skill [ Hoshino (Swimsuit) ]": {
+      "action": "Release [ Hoshino (Swimsuit) ] Skill",
+      "default_transition": "end"
+    },
+
+    "end": {
+
+    }
+  },
+  "conditions": {
+
+    "Skill [ Hoshino ] Appear": {
+      "type": "skill_name",
+      "op": "appear",
+      "name": "Hoshino (Swimsuit)",
+      "timeout": 1000
+    },
+
+    "Cost Over [ 5.0 ]": {
+      "type": "cost",
+      "op": "over",
+      "value": 5.0,
+      "timeout": 20000
+    }
+
+  },
+  "actions": {
+
+    "Release [ Hoshino (Swimsuit) ] Skill": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Hoshino (Swimsuit)",
+        "target": {
+          "op": "fixed",
+          "x": 640,
+          "y": 360
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 4.5,
+          "timeout": 2000
+        }
+      }
+    ]
+  }
+}

@@ -3446,7 +3446,7 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
                 auto it2 = m_data.m_value.object->find(it.key());
                 if (it2 != m_data.m_value.object->end())
                 {
-                    it2->second.update(it.value(), true);
+                    it2->second.update_reference(it.value(), true);
                     continue;
                 }
             }

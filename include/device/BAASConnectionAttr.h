@@ -5,18 +5,18 @@
 #ifndef BAAS_DEVICE_BAASCONNECTIONATTR_H_
 #define BAAS_DEVICE_BAASCONNECTIONATTR_H_
 
-#include <regex>
-
-#include "config.h"
+#include "utils.h"
+#include "utils/BAASStringUtil.h"
+#include "config/BAASUserConfig.h"
 
 // connection information with config
 BAAS_NAMESPACE_BEGIN
 
 class BAASConnectionAttr {
 public:
-    explicit BAASConnectionAttr(BAASUserConfig *cfg);
+    explicit BAASConnectionAttr(BAASUserConfig* cfg);
 
-    explicit BAASConnectionAttr(const std::string &cfg_path);
+    explicit BAASConnectionAttr(const std::string& cfg_path);
 
     static std::string adb_binary();
 
@@ -26,7 +26,7 @@ public:
 
     inline int port()
     {
-        return BAASUtil::serial2port(serial);
+        return serial2port(serial);
     }
 
     inline bool is_mumu12_family()
@@ -60,17 +60,17 @@ public:
 
     inline bool is_network_device()
     {
-        return BAASUtil::re_match(serial, R"(\d+\.\d+\.\d+\.\d+:\d+)");
+        return BAASStringUtil::re_match(serial, R"(\d+\.\d+\.\d+\.\d+:\d+)");
     }
 
     inline bool is_over_http() const
     {
-        return BAASUtil::re_match(serial, R"(^https?://)");
+        return BAASStringUtil::re_match(serial, R"(^https?://)");
     }
 
     inline bool is_chinac_phone_cloud() const
     {
-        return BAASUtil::re_match(serial, R"(:30[0-9]$)");
+        return BAASStringUtil::re_match(serial, R"(:30[0-9]$)");
     }
 
     inline bool is_bluestacks4_hyperv()
@@ -90,7 +90,7 @@ public:
 
     ~BAASConnectionAttr();
 
-    [[nodiscard]] inline BAASLogger *get_logger() const
+    [[nodiscard]] inline BAASLogger* get_logger() const
     {
         return logger;
     }
@@ -100,12 +100,13 @@ public:
         return serial;
     }
 
-    static int LDPlayer_serial2instance_id(const std::string &serial);
+    static int LDPlayer_serial2instance_id(const std::string& serial);
 
 protected:
-    BAASUserConfig *config;
 
-    BAASLogger *logger;
+    BAASUserConfig* config;
+
+    BAASLogger* logger;
 
     std::string serial;
 

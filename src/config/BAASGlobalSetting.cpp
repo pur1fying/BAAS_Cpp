@@ -1,9 +1,8 @@
 //
 // Created by pc on 2024/11/5.
 //
-#include "string"
 
-#include "nlohmann/json.hpp"
+#include <fstream>
 
 #include "BAASGlobals.h"
 #include "config/BAASConfig.h"
@@ -13,11 +12,12 @@ using namespace std;
 using json = nlohmann::json;
 
 BAAS_NAMESPACE_BEGIN
-BAASGlobalSetting *global_setting = nullptr;
 
-BAASGlobalSetting *BAASGlobalSetting::globalSetting = nullptr;
+BAASGlobalSetting* global_setting = nullptr;
 
-BAASGlobalSetting *BAASGlobalSetting::getGlobalSetting()
+BAASGlobalSetting* BAASGlobalSetting::globalSetting = nullptr;
+
+BAASGlobalSetting* BAASGlobalSetting::getGlobalSetting()
 {
     if (globalSetting == nullptr) {
         globalSetting = new BAASGlobalSetting();
@@ -27,7 +27,7 @@ BAASGlobalSetting *BAASGlobalSetting::getGlobalSetting()
 
 BAASGlobalSetting::BAASGlobalSetting() : BAASConfig(
         BAAS_CONFIG_DIR / "global_setting.json",
-        (BAASLogger *) BAASGlobalLogger
+        (BAASLogger*) BAASGlobalLogger
 )
 {
     create_modify_history_file();

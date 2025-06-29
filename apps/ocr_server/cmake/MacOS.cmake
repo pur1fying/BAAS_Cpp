@@ -1,9 +1,9 @@
-BAAS_sub_title_LOG("MacOS Lib Configure")
+BAAS_sub_title_LOG("BAAS_ocr_server MacOS Configure")
 
 target_link_directories(
         BAAS_ocr_server
         PRIVATE
-        ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}
+        ${BAAS_DEFAULT_SEARCH_DLL_PATH}
 )
 
 SET(
@@ -38,7 +38,7 @@ endforeach ()
 set(
     DLL_MOVE
     ${DLL_RAW}
-    libonnxruntime.1.17.1.dylib
+    libonnxruntime.1.22.0.dylib
     libopencv_world.4.9.0.dylib
 )
 
@@ -47,7 +47,9 @@ foreach (dll ${DLL_MOVE})
     file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endforeach ()
 
-add_custom_command(TARGET BAAS_ocr_server POST_BUILD
+add_custom_command(
+    TARGET BAAS_ocr_server 
+    POST_BUILD
     COMMAND install_name_tool -delete_rpath ${BAAS_PROJECT_PATH}/dll/MacOS $<TARGET_FILE:BAAS_ocr_server>
     COMMAND install_name_tool -add_rpath @executable_path $<TARGET_FILE:BAAS_ocr_server>
     COMMENT "Updating rpath for BAAS_ocr_server"

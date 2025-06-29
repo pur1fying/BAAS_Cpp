@@ -39,3 +39,48 @@ function(get_git_info OUTPUT_VAR)
     )
     set(${OUTPUT_VAR} "${_git_output}" PARENT_SCOPE)
 endfunction()
+
+function(check_app_options)
+    set(true_count 0)
+
+    foreach(option_name IN LISTS ARGN)
+        if(${option_name})
+            BAAS_sub_title_LOG("Option ${option_name} True")
+            math(EXPR true_count "${true_count} + 1")
+            if (${true_count} GREATER 1)
+                message(FATAL_ERROR "You Can Build One App At a Time.")
+            endif ()
+        endif()
+    endforeach()
+endfunction()
+
+function(set_ADB_BINARY)
+    if (${CURRENT_OS_NAME} STREQUAL "Windows")
+        SET(
+            ADB_FILES
+            "adb.exe"
+            "AdbWinApi.dll"
+            "AdbWinUsbApi.dll"
+        ) 
+    elseif ((${CURRENT_OS_NAME} STREQUAL "MacOS") OR (${CURRENT_OS_NAME} STREQUAL "Linux"))
+        SET(
+            ADB_FILES
+            "adb"
+        )
+    endif()
+
+    set(ADB_BINARY "")
+
+    foreach(adb_file IN LISTS ADB_FILES)
+        set(FULL_PATH ${BAAS_PROJECT_PATH}/resource/bin/${CURRENT_OS_NAME}/platform-tools/${adb_file})
+        if(EXISTS ${FULL_PATH})
+            message(STATUS "Found ADB binary: ${FULL_PATH}")
+            list(APPEND ADB_BINARY ${FULL_PATH})
+        else()
+            message(FATAL_ERROR "ADB binary not found: ${FULL_PATH}")
+        endif()
+    endforeach()
+
+    set(ADB_BINARY "${ADB_BINARY}" PARENT_SCOPE)
+    
+endfunction()

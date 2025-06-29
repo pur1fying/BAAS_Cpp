@@ -4,7 +4,6 @@
 
 #include "device/control/ScrcpyControl.h"
 
-
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
@@ -40,7 +39,7 @@ void ScrcpyControl::swipe(
 {
     int step_len;
     double sleep_delay;
-    BAASUtil::calc_swipe_params(x1, y1, x2, y2, duration, step_len, sleep_delay);
+    calc_swipe_params(x1, y1, x2, y2, duration, step_len, sleep_delay);
 
     client->swipe(x1, y1, x2, y2, step_len, sleep_delay);
 }

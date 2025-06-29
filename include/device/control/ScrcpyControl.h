@@ -5,15 +5,16 @@
 #ifndef BAAS_DEVICE_CONTROL_SCRCPYCONTROL_H_
 #define BAAS_DEVICE_CONTROL_SCRCPYCONTROL_H_
 
-#include "device/control/BaseControl.h"
-#include "device/BAASScrcpyClient.h"
 #include "BaseControl.h"
+#include "device/BAASScrcpyClient.h"
 
 BAAS_NAMESPACE_BEGIN
 
 class ScrcpyControl : public BaseControl {
+
 public:
-    explicit ScrcpyControl(BAASConnection *connection);
+
+    explicit ScrcpyControl(BAASConnection* connection);
 
     void init() override;
 
@@ -38,11 +39,11 @@ public:
 
     void exit() override;
 
-
 private:
-    BAASConnection *connection;
 
-    BAASScrcpyClient *client;
+    BAASConnection* connection;
+
+    BAASScrcpyClient* client;
 };
 
 BAAS_NAMESPACE_END

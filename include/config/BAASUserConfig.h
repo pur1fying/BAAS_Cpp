@@ -10,13 +10,20 @@
 BAAS_NAMESPACE_BEGIN
 
 class BAASUserConfig : public BAASConfig {
+
 public:
+
     explicit BAASUserConfig(int config_type) : BAASConfig(config_type)
     {
 
     }
 
-    explicit BAASUserConfig(const std::string &path) : BAASConfig(path)
+    explicit BAASUserConfig(const std::string& path) : BAASConfig(path)
+    {
+
+    }
+
+    explicit BAASUserConfig(const std::filesystem::path& path) : BAASConfig(path)
     {
 
     }

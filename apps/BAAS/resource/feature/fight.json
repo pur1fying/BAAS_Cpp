@@ -1,0 +1,239 @@
+{
+  "fight_pause-button_appear":{
+    "feature_type": 0,
+    "group": "fight",
+    "name": "pause-button",
+    "mean_rgb_diff": [20, 20, 20]
+  },
+
+  "fight_pause-notice_appear":{
+    "feature_type": 0,
+    "group": "fight",
+    "name": "pause-notice"
+  },
+  "fight_retreat-notice_appear":{
+    "feature_type": 0,
+    "group": "fight",
+    "name": "retreat-notice"
+  },
+
+  "fight_restart-notice_appear":{
+    "feature_type": 0,
+    "group": "fight",
+    "name": "restart-notice"
+  },
+
+  "fight_acc_phase1": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1180, 621]],
+        "range": [[195, 225, 195, 225, 195, 225]]
+      }
+    }
+  },
+
+  "fight_acc_phase2": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1180, 621]],
+        "range": [[100, 150, 200, 255, 200, 255]]
+      }
+    }
+  },
+
+  "fight_acc_phase3": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1180, 621]],
+        "range": [[200, 255, 180, 255, 0, 80]]
+      }
+    }
+  },
+
+  "fight_auto_off": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1170, 677]],
+        "range": [[195, 255, 195, 255, 195, 234]]
+      }
+    }
+  },
+
+  "fight_auto_on": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1170, 677]],
+        "range": [[200, 255, 180, 255, 0, 150]]
+      }
+    }
+  },
+
+  "fight_auto_off2on_r_white": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1250, 677]],
+        "range": [[235, 255, 235, 255, 235, 255]]
+      }
+    }
+  },
+
+  "fight_auto_off2on_l_white": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [[1170, 677]],
+        "range": [[235, 255, 235, 255, 235, 255]]
+      }
+    }
+  },
+
+  "fight_slot_0_selected": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [839, 663],
+          [857, 663],
+          [881, 663],
+          [908, 663],
+          [919, 663]
+        ],
+        "range": [
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56]
+        ]
+      }
+    }
+  },
+
+  "fight_slot_1_selected": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [941,  663],
+          [955,  663],
+          [982,  663],
+          [1011, 663],
+          [1021, 663]
+        ],
+        "range": [
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56]
+        ]
+      }
+    }
+  },
+
+  "fight_slot_2_selected": {
+    "feature_type": 2,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [1044, 663],
+          [1051, 663],
+          [1077, 663],
+          [1094, 663],
+          [1120, 663]
+        ],
+        "range": [
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56]
+        ]
+      }
+    }
+  },
+
+  "fight_skill_0_release_finish": {
+    "feature_type": 2,
+    "op": 3,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [839, 663],
+          [857, 663],
+          [881, 663],
+          [908, 663],
+          [919, 663]
+        ],
+        "range": [
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56]
+        ]
+      }
+    },
+    "and_features": [
+      "fight_pause-button_appear"
+    ]
+  },
+
+  "fight_skill_1_release_finish": {
+    "feature_type": 2,
+    "op": 3,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [941,  663],
+          [955,  663],
+          [982,  663],
+          [1011, 663],
+          [1021, 663]
+        ],
+        "range": [
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56]
+        ]
+      }
+    },
+    "and_features": [
+      "fight_pause-button_appear"
+    ]
+  },
+
+  "fight_skill_2_release_finish": {
+    "feature_type": 2,
+    "op": 3,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [1044, 663],
+          [1051, 663],
+          [1077, 663],
+          [1094, 663],
+          [1120, 663]
+        ],
+        "range": [
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56],
+          [192, 212, 35, 55, 36, 56]
+        ]
+      }
+    },
+    "and_features": [
+      "fight_pause-button_appear"
+    ]
+  }
+}

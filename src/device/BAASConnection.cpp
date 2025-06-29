@@ -3,14 +3,17 @@
 //
 
 #include "device/BAASConnection.h"
-#include "device/BAASAdbUtils.h"
+
 #include "BAASImageResource.h"
+#include "config/GameServer.h"
+#include "device/BAASAdbUtils.h"
+#include "config/BAASStaticConfig.h"
 
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-BAASConnection::BAASConnection(BAASUserConfig *cfg) : BAASConnectionAttr(cfg)
+BAASConnection::BAASConnection(BAASUserConfig* cfg) : BAASConnectionAttr(cfg)
 {
     detect_device();
     adb_connect();
@@ -22,7 +25,7 @@ BAASConnection::BAASConnection(BAASUserConfig *cfg) : BAASConnectionAttr(cfg)
     check_mumu_app_keep_alive();
 }
 
-BAASConnection::BAASConnection(const std::string &cfg_path) : BAASConnectionAttr(cfg_path)
+BAASConnection::BAASConnection(const std::string& cfg_path) : BAASConnectionAttr(cfg_path)
 {
     detect_device();
     adb_connect();
@@ -47,7 +50,7 @@ void BAASConnection::detect_device()
         BAASAdbClient::list_device(d);
         // Show available devices
         logger->BAASInfo("Available devices are listed below, choose the one you want to run BAAS on.");
-        for (auto &i: d) {
+        for (auto& i: d) {
             if (i.second == 1) {
                 logger->BAASInfo(to_string(++n_available) + " : [ " + i.first + " ]");
                 available.push_back(i.first);
@@ -98,7 +101,7 @@ void BAASConnection::detect_device()
            .empty() || p.second
                         .empty())) {
         pair<string, int> port_device = {"", -1}, emu_device = {"", -1};
-        for (auto &i: d) {
+        for (auto& i: d) {
             if (i.first == p.first) port_device = i;
             if (i.first == p.second) emu_device = i;
         }
@@ -122,7 +125,7 @@ void BAASConnection::detect_device()
         } else {
             // try to find the ld serial, if fail try paired serial
             bool found = false;
-            for (auto &i: available) {
+            for (auto& i: available) {
                 if (i == serial) {
                     logger->BAASInfo("LDPlayer device serial [ " + serial + " ] is online.");
                     found = true;
@@ -145,8 +148,8 @@ void BAASConnection::detect_device()
     if (serial == "127.0.0.1:7555") {
         vector<string> may_mumu_d;
         for (int i = 1; i <= 2; ++i) {
-            for (auto &j: available)
-                if (BAASUtil::isMuMuFamily(j)) may_mumu_d.push_back(j);
+            for (auto& j: available)
+                if (isMuMuFamily(j)) may_mumu_d.push_back(j);
             if (may_mumu_d.size() == 1) {
                 logger->BAASWarn("Redirect MuMu12 from [ " + serial + " ] to [ " + may_mumu_d[0] + " ]");
                 serial = may_mumu_d[0];
@@ -161,7 +164,7 @@ void BAASConnection::detect_device()
                     brute_force_connect(d);
                     available.clear();
                     logger->BAASInfo("Available devices.");
-                    for (auto &j: d)
+                    for (auto& j: d)
                         if (j.second == 1) {
                             available.push_back(j.first);
                             logger->BAASInfo(j.first);
@@ -175,9 +178,9 @@ void BAASConnection::detect_device()
     if (is_mumu12_family()) {
         bool matched = false;
         int device_port, this_port;
-        this_port = BAASUtil::serial2port(serial);
-        for (auto &i: available) {
-            device_port = BAASUtil::serial2port(i);
+        this_port = serial2port(serial);
+        for (auto& i: available) {
+            device_port = serial2port(i);
             if (device_port == this_port) {
                 matched = true;
                 break;
@@ -186,8 +189,8 @@ void BAASConnection::detect_device()
         if (!matched) {
             logger->BAASWarn("MuMu12 device [ " + serial + " ] not online, search port near by.");
             int diff;
-            for (auto &i: available) {
-                device_port = BAASUtil::serial2port(i);
+            for (auto& i: available) {
+                device_port = serial2port(i);
                 diff = abs(device_port - this_port);
                 if (diff <= 2) {
                     logger->BAASInfo("Assume MuMu12 device serial switch from [ " + serial + " ] to [ " + i + " ]");
@@ -203,7 +206,7 @@ void BAASConnection::adb_connect()
 {
     vector<pair<string, int>> d;
     BAASAdbClient::list_device(d);
-    for (auto &i: d) {
+    for (auto& i: d) {
         switch (i.second) {
             case 0:
                 logger->BAASWarn("Device [ " + i.first + " ] is offline, disconnect it before connecting.");
@@ -226,7 +229,7 @@ void BAASConnection::adb_connect()
         logger->BAASInfo(serial + " is an emulator-* serial, skip adb connect.");
         return;
     } else {
-        if (BAASUtil::re_match(serial, R"([a-zA-Z0-9]+$)")) {
+        if (BAASStringUtil::re_match(serial, R"([a-zA-Z0-9]+$)")) {
             logger->BAASInfo("Serial [ " + serial + " seems to be a Android serial, skip adb connect");
             return;
         }
@@ -256,18 +259,18 @@ void BAASConnection::adb_connect()
     detect_device();
 }
 
-void BAASConnection::brute_force_connect(vector <pair<string, int >> &devices)
+void BAASConnection::brute_force_connect(vector <pair<string, int >>& devices)
 {
     logger->hr("Brute Force Connect");
     BAASAdbClient::list_device(devices);
-    for (auto &i: devices)
+    for (auto& i: devices)
         if (i.second == 1) adb.connect(i.first);
     BAASAdbClient::list_device(devices);
 }
 
-std::pair<std::string, std::string> BAASConnection::port_emu_pair_serial(const string &serial)
+std::pair<std::string, std::string> BAASConnection::port_emu_pair_serial(const string& serial)
 {
-    int port = BAASUtil::serial2port(serial);
+    int port = serial2port(serial);
     if (serial.starts_with("127.0.0.1:") && port >= 5555 && port <= 5555 + 32)
         return {"127.0.0.1:" + to_string(port), "emulator-" + to_string(port - 1)};
     else if (serial.starts_with("emulator-") && port >= 5554 && port <= 5554 + 32)
@@ -275,7 +278,7 @@ std::pair<std::string, std::string> BAASConnection::port_emu_pair_serial(const s
     return {"", ""};
 }
 
-std::string BAASConnection::adb_shell_bytes(const string &command)
+std::string BAASConnection::adb_shell_bytes(const string& command)
 {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     string res;
@@ -284,7 +287,7 @@ std::string BAASConnection::adb_shell_bytes(const string &command)
     return res;
 }
 
-std::string BAASConnection::adb_shell_bytes(const vector <std::string> &commandList)
+std::string BAASConnection::adb_shell_bytes(const vector <std::string>& commandList)
 {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     string res;
@@ -292,7 +295,7 @@ std::string BAASConnection::adb_shell_bytes(const vector <std::string> &commandL
     return res;
 }
 
-std::string BAASConnection::adb_getprop(const string &name)
+std::string BAASConnection::adb_getprop(const string& name)
 {
     string temp = adb_shell_bytes("getprop " + name);
     return temp;
@@ -317,7 +320,7 @@ std::string BAASConnection::nemud_app_keep_alive()
     return t;
 }
 
-bool BAASConnection::is_avd(const string &serial)
+bool BAASConnection::is_avd(const string& serial)
 {
     pair<string, string> p = BAASConnection::port_emu_pair_serial(serial);
     if (p.first
@@ -338,26 +341,26 @@ bool BAASConnection::is_mumu_over_version_356()
     return false;
 }
 
-void BAASConnection::list_package(vector <std::string> &packages)
+void BAASConnection::list_package(vector <std::string>& packages)
 {
     logger->BAASInfo("Get Package List");
     // faster : 10ms
     string res = adb_shell_bytes(R"(pm list packages)");
-    BAASUtil::re_find_all(res, R"(package:([^\s]+))", packages);
+    BAASStringUtil::re_find_all(res, R"(package:([^\s]+))", packages);
     if (!packages.empty()) return;
     // slower ,but list system packages : 200 - 500ms
     res = adb_shell_bytes(R"(dumpsys package | grep "Package \[")");
-    BAASUtil::re_find_all(res, R"(Package \[([^\]]+)\])", packages);
+    BAASStringUtil::re_find_all(res, R"(Package \[([^\]]+)\])", packages);
 }
 
-void BAASConnection::list_all_known_packages(vector <std::string> &packages)
+void BAASConnection::list_all_known_packages(vector <std::string>& packages)
 {
     packages.clear();
     vector<string> valid_packages = static_config->valid_packages();
     assert(!valid_packages.empty());
     vector<string> packages_in_device;
     list_package(packages_in_device);
-    for (auto &i: packages_in_device)
+    for (auto& i: packages_in_device)
         if (std::find(valid_packages.begin(), valid_packages.end(), i) != valid_packages.end())
             packages.push_back(i);
     logger->BAASInfo("Packages Found in device [ " + serial + " ] are listed below.");
@@ -388,42 +391,42 @@ void BAASConnection::auto_detect_package()
 }
 
 int BAASConnection::adb_push(
-        const string &local,
-        const string &remote
+        const string& local,
+        const string& remote
 )
 {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     return d.push(local, remote);
 }
 
-string BAASConnection::adb_command(const string &command)
+string BAASConnection::adb_command(const string& command)
 {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     return d.getCommandResult(command);
 }
 
-BAASAdbConnection *BAASConnection::adb_shell_stream(const string &command)
+BAASAdbConnection* BAASConnection::adb_shell_stream(const string& command)
 {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     return d.shellStream(command);
 }
 
-BAASAdbConnection *BAASConnection::adb_shell_stream(const vector <std::string> &commandList)
+BAASAdbConnection* BAASConnection::adb_shell_stream(const vector <std::string>& commandList)
 {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     return d.shellStream(commandList);
 }
 
-BAASAdbConnection *BAASConnection::create_connection(
-        const string &network,
-        const string &address
+BAASAdbConnection* BAASConnection::create_connection(
+        const string& network,
+        const string& address
 )
 {
     BAASAdbDevice d = BAASAdbDevice(&adb, serial);
     return d.createConnection(network, address);
 }
 
-bool BAASConnection::clear_cache(const string &package)
+bool BAASConnection::clear_cache(const string& package)
 {
     logger->BAASInfo("Clear Cache for package [ " + package + " ]");
     string res = adb_shell_bytes("pm clear " + package);
@@ -435,16 +438,16 @@ bool BAASConnection::clear_cache(const string &package)
 }
 
 void BAASConnection::current_app(
-        string &pkg,
-        string &activity,
-        int &pid
+        string& pkg,
+        string& activity,
+        int& pid
 )
 {
     logger->BAASInfo("Get Current App");
     string res = adb_shell_bytes("dumpsys activity top");
     vector<smatch> m;
     string pat = R"(ACTIVITY ([^\s]+)/([^/\s]+) \w+ pid=(\d+))";
-    BAASUtil::re_find_all(res, pat, m);
+    BAASStringUtil::re_find_all(res, pat, m);
     if (m.empty()) {
         logger->BAASError("No current app found.");
         throw RequestHumanTakeOver("Couldn't get focused app.");
@@ -455,19 +458,19 @@ void BAASConnection::current_app(
     pid = stoi(m[tar][3]);
 }
 
-void BAASConnection::app_stop(const string &package)
+void BAASConnection::app_stop(const string& package)
 {
     adb_shell_bytes("am force-stop " + package);
 }
 
-void BAASConnection::app_start(const string &package)
+void BAASConnection::app_start(const string& package)
 {
     adb_shell_bytes("monkey -p " + package + " -c android.intent.category.LAUNCHER 1");
 }
 
 void BAASConnection::app_start(
-        const string &package,
-        const string &activity
+        const string& package,
+        const string& activity
 )
 {
     adb_shell_bytes(
@@ -482,7 +485,7 @@ void BAASConnection::start_self()
     else app_start(package_name, activity_name);
 }
 
-BAASAdbDevice *BAASConnection::adb_device()
+BAASAdbDevice* BAASConnection::adb_device()
 {
     return new BAASAdbDevice(&adb, serial);
 }

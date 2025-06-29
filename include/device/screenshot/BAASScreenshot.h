@@ -10,18 +10,22 @@
 BAAS_NAMESPACE_BEGIN
 
 class BAASScreenshot {
+
 public:
+
     BAASScreenshot(
-            const std::string &method,
-            BAASConnection *connection,
+            const std::string& method,
+            BAASConnection* connection,
             const double interval = 0.3
     );
 
     void init();
 
-    void set_interval(const double value) noexcept;
+    void set_interval(double value) noexcept;
 
-    void screenshot(cv::Mat &img);
+    void screenshot(cv::Mat& img);
+
+    void immediate_screenshot(cv::Mat& img);
 
     void ensure_interval() const;
 
@@ -30,7 +34,7 @@ public:
     bool is_lossy();
 
     void set_screenshot_method(
-            const std::string &method,
+            const std::string& method,
             bool exit = true
     );
 
@@ -42,19 +46,20 @@ public:
     }
 
 private:
-    BaseScreenshot *screenshot_instance;
+
+    BaseScreenshot* screenshot_instance;
 
     std::string screenshot_method;
 
-    BAASConnection *connection;
+    BAASConnection* connection;
 
-    BAASLogger *logger;
+    BAASLogger* logger;
 
     int interval;
 
     long long last_screenshot_time = 0;
 
-    static std::vector<std::string> available_methods;
+    const static std::set<std::string> available_methods;
 };
 
 BAAS_NAMESPACE_END

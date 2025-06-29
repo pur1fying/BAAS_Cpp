@@ -69,10 +69,10 @@ int BAASOCR::init(
     }
 
     std::string key = "/ocr_model_name/" + language + "/";
-    std::string det = static_config->get(key + "det", std::string());
-    std::string cls = static_config->get(key + "cls", std::string());
-    std::string rec = static_config->get(key + "rec", std::string());
-    std::string keys = static_config->get(key + "dict", std::string());
+    std::string det = static_config->getString(key + "det", "");
+    std::string cls = static_config->getString(key + "cls", "");
+    std::string rec = static_config->getString(key + "rec", "");
+    std::string keys = static_config->getString(key + "dict", "");
 
     auto ocr = new OcrLite();
     BAASGlobalLogger->sub_title("OCR Init");
@@ -129,13 +129,12 @@ void BAASOCR::ocr(
         if (logger != nullptr) logger->BAASError("OCR for" + language + " not init");
         return;
     }
-    std::string candidates_cpy = candidates;
     std::vector<std::string> unique_candidates;
-    string_unique_utf8_characters(candidates_cpy, unique_candidates);
+    string_unique_utf8_characters(candidates, unique_candidates);
 
     if (logger != nullptr and !candidates.empty()) {
         std::string temp;
-        BAASUtil::stringJoin(unique_candidates, "", temp);
+        BAASStringUtil::stringJoin(unique_candidates, "", temp);
         logger->BAASInfo("Ocr Candidates [ " + temp + " ]");
     }
     result = res->second->detect(
@@ -159,20 +158,18 @@ void BAASOCR::ocr_for_single_line(
         const std::string &log_content,
         BAASLogger *logger,
         const std::string &candidates
-
 )
 {
     auto res = ocr_map.find(language);
     if (res == ocr_map.end()) {
-        if (logger != nullptr) logger->BAASError("OCR for" + language + " not init");
+        if (logger != nullptr) logger->BAASError("OCR language [ " + language + " ] not init.");
         return;
     }
-    std::string candidates_cpy = candidates;
     std::vector<std::string> unique_candidates;
-    string_unique_utf8_characters(candidates_cpy, unique_candidates);
+    string_unique_utf8_characters(candidates, unique_candidates);
     if (logger != nullptr and !candidates.empty()) {
         std::string temp;
-        BAASUtil::stringJoin(unique_candidates, "", temp);
+        BAASStringUtil::stringJoin(unique_candidates, "", temp);
         logger->BAASInfo("Ocr Candidates [ " + temp + " ]");
     }
 
@@ -195,11 +192,12 @@ std::vector<int> BAASOCR::init(
 {
     // use config in global setting
     if (!gpu_id.has_value())
-        gpu_id = global_setting->get("/ocr/gpu_id", -1);
+        gpu_id = global_setting->ocr_gpu_id();
     if (!num_thread.has_value())
-        num_thread = global_setting->getInt("/ocr/num_thread", 0);
+        num_thread = global_setting->ocr_num_thread();
     if (!enable_cpu_memory_arena.has_value())
-        enable_cpu_memory_arena = global_setting->getBool("/ocr/enable_cpu_memory_arena", false);
+        enable_cpu_memory_arena = global_setting->ocr_enable_cpu_memory_arena();
+
     std::vector<int> res;
     for (auto &i: languages)
         res.push_back(
@@ -297,7 +295,7 @@ void BAASOCR::string_unique_utf8_characters(
     if (text.empty()) return;
     output.clear();
     std::vector<std::string> matches;
-    BAASUtil::re_find_all(text, REGEX_UTF8PATTERN, matches);
+    BAASStringUtil::re_find_all(text, REGEX_UTF8PATTERN, matches);
     for (auto &i: matches) output.push_back(i);
     sort(output.begin(), output.end());
     std::set<std::string> unique(output.begin(), output.end());
@@ -329,6 +327,12 @@ void BAASOCR::update_valid_languages()
         BAASGlobalLogger->BAASInfo(language);
         valid_languages.push_back(i.key());
     }
+}
+
+bool BAASOCR::is_valid_language(const std::string &language)
+{
+    for (auto& _lang : valid_languages) if(language == _lang) return true;
+    return false;
 }
 
 void BAASOCR::release_all()
@@ -401,6 +405,8 @@ void BAASOCR::disable_thread_pool()
         pool.reset();
     }
 }
+
+
 
 
 BAAS_NAMESPACE_END

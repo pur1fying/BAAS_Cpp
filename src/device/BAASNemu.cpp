@@ -2,45 +2,45 @@
 // Created by pc on 2024/5/22.
 //
 
+#ifdef _WIN32
+
 #include "device/BAASNemu.h"
+
+#include "device/utils.h"
+#include "utils/BAASChronoutil.h"
 
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
-std::map<int, BAASNemu *> BAASNemu::connections;
+std::map<int, BAASNemu*> BAASNemu::connections;
 
-BAASNemu *BAASNemu::get_instance(BAASConnection *connection)
+BAASNemu* BAASNemu::get_instance(BAASConnection* connection)
 {
     string mm_path = connection->emulator_folder_path();
-    int id = BAASUtil::MuMu_serial2instance_id(connection->get_serial());
+    int id = MuMu_serial2instance_id(connection->get_serial());
     for (auto &conn: connections)
-        if (conn.second
-                ->mumu_install_path == mm_path && conn.second
-                                                      ->instance_id == id) {
-            connection->get_logger()
-                      ->BAASInfo(
-                              "Nemu path [ " + conn.second
-                                                   ->mumu_install_path + " ], instance : " + to_string(id) +
-                              " already exist, use it."
+        if (conn.second->mumu_install_path == mm_path && conn.second->instance_id == id) {
+            connection->get_logger()->BAASInfo("Nemu path [ " + conn.second->mumu_install_path + " ], "
+                                                "instance : " + to_string(id) + " already exist, use it."
                       );
             return conn.second;
         }
     return new BAASNemu(connection);
 }
 
-BAASNemu::BAASNemu(BAASConnection *connection)
+BAASNemu::BAASNemu(BAASConnection* connection)
 {
     logger = connection->get_logger();
     mumu_install_path = connection->emulator_folder_path();
-    instance_id = BAASUtil::MuMu_serial2instance_id(connection->get_serial());
+    instance_id = MuMu_serial2instance_id(connection->get_serial());
     display_id = 0;
     init_dll();
     connect();
 }
 
-BAASNemu::BAASNemu(string &installPath)
+BAASNemu::BAASNemu(string& installPath)
 {
-    logger = (BAASLogger *) BAASGlobalLogger;
+    logger = (BAASLogger*) BAASGlobalLogger;
     mumu_install_path = installPath;
     instance_id = 0;
     display_id = 0;
@@ -52,14 +52,14 @@ BAASNemu::BAASNemu(string &installPath)
 void BAASNemu::connect()
 {
     for (auto &connection: connections) {
-        if (connection.second
-                      ->mumu_install_path == mumu_install_path && connection.second
-                                                                            ->instance_id == instance_id) {
+        if (connection.second->mumu_install_path == mumu_install_path && connection.second->instance_id == instance_id) {
             logger->BAASWarn("Already connected");
             return;
         }
     }
-    connection_id = nemu_connect(BAASUtil::stringToWString(mumu_install_path).c_str(), instance_id);
+    std::wstring w_mumu_install_path;
+    BAASStringUtil::str2wstr(mumu_install_path, w_mumu_install_path);
+    connection_id = nemu_connect(w_mumu_install_path.c_str(), instance_id);
     if (connection_id == 0) {
         logger->BAASError("Nemu connect failed");
         throw NemuIpcError("Nemu connect failed");
@@ -91,22 +91,30 @@ void BAASNemu::disconnect()
 }
 
 
-void BAASNemu::screenshot(cv::Mat &image)
+void BAASNemu::screenshot(cv::Mat& image)
 {
     if (nemu_capture_display(
-            connection_id, 0, int(pixels.size()), &resolution.first, &resolution.second, pixels.data()) != 0)
+            connection_id,
+            0,
+            int(pixels.size()),
+            &resolution.first,
+            &resolution.second,
+            pixels.data()
+       ) != 0
+    ) {
+        BAASGlobalLogger->BAASError("Nemu capture display failed");
         throw NemuIpcError("Nemu capture display failed");
-    imageOpMutex.lock();
+    }
+
     cv::Mat temp = cv::Mat(resolution.second, resolution.first, CV_8UC4, pixels.data());
     cv::cvtColor(temp, image, cv::COLOR_BGRA2RGB);
     cv::flip(image, image, 0);
-    imageOpMutex.unlock();
 }
 
 int BAASNemu::get_resolution(
         int connectionId,
         int displayId,
-        std::pair<int, int> &resolution
+        std::pair<int, int>& resolution
 )
 {
     return nemu_capture_display(connectionId, displayId, 0, &resolution.first, &resolution.second, nullptr);
@@ -118,12 +126,9 @@ void BAASNemu::click(
 )
 {
     update_resolution();
-    int t = BAASUtil::genRandInt(10, 20);
-    convertXY(x, y);
+//    convertXY(x, y);
     down(x, y);
-    BAASUtil::sleepMS(t);
     up();
-    BAASUtil::sleepMS(50 - t);
 }
 
 void BAASNemu::click(BAASPoint point)
@@ -138,9 +143,9 @@ void BAASNemu::long_click(
 )
 {
     update_resolution();
-    convertXY(x, y);
+//    convertXY(x, y);
     down(x, y);
-    BAASUtil::sleepMS(int(duration * 1000));
+    BAASChronoUtil::sleepMS(int(duration * 1000));
     up();
 }
 
@@ -162,18 +167,18 @@ void BAASNemu::swipe(
 )
 {
     update_resolution();
-    convertXY(start_x, start_y);
-    convertXY(end_x, end_y);
+//    convertXY(start_x, start_y);
+//    convertXY(end_x, end_y);
 
     vector<pair<int, int>> points;
-    BAASUtil::insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
+    insert_swipe(points, start_x, start_y, end_x, end_y, step_len);
 
     int sleep_time = int(step_duration * 1000);
 
     down(start_x, start_y);
 
     for (int i = 1; i < points.size(); i++) {
-        BAASUtil::sleepMS(sleep_time);
+        BAASChronoUtil::sleepMS(sleep_time);
         down(points[i].first, points[i].second);
     }
 
@@ -197,8 +202,8 @@ void BAASNemu::down(BAASPoint point) const
 }
 
 void BAASNemu::convertXY(
-        int &x,
-        int &y
+        int& x,
+        int& y
 ) const
 {
     if (resolution.first < resolution.second) return;
@@ -209,7 +214,7 @@ void BAASNemu::convertXY(
     printf("x: %d, y: %d\n", x, y);
 }
 
-void BAASNemu::convertXY(BAASPoint &point) const
+void BAASNemu::convertXY(BAASPoint& point) const
 {
     int temp = point.x;
     point.x = resolution.second - point.y;
@@ -281,3 +286,5 @@ void BAASNemu::release(int connectionId)
 }
 
 BAAS_NAMESPACE_END
+
+#endif // _WIN32

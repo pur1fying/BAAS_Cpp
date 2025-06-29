@@ -2,10 +2,11 @@
 // Created by pc on 2024/8/10.
 //
 
-#if defined(BAAS_APP_BUILD_FEATURE) && defined(BAAS_APP_BUILD_PROCEDURE)
+
+#include "procedure/AppearThenClickProcedure.h"
 
 #include "BAAS.h"
-#include "procedure/AppearThenClickProcedure.h"
+#include "utils/BAASChronoUtil.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -20,8 +21,8 @@ using namespace nlohmann;
         "max_click_times": 30,      // 30 times click between two features throw error
         "show_log": false,          // show feature compare log
         "possibles": [              // array  list all features to click
-               ["UI-AT_restart_login-bonus", 360, 720, 1.0,      5,     1,    5,      0,              0.0,      0.0]
-            // [feature_name ,               x,   y  , interval, count, type, offset, click_interval, pre_wait, post_wait]
+               ["UI-AT_restart_login-bonus", 360, 720, 1.0,      0.0,      0.0,       5,      0,             1,    5,    ]
+            // [feature_name ,               x,   y  , interval, pre_wait, post_wait, count, click_interval, type, offset]
         ],
         "tentative_click": [true, 640, 360, 10]  // click (640, 360) when 10s didn't find any feature
      }
@@ -33,57 +34,60 @@ using namespace nlohmann;
 
 BAAS_NAMESPACE_BEGIN
 
-AppearThenClickProcedure::AppearThenClickProcedure(BAASConfig *possible_features) : BaseProcedure(possible_features)
+AppearThenClickProcedure::AppearThenClickProcedure(
+        BAAS* baas,
+        const BAASConfig& possible_features
+) : BaseProcedure(baas, possible_features)
 {
+    json end = possible_feature.getJson("ends");
 
-}
-
-void AppearThenClickProcedure::implement(
-        BAAS *baas,
-        BAASConfig &output
-)
-{
-    this->baas = baas;
-    this->logger = baas->get_logger();
-
-    json end = possible_feature->get<json>("ends");
-    vector<string> end_feature_names;
-
-    bool show_log = baas->script_show_image_compare_log;
-
-    if (end.is_array() or end.is_object()) { for (auto &i: end)if (i.is_string())end_feature_names.push_back(i); }
+    if (end.is_array() or end.is_object()) { for (auto &i: end) if (i.is_string())end_feature_names.push_back(i); }
     else if (end.is_string()) { end_feature_names.push_back(end); }
 
-    json possible = possible_feature->get<json>("possibles", json::array());
+    json possible = possible_feature.getJson("possibles", json::array());
     if (possible.is_array())
         for (auto &i: possible)
             if (i.is_array() && i.size() >= 3) {
-                possibles.push_back(new BAASConfig(i, logger));
-                possibles_feature_names.push_back(possibles[possibles.size() - 1]->get<string>("/0"));
+                possibles.push_back(_get_click_param(BAASConfig(i, logger)));
+                possibles_feature_names.push_back(possibles[possibles.size() - 1].description);
             }
-
-    max_stuck_time = possible_feature->getInt("max_stuck_time", 20);
-    max_click = possible_feature->getInt("max_click_times", 20);
-    max_execute_time = possible_feature->getLLong("max_execute_time", LLONG_MAX);
-    enable_tentative_click = possible_feature->getBool("/tentative_click/0", false);
+    max_stuck_time = (long long)(possible_feature.getDouble("max_stuck_time", 20) * 1000);
+    max_click = possible_feature.getInt("max_click_times", 20);
+    max_execute_time = (long long)(possible_feature.getDouble("max_execute_time", 6000) * 1000);
+    enable_tentative_click = possible_feature.getBool("/tentative_click/0", false);
     if (enable_tentative_click) {
-        tentative_click_x = possible_feature->getInt("/tentative_click/1", 640);
-        tentative_click_y = possible_feature->getInt("/tentative_click/2", 360);
-        tentative_click_stuck_time = possible_feature->getLLong("/tentative_click/3", 10);
+        tentative_click_x = possible_feature.getInt("/tentative_click/1", 640);
+        tentative_click_y = possible_feature.getInt("/tentative_click/2", 360);
+        tentative_click_stuck_time = (long long)(possible_feature.getDouble("/tentative_click/3", 10.0)*1000);
     }
+}
 
-    bool skip_first_screenshot = possible_feature->getBool("skip_first_screenshot", false);
-
+void AppearThenClickProcedure::implement(
+        BAASConfig &output,
+        bool skip_first_screenshot
+)
+{
+    last_clicked_pair_counter.first.second = 0;
+    last_clicked_pair_counter.second.second = 0;
+    last_clicked_counter.clear();
     output.clear();
 
-    start_time = BAASUtil::getCurrentTimeStamp();
+    start_time = BAASChronoUtil::getCurrentTimeMS();
     last_appeared_time = start_time;
     last_tentative_click_time = start_time;
 
     while (baas->is_running()) {
-        this_round_start_time = BAASUtil::getCurrentTimeStamp();
+
+        if (!skip_first_screenshot) {
+            baas->update_screenshot_array();
+            baas->reset_all_feature();
+//            wait_loading();
+        }
+        else skip_first_screenshot = false;
+
+        this_round_start_time = BAASChronoUtil::getCurrentTimeMS();
         if (this_round_start_time - start_time >= max_execute_time) {
-            logger->hr("Max execute time " + to_string(max_execute_time) + "s reached.");
+            logger->hr("Max execute time " + to_string(max_execute_time) + "ms reached.");
             logger->BAASError("Looking for End features : ");
             logger->BAASError(end_feature_names);
             logger->BAASError("Looking for Possible features : ");
@@ -92,7 +96,7 @@ void AppearThenClickProcedure::implement(
         }
 
         if (this_round_start_time - last_appeared_time >= max_stuck_time) {
-            logger->hr(to_string(max_stuck_time) + "s didn't find any feature, assume game stuck.");
+            logger->hr(to_string(max_stuck_time) + "ms didn't find any feature, assume game stuck.");
             logger->BAASError("Looking for End features : ");
             logger->BAASError(end_feature_names);
             logger->BAASError("Looking for Possible features : ");
@@ -100,23 +104,14 @@ void AppearThenClickProcedure::implement(
             throw GameStuckError("Game stuck.");
         }
 
-        if (enable_tentative_click && this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time) {
+        if (enable_tentative_click && (this_round_start_time - last_tentative_click_time >= tentative_click_stuck_time)) {
             baas->click(tentative_click_x, tentative_click_y, 1, 1, 5, 0.0, 0.0, 0.0, "Tentative Click");
-            last_tentative_click_time = BAASUtil::getCurrentTimeStamp();
+            last_tentative_click_time = BAASChronoUtil::getCurrentTimeMS();
         }
 
-        if (!skip_first_screenshot)wait_loading();
-        else skip_first_screenshot = false;
-
-        for (auto &i: end_feature_names) BAASFeature::reset_feature(i);
-        for (auto &i: possibles_feature_names) BAASFeature::reset_feature(i);
-
-
-        for (int i = 0; i < end_feature_names.size(); ++i) {
-            current_comparing_feature_name = end_feature_names[i];
-            if (BAASFeature::appear(
-                    baas->connection, current_comparing_feature_name, baas->latest_screenshot, temp_output, show_log
-            )) {
+        for (const auto & end_feature_name : end_feature_names) {
+            current_comparing_feature_name = end_feature_name;
+            if (baas->feature_appear(current_comparing_feature_name, temp_output, show_log)) {
                 logger->BAASInfo("End [ " + current_comparing_feature_name + " ]. ");
                 output.insert("end", current_comparing_feature_name);
                 return;
@@ -125,13 +120,11 @@ void AppearThenClickProcedure::implement(
 
         for (int i = 0; i < possibles.size(); i++) {
             current_comparing_feature_name = possibles_feature_names[i];
-            if (BAASFeature::appear(
-                    baas->connection, possibles_feature_names[i], baas->latest_screenshot, temp_output, show_log
-            )) {
+            if (baas->feature_appear(current_comparing_feature_name, temp_output, show_log)) {
                 logger->BAASInfo("Feature [ " + possibles_feature_names[i] + " ] appeared. ");
                 last_appeared_feature_name = possibles_feature_names[i];
-                last_appeared_time = BAASUtil::getCurrentTimeStamp();
-                solve_feature_action_click(possibles[i]);
+                last_appeared_time = BAASChronoUtil::getCurrentTimeMS();
+                solve_feature_action_click(i);
                 last_tentative_click_time = last_appeared_time;
                 break;
             }
@@ -144,21 +137,19 @@ void AppearThenClickProcedure::wait_loading()
 {
     long long t_loading;
     baas->update_screenshot_array();
-    long long start = BAASUtil::getCurrentTimeMS();
+    long long start = BAASChronoUtil::getCurrentTimeMS();
     string zero, ld;
     while (baas->is_running()) {
         if (BAASFeature::reset_then_feature_appear(baas, "common_loading_appear")) {
-            t_loading = BAASUtil::getCurrentTimeMS() - start;
+            t_loading = BAASChronoUtil::getCurrentTimeMS() - start;
             ld = to_string(t_loading);
             zero = string(6 - ld.length(), ' ');
             if (ld.length() <= 6)
                 zero += ld;
             logger->BAASInfo("Loading :" + zero + "ms");
-            if (t_loading >= 20000 && baas->get_screenshot()
-                                          ->get_interval() < 1) {
+            if (t_loading >= 20000 && baas->get_screenshot()->get_interval() < 1) {
                 logger->BAASInfo("Loading too long, add screenshot interval to 1s.");
-                baas->get_screenshot()
-                    ->set_interval(1);
+                baas->get_screenshot()->set_interval(1);
             }
             baas->update_screenshot_array();
         } else break;
@@ -167,42 +158,39 @@ void AppearThenClickProcedure::wait_loading()
 
 void AppearThenClickProcedure::clear_possibles()
 {
-    for (auto &i: possibles) delete i;
     possibles.clear();
     possibles_feature_names.clear();
 }
 
-void AppearThenClickProcedure::solve_feature_appear(
-        BAASConfig *feature,
-        bool show_log
-)
+
+void AppearThenClickProcedure::solve_feature_action_click(int index)
 {
+    _click_param& param = possibles[index];
 
-}
+    // click p check
+    if (param.x < 0 || param.y < 0) return;
 
-void AppearThenClickProcedure::solve_feature_action_click(BAASConfig *parameters)
-{
-
-    int interval = int(parameters->getDouble("/3", 1.0) * 1000);
+    // interval
     if (last_clicked_feature_name == last_appeared_feature_name &&
-        (int(BAASUtil::getCurrentTimeMS() - last_clicked_time) < interval))
+        (int(BAASChronoUtil::getCurrentTimeMS() - last_clicked_time) < param.interval))
         return;
 
-    int x = parameters->getInt("/1");
-    int y = parameters->getInt("/2");
-    int count = parameters->getInt("/4", 1);
-    uint8_t type = parameters->getInt("/5", 1);
-    int offset = parameters->getInt("/6", 5);
-    double click_interval = parameters->getDouble("/7", 0.0);
-    double pre_wait = parameters->getDouble("/8", 0.0);
-    double post_wait = parameters->getDouble("/9", 0.0);
-
-    baas->click(x, y, count, type, offset, click_interval, pre_wait, post_wait, current_comparing_feature_name);
+    baas->click(
+            param.x,
+            param.y,
+            param.count,
+            param.type,
+            param.offset,
+            param.click_interval,
+            param.pre_wait,
+            param.post_wait,
+            param.description
+    );
 
     insert_last_clicked_queue(last_appeared_feature_name);  // this clicked
     pop_last_clicked_queue(max_click);                      // pop last clicked and check max click
 
-    last_clicked_time = BAASUtil::getCurrentTimeMS();
+    last_clicked_time = BAASChronoUtil::getCurrentTimeMS();
     last_clicked_feature_name = last_appeared_feature_name;
 }
 
@@ -273,6 +261,23 @@ void AppearThenClickProcedure::clear_resource()
     temp_output.clear();
 }
 
+_click_param AppearThenClickProcedure::_get_click_param(const BAASConfig& parameters)
+{
+    _click_param ret;
+    ret.description = parameters.getString("/0");
+    ret.x = parameters.getInt("/1");
+    ret.y = parameters.getInt("/2");
+    ret.interval = ( long long )(parameters.getDouble("/3", 0.0) * 1000);
+    ret.pre_wait = parameters.getDouble("/4", 0.0);
+    ret.post_wait = parameters.getDouble("/5", 0.0);
+    ret.count = parameters.getInt("/6", 1);
+    ret.click_interval = parameters.getDouble("/7", 0.0);
+    ret.type = parameters.getInt("/8", 1);
+    ret.offset = parameters.getInt("/9", 5);
+
+    return ret;
+}
+
+
 BAAS_NAMESPACE_END
 
-#endif  //BAAS_APP_BUILD_FEATURE && BAAS_APP_BUILD_PROCEDURE

@@ -1,4 +1,64 @@
 {
+  "BAAS": {
+    "auto_fight": {
+      "yolo": {
+        "models": {
+          "best.onnx": {
+            "yaml_path": "data.yaml",
+            "type": "fp32"
+          },
+          "best_fp16.onnx": {
+            "yaml_path": "data.yaml",
+            "type": "fp16"
+          }
+        }
+      },
+      "cost" :{
+        "increase_1_dealt_x": 31.7,
+        "recognize_region": [820, 681, 1141, 696],
+        "target_pixel_rgb": {
+          "min": [250, 250, 250],
+          "max": [255, 255, 255]
+         }
+      },
+      "BossHealth": {
+        "current_ocr_region": [549, 47, 656, 64],
+        "max_ocr_region": [666, 47, 775, 64],
+        "ocr_region": [549, 47, 775, 64],
+        "ocr_model_name": "en-us"
+      },
+      "Skill": {
+        "threshold": 0.8,
+        "rgb_diff": 20,
+        "slot": {
+          "center": [
+            [883,  621],
+            [985,  621],
+            [1087, 621]
+          ],
+          "match_template_regions": [
+            [839, 594, 936, 670],
+            [940, 594, 1032, 670],
+            [1041, 594, 1133, 670]
+          ],
+          "cost_ocr": {
+            "regions" : [
+              [844, 569, 874, 595],
+              [946, 569, 976, 595],
+              [1047, 569, 1077, 595]
+            ],
+            "model_name": "en-us"
+          }
+        },
+        "templates": {
+          "Ui": {
+            "active": ["skill_active"],
+            "inactive": ["skill_l_inactive", "skill_r_inactive"]
+          }
+        }
+      }
+    }
+  },
   "emulator_types" : {
     "mumu": "MuMu模拟器",
     "bluestacks_nxt_cn": "蓝叠模拟器",
@@ -39,7 +99,7 @@
   "server_language_choice": {
     "JP": ["ja-jp"],
     "CN": ["zh-cn"],
-    "Global": ["en-us", "ko-kr", "ru-ru", "zh-tw"]
+    "Global": ["en-us"]
   },
   "activity_name": {
     "com.bandainamcoent.idolmaster_gakuen" : "com.google.firebase.MessagingUnityPlayerActivity",
@@ -50,8 +110,6 @@
     "com.nexon.bluearchiveone" : ".MxUnityPlayerActivity",
     "com.YostarJP.BlueArchive" : "com.yostarjp.bluearchive.MxUnityPlayerActivity"
   },
-  "available_screenshot_methods": ["adb", "scrcpy", "ascreencap", "nemu", "ldopengl"],
-  "available_control_methods": ["adb", "scrcpy", "nemu"],
   "google_store_package_name": "com.android.vending",
   "ocr_model_name": {
     "zh-cn_v3": {

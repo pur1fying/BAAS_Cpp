@@ -5,11 +5,7 @@
 #ifndef BAAS_DEVICE_CONTROL_BAASCONTROL_H_
 #define BAAS_DEVICE_CONTROL_BAASCONTROL_H_
 
-#include "NemuControl.h"
-#include "ScrcpyControl.h"
-#include "AdbControl.h"
 #include "BaseControl.h"
-#include "BAASImageUtil.h"
 
 #define OFFSET_TYPE_NOCHANGE 0
 #define OFFSET_TYPE_RECTANGLE 1
@@ -20,19 +16,18 @@ BAAS_NAMESPACE_BEGIN
 class BAASControl {
 
 public:
+
     explicit BAASControl(
-            const std::string &method,
+            const std::string& method,
             double screen_ratio,
-            BAASConnection *connection
+            BAASConnection* connection
     );
 
     void init();
 
     void click(
             BAASPoint point,
-            uint8_t type = 1,
-            int offset = 5,
-            const std::string &description = ""
+            const std::string& description = ""
     );
 
     void click(
@@ -40,7 +35,7 @@ public:
             int y,
             uint8_t type = 1,
             int offset = 5,
-            const std::string &description = ""
+            const std::string& description = ""
     );
 
     void click(
@@ -51,7 +46,7 @@ public:
             double interval = 0.0,
             double pre_wait = 0.0,
             double post_wait = 0.0,
-            const std::string &description = ""
+            const std::string& description = ""
     );
 
     void click(
@@ -60,10 +55,10 @@ public:
             int count,
             uint8_t type = 1,
             int offset = 5,
-            double interval = 0.0,
+            double click_interval = 0.0,
             double pre_wait = 0.0,
             double post_wait = 0.0,
-            const std::string &description = ""
+            const std::string& description = ""
     );
 
     void long_click(
@@ -98,13 +93,13 @@ public:
     void exit();
 
     void set_control_method(
-            const std::string &method,
+            const std::string& method,
             bool exit = true
     );
 
     void set_x_y_offset(
-            int &x,
-            int &y,
+            int& x,
+            int& y,
             uint8_t type,
             int size
     );
@@ -113,7 +108,7 @@ public:
             int x,
             int y,
             int count = 1,
-            const std::string &description = ""
+            const std::string& description = ""
     );
 
     void gen_swipe_log(
@@ -125,17 +120,18 @@ public:
     );
 
 private:
-    BAASLogger *logger;
+
+    BAASLogger* logger;
 
     double ratio;
 
-    BAASConnection *connection;
+    BAASConnection* connection;
 
     std::string control_method;
 
-    static std::vector<std::string> available_methods;
+    static const std::set<std::string> available_methods;
 
-    BaseControl *control;
+    BaseControl* control;
 };
 
 BAAS_NAMESPACE_END

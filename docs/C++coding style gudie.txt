@@ -63,7 +63,7 @@ c++标头
 #include <opencv2/opencv.hpp>
 
 项目中其他头文件
-#include "BAASUtil.h"
+#include "BAASRandomUtil.h"
 
 每一类头文件中该有空行隔开
 

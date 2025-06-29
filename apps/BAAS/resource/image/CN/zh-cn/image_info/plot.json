@@ -1,0 +1,18 @@
+{
+  "group": "plot",
+  "path": "plot",
+  "image": {
+    "menu": {
+      "region": [1172, 21, 1231, 56]
+    },
+    "skip-plot-button": {
+      "region": [1193, 103, 1235, 132]
+    },
+    "skip-plot-notice": {
+        "region": [606, 124, 672, 160]
+    },
+    "formation": {
+      "region": [100, 9, 250, 40]
+    }
+  }
+}

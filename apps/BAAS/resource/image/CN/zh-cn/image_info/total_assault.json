@@ -1,0 +1,9 @@
+{
+  "group": "total_assault",
+  "path": "total_assault",
+  "image": {
+    "formation": {
+      "region": [100, 7, 287, 41]
+    }
+  }
+}

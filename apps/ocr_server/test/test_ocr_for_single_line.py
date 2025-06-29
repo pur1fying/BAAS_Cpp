@@ -130,7 +130,7 @@ class TestOcrForSingleLine(unittest.TestCase):
                 image_path = os.path.join(test_image_path, model, f"{i}.png")
                 ret = client.ocr_for_single_line(
                     language=model,
-                    origin_image=img,
+                    origin_image=None,
                     candidates="",
                     pass_method=2,
                     local_path=image_path,

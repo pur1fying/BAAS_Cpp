@@ -2,24 +2,28 @@
 // Created by pc on 2024/8/14.
 //
 
+#ifdef _WIN32
+
 #include "device/BAASLdopengl.h"
+
+#include "utils/BAASSystemUtil.h"
 
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-map<int, BAASLdopengl *> BAASLdopengl::connections;
+map<int, BAASLdopengl*> BAASLdopengl::connections;
 
-BAASLdopengl *BAASLdopengl::get_instance(BAASConnection *connection)
+BAASLdopengl* BAASLdopengl::get_instance(BAASConnection* connection)
 {
-    static BAASLdopengl *instance = nullptr;
+    static BAASLdopengl* instance = nullptr;
     if (instance == nullptr) {
         instance = new BAASLdopengl(connection);
     }
     return instance;
 }
 
-BAASLdopengl::BAASLdopengl(std::string &installPath)
+BAASLdopengl::BAASLdopengl(std::string& installPath)
 {
     logger = (BAASLogger *) BAASGlobalLogger;
     ldplayer_install_path = installPath;
@@ -31,7 +35,7 @@ void BAASLdopengl::detect_ldplayer_instance()
 {
     pair<string, string> serial_emu_pair;
     BAASConnection::port_emu_pair_serial(serial);
-    instance_id = BAASUtil::LDPlayer_serial2instance_id(serial);
+    instance_id = BAASConnectionAttr::LDPlayer_serial2instance_id(serial);
     logger->BAASInfo("LDPlayer instance id : " + to_string(instance_id));
 
     if (instance_id == -1) {
@@ -45,7 +49,7 @@ void BAASLdopengl::detect_ldplayer_instance()
         throw LDOpenGLError("ldconsole.exe not found");
     }
     cmd += " list2";
-    string ret = BAASUtil::executeCommandAndGetOutput(cmd);
+    string ret = BAASSystemUtil::executeCommandAndGetOutput(cmd);
     cout << ret << endl;
 
     istringstream iss(ret);
@@ -99,7 +103,7 @@ void BAASLdopengl::init_dll()
     }
 }
 
-BAASLdopengl::BAASLdopengl(BAASConnection *connection)
+BAASLdopengl::BAASLdopengl(BAASConnection* connection)
 {
     logger = connection->get_logger();
     ldplayer_install_path = connection->emulator_folder_path();
@@ -113,17 +117,15 @@ void BAASLdopengl::release(int connectionId)
 {
     auto it = connections.find(connectionId);
     if (it != connections.end()) {
-        it->second
-          ->shot_instance
-          ->release();
+        it->second->shot_instance->release();
         delete it->second;
         connections.erase(it);
     }
 }
 
-void BAASLdopengl::screenshot(cv::Mat &image)
+void BAASLdopengl::screenshot(cv::Mat& image)
 {
-    void *ptr = shot_instance->cap();
+    void* ptr = shot_instance->cap();
     if (ptr == nullptr) {
         logger->BAASError("LDOpenGL screenshot failed");
         throw LDOpenGLError("screenshot failed");
@@ -134,3 +136,5 @@ void BAASLdopengl::screenshot(cv::Mat &image)
 }
 
 BAAS_NAMESPACE_END
+
+#endif // _WIN32

@@ -11,12 +11,14 @@
 
 BAAS_NAMESPACE_BEGIN
 class ScrcpyScreenshot : public BaseScreenshot {
+
 public:
-    explicit ScrcpyScreenshot(BAASConnection *connection);
+
+    explicit ScrcpyScreenshot(BAASConnection* connection);
 
     void init() override;
 
-    void screenshot(cv::Mat &img) override;
+    void screenshot(cv::Mat& img) override;
 
     void exit() override;
 
@@ -24,9 +26,9 @@ public:
 
 private:
 
-    BAASConnection *connection;
+    BAASConnection* connection;
 
-    BAASScrcpyClient *client;
+    BAASScrcpyClient* client;
 
 };
 

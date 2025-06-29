@@ -2,25 +2,40 @@
 //
 #include "device/control/BAASControl.h"
 
+#include "device/control/AdbControl.h"
+#ifdef _WIN32
+#include "device/control/NemuControl.h"
+#endif // _WIN32
+#include "device/control/ScrcpyControl.h"
+
+#include "utils/BAASRandomUtil.h"
+#include "config/BAASStaticConfig.h"
+
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
-vector <string> BAASControl::available_methods;
+const set<string> BAASControl::available_methods = {
+     "adb"
+    ,"scrcpy"
+#ifdef _WIN32
+    ,"nemu"
+#endif // _WIN32
+};
 
 BAASControl::BAASControl(
-        const std::string &method,
+        const std::string& method,
         double screen_ratio,
-        BAASConnection *connection
+        BAASConnection* connection
 )
 {
     assert(connection != nullptr);
     this->connection = connection;
     logger = connection->get_logger();
 
-    available_methods = static_config->get<std::vector<std::string>>("available_control_methods");
     logger->BAASInfo("Available control methods : ");
-    logger->BAASInfo(available_methods);
-
+    int cnt = 0;
+    for (const auto& m: available_methods)
+        logger->BAASInfo(to_string(++cnt) + " : " + m);
 
     this->ratio = screen_ratio;
 
@@ -35,12 +50,10 @@ void BAASControl::init()
 
 void BAASControl::click(
         BAASPoint point,
-        uint8_t type,
-        int offset,
         const string &description
 )
 {
-    click(point.x, point.y, type, offset, description);
+    click(point.x, point.y, 1, 5, description);
 }
 
 void BAASControl::click(
@@ -63,13 +76,13 @@ void BAASControl::click(
         int count,
         uint8_t type,
         int offset,
-        double interval,
+        double click_interval,
         double pre_wait,
         double post_wait,
         const string &description
 )
 {
-    click(point.x, point.y, count, type, offset, interval, pre_wait, post_wait, description);
+    click(point.x, point.y, count, type, offset, click_interval, pre_wait, post_wait, description);
 }
 
 void BAASControl::click(
@@ -78,7 +91,7 @@ void BAASControl::click(
         int count,
         uint8_t type,
         int offset,
-        double interval,
+        double click_interval,
         double pre_wait,
         double post_wait,
         const string &description
@@ -86,17 +99,24 @@ void BAASControl::click(
 {
     gen_click_log(x, y, count, description);
 
-    set_x_y_offset(x, y, type, offset);
+    if (offset > 0)
+        set_x_y_offset(x, y, type, offset);
+
     x = int(double(x) * 1.0 * ratio);
     y = int(double(y) * 1.0 * ratio);
-    if (pre_wait > 0) BAASUtil::sleepMS(int(pre_wait * 1000));
 
-    int itv = int(interval * 1000);
+    if (pre_wait > 0)
+        BAASChronoUtil::sleepMS(int(pre_wait * 1000));
+
+    int itv = int(click_interval * 1000);
     for (int i = 0; i < count; i++) {
         control->click(x, y);
-        if (i < count - 1) BAASUtil::sleepMS(itv);
+        if (i < count - 1)
+            BAASChronoUtil::sleepMS(itv);
     }
-    if (post_wait > 0) BAASUtil::sleepMS(int(post_wait * 1000));
+
+    if (post_wait > 0)
+        BAASChronoUtil::sleepMS(int(post_wait * 1000));
 }
 
 void BAASControl::long_click(
@@ -155,13 +175,13 @@ void BAASControl::set_control_method(
         bool exit
 )
 {
-    if (std::find(available_methods.begin(), available_methods.end(), method) == available_methods.end()) {
+    if(available_methods.find(method) == available_methods.end()) {
         logger->BAASCritical("Unsupported control method : [ " + method + " ]");
         throw RequestHumanTakeOver("Unsupported control method: " + method);
     }
 
     if (method == control_method) {
-        logger->BAASInfo("Control method is already set to " + method);
+        logger->BAASInfo("Control method is already set to : [ " + method + " ]");
         return;
     }
 
@@ -176,11 +196,15 @@ void BAASControl::set_control_method(
     control_method = method;
     if (control_method == "adb") {
         control = new AdbControl(connection);
-    } else if (control_method == "scrcpy") {
+    }
+    else if (control_method == "scrcpy") {
         control = new ScrcpyControl(connection);
-    } else if (control_method == "nemu") {
+    }
+#ifdef _WIN32
+    else if (control_method == "nemu") {
         control = new NemuControl(connection);
     }
+#endif // _WIN32
     init();
 }
 
@@ -195,12 +219,12 @@ void BAASControl::set_x_y_offset(
         case OFFSET_TYPE_NOCHANGE:
             break;
         case OFFSET_TYPE_RECTANGLE: {
-            x += BAASUtil::genRandInt(-size, size);
-            y += BAASUtil::genRandInt(-size, size);
+            x += BAASRandomUtil::genRandInt(-size, size);
+            y += BAASRandomUtil::genRandInt(-size, size);
             break;
         }
         case OFFSET_TYPE_CIRCLE: {
-            double angle = BAASUtil::genRandDouble(0, 2 * M_PI);
+            double angle = BAASRandomUtil::genRandDouble(0, 2 * M_PI);
             x += int(size * cos(angle));
             y += int(size * sin(angle));
             break;

@@ -11,10 +11,8 @@
 #include <spdlog/details/os.h>
 
 #include <cerrno>
-#include <chrono>
 #include <cstdio>
 #include <string>
-#include <thread>
 #include <tuple>
 
 namespace spdlog {
@@ -98,10 +96,11 @@ SPDLOG_INLINE void file_helper::close() {
 }
 
 SPDLOG_INLINE void file_helper::write(const memory_buf_t &buf) {
-    if(fd_ == nullptr) return;
+    if (fd_ == nullptr) return;
     size_t msg_size = buf.size();
     auto data = buf.data();
-    if (std::fwrite(data, 1, msg_size, fd_) != msg_size) {
+
+    if (!details::os::fwrite_bytes(data, msg_size, fd_)) {
         throw_spdlog_ex("Failed writing to file " + os::filename_to_str(filename_), errno);
     }
 }

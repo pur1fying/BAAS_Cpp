@@ -9,7 +9,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
-#include <ThreadPool.h>
+#include "ThreadPool.h"
 
 #include "ocr/OcrStruct.h"
 #include "ocr/OcrLite.h"
@@ -28,6 +28,8 @@ public:
     static void disable_thread_pool();
 
     static void update_valid_languages();
+
+    static bool is_valid_language(const std::string& language);
 
     bool language_inited(const std::string &language);
 

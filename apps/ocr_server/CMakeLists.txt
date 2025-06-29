@@ -30,8 +30,6 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
 endif()
 
-
-
 file(
         GLOB_RECURSE
         BAAS_OCR_SERVER_CORE_SOURCES
@@ -40,7 +38,7 @@ file(
         ${BAAS_PROJECT_PATH}/src/ocr/*.cpp
         ${BAAS_PROJECT_PATH}/src/BAASGlobals.cpp
         ${BAAS_PROJECT_PATH}/src/BAASLogger.cpp
-        ${BAAS_PROJECT_PATH}/src/BAASUtil.cpp
+        ${BAAS_PROJECT_PATH}/src/utils/*cpp
         ${BAAS_PROJECT_PATH}/src/simdutf.cpp
         ${BAAS_PROJECT_PATH}/src/BAASExternalIPC.cpp
 )
@@ -51,6 +49,7 @@ add_executable(
         ${BAAS_OCR_SERVER_CORE_SOURCES}
 )
 
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/${CURRENT_OS_NAME}.cmake)
 
 target_include_directories(
         BAAS_ocr_server PRIVATE
@@ -58,7 +57,6 @@ target_include_directories(
         ${CMAKE_BINARY_DIR}
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/${CURRENT_OS_NAME}.cmake)
 
 if(CURRENT_OS_NAME STREQUAL "Windows")
     set(ICON_RESOURCE "${CMAKE_CURRENT_LIST_DIR}/src/rc/logo.ico")

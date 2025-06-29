@@ -4,13 +4,15 @@
 
 #include <vector>
 
+#include "config/BAASStaticConfig.h"
+#include "device/BAASConnection.h"
 #include "device/BAASConnectionAttr.h"
 
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
 
-BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg)
+BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig* cfg)
 {
     logger = cfg->get_logger();
     config = cfg;
@@ -19,7 +21,7 @@ BAASConnectionAttr::BAASConnectionAttr(BAASUserConfig *cfg)
     serial_check();
 }
 
-BAASConnectionAttr::BAASConnectionAttr(const std::string &cfg_path)
+BAASConnectionAttr::BAASConnectionAttr(const std::string& cfg_path)
 {
     config = new BAASUserConfig(cfg_path);
     logger = config->get_logger();
@@ -49,7 +51,7 @@ void BAASConnectionAttr::serial_check()
     revise_serial();
     if (old != serial) {
         logger->BAASWarn("Serial [ " + old + " ] is revised to [ " + serial + " ]");
-        config->update("/emulator/serial", serial);
+        config->update_reference("/emulator/serial", serial);
     }
     logger->BAASInfo("Serial : " + serial);
 
@@ -57,29 +59,30 @@ void BAASConnectionAttr::serial_check()
 
 void BAASConnectionAttr::revise_serial()
 {
-    BAASUtil::stringReplace(" ", "", serial);
-    BAASUtil::stringReplace("。", ".", serial);
-    BAASUtil::stringReplace("，", ".", serial);
-    BAASUtil::stringReplace(",", ".", serial);
-    BAASUtil::stringReplace("：", ":", serial);
+    BAASStringUtil::stringReplace(" ", "", serial);
+    BAASStringUtil::stringReplace("。", ".", serial);
+    BAASStringUtil::stringReplace("，", ".", serial);
+    BAASStringUtil::stringReplace(",", ".", serial);
+    BAASStringUtil::stringReplace("：", ":", serial);
     try {
         int port = std::stoi(serial);
         if (port > 1000 && port < 65536) serial = "127.0.0.1" + std::to_string(port);
     } catch (std::exception &e) {}
     if (serial.find("模拟") != std::string::npos) {
         string m;
-        BAASUtil::re_find(serial, R"(\d+\.\d+\.\d+\.\d+)", m);
+        BAASStringUtil::re_find(serial, R"(\d+\.\d+\.\d+\.\d+)", m);
         if (!m.empty()) serial = m;
     }
-    BAASUtil::stringReplace("12127.0.0.1", "127.0.0.1", serial);
-    BAASUtil::stringReplace("auto127.0.0.1", "127.0.0.1", serial);
+    BAASStringUtil::stringReplace("12127.0.0.1", "127.0.0.1", serial);
+    BAASStringUtil::stringReplace("auto127.0.0.1", "127.0.0.1", serial);
 }
 
-int BAASConnectionAttr::LDPlayer_serial2instance_id(const string &serial)
+int BAASConnectionAttr::LDPlayer_serial2instance_id(const string& serial)
 {
     pair<string, string> pair_serial = BAASConnection::port_emu_pair_serial(serial);
     int port = serial2port(pair_serial.first);
     if (5555 <= port && port <= 5555 + 32) return int((port - 5555) / 2);
     return -1;
 }
+
 BAAS_NAMESPACE_END

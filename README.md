@@ -44,6 +44,7 @@ ps:文档不全面, 请等待文档完善后使用这个框架
 ### APPS
 1. BAAS_ocr_server: 一个简单的ocr服务器, 使用onnxruntime进行推理, 使用cpp-httplib进行http通信, 替代了原项目BAAS体积过大的OCR模块
 
+
 Open Source Code used:
 1. [json](https://github.com/nlohmann/json)
     - config management and data exchange
@@ -67,4 +68,5 @@ Open Source Code used:
     - ascreencap screenshot decod
 11. [thread-pool](https://github.com/mtrebi/thread-pool)
     - thread pool
+
 Thanks for all the open source code authors!

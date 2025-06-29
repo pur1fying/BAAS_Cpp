@@ -5,14 +5,15 @@
 #ifndef BAAS_DEVICE_CONTROL_ADBCONTROL_H_
 #define BAAS_DEVICE_CONTROL_ADBCONTROL_H_
 
-#include "device/BAASConnection.h"
-#include "device/control/BaseControl.h"
+#include "BaseControl.h"
 
 BAAS_NAMESPACE_BEGIN
 
 class AdbControl : public BaseControl {
+
 public:
-    explicit AdbControl(BAASConnection *connection);
+
+    explicit AdbControl(BAASConnection* connection);
 
     void init() override;
 

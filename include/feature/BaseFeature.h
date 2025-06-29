@@ -5,114 +5,113 @@
 #ifndef BAAS_FEATURE_BASEFEATURE_H_
 #define BAAS_FEATURE_BASEFEATURE_H_
 
-#include <vector>
-#include <string>
-#include <opencv2/opencv.hpp>
-#include <optional>
-
 #include "config/BAASConfig.h"
-#include "BAASImageResource.h"
 
 // used to create different feature and combine them
 
 BAAS_NAMESPACE_BEGIN
 
+class BAAS;
+
 class BaseFeature {
+
 public:
-    explicit BaseFeature() = default;
 
-    explicit BaseFeature(BAASConfig *config);
-
-    inline bool is_primitive()
-    {
-        return and_features.empty() && or_features.empty();
+    inline std::vector<std::string> get_and_features() {
+        return this->config->get<std::vector<std::string>>("and_features", {});
     }
 
-    // used to judge the compare order of feature
-    virtual double self_average_cost(
-            const cv::Mat &image,
-            const std::string &server,
-            const std::string &language
+    inline std::vector<std::string> get_or_features() {
+        return this->config->get<std::vector<std::string>>("or_features", {});
+    }
+
+    explicit BaseFeature() = default;
+
+    explicit BaseFeature(BAASConfig* config);
+
+    virtual ~BaseFeature();
+
+    [[nodiscard]] inline bool is_primitive() const
+    {
+        return _is_primitive;
+    }
+
+    std::vector<BaseFeature*> get_and_feature_ptr();
+
+    std::vector<BaseFeature*> get_or_feature_ptr();
+
+    inline bool has_and_feature() {
+        return !and_feature_ptr.empty();
+    }
+
+    inline bool has_or_feature() {
+        return !or_feature_ptr.empty();
+    }
+
+    virtual void show();
+
+    // compare func
+    virtual bool appear(
+            const BAAS* baas,
+            BAASConfig& output
     );
 
-    std::vector<std::string> get_and_features();
+    // used to judge the compare order of feature
 
-    std::vector<std::string> get_or_features();
-
-    bool has_and_feature();
-
-    bool has_or_feature();
+    virtual double self_average_cost(
+            const BAAS* baas
+    );
 
     [[nodiscard]] double all_average_cost(
-            const cv::Mat &image,
-            const std::string &server,
-            const std::string &language
+            const BAAS* baas
     );
 
-    [[nodiscard]] inline BAASConfig *get_config()
+    [[nodiscard]] inline BAASConfig* get_config()
     {
         return config;
     }
 
-    static void get_image(
-            BAASConfig *parameter,
-            BAASImage &image
-    );
-
-    inline bool get_this_round_result()
+    inline void set_path(const std::string& _path)
     {
-        assert(this_round_result.has_value());
-        return this_round_result.value();
+        this->path = _path;
     }
 
-    inline bool is_checked_this_round()
+    inline void set_name(const std::string& _name)
     {
-        return this_round_result.has_value();
+        this->name = _name;
     }
 
-    inline bool set_checked_this_round(bool result)
+    inline const std::string& get_name()
     {
-        this_round_result = result;
-        return result;
+        return name;
     }
 
-    inline void reset_checked()
-    {
-        this_round_result.reset();
-    }
-
-    inline void set_path(const std::string &path)
-    {
-        this->path = path;
-    }
-
-    inline const std::string &get_path()
+    inline const std::string& get_path()
     {
         return path;
     }
 
-    inline void set_enabled(const bool enabled)
-    {
-        is_enabled = enabled;
-    }
-
-    inline bool get_enabled()
-    {
-        return is_enabled;
-    }
-
 protected:
-    std::vector<std::string> or_features;
 
-    std::vector<std::string> and_features;
+    inline void _display_basic_info() {
+        BAASGlobalLogger->BAASInfo("is_primitive        : [ " + std::to_string(_is_primitive) + " ]");
+        BAASGlobalLogger->BAASInfo("and_feature_count   : [ " + std::to_string(and_feature_ptr.size()) + " ]");
+        BAASGlobalLogger->BAASInfo("or_feature_count    : [ " + std::to_string(or_feature_ptr.size()) + " ]");
+    }
 
-    BAASConfig *config;
+    bool _is_primitive;
+
+    std::vector<BaseFeature*> and_feature_ptr;
+
+    std::vector<BaseFeature*> or_feature_ptr;
+
+    BAASConfig* config;
 
     std::optional<bool> this_round_result;
 
-    std::string path;
+    std::string path, name;
 
-    bool is_enabled;
+    friend class BAASFeature;
 };
 
 BAAS_NAMESPACE_END

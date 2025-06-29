@@ -5,11 +5,11 @@
 
 BAAS_NAMESPACE_BEGIN
 
-BAASStaticConfig *static_config = nullptr;
+BAASStaticConfig* static_config = nullptr;
 
-BAASStaticConfig *BAASStaticConfig::staticConfig = nullptr;
+BAASStaticConfig* BAASStaticConfig::staticConfig = nullptr;
 
-BAASStaticConfig *BAASStaticConfig::getStaticConfig()
+BAASStaticConfig* BAASStaticConfig::getStaticConfig()
 {
     if (staticConfig == nullptr) {
         staticConfig = new BAASStaticConfig();

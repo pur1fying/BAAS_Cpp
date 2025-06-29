@@ -1,14 +1,14 @@
-BAAS_sub_title_LOG("Linux Lib Configure")
+BAAS_sub_title_LOG("BAAS_ocr_server Linux Configure")
 
 target_link_directories(
         BAAS_ocr_server
         PRIVATE
-        ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}
+        ${BAAS_DEFAULT_SEARCH_DLL_PATH}
 )
 
 SET(
         DLL_COMMON
-        libonnxruntime.so.1.17.1
+        libonnxruntime.so.1
 )
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -38,6 +38,7 @@ set(
         ${DLL_COMMON}
         ${DLL_RELEASE}
 )
+
 LOG_LINE()
 message(STATUS "DLL RAW :")
 foreach (DLL ${DLL_RAW})

@@ -1,0 +1,170 @@
+{
+  "name": "如何在释放完忧技能后, 判断亚子和日鞠技能是否出现, 亚子技能没有出现如何重开( 使用 BAAS 凹技能排序 )",
+  "yolo_setting": {
+    "model": "best.onnx",
+    "update_interval": 100
+  },
+  "formation": {
+    "front": ["Hoshino (Swimsuit)", "Aru", "Shun", "Ui"],
+    "back": ["Ako", "Himari"],
+    "slot_count": 3,
+    "all_appeared_skills": [
+      "Hoshino (Swimsuit)",
+      "Aru",
+      "Shun",
+      "Ui",
+      "Ako",
+      "Himari"
+    ]
+  },
+  "start_state": "start",
+  "states": {
+    "start": {
+      "transitions": [
+        {
+          "condition": "initial_skill_check",
+          "next": "wait_cost_to [ 5.0 ]"
+        }
+      ],
+      "default_transition": "end"
+    },
+
+    "wait_cost_to [ 5.0 ]": {
+      "transitions": [
+        {
+          "condition": "Cost Over [ 5.0 ]",
+          "next": "[1] release_skill [ Hoshino (Swimsuit) ]"
+        }
+      ]
+    },
+
+    "[1] release_skill [ Hoshino (Swimsuit) ]": {
+      "action": "Release [ Hoshino (Swimsuit) ] Skill",
+      "transitions": [
+        {
+          "condition": "Cost Over [ 3.0 ]",
+          "next": "[2] release_skill [ Ui ] to [ Aru ]"
+        }
+      ],
+      "default_transition": "end"
+    },
+
+    "[2] release_skill [ Ui ] to [ Aru ]": {
+      "action": "[ Ui ] Skill To [ Aru ]",
+      "default_transition": "[3] check [ Ako ] Skill Appear"
+    },
+
+    "[3] check [ Ako ] Skill Appear": {
+      "transitions": [
+        {
+          "condition": "Skill [ Ako ] appear",
+          "next": "end"
+        }
+      ],
+      "default_transition": "restart"
+    },
+
+    "restart": {
+      "action": "restart",
+      "default_transition": "start"
+    },
+
+    "end": {
+
+    }
+  },
+  "conditions": {
+
+    "Skill [ Ako ] appear": {
+      "type": "skill_name",
+      "name": "Ako",
+      "op": "appear",
+      "timeout": 1000
+    },
+
+    "initial_skill_check": {
+      "type": "and_combined",
+      "and": [
+        "Skill [ Hoshino ] At Slot [ 0 ]",
+        "Skill [ Aru ] At Slot [ 1 ]",
+        "Skill [ Ui ] At Slot [ 2 ]"
+      ]
+    },
+    "Cost Over [ 3.0 ]": {
+      "type": "cost",
+      "op": "over",
+      "value": 3.0,
+      "timeout": 10000
+    },
+    "Skill [ Hoshino ] At Slot [ 0 ]": {
+      "type": "skill_name",
+      "name": "Hoshino (Swimsuit)",
+      "op": "at",
+      "p": 0,
+      "timeout": 1000
+    },
+
+    "Skill [ Aru ] At Slot [ 1 ]": {
+      "type": "skill_name",
+      "name": "Aru",
+      "op": "at",
+      "p": 1,
+      "timeout": 1000
+    },
+
+    "Skill [ Ui ] At Slot [ 2 ]": {
+      "type": "skill_name",
+      "name": "Ui",
+      "op": "at",
+      "p": 2,
+      "timeout": 1000
+    },
+
+    "Cost Over [ 5.0 ]": {
+      "type": "cost",
+      "op": "over",
+      "value": 5.0,
+      "timeout": 20000
+    }
+  },
+  "actions": {
+    "restart":[
+      {
+        "t": "restart"
+      }
+    ],
+    "Release [ Hoshino (Swimsuit) ] Skill": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Hoshino (Swimsuit)",
+        "target": {
+          "op": "fixed",
+          "x": 640,
+          "y": 360
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 4.5,
+          "timeout": 1000
+        }
+      }
+    ],
+    "[ Ui ] Skill To [ Aru ]": [
+      {
+        "t": "skill",
+        "op": "name",
+        "skill_n": "Ui",
+        "target": {
+          "op": "yolo_c_p",
+          "obj": ["Aru"]
+        },
+        "check": {
+          "op": "C_decrease",
+          "value": 2.5,
+          "timeout": 1000
+        }
+      }
+    ]
+  }
+}

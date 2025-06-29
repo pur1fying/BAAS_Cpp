@@ -9,11 +9,15 @@
 
 #include "core_defines.h"
 
+#include <filesystem>
+
 BAAS_NAMESPACE_BEGIN
 
 extern std::filesystem::path BAAS_PROJECT_DIR;
 
 extern std::filesystem::path BAAS_CONFIG_DIR;
+
+extern std::filesystem::path BAAS_RESOURCE_DIR;
 
 extern std::filesystem::path BAAS_IMAGE_RESOURCE_DIR;
 
@@ -27,9 +31,7 @@ extern std::filesystem::path scrcpyJarPath;
 
 extern std::filesystem::path scrcpyJar_REMOTE_DIR;
 
-extern std::filesystem::path scrcpyJarName;
-
-extern std::filesystem::path MuMuInstallPath;
+extern std::string scrcpyJarName;
 
 extern std::filesystem::path BAAS_OUTPUT_DIR;
 
@@ -41,20 +43,9 @@ extern std::filesystem::path DEVELOPER_PROJECT_DIR;
 
 extern std::string CURRENT_TIME_STRING;
 
-
-/*
- *  BAAS_CPP --
- *           -- cmake-build-debug (this is BAAS_PROJECT_DIR)
- *              -- resource
- *           -- resource (developer need to modify resource in this directory)
- *
- */
-
-void init_globals();
+void log_git_info();
 
 void init_path();
-
-static bool inited = false;
 
 BAAS_NAMESPACE_END
 

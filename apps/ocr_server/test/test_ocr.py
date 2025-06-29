@@ -64,7 +64,6 @@ class TestOcr(unittest.TestCase):
                 j = json.loads(ret.text)
                 time = j["time"]
                 logger.info(f"{i} time : [ {time} ms ]")
-                # print(j["str_res"])
                 shared_memory_ret_text_list.append(j["str_res"])
 
         ret = client.release_shared_memory("test")
@@ -92,7 +91,6 @@ class TestOcr(unittest.TestCase):
                 j = json.loads(ret.text)
                 time = j["time"]
                 logger.info(f"{i} time : [ {time} ms ]")
-                # print(j["str_res"])
                 post_file_ret_text_list.append(j["str_res"])
 
         # pass method local file
@@ -103,20 +101,18 @@ class TestOcr(unittest.TestCase):
             num_files = count_files(_dir)
             for i in range(0, num_files):
                 image_path = os.path.join(test_image_path, model, f"{i}.png")
-                img = cv2.imread(image_path)
                 ret = client.ocr(
                     language=model,
-                    origin_image=img,
+                    origin_image=None,
                     candidates="",
-                    pass_method=1,
+                    pass_method=2,
                     ret_options=0b111,
-                    local_path="",
+                    local_path=image_path,
                 )
                 self.assertEqual(200, ret.status_code)
                 j = json.loads(ret.text)
                 time = j["time"]
                 logger.info(f"{i} time : [ {time} ms ]")
-                # print(j["str_res"])
                 local_file_ret_text_list.append(j["str_res"])
 
         # same image same result

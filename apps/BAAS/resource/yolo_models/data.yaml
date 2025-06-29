@@ -1,0 +1,22 @@
+path: D:\github\datasets\baas\labeled
+train: images/train
+val: images/val
+nc: 17
+names:
+  0: Aris (Maid)
+  1: Aru
+  2: Eimi
+  3: Kayoko
+  4: Koharu
+  5: Wakamo
+  6: Ui
+  7: Hoshino (Swimsuit)
+  8: Yuuka (Track)
+  9: Mika
+  10: Kayoko (New Year)
+  11: Ui (Swimsuit)
+  12: stu_h_bar
+  13: Nighttime Nero
+  14: Shun
+  15: Cherino
+  16: Kazusa

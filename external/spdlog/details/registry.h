@@ -31,6 +31,7 @@ public:
     registry &operator=(const registry &) = delete;
 
     void register_logger(std::shared_ptr<logger> new_logger);
+    void register_or_replace(std::shared_ptr<logger> new_logger);
     void initialize_logger(std::shared_ptr<logger> new_logger);
     std::shared_ptr<logger> get(const std::string &logger_name);
     std::shared_ptr<logger> default_logger();
@@ -42,8 +43,10 @@ public:
     // another.
     logger *get_default_raw();
 
-    // set default logger.
+    // set default logger and add it to the registry if not registered already.
     // default logger is stored in default_logger_ (for faster retrieval) and in the loggers_ map.
+    // Note: Make sure to unregister it when no longer needed or before calling again with a new
+    // logger.
     void set_default_logger(std::shared_ptr<logger> new_default_logger);
 
     void set_tp(std::shared_ptr<thread_pool> tp);
@@ -66,6 +69,11 @@ public:
         std::lock_guard<std::mutex> lock(flusher_mutex_);
         auto clbk = [this]() { this->flush_all(); };
         periodic_flusher_ = details::make_unique<periodic_worker>(clbk, interval);
+    }
+
+    std::unique_ptr<periodic_worker> &get_flusher() {
+        std::lock_guard<std::mutex> lock(flusher_mutex_);
+        return periodic_flusher_;
     }
 
     void set_error_handler(err_handler handler);
@@ -98,6 +106,7 @@ private:
 
     void throw_if_exists_(const std::string &logger_name);
     void register_logger_(std::shared_ptr<logger> new_logger);
+    void register_or_replace_(std::shared_ptr<logger> new_logger);
     bool set_level_from_cfg_(logger *logger);
     std::mutex logger_map_mutex_, flusher_mutex_;
     std::recursive_mutex tp_mutex_;
