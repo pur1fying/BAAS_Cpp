@@ -50,14 +50,14 @@ jobs:
         id: checkout_main
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           path: baas
 
       - name: Clone Emsdk Repo
         id: clone_emsdk_repo
         uses: actions/checkout@v4
         with: 
-          fetch-depth: 0
+          fetch-depth: 1
           repository: "emscripten-core/emsdk"
           ref: "main"
           path: emsdk
