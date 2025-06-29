@@ -123,7 +123,7 @@ jobs:
         id: release_artifact
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v$APP_VERSION
+          tag_name: v${{ env.APP_VERSION }}
           files: |
             baas-app-bin-windows-x64-cuda.zip
             baas-app-bin-windows-x64.zip
