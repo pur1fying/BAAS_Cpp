@@ -4,6 +4,7 @@
 #include "utils.h"
 
 #include <config.h>
+#include <BAASGlobals.h>
 #include <ocr/BAASOCR.h>
 #include <BAASExternalIPC.h>
 

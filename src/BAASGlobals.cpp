@@ -5,12 +5,8 @@
 
 #include <iostream>
 
-#include "config.h"
 #include "BAASLogger.h"
-#include "ocr/BAASOCR.h"
 #include "BAAS_version.h"
-#include "feature/BAASFeature.h"
-#include "procedure/BAASProcedure.h"
 
 using namespace std::filesystem;
 using namespace std;
