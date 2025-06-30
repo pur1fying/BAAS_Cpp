@@ -117,9 +117,9 @@ jobs:
       #     echo "Detected project version: $VERSION"
       #     echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
 
-      - name: Download Artifact
-        id: download_artifact
-        uses: actions/download-artifact@v4
+      # - name: Download Artifact
+      #   id: download_artifact
+      #   uses: actions/download-artifact@v4
 
       - name: Zip Artifact
         id: zip_artifact
