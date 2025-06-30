@@ -4,7 +4,6 @@
 #include "utils.h"
 
 #include "config.h"
-#include "version.h"
 #include "BAASGlobals.h"
 #include "ocr/BAASOCR.h"
 #include "feature/BAASFeature.h"

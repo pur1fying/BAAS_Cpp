@@ -5,8 +5,8 @@
 
 #include <iostream>
 
-#include "version.h"
 #include "BAASLogger.h"
+#include "BAAS_version.h"
 
 using namespace std::filesystem;
 using namespace std;
