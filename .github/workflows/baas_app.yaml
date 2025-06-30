@@ -49,6 +49,8 @@ jobs:
         BAAS_APP_USE_CUDA: [ON, OFF]
     name: 'Build Binary for Windows x64'
     runs-on: windows-latest
+    outputs:
+      APP_VERSION: ${{ steps.save_version_to_env.APP_VERSION }}
     defaults:
       run:
         working-directory: baas
