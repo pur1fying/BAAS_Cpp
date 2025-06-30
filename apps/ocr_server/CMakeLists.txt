@@ -1,8 +1,20 @@
 BAAS_hr_LOG("APP BAAS_OCR_SERVER")
 
 set(CMAKE_CXX_STANDARD 20)
-project(BAAS_OCR_SERVER VERSION 1.2.0)
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/Version.cmake)
+
+project(BAAS_OCR_SERVER VERSION ${BAAS_OCR_SERVER_VERSION})
+
+configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/version.h.in
+        ${CMAKE_BINARY_DIR}/BAAS_OCR_version.h
+)
+
+configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/version.txt.in
+        ${CMAKE_BINARY_DIR}/BAAS_OCR_version.txt
+)
 
 option(BAAS_OCR_SERVER_USE_CUDA "Ocr Server Use CUDA" OFF)
 
@@ -17,11 +29,6 @@ if (MSVC)
     add_compile_options(/W0)
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /Ob2 /DNDEBUG")
 endif()
-
-configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/version.h.in
-        ${CMAKE_BINARY_DIR}/BAAS_OCR_Version.h
-)
 
 file(
         GLOB_RECURSE

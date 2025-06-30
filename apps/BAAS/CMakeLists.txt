@@ -1,10 +1,17 @@
 BAAS_hr_LOG("APP BAAS")
 
-project(BAAS_APP VERSION 1.1.2)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/Version.cmake)
+
+project(BAAS_APP VERSION ${BAAS_APP_VERSION})
 
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/version.h.in
-        ${CMAKE_BINARY_DIR}/BAAS_Version.h
+        ${CMAKE_BINARY_DIR}/BAAS_APP_version.h
+)
+
+configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/version.txt.in
+        ${CMAKE_BINARY_DIR}/BAAS_APP_version.txt
 )
 
 if (MSVC)
