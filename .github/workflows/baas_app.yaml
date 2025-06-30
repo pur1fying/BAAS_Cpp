@@ -83,6 +83,13 @@ jobs:
           cmake --build build --config Release -j 4
           Write-Output "::endgroup::"
 
+      - name: Save Version To Env
+        id: save_version_to_env
+        working-directory: baas/build
+        run: | 
+          $APP_VERSION = Get-Content -Path "BAAS_APP_version.txt" -TotalCount 1
+          Add-Content -Path $env:GITHUB_ENV -Value "APP_VERSION=$APP_VERSION"
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -103,12 +110,12 @@ jobs:
           fetch-depth: 1
           ref: "main"
 
-      - name: Determine Tag Name
-        id: determine_tag_name
-        run: | 
-          VERSION=$(tr -d '\n' < apps/BAAS/CMakeLists.txt | grep -oP 'project\s*\([^)]*VERSION\s+\K[\d.]+')
-          echo "Detected project version: $VERSION"
-          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+      # - name: Determine Tag Name
+      #   id: determine_tag_name
+      #   run: | 
+      #     VERSION=$(tr -d '\n' < apps/BAAS/CMakeLists.txt | grep -oP 'project\s*\([^)]*VERSION\s+\K[\d.]+')
+      #     echo "Detected project version: $VERSION"
+      #     echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Download Artifact
         id: download_artifact
