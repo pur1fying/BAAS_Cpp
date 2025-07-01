@@ -31,7 +31,7 @@ jobs:
 
           github_token: ${{ secrets.GITHUB_TOKEN }}
           owner: pur1fying
-          repo: BAAS_Cpp
+          repo: BAAS_Cpp_cuda
           upload_token: ${{ secrets.MirrorChyanUploadToken }}
           os: windows
           arch: x64
