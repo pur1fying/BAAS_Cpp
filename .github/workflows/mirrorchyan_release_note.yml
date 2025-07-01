@@ -13,13 +13,15 @@ jobs:
       - uses: MirrorChyan/release-note-action@v1
         with:
           mirrorchyan_rid: BAAS_Cpp
-
+          owner: pur1fying
+          repo: BAAS_Cpp
           upload_token: ${{ secrets.MirrorChyanUploadToken }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: MirrorChyan/release-note-action@v1
         with:
           mirrorchyan_rid: BAAS_Cpp_cuda
-
+          owner: pur1fying
+          repo: BAAS_Cpp
           upload_token: ${{ secrets.MirrorChyanUploadToken }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
