@@ -1,0 +1,37 @@
+name: mirrorchyan_uploading
+
+on:
+  workflow_dispatch:
+
+jobs:
+  mirrorchyan:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: MirrorChyan/uploading-action@v1
+        with:
+          filetype: latest-release
+          filename: "baas-app-bin-windows-x64.zip"
+          mirrorchyan_rid: BAAS_cpp
+
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          owner: pur1fying
+          repo: BAAS_Cpp
+          upload_token: ${{ secrets.MirrorChyanUploadToken }}
+          os: windows
+          arch: x64
+
+      - uses: MirrorChyan/uploading-action@v1
+        with:
+          filetype: latest-release
+          filename: "baas-app-bin-windows-x64-cuda.zip"
+          mirrorchyan_rid: BAAS_cpp_cuda
+
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          owner: pur1fying
+          repo: BAAS_Cpp
+          upload_token: ${{ secrets.MirrorChyanUploadToken }}
+          os: windows
+          arch: x64
