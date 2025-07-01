@@ -6,8 +6,7 @@ on:
 jobs:
   mirrorchyan:
     runs-on: macos-latest
-    strategy:
-      fail-fast: false
+    if: ${{ github.repository_owner == 'pur1fying' }}
 
     steps:
       - uses: MirrorChyan/uploading-action@v1
