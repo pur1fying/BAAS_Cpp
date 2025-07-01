@@ -31,11 +31,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref && github.ref || github.run_id }}
   cancel-in-progress: true
 
-
-permissions:
-  contents: write # for creating release
-
-
 env:
   BUILD_TYPE: Release
   BUILD_APP_BAAS: ON
