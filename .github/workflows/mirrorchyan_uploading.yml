@@ -14,7 +14,7 @@ jobs:
         with:
           filetype: latest-release
           filename: "baas-app-bin-windows-x64.zip"
-          mirrorchyan_rid: BAAS_cpp
+          mirrorchyan_rid: BAAS_Cpp
 
           github_token: ${{ secrets.GITHUB_TOKEN }}
           owner: pur1fying
@@ -27,7 +27,7 @@ jobs:
         with:
           filetype: latest-release
           filename: "baas-app-bin-windows-x64-cuda.zip"
-          mirrorchyan_rid: BAAS_cpp_cuda
+          mirrorchyan_rid: BAAS_Cpp_cuda
 
           github_token: ${{ secrets.GITHUB_TOKEN }}
           owner: pur1fying
