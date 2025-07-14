@@ -327,9 +327,9 @@ class BAASScrcpyClient {
 
 public:
 
-    static BAASScrcpyClient* get_client(BAASConnection* connection);
+    static std::shared_ptr<BAASScrcpyClient> get_client(BAASConnection* connection);
 
-    static void release_client(BAASConnection* connection);
+    static void try_release_client(std::shared_ptr<BAASScrcpyClient>& client);
 
     // continuous start and stop seems to have memory leak problem, reason unknown
     bool start();
@@ -418,6 +418,11 @@ public:
             double step_delay = 0.005
     );
 
+    inline bool get_alive()
+    {
+        std::lock_guard<std::mutex> lock(alive_mutex);
+        return alive;
+    }
 private:
 
     inline bool ffmpeg_init()
@@ -446,12 +451,6 @@ private:
         alive = state;
     }
 
-    inline bool get_alive()
-    {
-        std::lock_guard<std::mutex> lock(alive_mutex);
-        return alive;
-    }
-
     inline void set_resolution(
             uint16_t width,
             uint16_t height
@@ -475,7 +474,7 @@ private:
 
     explicit BAASScrcpyClient(BAASConnection* connection);
 
-    static std::map<BAASConnection*, BAASScrcpyClient*> clients;
+    static std::map<std::string, std::shared_ptr<BAASScrcpyClient>> clients;
 
     BAASLogger* logger;
 
@@ -546,7 +545,9 @@ private:
 
 
 class ScrcpyError : public std::exception {
+
 public:
+
     ScrcpyError() = default;
 
     explicit ScrcpyError(const char* msg)
@@ -561,6 +562,7 @@ public:
     }
 
 private:
+
     std::string message;
 };
 

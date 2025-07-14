@@ -14,7 +14,11 @@ ScrcpyScreenshot::ScrcpyScreenshot(BAASConnection* connection) : BaseScreenshot(
 void ScrcpyScreenshot::init()
 {
     logger->hr("Screenshot Method ScrcpyScreenshot init.");
-    client->start();
+    if(client->get_alive()) logger->BAASInfo("Scrcpy loop already started.");
+    else {
+        logger->BAASInfo("Start Scrcpy loop.");
+        client->start();
+    }
 }
 
 void ScrcpyScreenshot::screenshot(cv::Mat& img)
@@ -26,7 +30,7 @@ void ScrcpyScreenshot::screenshot(cv::Mat& img)
 void ScrcpyScreenshot::exit()
 {
     logger->BAASInfo("ScrcpyScreenshot exit.");
-    client->stop();
+    BAASScrcpyClient::try_release_client(client);
 }
 
 // H.264 is a lossy compression method

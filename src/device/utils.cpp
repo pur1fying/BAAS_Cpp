@@ -68,11 +68,17 @@ void insert_swipe(
 int MuMu_serial2instance_id(const std::string &serial)
 {
     int port = serial2port(serial);
-    port -= 16384;
-    int index = port / 32, offset = port % 32;
-    if ((offset == 0 || offset == 1 || offset == 2) && index >= 0 && index <= 31) {
-        return index;
+    if (port >= 16384) {
+        int temp = (port - 16384);
+        int index = temp / 32, offset = temp % 32;
+        if ((offset < 3) && index <= 31) return index;
     }
+    if (port >= 5555) {
+        int temp = (port - 5555);
+        int index = temp / 2;
+        if (index <= 31) return index;
+    }
+
     return -1;
 }
 
@@ -82,7 +88,7 @@ bool serialHost(
         std::string &host
 )
 {
-    int pos = static_cast<int>(serial.find(':'));
+    size_t pos = serial.find(':');
     if (pos == std::string::npos) {
         host = "";
         return false;

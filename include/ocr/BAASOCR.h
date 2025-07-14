@@ -18,8 +18,10 @@
 BAAS_NAMESPACE_BEGIN
 
 class BAASOCR {
+
 public:
-    static BAASOCR *get_instance();
+
+    static BAASOCR* get_instance();
 
     static void shutdown();
 
@@ -85,6 +87,7 @@ public:
     static std::string REGEX_UTF8PATTERN;
 
 private:
+
     int init(
             const std::string &language,
             int gpu_id,

@@ -41,7 +41,7 @@ public:
 
 private:
 
-    BAASNemu* nemu_connection;
+    std::shared_ptr<BAASNemu> nemu_connection;
 };
 
 BAAS_NAMESPACE_END

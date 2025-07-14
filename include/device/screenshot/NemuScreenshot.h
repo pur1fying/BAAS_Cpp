@@ -25,7 +25,7 @@ public:
 
 private:
 
-    BAASNemu *nemu_connection;
+    std::shared_ptr<BAASNemu> nemu_connection;
 
 };
 

@@ -12,7 +12,7 @@
 #include <thread>
 #include <filesystem>
 
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 
 #include "BAASTypes.h"
 #include "BAASGlobals.h"
@@ -83,9 +83,9 @@ class BAASNemu {
 
 public:
 
-    static BAASNemu* get_instance(BAASConnection* connection);
+    static std::shared_ptr<BAASNemu> get_instance(BAASConnection* connection);
 
-    static void release(int connectionId);
+    static void try_release(std::shared_ptr<BAASNemu>& nemu, bool try_disconnect=false);
 
     explicit BAASNemu(BAASConnection* connection);
 
@@ -159,6 +159,8 @@ private:
 
     void init_dll();
 
+    static const std::vector<std::string> nemu_possible_dll_path;
+
     BAASLogger* logger;
 
     std::string mumu_install_path;
@@ -175,7 +177,7 @@ private:
 
     bool alive = false;
 
-    static std::map<int, BAASNemu*> connections;
+    static std::map<int, std::shared_ptr<BAASNemu>> connections;
 
     HINSTANCE hDllInst;
 

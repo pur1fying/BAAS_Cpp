@@ -12,20 +12,24 @@
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
-std::map<int, BAASNemu*> BAASNemu::connections;
 
-BAASNemu* BAASNemu::get_instance(BAASConnection* connection)
+std::map<int, std::shared_ptr<BAASNemu>> BAASNemu::connections;
+
+const std::vector<std::string> BAASNemu::nemu_possible_dll_path = {
+    "./shell/sdk/external_renderer_ipc.dll",
+    "./nx_device/12.0/shell/sdk/external_renderer_ipc.dll",
+};
+
+std::shared_ptr<BAASNemu> BAASNemu::get_instance(BAASConnection* connection)
 {
     string mm_path = connection->emulator_folder_path();
     int id = MuMu_serial2instance_id(connection->get_serial());
     for (auto &conn: connections)
-        if (conn.second->mumu_install_path == mm_path && conn.second->instance_id == id) {
-            connection->get_logger()->BAASInfo("Nemu path [ " + conn.second->mumu_install_path + " ], "
-                                                "instance : " + to_string(id) + " already exist, use it."
-                      );
+        if (conn.second->mumu_install_path == mm_path && conn.second->instance_id == id)
             return conn.second;
-        }
-    return new BAASNemu(connection);
+    auto temp = std::make_shared<BAASNemu>(connection);
+    connections[temp->connection_id] = temp;
+    return temp;
 }
 
 BAASNemu::BAASNemu(BAASConnection* connection)
@@ -64,7 +68,6 @@ void BAASNemu::connect()
         logger->BAASError("Nemu connect failed");
         throw NemuIpcError("Nemu connect failed");
     }
-    connections[connection_id] = this;
     if (get_resolution(connection_id, display_id, resolution) > 0) {
         logger->BAASError("Nemu get display resolution failed.");
         throw NemuIpcError("Nemu get display resolution failed");
@@ -83,11 +86,11 @@ void BAASNemu::connect()
 
 void BAASNemu::disconnect()
 {
-    if (connections.find(connection_id) == connections.end()) {
-        logger->BAASError("Invalid connection_id : " + to_string(connection_id));
-    }
+    if (connections.find(connection_id) == connections.end())
+        logger->BAASError("Not recorded connection_id : " + to_string(connection_id));
+
     nemu_disconnect(connection_id);
-    connections.erase(connection_id);
+
 }
 
 
@@ -223,16 +226,26 @@ void BAASNemu::convertXY(BAASPoint& point) const
 
 void BAASNemu::init_dll()
 {
-    string dll_path = mumu_install_path + "./shell/sdk/external_renderer_ipc.dll";
-    logger->BAASInfo("dll_path : " + dll_path);
-    if (!filesystem::exists(dll_path)) {
-        logger->BAASError("Nemu dll not found : [ " + dll_path + " ]");
-        throw PathError("Nemu dll not found");
+    std::vector<string> _list_dll;
+    for (const auto& extra_path: BAASNemu::nemu_possible_dll_path) {
+        string full_path = mumu_install_path + extra_path;
+        _list_dll.push_back(full_path);
+        if (!filesystem::exists(full_path)) {
+            logger->BAASError("Nemu dll not found : [ " + full_path + " ]");
+            continue;
+        }
+        hDllInst = LoadLibrary(full_path.c_str());
+        if (hDllInst == nullptr) {
+            logger->BAASError("ipc_dll = " + full_path + " exists but cannot be loaded.");
+            continue;
+        }
     }
-    hDllInst = LoadLibrary(dll_path.c_str());
+
     if (hDllInst == nullptr) {
-        logger->BAASError("LoadLibrary : [ " + dll_path + " ] failed");
-        throw NemuIpcError("Load Dynamic Library failed");
+        logger->BAASError("NemuIpc requires MuMu12 version >= 3.8.13, please check your version. ");
+        logger->BAASError("None of the following path exists");
+        logger->BAASError(_list_dll);
+        throw NemuIpcError("Nemu dll not found, please check your MuMu Player 12 version and install path in BAAS settings");
     }
 
     nemu_connect = (nemuConnect) GetProcAddress(hDllInst, "nemu_connect");
@@ -273,16 +286,31 @@ void BAASNemu::update_resolution()
     }
 }
 
-void BAASNemu::release(int connectionId)
+void BAASNemu::try_release(
+        std::shared_ptr<BAASNemu>& nemu,
+        bool try_disconnect
+)
 {
+    assert(nemu != nullptr);
+    int connectionId = nemu->connection_id;
     auto it = connections.find(connectionId);
+    nemu.reset();
     if (it == connections.end()) {
-        BAASGlobalLogger->BAASError("Invalid connection_id : " + to_string(connectionId));
+        BAASGlobalLogger->BAASError("Nemu connection [ " + to_string(connectionId) + " ] not found.");
+        return;
     }
-    it->second
-      ->disconnect();
-    delete it->second;
-    connections.erase(connectionId);
+    if (try_disconnect) {
+        // when use count is 1, it means no one is using this nemu connection anymore so we can release it safely
+        if (it->second.use_count() == 1) {
+            it->second->disconnect();
+            BAASGlobalLogger->BAASInfo("Nemu connection [ " + to_string(connectionId) + " ] disconnected.");
+            it->second.reset();
+            connections.erase(it);
+        }
+        else
+            BAASGlobalLogger->BAASWarn("Nemu connection [ " + to_string(connectionId) + " ] use count : " + to_string(it->second.use_count()));
+
+    }
 }
 
 BAAS_NAMESPACE_END

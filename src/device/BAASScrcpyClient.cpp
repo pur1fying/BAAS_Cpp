@@ -11,7 +11,7 @@ using namespace std::filesystem;
 
 BAAS_NAMESPACE_BEGIN
 
-map<BAASConnection*, BAASScrcpyClient*> BAASScrcpyClient::clients;
+map<std::string, std::shared_ptr<BAASScrcpyClient>> BAASScrcpyClient::clients;
 
 BAASScrcpyClient::BAASScrcpyClient(BAASConnection* connection)
 {
@@ -279,22 +279,36 @@ bool BAASScrcpyClient::stop()
     return true;
 }
 
-BAASScrcpyClient* BAASScrcpyClient::get_client(BAASConnection* connection)
+std::shared_ptr<BAASScrcpyClient> BAASScrcpyClient::get_client(BAASConnection* connection)
 {
-    if (clients.find(connection) == clients.end()) {
-        clients[connection] = new BAASScrcpyClient(connection);
-    }
-    return clients[connection];
+    auto it = clients.find(connection->get_serial());
+
+    if (it != clients.end()) return it->second;
+
+    auto sha_ptr = std::shared_ptr<BAASScrcpyClient>(new BAASScrcpyClient(connection));
+    clients[connection->get_serial()] = std::shared_ptr<BAASScrcpyClient>(sha_ptr);
+    return sha_ptr;
+
 }
 
-void BAASScrcpyClient::release_client(BAASConnection* connection)
+void BAASScrcpyClient::try_release_client(std::shared_ptr<BAASScrcpyClient>& client)
 {
-    auto it = clients.find(connection);
-    if (it != clients.end()) {
-        clients.erase(connection);
-    }
-}
+    if (client == nullptr) return;
 
+    auto serial = client->connection->get_serial();
+    auto it = clients.find(serial);
+    if (it == clients.end()) return;
+
+    auto logger = client->connection->get_logger();
+    if (it->second.use_count() == 1) {
+        logger->BAASInfo("Stop Scrcpy instance [ " + serial + " ]");
+        it->second->stop();
+        it->second.reset();
+        clients.erase(it);
+        return;
+    }
+    it->second->connection->get_logger()->BAASInfo("Scrcpy instance [ " + serial + " ] use count : " + to_string(it->second.use_count()));
+}
 
 void BAASScrcpyClient::touch(
         int x,

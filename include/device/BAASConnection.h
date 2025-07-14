@@ -133,7 +133,7 @@ public:
 
     [[nodiscard]] inline const std::string emulator_folder_path() const
     {
-        return config->getString("/emulator/emulator_folder_path");
+        return config->getPath("/emulator/emulator_folder_path").string();
     }
 
     void detect_package();

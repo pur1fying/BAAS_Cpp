@@ -43,7 +43,8 @@ private:
 
     BAASConnection* connection;
 
-    BAASScrcpyClient* client;
+    std::shared_ptr<BAASScrcpyClient> client;
+
 };
 
 BAAS_NAMESPACE_END

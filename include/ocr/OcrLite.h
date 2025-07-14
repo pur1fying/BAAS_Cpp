@@ -11,7 +11,9 @@
 BAAS_NAMESPACE_BEGIN
 
 class OcrLite {
+
 public:
+
     OcrLite();
 
     ~OcrLite();

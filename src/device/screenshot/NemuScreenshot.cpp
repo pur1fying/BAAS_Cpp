@@ -29,7 +29,8 @@ void NemuScreenshot::screenshot(cv::Mat& output)
 void NemuScreenshot::exit()
 {
     logger->BAASInfo("Screenshot Method NemuScreenshot exit");
-    nemu_connection->disconnect();
+    // maybe same instance nemu control still needs it, just try release, do not disconnect
+    BAASNemu::try_release(nemu_connection, true);
 }
 
 bool NemuScreenshot::is_lossy()

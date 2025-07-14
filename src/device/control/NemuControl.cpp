@@ -55,7 +55,8 @@ void NemuControl::swipe(
 
 void NemuControl::exit()
 {
-    nemu_connection->disconnect();
+    // maybe same instance nemu screenshot still needs it, just try release, do not disconnect
+    BAASNemu::try_release(nemu_connection, true);
 }
 
 BAAS_NAMESPACE_END

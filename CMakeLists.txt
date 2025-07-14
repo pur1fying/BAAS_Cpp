@@ -34,16 +34,6 @@ cmake_minimum_required(VERSION 3.22)
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/Version.cmake")
 project(BAAS VERSION ${BAAS_VERSION})
 
-configure_file(
-        version.h.in
-        BAAS_version.h
-)
-
-configure_file(
-        version.txt.in
-        BAAS_version.txt
-)
-
 # git configuration
 get_git_info(GIT_BRANCH git rev-parse --abbrev-ref HEAD)
 get_git_info(GIT_COMMIT_HASH  git rev-parse HEAD)
@@ -54,7 +44,17 @@ get_git_info(GIT_COMMIT_BODY   git log -1 --format=%b)
 get_git_info(GIT_COMMIT_DATE   git log -1 --format=%cd --date=iso)
 
 # build time
-string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S" UTC)
+string(TIMESTAMP BUILD_TIME "%Y-%m-%d %H:%M:%S (UTC)" UTC)
+
+configure_file(
+        version.h.in
+        BAAS_version.h
+)
+
+configure_file(
+        version.txt.in
+        BAAS_version.txt
+)
 
 BAAS_sub_title_LOG("GIT INFO")
 message(STATUS "Hash        : ${GIT_COMMIT_HASH}")

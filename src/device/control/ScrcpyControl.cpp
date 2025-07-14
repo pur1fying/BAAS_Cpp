@@ -7,6 +7,7 @@
 using namespace std;
 
 BAAS_NAMESPACE_BEGIN
+
 ScrcpyControl::ScrcpyControl(BAASConnection *connection) : BaseControl(connection)
 {
     client = BAASScrcpyClient::get_client(connection);
@@ -15,10 +16,15 @@ ScrcpyControl::ScrcpyControl(BAASConnection *connection) : BaseControl(connectio
 void ScrcpyControl::init()
 {
     logger->hr("Control Method ScrcpyControl Method init.");
-    client->start();
+    if (client->get_alive()) logger->BAASInfo("Scrcpy loop already started.");
+    else {
+        logger->BAASInfo("Start Scrcpy loop.");
+        client->start();
+    }
 }
 
 void ScrcpyControl::click(
+
         int x,
         int y
 )
@@ -26,7 +32,6 @@ void ScrcpyControl::click(
     client->touch(x, y);
     client->touch(x, y, ScrcpyConst::ACTION_UP);
     this_thread::sleep_for(chrono::milliseconds(5));
-
 }
 
 void ScrcpyControl::swipe(
@@ -46,9 +51,7 @@ void ScrcpyControl::swipe(
 
 void ScrcpyControl::exit()
 {
-    client->stop();
-    delete client;
-    BAASScrcpyClient::release_client(connection);
+    BAASScrcpyClient::try_release_client(client);
 }
 
 void ScrcpyControl::long_click(
@@ -63,5 +66,6 @@ void ScrcpyControl::long_click(
     this_thread::sleep_for(chrono::milliseconds(5));
 }
 
-}
+
+BAAS_NAMESPACE_END
 
