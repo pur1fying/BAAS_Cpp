@@ -99,4 +99,4 @@ target_compile_definitions(
         BENCHMARK_STATIC_DEFINE
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/${CURRENT_OS_NAME}.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/${TARGET_OS_NAME}.cmake)

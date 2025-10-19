@@ -3,9 +3,9 @@ BAAS_sub_title_LOG("BAAS_APP Windows Configure")
 file(
         GLOB
         ADB_BINARY
-        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{CURRENT_OS_NAME}/platform-tools/adb.exe
-        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{CURRENT_OS_NAME}/platform-tools/AdbWinApi.dll
-        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{CURRENT_OS_NAME}/platform-tools/AdbWinUsbApi.dll
+        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{TARGET_OS_NAME}/platform-tools/adb.exe
+        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{TARGET_OS_NAME}/platform-tools/AdbWinApi.dll
+        ${CMAKE_CURRENT_LIST_DIR}/resource/bin/{TARGET_OS_NAME}/platform-tools/AdbWinUsbApi.dll
 )
 
 target_link_directories(
@@ -123,7 +123,7 @@ endforeach ()
 
 # get dll full path and copy to binary dir
 foreach (dll ${DLL_RAW})
-    set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}/${dll}.dll)
+    set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${TARGET_OS_NAME}/${dll}.dll)
     file(COPY ${FULL_PATH} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 endforeach ()
 

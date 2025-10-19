@@ -1,6 +1,9 @@
+cmake_minimum_required(VERSION 3.22)
+
 get_filename_component(BAAS_PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/platform.cmake")
 
 BAAS_hr_LOG("PROJECT BAAS")
 
@@ -11,25 +14,21 @@ endif()
 
 BAAS_sub_title_LOG("BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 
-# Platform
-if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
-    set(CURRENT_OS_NAME "Linux")
-elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
-    set(CURRENT_OS_NAME "Windows")
-elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
-    set(CURRENT_OS_NAME "MacOS")
-else()
-    message(STATUS "Unknown OS: ${CMAKE_SYSTEM_NAME}")
-endif()
-if ( NOT DEFINED CURRENT_OS_NAME)
-    message(FATAL_ERROR "Unknown OS: ${CMAKE_SYSTEM_NAME}")
+# Target Platform
+detect_platform(TARGET_OS_NAME)
+
+if(NOT DEFINED TARGET_OS_NAME)
+    message(FATAL_ERROR "Unknown Target OS: ${CMAKE_SYSTEM_NAME}")
 endif()
 
-BAAS_sub_title_LOG("OS : ${CURRENT_OS_NAME}")
-set(BAAS_DEFAULT_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${CURRENT_OS_NAME}")
-set(BAAS_DEFAULT_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${CURRENT_OS_NAME}")
+BAAS_sub_title_LOG("Target OS : ${TARGET_OS_NAME}")
+set(BAAS_DEFAULT_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${TARGET_OS_NAME}")
+set(BAAS_DEFAULT_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${TARGET_OS_NAME}")
 
-cmake_minimum_required(VERSION 3.22)
+if(TARGET_OS_NAME STREQUAL "Android")
+    Android_NDK_check()
+endif()
+
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/Version.cmake")
 project(BAAS VERSION ${BAAS_VERSION})
@@ -78,6 +77,7 @@ option(BUILD_BAAS_AW_CHECKER    "build BAAS Auto Fight Workflow Checker" OFF)
 check_app_options(
         BUILD_APP_BAAS
         BUILD_APP_ISA
+        BUILD_BAAS_OCR
         BUILD_BAAS_AW_CHECKER
 )
 

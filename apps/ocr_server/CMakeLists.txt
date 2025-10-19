@@ -16,7 +16,9 @@ configure_file(
         ${CMAKE_BINARY_DIR}/BAAS_OCR_version.txt
 )
 
-option(BAAS_OCR_SERVER_USE_CUDA "Ocr Server Use CUDA" OFF)
+# cuda is only available in Windows and Linux
+option(BAAS_OCR_SERVER_USE_CUDA      "Ocr Server Use CUDA"       OFF)
+option(BAAS_OCR_SERVER_ANDROID_BUILD "Build Android Application" OFF)
 
 set(OCR_MODEL_RESOURCE_REQUIRED     ON PARENT_SCOPE)
 set(STATIC_CONFIG_RESOURCE_REQUIRED ON PARENT_SCOPE)
@@ -38,27 +40,45 @@ file(
         ${BAAS_PROJECT_PATH}/src/ocr/*.cpp
         ${BAAS_PROJECT_PATH}/src/BAASGlobals.cpp
         ${BAAS_PROJECT_PATH}/src/BAASLogger.cpp
-        ${BAAS_PROJECT_PATH}/src/utils/*cpp
+        ${BAAS_PROJECT_PATH}/src/utils/*.cpp
         ${BAAS_PROJECT_PATH}/src/simdutf.cpp
+)
+
+# Generate jni lib in Android, build executable in [Windows, Linux, MacOS]
+
+if(NOT ${TARGET_OS_NAME} STREQUAL "Android")
+    list(
+        APPEND
+        BAAS_OCR_SERVER_CORE_SOURCES
         ${BAAS_PROJECT_PATH}/src/BAASExternalIPC.cpp
-)
+    )
 
-add_executable(
-        BAAS_ocr_server
-        baas_ocr_main.cpp
-        ${BAAS_OCR_SERVER_CORE_SOURCES}
-)
+    add_executable(
+            BAAS_ocr_server
+            baas_ocr_main.cpp
+            ${BAAS_OCR_SERVER_CORE_SOURCES}
+    )
+else()
+    add_library(
+            BAAS_ocr_server
+            SHARED
+            native-lib.cpp
+            ${BAAS_OCR_SERVER_CORE_SOURCES}
+    )
+endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/${CURRENT_OS_NAME}.cmake)
+BAAS_sub_title_LOG("BAAS_ocr_server ${TARGET_OS_NAME} Configure")
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/${TARGET_OS_NAME}.cmake)
 
 target_include_directories(
-        BAAS_ocr_server PRIVATE
+        BAAS_ocr_server
+        PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include
         ${CMAKE_BINARY_DIR}
 )
 
-
-if(CURRENT_OS_NAME STREQUAL "Windows")
+# Generate icon in Windows
+if(TARGET_OS_NAME STREQUAL "Windows")
     set(ICON_RESOURCE "${CMAKE_CURRENT_LIST_DIR}/src/rc/logo.ico")
     set(RES_FILE "${CMAKE_CURRENT_LIST_DIR}/src/rc/app.rc")
     target_sources(BAAS_ocr_server PRIVATE ${RES_FILE})

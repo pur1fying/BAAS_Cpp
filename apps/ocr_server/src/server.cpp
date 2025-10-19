@@ -7,7 +7,9 @@
 
 #include <ocr/BAASOCR.h>
 #include <ocr/OcrUtils.h>
+#ifndef __ANDROID__
 #include <BAASExternalIPC.h>
+#endif // __ANDROID__
 #include <utils/BAASChronoUtil.h>
 #include <config/BAASGlobalSetting.h>
 
@@ -16,9 +18,9 @@ using namespace baas;
 OCR_NAMESPACE_BEGIN
 
 std::vector<std::string> Server::image_pass_method_names = {
-    "shared_memory",
-    "post file",
-    "local file"
+        "shared_memory",
+        "post file",
+        "local file"
 };
 
 Server::Server(){
@@ -414,6 +416,10 @@ int Server::req_get_image(
     BAASGlobalLogger->BAASInfo("Pass method : " + pass_method_name);
     // shared memory
     if(pass_method == 0) {
+#ifdef __ANDROID__
+        BAASGlobalLogger->BAASError("Android do not support shared memory.");
+        return 1;
+#else
         if (!image_info.contains("shared_memory_name")) {
             BAASGlobalLogger->BAASError("image_info must contains 'shared_memory_name'.");
             return 1;
@@ -438,15 +444,15 @@ int Server::req_get_image(
         size_t shm_size = Shared_Memory::get_shared_memory_size(shared_memory_name);
         if (size > shm_size) {
             BAASGlobalLogger->BAASError
-                (
-                "Required size [" + std::to_string(size) + "] "
-                "is larger than shared memory size [" + std::to_string(shm_size) + "]."
-                );
+                    (
+                            "Required size [" + std::to_string(size) + "] "
+                                                                       "is larger than shared memory size [" + std::to_string(shm_size) + "]."
+                    );
             return 1;
         }
         ret = cv::Mat(y, x, CV_8UC3, data);
+#endif // __ANDROID__
     }
-    // post file
     else if (pass_method == 1) {
         const auto& file = req.get_file_value("image");
         if (file.content.empty()){
@@ -456,7 +462,7 @@ int Server::req_get_image(
         const auto* image_data = (const uchar*)file.content.data();
         ret = cv::imdecode(cv::Mat(1, int(file.content.size()), CV_8UC1, (void*)image_data), cv::IMREAD_COLOR);
     }
-    // local file
+        // local file
     else {
         if (!image_info.contains("local_path")) {
             BAASGlobalLogger->BAASError("image_info must contains 'local_path'.");
@@ -495,26 +501,21 @@ void Server::handler_test(
 )
 {
     BAASGlobalLogger->sub_title("Test");
-    // 输出请求的基本信息
     std::cout << "Request Method: " << req.method << std::endl;
     std::cout << "Request Path: " << req.path << std::endl;
-    // 输出请求头
     std::cout << "Request Headers:" << std::endl;
     for (const auto& header : req.headers) {
         std::cout << header.first << ": " << header.second << std::endl;
     }
-    // 输出查询参数
     if (!req.params.empty()) {
         std::cout << "Request Params:" << std::endl;
         for (const auto& param : req.params) {
             std::cout << param.first << ": " << param.second << std::endl;
         }
     }
-    // 输出请求体（如果有的话）
     if (!req.body.empty()) {
         std::cout << "Request Body: " << req.body << std::endl;
     }
-    // 返回响应
     res.set_content("Request received", "text/plain");
 }
 
@@ -570,6 +571,10 @@ void Server::handle_create_shared_memory(
         httplib::Response &res
 )
 {
+#ifdef __ANDROID__
+    set_error_response(res, "[Create Shared Memory] Android do not support shared memory.");
+    return;
+#else
     BAASGlobalLogger->sub_title("Ocr Create Shared Memory");
     BAASConfig temp = BAASConfig(nlohmann::json::parse(req.body), (BAASLogger*)BAASGlobalLogger);
     out_req_params(temp.get_config());
@@ -608,9 +613,10 @@ void Server::handle_create_shared_memory(
         return;
     }
     BAASGlobalLogger->BAASInfo("Shared Memory [ " + name + " ] actual size : " +
-                                        std::to_string(Shared_Memory::get_shared_memory_size(name)));
+                               std::to_string(Shared_Memory::get_shared_memory_size(name)));
     res.status = 200;
     res.set_content("Success.", "text/plain");
+#endif // __ANDROID__
 }
 
 void Server::handle_release_shared_memory(
@@ -618,6 +624,10 @@ void Server::handle_release_shared_memory(
         httplib::Response &res
 )
 {
+#ifdef __ANDROID__
+    set_error_response(res, "[Release Shared Memory] Android do not support shared memory.");
+    return;
+#else
     BAASGlobalLogger->sub_title("Ocr Release Shared Memory");
     BAASConfig temp = BAASConfig(nlohmann::json::parse(req.body), (BAASLogger*)BAASGlobalLogger);
     out_req_params(temp.get_config());
@@ -641,6 +651,8 @@ void Server::handle_release_shared_memory(
         res.status = 400;
         res.set_content("Shm not exists.", "text/plain");
     }
+#endif // __ANDROID__
 }
+
 
 OCR_NAMESPACE_END

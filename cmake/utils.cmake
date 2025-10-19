@@ -55,14 +55,14 @@ function(check_app_options)
 endfunction()
 
 function(set_ADB_BINARY)
-    if (${CURRENT_OS_NAME} STREQUAL "Windows")
+    if (${TARGET_OS_NAME} STREQUAL "Windows")
         SET(
             ADB_FILES
             "adb.exe"
             "AdbWinApi.dll"
             "AdbWinUsbApi.dll"
         ) 
-    elseif ((${CURRENT_OS_NAME} STREQUAL "MacOS") OR (${CURRENT_OS_NAME} STREQUAL "Linux"))
+    elseif ((${TARGET_OS_NAME} STREQUAL "MacOS") OR (${TARGET_OS_NAME} STREQUAL "Linux"))
         SET(
             ADB_FILES
             "adb"
@@ -72,7 +72,7 @@ function(set_ADB_BINARY)
     set(ADB_BINARY "")
 
     foreach(adb_file IN LISTS ADB_FILES)
-        set(FULL_PATH ${BAAS_PROJECT_PATH}/resource/bin/${CURRENT_OS_NAME}/platform-tools/${adb_file})
+        set(FULL_PATH ${BAAS_PROJECT_PATH}/resource/bin/${TARGET_OS_NAME}/platform-tools/${adb_file})
         if(EXISTS ${FULL_PATH})
             message(STATUS "Found ADB binary: ${FULL_PATH}")
             list(APPEND ADB_BINARY ${FULL_PATH})
@@ -82,5 +82,4 @@ function(set_ADB_BINARY)
     endforeach()
 
     set(ADB_BINARY "${ADB_BINARY}" PARENT_SCOPE)
-    
 endfunction()

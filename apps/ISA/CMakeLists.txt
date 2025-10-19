@@ -1,4 +1,4 @@
-if (NOT ${CURRENT_OS_NAME} STREQUAL "Windows")
+if (NOT ${TARGET_OS_NAME} STREQUAL "Windows")
     message(STATUS "ISA only support Windows")
     return()
 endif ()
@@ -71,7 +71,7 @@ add_executable(
 target_link_directories(
         ISA
         PRIVATE
-        ${BAAS_PROJECT_PATH}/lib/${CURRENT_OS_NAME}
+        ${BAAS_PROJECT_PATH}/lib/${TARGET_OS_NAME}
 )
 
 target_include_directories(
@@ -177,7 +177,7 @@ endforeach ()
 
 # get dll full path and copy to binary dir
 foreach (dll ${DLL_RAW})
-    set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${CURRENT_OS_NAME}/${dll}.dll)
+    set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${TARGET_OS_NAME}/${dll}.dll)
     file(COPY ${FULL_PATH} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endforeach ()
 

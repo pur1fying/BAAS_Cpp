@@ -380,7 +380,7 @@ void BAASConfig::_check_p(const std::filesystem::path& _p)
     _get_logger();
     config_type = _p.filename().string();
 
-    if (!_p.filename().string().ends_with(".json"))
+    if (_p.filename().extension() != ".json")
         throw ValueError("Config file must be a json file : [ " + _p.string() + " ]");
     this->path = BAAS_CONFIG_DIR / _p;
     if (!std::filesystem::exists(this->path)) {

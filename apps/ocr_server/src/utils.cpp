@@ -45,7 +45,9 @@ void _init()
 
 void _cleanup()
 {
+#ifndef __ANDROID__
     Shared_Memory::release_all();
+#endif // __ANDROID__
     delete default_global_setting;
     delete global_setting;
     delete static_config;
