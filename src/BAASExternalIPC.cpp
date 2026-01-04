@@ -335,7 +335,7 @@ void Shared_Memory::release_all() noexcept
 BAAS_NAMESPACE_END
 
 
-void *get_shared_memory(
+void* get_shared_memory(
         const char *name,
         size_t size,
         const unsigned char *data

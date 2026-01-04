@@ -8,7 +8,9 @@
 #include <map>
 #include <string>
 #include <memory>
+
 #include "core_defines.h"
+#include "BAASExport.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -126,17 +128,6 @@ private:
 };
 
 BAAS_NAMESPACE_END
-#ifdef _WIN32
-#ifdef BAAS_BUILD_DLL
-    #define BAAS_API __declspec(dllexport)
-#else
-    #define BAAS_API __declspec(dllimport)
-#endif
-#endif
-
-#if UNIX_LIKE_PLATFORM
-#define BAAS_API __attribute__((visibility("default")))
-#endif
 
 #ifdef __cplusplus
 extern "C" {

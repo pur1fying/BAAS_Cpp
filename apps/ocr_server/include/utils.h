@@ -14,7 +14,12 @@ OCR_NAMESPACE_BEGIN
 
 extern BAAS_OCR::Server server;
 
-void _init();
+/*
+ * Initialize BAAS OCR server environment
+ * Parameters:
+ *   res_path: Resource directory path (for android)
+ */
+void _init(const std::filesystem::path& res_path="");
 
 void _cleanup();
 

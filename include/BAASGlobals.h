@@ -45,7 +45,8 @@ extern std::string CURRENT_TIME_STRING;
 
 void log_git_info();
 
-void init_path();
+// init resource / output path
+void init_path(const std::filesystem::path res_dir = "");
 
 BAAS_NAMESPACE_END
 

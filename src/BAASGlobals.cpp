@@ -7,6 +7,7 @@
 
 #include "BAASLogger.h"
 #include "BAAS_version.h"
+#include "BAASExceptions.h"
 
 using namespace std::filesystem;
 using namespace std;
@@ -54,8 +55,14 @@ void log_git_info() {
     BAASGlobalLogger->BAASInfo("Build time  : " + std::string(BUILD_TIME));
 }
 
-void init_path() {
-    BAAS_PROJECT_DIR = std::filesystem::current_path();
+void init_path(const filesystem::path res_dir) {
+    // Set BAAS_PROJECT_DIR in Android Device
+    if (!res_dir.empty()) {
+        if (!std::filesystem::exists(res_dir)) throw PathError("Resource directory [ " +  res_dir.string() + " ] not exist.");
+        BAAS_PROJECT_DIR = res_dir;
+    } else {
+        BAAS_PROJECT_DIR = std::filesystem::current_path();
+    }
     BAAS_OUTPUT_DIR = BAAS_PROJECT_DIR / "output";
     BAAS_CONFIG_DIR = BAAS_PROJECT_DIR / "config";
     BAAS_RESOURCE_DIR = BAAS_PROJECT_DIR / "resource";

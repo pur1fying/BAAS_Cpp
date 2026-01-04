@@ -47,11 +47,12 @@
    - Architectures : arm64-v8a, x86_64, armeabi-v7a, x86
 
 4. build command
+You need to replace -DANDROID_NDK_PATH and -DCMAKE_MAKE_PROGRAM with your own path.
 ```shell
 cmake -G "Ninja" ^
       -B cmake-build-Android_NDK ^
       -DANDROID_NDK_PATH="D:\AndroidSDK\ndk\29.0.14206865" ^
-      -DANDROID_ABI="x86_64" ^
+      -DANDROID_ABI="arm64-v8a" ^
       -DANDROID_PLATFORM=android-26 ^
       -DBUILD_BAAS_OCR=ON ^
       -DBAAS_OCR_ANDROID_BUILD=ON ^

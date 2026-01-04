@@ -44,7 +44,7 @@ file(
         ${BAAS_PROJECT_PATH}/src/simdutf.cpp
 )
 
-# Generate jni lib in Android, build executable in [Windows, Linux, MacOS]
+# Generate lib in Android, build executable in [Windows, Linux, MacOS]
 
 if(NOT ${TARGET_OS_NAME} STREQUAL "Android")
     list(

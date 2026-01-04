@@ -15,9 +15,9 @@ OCR_NAMESPACE_BEGIN
 
 Server server;
 
-void _init()
+void _init(const std::filesystem::path& res_dir)
 {
-    init_path();
+    init_path(res_dir);
     BAASGlobalLogger = GlobalLogger::getGlobalLogger();
     BAASGlobalLogger->BAASInfo("BAAS OCR VERSION : " + std::string(BAAS_OCR_VERSION));
     log_git_info();

@@ -20,8 +20,7 @@ void BAASUserConfig::config_update()
     vector<pair<string, json>> keys;
     // remove not exist key
     for (auto &it: config.items())
-        if (!config_template->config
-                            .contains(it.key())) {
+        if (!config_template->config.contains(it.key())) {
             logger->BAASInfo("Remove [ " + it.key() + " ]");
             keys.push_back({it.key(), {}});
         }
@@ -29,8 +28,7 @@ void BAASUserConfig::config_update()
 
     // insert new key
     keys.clear();
-    for (auto &it: config_template->config
-                                  .items())
+    for (auto &it: config_template->config.items())
         if (!config.contains(it.key())) {
             logger->BAASInfo("Add [ " + it.key() + " ]");
             keys.emplace_back(it.key(), it.value());
@@ -42,13 +40,11 @@ void BAASUserConfig::config_update()
 
 void BAASUserConfig::update_name()
 {
-    logger->BAASInfo("CONFIG NAME UPDATE");
+    logger->BAASInfo("User Config Name Update");
     my_flatten();
     string t;
-    for (auto &it: config_name_change->get_config()
-                                           .items()) {
-        assert(it.value()
-                 .is_string());
+    for (auto &it: config_name_change->get_config().items()) {
+        assert(it.value().is_string());
         t = it.value();
         if (config.contains(it.key())) {
             updateByKey(it.value(), config[it.key()]);
