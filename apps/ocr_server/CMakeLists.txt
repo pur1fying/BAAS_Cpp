@@ -50,7 +50,7 @@ file(
 BAAS_sub_title_LOG(${TARGET_OS_NAME})
 
 if(NOT ${TARGET_OS_NAME} STREQUAL "Android")
-    BAAS_sub_title_LOG("Enable Shared Memory in " ${TARGET_OS_NAME})
+    BAAS_sub_title_LOG("Enable Shared Memory in  ${TARGET_OS_NAME}")
     list(
         APPEND
         BAAS_OCR_SERVER_CORE_SOURCES
@@ -63,7 +63,7 @@ if(NOT ${TARGET_OS_NAME} STREQUAL "Android")
             ${BAAS_OCR_SERVER_CORE_SOURCES}
     )
 else()
-    BAAS_sub_title_LOG("Disable Shared Memory in " ${TARGET_OS_NAME})
+    BAAS_sub_title_LOG("Disable Shared Memory in  ${TARGET_OS_NAME}")
 
     add_library(
             BAAS_ocr_server
@@ -75,7 +75,7 @@ endif()
 
 
 foreach (item in BAAS_OCR_SERVER_CORE_SOURCES)
-    BAAS_sub_title_LOG("BAAS_ocr_server Source File: " ${item})
+    BAAS_sub_title_LOG("BAAS_ocr_server Source File:  ${item}")
 endforeach ()
 
 BAAS_sub_title_LOG("BAAS_ocr_server ${TARGET_OS_NAME} Configure")
