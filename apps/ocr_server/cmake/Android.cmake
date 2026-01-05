@@ -17,5 +17,5 @@ target_link_libraries(
 set_target_properties(
         BAAS_ocr_server
         PROPERTIES
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/${ANDROID_ABI}
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/lib/${ANDROID_ABI}
 )
