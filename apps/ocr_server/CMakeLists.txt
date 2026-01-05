@@ -47,6 +47,7 @@ file(
 # Generate lib in Android, build executable in [Windows, Linux, MacOS]
 
 if(NOT ${TARGET_OS_NAME} STREQUAL "Android")
+    BAAS_sub_title_LOG("Enable Shared Memory in " ${TARGET_OS_NAME})
     list(
         APPEND
         BAAS_OCR_SERVER_CORE_SOURCES
