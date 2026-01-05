@@ -74,7 +74,7 @@ else()
 endif()
 
 
-foreach (item in BAAS_OCR_SERVER_CORE_SOURCES)
+foreach (item in LISTS BAAS_OCR_SERVER_CORE_SOURCES)
     BAAS_sub_title_LOG("BAAS_ocr_server Source File:  ${item}")
 endforeach ()
 
