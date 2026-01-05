@@ -60,6 +60,8 @@ if(NOT ${TARGET_OS_NAME} STREQUAL "Android")
             ${BAAS_OCR_SERVER_CORE_SOURCES}
     )
 else()
+    BAAS_sub_title_LOG("Disable Shared Memory in " ${TARGET_OS_NAME})
+
     add_library(
             BAAS_ocr_server
             SHARED
