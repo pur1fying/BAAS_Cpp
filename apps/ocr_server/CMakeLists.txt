@@ -44,7 +44,10 @@ file(
         ${BAAS_PROJECT_PATH}/src/simdutf.cpp
 )
 
+
 # Generate lib in Android, build executable in [Windows, Linux, MacOS]
+
+BAAS_sub_title_LOG(${TARGET_OS_NAME})
 
 if(NOT ${TARGET_OS_NAME} STREQUAL "Android")
     BAAS_sub_title_LOG("Enable Shared Memory in " ${TARGET_OS_NAME})
@@ -69,6 +72,11 @@ else()
             ${BAAS_OCR_SERVER_CORE_SOURCES}
     )
 endif()
+
+
+foreach (item in BAAS_OCR_SERVER_CORE_SOURCES)
+    BAAS_sub_title_LOG("BAAS_ocr_server Source File: " ${item})
+endforeach ()
 
 BAAS_sub_title_LOG("BAAS_ocr_server ${TARGET_OS_NAME} Configure")
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/${TARGET_OS_NAME}.cmake)
