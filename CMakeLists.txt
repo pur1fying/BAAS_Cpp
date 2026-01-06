@@ -15,7 +15,7 @@ endif()
 BAAS_sub_title_LOG("BUILD TYPE: ${CMAKE_BUILD_TYPE}")
 
 # Target Platform
-detect_platform(TARGET_OS_NAME)
+detect_target_platform(TARGET_OS_NAME)
 
 if(NOT DEFINED TARGET_OS_NAME)
     message(FATAL_ERROR "Unknown Target OS: ${CMAKE_SYSTEM_NAME}")

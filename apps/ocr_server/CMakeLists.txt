@@ -60,6 +60,16 @@ if(NOT ${TARGET_OS_NAME} STREQUAL "Android")
             ${BAAS_OCR_SERVER_CORE_SOURCES}
     )
 else()
+    set(CMAKE_CXX_FLAGS_RELEASE
+            "-O3 -DNDEBUG -ffunction-sections -fdata-sections"
+    )
+
+    set(CMAKE_SHARED_LINKER_FLAGS
+            "-Wl,--gc-sections -Wl,--strip-all"
+    )
+
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+
     add_library(
             BAAS_ocr_server
             SHARED

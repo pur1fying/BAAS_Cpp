@@ -83,3 +83,38 @@ function(set_ADB_BINARY)
 
     set(ADB_BINARY "${ADB_BINARY}" PARENT_SCOPE)
 endfunction()
+
+function(copy_android_libcxx_shared DEST_DIR)
+    BAAS_sub_title_LOG("Copy libc++_shared.so from NDK")
+    if (ANDROID_ABI STREQUAL "armeabi-v7a")
+        set(ANDROID_TRIPLE arm-linux-androideabi)
+    elseif (ANDROID_ABI STREQUAL "arm64-v8a")
+        set(ANDROID_TRIPLE aarch64-linux-android)
+    elseif (ANDROID_ABI STREQUAL "x86")
+        set(ANDROID_TRIPLE i686-linux-android)
+    elseif (ANDROID_ABI STREQUAL "x86_64")
+        set(ANDROID_TRIPLE x86_64-linux-android)
+    else()
+        message(FATAL_ERROR "NDK Unsupported Android ABI: ${ABI}")
+    endif()
+
+    if (CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+        set(NDK_HOST windows-x86_64)
+    elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+        set(NDK_HOST darwin-x86_64)
+    elseif (CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
+        set(NDK_HOST linux-x86_64)
+    else()
+        message(FATAL_ERROR "NDK Unsupported host OS: ${CMAKE_HOST_SYSTEM_NAME}")
+    endif()
+
+    set(
+            LIBCXX_PATH
+            ${ANDROID_NDK_PATH}/toolchains/llvm/prebuilt/${NDK_HOST}/sysroot/usr/lib/${ANDROID_TRIPLE}/libc++_shared.so
+    )
+    if (NOT EXISTS ${LIBCXX_PATH})
+        message(FATAL_ERROR "libc++_shared.so not found: ${LIBCXX_PATH}")
+    endif()
+    message(STATUS "Lib found at : ${LIBCXX_PATH}")
+    file(COPY ${LIBCXX_PATH} DESTINATION ${DEST_DIR})
+endfunction()

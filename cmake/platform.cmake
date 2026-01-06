@@ -1,4 +1,4 @@
-function(detect_platform OUTPUT_VAR)
+function(detect_target_platform OUTPUT_VAR)
     if(BAAS_OCR_ANDROID_BUILD)
         set(${OUTPUT_VAR} "Android" PARENT_SCOPE)
     elseif(CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")

@@ -57,7 +57,8 @@ cmake -G "Ninja" ^
       -DBUILD_BAAS_OCR=ON ^
       -DBAAS_OCR_ANDROID_BUILD=ON ^
       -DCMAKE_BUILD_TYPE=Release ^
-      -DCMAKE_MAKE_PROGRAM="D:\AndroidSDK\cmake\3.22.1\bin\ninja.exe"
+      -DCMAKE_MAKE_PROGRAM="D:\AndroidSDK\cmake\3.22.1\bin\ninja.exe" ^
+      -DANDROID_STL=c++_shared
 ```
 
 ```shell
