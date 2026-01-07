@@ -263,8 +263,8 @@ jobs:
           fetch-depth: 0
           path: "prebuild"
 
-      - name: Install Build Dependencies
-        id: install_build_depends
+      - name: Install Ninja
+        id: install_ninja
         run: |
           choco install ninja
 
@@ -273,8 +273,8 @@ jobs:
         with:
           arch: x64
 
-      - name: Build
-        id: cmake_build
+      - name: CMake Configure and Build
+        id: cmake_configure_and_build
         run: |
           Write-Output "::group::Generate makefile"
           cmake -S . -B build -DBUILD_BAAS_OCR=${{env.BUILD_BAAS_OCR}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G Ninja      # Hard encode command with env var before exec
@@ -334,3 +334,72 @@ jobs:
           trigger: ${{ github.workflow }} (event: ${{ github.event_name }})
           build bot: ${{ github.job }} (run id: ${{ github.run_id }})"
           git push   
+  Android-lib:
+    strategy:
+      matrix:
+        target_arch: [arm64-v8a, x86_64]
+    name: Build Android lib (${{ matrix.target_arch }})
+    runs-on: windows-latest
+    steps:
+      - name: Clone Source Repo
+        id: checkout_main
+        uses: actions/checkout@v4
+        with:
+          repository: pur1fying/BAAS_Cpp
+          ref: main
+          fetch-depth: 0
+          path: "baas_cpp"
+
+      - name: Clone Prebuild Repo
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        id: checkout_prebuild
+        uses: actions/checkout@v4
+        with:
+          repository: "pur1fying/BAAS_Cpp_prebuild"
+          ref: android-${{ matrix.target_arch }}
+          token: ${{ secrets.GHA_TOKEN_SECRET }}
+          fetch-depth: 0
+          path: "prebuild"
+
+      - name: Install Ninja
+        id: install_ninja
+        run: |
+          choco install ninja
+
+      - name: CMake Configure and Build
+        id: cmake_configure_and_build
+        working-directory: ./baas_cpp
+        run: |
+          cmake -G Ninja -B build -DCMAKE_TOOLCHAIN_FILE="$env:ANDROID_NDK_LATEST_HOME\build\cmake\android.toolchain.cmake" -DANDROID_NDK_PATH="$env:ANDROID_NDK_LATEST_HOME" -DANDROID_ABI=${{ matrix.target_arch }} -DANDROID_PLATFORM=android-26 -DBUILD_BAAS_OCR=ON -DBAAS_OCR_ANDROID_BUILD=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release --target BAAS_ocr_server -- -j 4
+      
+      - name: Upload Artifacts
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./baas_cpp/build/bin
+          name: baas-ocr-android-lib-${{ matrix.target_arch }}
+
+      - name: Copy Binaries
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        working-directory: ./prebuild
+        id: copy_bin
+        run: |
+          Copy-Item -Path "..\baas_cpp\build\bin\*" -Destination . -Recurse -Force
+
+      - name: Commit and Push
+        if: ${{ ( github.event_name == 'push' && github.ref == 'refs/heads/main' ) || github.event.inputs.create_release == 'true' }}
+        working-directory: ./prebuild
+        continue-on-error: true
+        id: commit_and_push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "New version pushed
+
+          commit sha: ${{ github.sha }}
+          commit msg: ${{ github.event.head_commit.message }}
+          trigger: ${{ github.workflow }} (event: ${{ github.event_name }})
+          build bot: ${{ github.job }} (run id: ${{ github.run_id }})"
+          git push
