@@ -25,6 +25,8 @@ bool restart_handler::execute() noexcept
     data->last_rel_skill_slot_idx.clear();
     baas->solve_procedure("fight_execute_restart", true);
 
+    // when fight is restarted, all data should be reset
+    data->reset_all();
     return true;
 }
 

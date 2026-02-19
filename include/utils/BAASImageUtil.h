@@ -106,7 +106,8 @@ public:
     static void imagePaste(
             cv::Mat &src,
             const cv::Mat &dst,
-            const BAASPoint &point = BAASPoint(0, 0));
+            const BAASPoint &point = BAASPoint(0, 0)
+    );
 
     static void gen_not_black_region_mask(
             const cv::Mat &src,
@@ -162,6 +163,16 @@ public:
             const BAASPoint &position,
             const cv::Vec3b &min,
             const cv::Vec3b &max,
+            bool checkAround,
+            int aroundRange = 1
+    );
+
+    static bool judge_rgb_range(
+            const cv::Mat &target,
+            const BAASPoint &position,
+            const cv::Vec3b &min,
+            const cv::Vec3b &max,
+            double ratio,
             bool checkAround,
             int aroundRange = 1
     );

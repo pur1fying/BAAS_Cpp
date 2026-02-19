@@ -13,19 +13,25 @@
           }
         }
       },
-      "cost" :{
-        "increase_1_dealt_x": 31.7,
-        "recognize_region": [820, 681, 1141, 696],
-        "target_pixel_rgb": {
-          "min": [250, 250, 250],
-          "max": [255, 255, 255]
-         }
+      "cost": {
+        "recognize_y": {
+          "normal" : 690,
+          "infinite_assault": 692
+        }
       },
       "BossHealth": {
         "current_ocr_region": [549, 47, 656, 64],
         "max_ocr_region": [666, 47, 775, 64],
         "ocr_region": [549, 47, 775, 64],
         "ocr_model_name": "en-us"
+      },
+      "BattleTime": {
+        "ocr_region": [
+          [1097, 26, 1197, 44],
+          [1138, 27, 1195, 45]
+        ],
+        "ocr_model_name": "en-us",
+        "time_format": 0
       },
       "Skill": {
         "threshold": 0.8,
@@ -68,11 +74,6 @@
       "resource/platform-tools/adb.exe",
       "env/Lib/site-packages/adbutils/binaries/adb.exe"
   ],
-  "current_game_activity": {
-    "CN": "SweetSecretsAndGunfightsATaleOfAfterSchoolSweets",
-    "Global": null,
-    "JP": "SummerSpecialOperationsRABBITPlatoonAndTheMysteryOfTheMissingShrimp"
-  },
   "valid_packages": [
     "com.bandainamcoent.idolmaster_gakuen",
     "com.RoamingStar.BlueArchive",

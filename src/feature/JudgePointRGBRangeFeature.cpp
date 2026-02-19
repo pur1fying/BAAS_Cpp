@@ -39,8 +39,6 @@ bool JudgePointRGBRangeFeature::appear(
         BAASConfig& output
 )
 {
-    vector<string> log;
-
     cv::Mat image = baas->latest_screenshot;
 
     int dir = 1;
@@ -56,14 +54,9 @@ bool JudgePointRGBRangeFeature::appear(
             for (int i = 0; i < it->second.size(); i++)
                 if (!BAASImageUtil::judge_rgb_range(
                         image,
-                        it->second[i].x,
-                        it->second[i].y,
-                        it->second[i].r_min,
-                        it->second[i].r_max,
-                        it->second[i].g_min,
-                        it->second[i].g_max,
-                        it->second[i].b_min,
-                        it->second[i].b_max,
+                        it->second[i].p,
+                        it->second[i]._min,
+                        it->second[i]._max,
                         baas->screen_ratio,
                         check_around,
                         around_range))
@@ -73,18 +66,12 @@ bool JudgePointRGBRangeFeature::appear(
 
         // one match then true
         case Op::ANY : {
-            bool _match = false;
             for (int i = 0; i < it->second.size(); i++)
                 if (BAASImageUtil::judge_rgb_range(
                         image,
-                        it->second[i].x,
-                        it->second[i].y,
-                        it->second[i].r_min,
-                        it->second[i].r_max,
-                        it->second[i].g_min,
-                        it->second[i].g_max,
-                        it->second[i].b_min,
-                        it->second[i].b_max,
+                        it->second[i].p,
+                        it->second[i]._min,
+                        it->second[i]._max,
                         baas->screen_ratio,
                         check_around,
                         around_range)
@@ -97,18 +84,12 @@ bool JudgePointRGBRangeFeature::appear(
             for (int i = 0; i < it->second.size(); i++)
                 if (BAASImageUtil::judge_rgb_range(
                         image,
-                        it->second[i].x,
-                        it->second[i].y,
-                        it->second[i].r_min,
-                        it->second[i].r_max,
-                        it->second[i].g_min,
-                        it->second[i].g_max,
-                        it->second[i].b_min,
-                        it->second[i].b_max,
+                        it->second[i].p,
+                        it->second[i]._min,
+                        it->second[i]._max,
                         baas->screen_ratio,
                         check_around,
-                        around_range)
-                        )
+                        around_range))
                     return false;
             return true;
         }
@@ -117,20 +98,14 @@ bool JudgePointRGBRangeFeature::appear(
             for (int i = 0; i < it->second.size(); i++)
                 if (!BAASImageUtil::judge_rgb_range(
                         image,
-                        it->second[i].x,
-                        it->second[i].y,
-                        it->second[i].r_min,
-                        it->second[i].r_max,
-                        it->second[i].g_min,
-                        it->second[i].g_max,
-                        it->second[i].b_min,
-                        it->second[i].b_max,
+                        it->second[i].p,
+                        it->second[i]._min,
+                        it->second[i]._max,
                         baas->screen_ratio,
                         check_around,
-                        around_range)
-                        ){
+                        around_range))
                     return true;
-                }
+
             return false;
         }
     }
@@ -207,24 +182,23 @@ void JudgePointRGBRangeFeature::_decode_single_rgb_info(
     for (auto &_p: j["positions"]) {
         if (!_p.is_array() || _p.size() != 2)
             throw JudgePointRGBRangeFeatureError("single position length should be 2");
-        out[count].x = _p[0];
-        out[count].y = _p[1];
+        out[count].p.x = _p[0];
+        out[count].p.y = _p[1];
         count++;
     }
     count = 0;
     for (auto &_r: j["range"]) {
         if (!_r.is_array() || _r.size() != 6)
             throw JudgePointRGBRangeFeatureError("single range length should be 6");
-        out[count].r_min = _r[0];
-        out[count].r_max = _r[1];
-        out[count].g_min = _r[2];
-        out[count].g_max = _r[3];
-        out[count].b_min = _r[4];
-        out[count].b_max = _r[5];
-        count ++;
+        out[count]._min[0] = _r[0];
+        out[count]._max[0] = _r[1];
+        out[count]._min[1] = _r[2];
+        out[count]._max[1] = _r[3];
+        out[count]._min[2] = _r[4];
+        out[count]._max[2] = _r[5];
+        count++;
     }
 }
-
 
 BAAS_NAMESPACE_END
 

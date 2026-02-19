@@ -17,6 +17,7 @@ BaseFeature::BaseFeature(BAASConfig* config)
     and_feature_ptr.clear();
     or_feature_ptr.clear();
     this->config = config;
+    this->feature_type = config->getInt("feature_type", -1);
 }
 
 bool BaseFeature::appear(

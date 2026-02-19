@@ -164,7 +164,7 @@ bool BAASFeature::feature_appear(
     }
 
     // check self
-    int type = feature->second->get_config()->getInt("feature_type", -1);
+    int type = feature->second->get_feature_type();
     bool has_self = (type != -1);
     if (type != -1) {
         bool result;

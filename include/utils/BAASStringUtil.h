@@ -6,6 +6,7 @@
 #define BAAS_UTILS_BAASSTRINGUTIL_H_
 
 #include <regex>
+#include <format>
 
 #include <simdutf.h>
 
@@ -173,6 +174,13 @@ public:
         );
 #else
 #endif
+    }
+
+    inline static std::string format_battle_time_ms(int milliseconds) {
+        int minutes = milliseconds  / (60 * 1000);
+        int seconds = (milliseconds % (60 * 1000)) / 1000;
+        milliseconds = milliseconds % 1000;
+        return std::format("{:02}:{:02}.{:03}", minutes, seconds, milliseconds);
     }
 };
 

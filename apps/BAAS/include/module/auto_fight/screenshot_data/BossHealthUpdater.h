@@ -13,7 +13,7 @@ class BossHealthUpdater : public BaseDataUpdater {
 
 public:
 
-    explicit BossHealthUpdater(BAAS *baas, auto_fight_d *data);
+    explicit BossHealthUpdater(BAAS* baas, auto_fight_d* data);
 
     void update() override;
 

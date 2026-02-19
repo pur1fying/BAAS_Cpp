@@ -207,10 +207,8 @@ int BAASImageResource::load_from_json(
         BAASImage image(region, d);
         image_path = group_path / (name + ".png");
         if (!BAASImageUtil::load(image_path.string(), image.image)) {
-            BAASGlobalLogger->BAASError(
-                    "Image [ " + get_resource_pointer(server, language, group, name) +" ] load failed, "
-                                                                                      "reason : not exist or broken"
-            );
+            BAASGlobalLogger->BAASError("Image [ " + get_resource_pointer(server, language, group, name) +" ] load failed, reason : not exist or broken");
+            BAASGlobalLogger->Path(image_path);
             continue;
         }
         if (!check_shape(image, server, language, group, name)) continue;

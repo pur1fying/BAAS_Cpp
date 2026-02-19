@@ -1,7 +1,11 @@
 {
   "yolo_setting": {
-    "model": "best.onnx"
+    "model": "best.onnx",
+    "update_interval": 0
   },
+
+  "battle_type": "normal",
+
   "formation": {
     "front": ["Aris (Maid)", "Wakamo", "Kayoko (New Year)", "Ui"],
     "back": ["Ako", "Himari"],
@@ -14,12 +18,19 @@
       "Himari"
     ]
   },
+
   "start_state": "start",
+
   "states": {
 
     "start": {
-      "action": "skip_animation",
-      "action_fail_transition": "restart",
+      "action": "set_start_fight_auto_acc",
+      "transitions": [
+        {
+          "condition": "battle_time_below_02:55.500",
+          "next": "restart"
+        }
+      ],
       "default_transition": "end"
     },
 
@@ -32,15 +43,25 @@
 
     }
   },
-  "conditions": {
 
+  "conditions": {
+    "battle_time_below_02:55.500": {
+      "type": "battle_time",
+      "op": "below",
+      "value": 175500,
+      "timeout": 20000000
+    }
   },
 
   "actions": {
-    "skip_animation": [
+    "set_start_fight_auto_acc": [
       {
-        "t": "skip_animation",
-        "timeout": 3.0
+        "t": "auto",
+        "op": "off"
+      },
+      {
+        "t": "acc",
+        "op": "1"
       }
     ],
 

@@ -315,7 +315,7 @@ void skill_handler::_calc_target_p(int& _x, int& _y)
             for (const auto& obj_idx : _obj_idx) {
                 if (data->obj_last_appeared_pos[obj_idx].has_value()) {
                     int top_x = data->obj_last_appeared_pos[obj_idx].value().box.x +
-                                   data->obj_last_appeared_pos[obj_idx].value().box.width / 2;
+                                data->obj_last_appeared_pos[obj_idx].value().box.width / 2;
                     int top_y = data->obj_last_appeared_pos[obj_idx].value().box.y;
                     _x += top_x;
                     _y += top_y;

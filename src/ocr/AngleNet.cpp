@@ -35,16 +35,6 @@ void AngleNet::set_gpu_id(int gpu_id)
     }
     BAASGlobalLogger->BAASInfo("Cls use CPU.");
 #endif
-
-#ifdef __DIRECTML__
-    if (gpu_id >= 0) {
-        OrtSessionOptionsAppendExecutionProvider_DML(sessionOptions, gpu_id);
-        printf("cls try to use GPU%d\n", gpu_id);
-    }
-    else {
-        printf("cls use CPU\n");
-    }
-#endif
 }
 
 AngleNet::~AngleNet()

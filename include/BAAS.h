@@ -42,6 +42,10 @@ public:
 
     void get_latest_screenshot(cv::Mat& img);
 
+    inline void set_latest_screenshot(cv::Mat& img) {
+        latest_screenshot = img;
+    }
+
     void get_latest_screenshot(
             cv::Mat& img,
             const BAASRectangle& region

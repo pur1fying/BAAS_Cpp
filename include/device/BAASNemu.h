@@ -179,7 +179,7 @@ private:
 
     static std::map<int, std::shared_ptr<BAASNemu>> connections;
 
-    HINSTANCE hDllInst;
+    HINSTANCE hDllInst= nullptr;
 
     nemuConnect nemu_connect;
 

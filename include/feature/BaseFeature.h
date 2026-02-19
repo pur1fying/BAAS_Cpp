@@ -91,6 +91,11 @@ public:
         return path;
     }
 
+    inline int get_feature_type() const
+    {
+        return feature_type;
+    }
+
 protected:
 
     inline void _display_basic_info() {
@@ -112,6 +117,8 @@ protected:
     std::string path, name;
 
     friend class BAASFeature;
+
+    int feature_type;
 };
 
 BAAS_NAMESPACE_END

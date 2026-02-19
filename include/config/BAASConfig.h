@@ -34,13 +34,8 @@ public:
     // init with json path
     explicit BAASConfig(
             const std::filesystem::path& path,
-            BAASLogger* logger
-    );
-
-    // create a simple json read and write config with json path and logger
-    explicit BAASConfig(
-            const std::string& path,
-            BAASLogger* logger
+            BAASLogger* logger,
+            bool create=false
     );
 
     /*

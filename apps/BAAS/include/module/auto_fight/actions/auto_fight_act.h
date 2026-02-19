@@ -18,7 +18,7 @@ public:
             auto_fight_d* data
     );
 
-    bool _execute(uint64_t act_id) noexcept;
+    bool _execute(uint64_t act_id);
 
     inline auto act_find(const std::string& act_name) {
         return act_name_idx_map.find(act_name);

@@ -27,27 +27,22 @@ struct BAASPoint {
     );
 
     friend void to_json(
-            nlohmann::json &j,
-            const BAASPoint &point
+            nlohmann::json& j,
+            const BAASPoint& point
     )
     {
         j = nlohmann::json::array({point.x, point.y});
     }
 
     friend void from_json(
-            const nlohmann::json &j,
-            BAASPoint &point
+            const nlohmann::json& j,
+            BAASPoint& point
     )
     {
-        if (!j.is_array()) {
-            throw nlohmann::json::type_error::create(302,
-                                   nlohmann::detail::concat("type must be array, but is ", j.type_name()), &j);
-        }
-        if (j.size() != 2) {
-            throw nlohmann::json::out_of_range::create(401,
-                                   nlohmann::detail::concat("Invalid json size for BAASPoint : [ ",
-                                                             std::to_string(j.size()), " ] , expected : [ 2 ]."), &j);
-        }
+        if (!j.is_array())
+            throw nlohmann::json::type_error::create(302,nlohmann::detail::concat("type must be array, but is ", j.type_name()), &j);
+        if (j.size() != 2)
+            throw nlohmann::json::out_of_range::create(401,nlohmann::detail::concat("Invalid json size for BAASPoint : [ ", std::to_string(j.size()), " ] , expected : [ 2 ]."), &j);
         point.x = j[0].get<int>();
         point.y = j[1].get<int>();
     }
@@ -66,7 +61,7 @@ struct BAASPoint {
 };
 
 inline BAASPoint operator*(
-        const BAASPoint &p,
+        const BAASPoint& p,
         int i
 )
 {
@@ -75,14 +70,14 @@ inline BAASPoint operator*(
 
 inline BAASPoint operator*(
         int i,
-        const BAASPoint &p
+        const BAASPoint& p
 )
 {
     return {p.x * i, p.y * i};
 }
 
 inline BAASPoint operator*(
-        const BAASPoint &p,
+        const BAASPoint& p,
         float i
 )
 {
@@ -91,7 +86,7 @@ inline BAASPoint operator*(
 
 inline BAASPoint operator*(
         float i,
-        const BAASPoint &p
+        const BAASPoint& p
 )
 {
     return {int(float(p.x) * 1.0 * i), int(float(p.y) * 1.0 * i)};
@@ -99,22 +94,22 @@ inline BAASPoint operator*(
 
 inline BAASPoint operator*(
         double i,
-        const BAASPoint &p
+        const BAASPoint& p
 )
 {
     return {int(double(p.x) * 1.0 * i), int(double(p.y) * 1.0 * i)};
 }
 
 inline BAASPoint operator*(
-        const BAASPoint &p,
+        const BAASPoint& p,
         double i
 )
 {
     return {int(double(p.x) * 1.0 * i), int(double(p.y) * 1.0 * i)};
 }
 
-inline BAASPoint &operator*=(
-        BAASPoint &p1,
+inline BAASPoint& operator*=(
+        BAASPoint& p1,
         int i
 )
 {
@@ -124,7 +119,7 @@ inline BAASPoint &operator*=(
 }
 
 inline BAASPoint operator/(
-        const BAASPoint &p1,
+        const BAASPoint& p1,
         int i
 )
 {
@@ -132,7 +127,7 @@ inline BAASPoint operator/(
 }
 
 inline BAASPoint operator/(
-        const BAASPoint &p1,
+        const BAASPoint& p1,
         float i
 )
 {
@@ -140,15 +135,15 @@ inline BAASPoint operator/(
 }
 
 inline BAASPoint operator/(
-        const BAASPoint &p1,
+        const BAASPoint& p1,
         double i
 )
 {
     return {int(double(p1.x) / i), int(double(p1.y) / i)};
 }
 
-inline BAASPoint &operator/=(
-        BAASPoint &p1,
+inline BAASPoint& operator/=(
+        BAASPoint& p1,
         int i
 )
 {
@@ -158,72 +153,72 @@ inline BAASPoint &operator/=(
 }
 
 inline BAASPoint operator+(
-        const BAASPoint &p1,
-        const BAASPoint &p2
+        const BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     return {p1.x + p2.x, p1.y + p2.y};
 }
 
 inline bool operator!=(
-        const BAASPoint &p1,
-        const BAASPoint &p2
+        const BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     return p1.x != p2.x || p1.y != p2.y;
 }
 
 inline bool operator==(
-        const BAASPoint &p1,
-        const BAASPoint &p2
+        const BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     return p1.x == p2.x && p1.y == p2.y;
 }
 
 inline bool operator<(
-        const BAASPoint &p1,
-        const BAASPoint &p2
+        const BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     return p1.x < p2.x && p1.y < p2.y;
 }
 
 inline bool operator<=(
-        const BAASPoint &p1,
-        const BAASPoint &p2
+        const BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     return p1.x <= p2.x && p1.y <= p2.y;
 }
 
 inline bool operator>(
-        const BAASPoint &p1,
-        const BAASPoint &p2
+        const BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     return p1.x > p2.x && p1.y > p2.y;
 }
 
 inline bool operator>=(
-        const BAASPoint &p1,
-        const BAASPoint &p2
+        const BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     return p1.x >= p2.x && p1.y >= p2.y;
 }
 
 inline BAASPoint operator-(
-        const BAASPoint &p1,
-        const BAASPoint &p2
+        const BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     return {p1.x - p2.x, p1.y - p2.y};
 }
 
-inline BAASPoint &operator-=(
-        BAASPoint &p1,
-        const BAASPoint &p2
+inline BAASPoint& operator-=(
+        BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     p1.x -= p2.x;
@@ -231,9 +226,9 @@ inline BAASPoint &operator-=(
     return p1;
 }
 
-inline BAASPoint &operator+=(
-        BAASPoint &p1,
-        const BAASPoint &p2
+inline BAASPoint& operator+=(
+        BAASPoint& p1,
+        const BAASPoint& p2
 )
 {
     p1.x += p2.x;
@@ -241,18 +236,18 @@ inline BAASPoint &operator+=(
     return p1;
 }
 
-inline std::ostream &operator<<(
+inline std::ostream& operator<<(
         std::ostream &os,
-        const BAASPoint &point
+        const BAASPoint& point
 )
 {
     os << point.to_string();
     return os;
 }
 
-inline std::istream &operator>>(
+inline std::istream& operator>>(
         std::istream &is,
-        BAASPoint &point
+        BAASPoint& point
 )
 {
     is >> point.x >> point.y;
@@ -266,32 +261,22 @@ struct BAASRectangle {
     BAASPoint lr;               // lower right
 
     friend void to_json(
-            nlohmann::json &j,
-            const BAASRectangle &rect
+            nlohmann::json& j,
+            const BAASRectangle& rect
     )
     {
-        j = nlohmann::json::array({
-                                          rect.ul.x,
-                                          rect.ul.y,
-                                          rect.lr.x,
-                                          rect.lr.y
-                                  });
+        j = nlohmann::json::array({rect.ul.x, rect.ul.y, rect.lr.x, rect.lr.y});
     }
 
     friend void from_json(
-            const nlohmann::json &j,
-            BAASRectangle &rect
+            const nlohmann::json& j,
+            BAASRectangle& rect
     )
     {
-        if (!j.is_array()) {
-            throw nlohmann::json::type_error::create(302,
-                                                     nlohmann::detail::concat("type must be array, but is ", j.type_name()), &j);
-        }
-        if (j.size() != 4) {
-            throw nlohmann::json::out_of_range::create(401,
-                                                       nlohmann::detail::concat("Invalid json size for BAASRectangle : [ ",
-                                                                                std::to_string(j.size()), " ] , expected : [ 4 ]."), &j);
-        }
+        if (!j.is_array())
+            throw nlohmann::json::type_error::create(302,nlohmann::detail::concat("type must be array, but is ", j.type_name()), &j);
+        if (j.size() != 4)
+            throw nlohmann::json::out_of_range::create(401,nlohmann::detail::concat("Invalid json size for BAASRectangle : [ ",std::to_string(j.size()), " ] , expected : [ 4 ]."), &j);
         rect.ul.x = j[0].get<int>();
         rect.ul.y = j[1].get<int>();
         rect.lr.x = j[2].get<int>();
@@ -344,7 +329,7 @@ struct BAASRectangle {
 };
 
 inline bool operator<=(
-        const BAASPoint &point,
+        const BAASPoint& point,
         const BAASRectangle &rect
 )
 {

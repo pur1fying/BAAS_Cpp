@@ -18,6 +18,8 @@
   },
   "auto_fight": {
     "workflow_name": "Special-Task-L_Aris_Maid",
+    "detect_max_cost_when": "enter_fight",
+    "max_cost": 10.0,
     "d_update_max_thread": 4,
     "yolo": {
       "gpu_id": -1,

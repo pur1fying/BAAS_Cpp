@@ -16,7 +16,7 @@ auto_handler::auto_handler(
     _parse_op();
 }
 
-bool auto_handler::execute() noexcept
+bool auto_handler::execute()
 {
     switch (_op) {
         case ON : {

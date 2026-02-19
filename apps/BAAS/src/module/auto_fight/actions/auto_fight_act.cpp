@@ -32,7 +32,7 @@ auto_fight_act::auto_fight_act(BAAS* baas, auto_fight_d* data)
     data->d_fight.getBAASConfig("actions", act_config);
 }
 
-bool auto_fight_act::_execute(uint64_t act_id) noexcept
+bool auto_fight_act::_execute(uint64_t act_id)
 {
     assert(act_id < all_act.size());
 

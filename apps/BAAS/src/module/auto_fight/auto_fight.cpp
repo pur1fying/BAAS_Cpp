@@ -20,14 +20,21 @@
 #include "module/auto_fight/screenshot_data/AccelerationPhaseUpdater.h"
 #include "module/auto_fight/screenshot_data/AutoStateUpdater.h"
 #include "module/auto_fight/screenshot_data/ObjectPositionUpdater.h"
+#include "module/auto_fight/screenshot_data/BattleTimeUpdater.h"
 
 #include "module/auto_fight/conditions/CostCondition.h"
 #include "module/auto_fight/conditions/BossHealthCondition.h"
 #include "module/auto_fight/conditions/SkillNameCondition.h"
 #include "module/auto_fight/conditions/OrCombinedCondition.h"
 #include "module/auto_fight/conditions/AndCombinedCondition.h"
+#include "module/auto_fight/conditions/BattleTimeCondition.h"
 
 BAAS_NAMESPACE_BEGIN
+
+// Valid Battle Types
+const std::vector<std::string> AutoFight::valid_battle_types = {
+        "normal", "infinite_assault"
+};
 
 // Default skill recognition template
 const std::vector<std::string> AutoFight::default_active_skill_template = {
@@ -87,6 +94,12 @@ void AutoFight::_init_data_updaters()
     d_auto_f.d_updaters.push_back(std::make_unique<ObjectPositionUpdater>(baas, &d_auto_f));
     d_updater_map["object_position"] = 1LL << 6;
 
+    // BIT [ 8 ]
+    // battle left time
+    d_auto_f.d_updaters.push_back(std::make_unique<BattleTimeUpdater>(baas, &d_auto_f));
+    d_updater_map["battle_time"] = 1LL << 7;
+
+    d_auto_f.default_d_updater_mask = 0b01000000;
 }
 
 void AutoFight::update_data()
@@ -298,7 +311,15 @@ void AutoFight::_init_d_fight(const std::filesystem::path& name)
     logger->BAASInfo("Name : " + workflow_name);
     logger->BAASInfo("Path : " + workflow_path.string());
     d_auto_f.d_fight = BAASConfig(workflow_path, logger);
+    d_auto_f.battle_type = d_auto_f.d_fight.getString("battle_type", "normal");
 
+    if(std::find(valid_battle_types.begin(), valid_battle_types.end(), d_auto_f.battle_type) == valid_battle_types.end()) {
+        logger->BAASError("Invalid battle type [ " + d_auto_f.battle_type + " ]");
+        logger->BAASError("Valid Battle Types");
+        logger->BAASError(valid_battle_types);
+        throw ValueError("Invalid battle type in workflow.");
+    }
+    logger->BAASError("Battle Type : " + d_auto_f.battle_type);
 }
 
 void AutoFight::_init_skills()
@@ -373,9 +394,9 @@ void AutoFight::_init_self_cond()
         try {
             _init_single_cond(BAASConfig(cond.value(), logger));
         }
-        catch (const std::exception &e) {
+        catch (const std::exception& e) {
             logger->BAASError("Error condition name : [ " + cond.key() + " ]");
-            throw e;
+            throw;
         }
     }
 }
@@ -425,6 +446,9 @@ void AutoFight::_init_single_cond(const BAASConfig& d_cond)
             break;
         case BaseCondition::SKILL_NAME:
             all_cond.push_back(std::make_unique<SkillNameCondition>(baas, &d_auto_f, d_cond));
+            break;
+        case BaseCondition::BATTLE_TIME:
+                all_cond.push_back(std::make_unique<BattleTimeCondition>(baas, &d_auto_f, d_cond));
             break;
     }
 
@@ -498,9 +522,9 @@ void AutoFight::_init_self_state()
             _init_single_state(BAASConfig(stat.value(), logger));
             all_states.back().name = stat.key();
         }
-        catch (const std::exception &e) {
+        catch (const std::exception& e) {
             logger->BAASError("Error state name : [ " + stat.key() + " ]");
-            throw e;
+            throw;
         }
     }
 }
@@ -693,7 +717,11 @@ void AutoFight::display_state_idx_name_map() const noexcept
 
 void AutoFight::start_state_transition()
 {
+    logger->BAASInfo("Auto Fight Start");
     enter_fight();
+    // get max cost since max cost may not be 10.0
+    auto tmp = (CostUpdater* )(d_auto_f.d_updaters[0].get());
+    if (tmp->get_detect_max_cost_when() == "enter_fight") tmp->detect_max_cost();
     _start_state_transition_loop();
 }
 
@@ -704,6 +732,7 @@ void AutoFight::ensure_fighting_page()
 
 void AutoFight::enter_fight()
 {
+    logger->BAASInfo("Enter Fight");
     baas->solve_procedure("UI-FROM_PAGE_formation_TO_PAGE_fighting", true);
 }
 
@@ -766,7 +795,8 @@ bool AutoFight::_state_start_trans_cond_j_loop()
         }
 
         // screenshot update
-        baas->i_update_screenshot_array();
+        update_screenshot();
+//        baas->i_update_screenshot_array();
         baas->reset_all_feature();
 
         // check at fighting page
@@ -798,7 +828,7 @@ bool AutoFight::_state_start_trans_cond_j_loop()
 
         // submit updaters into thread pool
         for (int i = 0; i < d_wait_to_update_idx.size(); ++i) {
-            if (d_updater_running_thread_count >= d_update_max_thread){
+            if (d_updater_running_thread_count >= d_update_max_thread) {
                 std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
                 d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
                     return d_updater_running_thread_count < d_update_max_thread;
@@ -832,6 +862,8 @@ bool AutoFight::_state_start_trans_cond_j_loop()
             if(_state_trans_next_state_idx.has_value())   return true;
             if(_state_flg_all_trans_cond_dissatisfied)    return _try_default_trans();
         }
+
+        display_screenshot_extracted_data();
     }
     return false;
 }
@@ -869,7 +901,6 @@ bool AutoFight::_state_cond_timeout_update()
 
 void AutoFight::_start_state_transition_loop()
 {
-
     while (1) {
         if(all_states[_curr_state_idx].act_id.has_value()) {
             bool act_ret = _actions->_execute(all_states[_curr_state_idx].act_id.value());
@@ -877,11 +908,8 @@ void AutoFight::_start_state_transition_loop()
                 if(all_states[_curr_state_idx].act_fail_trans.has_value()) {
                     logger->BAASInfo("Execute State [ Action Fail Transition ]");
                     _state_trans_next_state_idx = all_states[_curr_state_idx].act_fail_trans.value();
-
                 }
-
         }
-
 
         if(!_state_start_trans_cond_j_loop()) break;
 
@@ -1059,7 +1087,7 @@ std::optional<bool> AutoFight::_recursive_cond_j(uint64_t cond_idx)
 void AutoFight::_state_set_d_update_flags()
 {
     std::fill(_cond_checked.begin(), _cond_checked.end(), false);
-    d_auto_f.d_updater_mask = 0b1000000;
+    d_auto_f.d_updater_mask = d_auto_f.default_d_updater_mask;
     d_auto_f.boss_health_update_flag = 0b000;
     d_auto_f.skill_cost_update_flag = 0b000;
 

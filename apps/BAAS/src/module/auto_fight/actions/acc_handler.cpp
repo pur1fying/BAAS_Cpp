@@ -16,7 +16,7 @@ acc_handler::acc_handler(
     _parse_op();
 }
 
-bool acc_handler::execute() noexcept
+bool acc_handler::execute()
 {
     switch (_op) {
         case PHASE_1 : {

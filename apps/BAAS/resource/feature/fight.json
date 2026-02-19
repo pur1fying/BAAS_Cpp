@@ -11,6 +11,7 @@
     "group": "fight",
     "name": "pause-notice"
   },
+
   "fight_retreat-notice_appear":{
     "feature_type": 0,
     "group": "fight",
@@ -28,7 +29,7 @@
     "rgb_range": {
       "CN_zh-cn": {
         "positions": [[1180, 621]],
-        "range": [[195, 225, 195, 225, 195, 225]]
+        "range": [[195, 245, 195, 245, 195, 255]]
       }
     }
   },
@@ -235,5 +236,95 @@
     "and_features": [
       "fight_pause-button_appear"
     ]
+  },
+
+  "fight_normal_cost_positive": {
+    "feature_type": 2,
+    "op": 1,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [828, 690]
+        ],
+        "range": [
+          [0, 255, 100, 255, 210, 255]
+        ]
+      }
+    }
+  },
+
+  "fight_normal_cost_negative": {
+    "feature_type": 2,
+    "op": 1,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [828, 690]
+        ],
+        "range": [
+          [160, 255, 100, 255, 0, 120]
+        ]
+      }
+    }
+  },
+
+  "fight_infinite_assault_cost_positive": {
+    "feature_type": 2,
+    "op": 1,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [754, 692]
+        ],
+        "range": [
+          [0, 255, 100, 255, 210, 255]
+        ]
+      }
+    }
+  },
+
+  "fight_infinite_assault_cost_positive_0": {
+    "feature_type": 2,
+    "op": 1,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [753, 692]
+        ],
+        "range": [
+          [210, 255, 210, 255, 210, 255]
+        ]
+      }
+    }
+  },
+
+  "fight_infinite_assault_cost_negative": {
+    "feature_type": 2,
+    "op": 1,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [754, 692]
+        ],
+        "range": [
+          [160, 255, 100, 255, 0, 120]
+        ]
+      }
+    }
+  },
+
+  "fight_infinite_assault_cost_negative_0": {
+    "feature_type": 2,
+    "op": 1,
+    "rgb_range": {
+      "CN_zh-cn": {
+        "positions": [
+          [753, 692]
+        ],
+        "range": [
+          [160, 255, 100, 255, 0, 120]
+        ]
+      }
+    }
   }
 }

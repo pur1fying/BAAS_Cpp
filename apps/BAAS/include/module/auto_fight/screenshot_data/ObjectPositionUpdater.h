@@ -30,6 +30,8 @@ public:
 
 private:
 
+    void _log_fps();
+
     void _init_time_cost();
 
     void _init_yolo_d();
@@ -39,6 +41,12 @@ private:
     void _warm_up_session();
 
     long long _yolo_last_update_t = 0;
+
+    int _last_log_frames = 0;
+
+    int _total_yolo_frames;
+
+    long long _last_show_frames_t;
 
     long long _yolo_update_itv;
 

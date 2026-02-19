@@ -143,7 +143,8 @@ const std::map<std::string, BaseCondition::ConditionType> BaseCondition::cond_ty
         {"skill_cost"  ,  SKILL_COST},
         {"acc_phase"   ,  ACC_PHASE},
         {"auto_state"  ,  AUTO_STATE},
-        {"boss_health" ,  BOSS_HEALTH}
+        {"boss_health" ,  BOSS_HEALTH},
+        {"battle_time" ,  BATTLE_TIME}
 };
 
 const std::vector<std::string> BaseCondition::cond_type_st_list = {
@@ -154,7 +155,8 @@ const std::vector<std::string> BaseCondition::cond_type_st_list = {
         "skill_cost",
         "acc_phase",
         "auto_state",
-        "boss_health"
+        "boss_health",
+        "battle_time"
 };
 
 const std::map<std::string, SkillNameCondition::Op> SkillNameCondition::op_map = {

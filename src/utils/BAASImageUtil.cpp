@@ -232,13 +232,17 @@ int BAASImageUtil::pointDistance(
 }
 
 bool BAASImageUtil::judge_rgb_range(
-        const Vec3b &target,
-        const Vec3b &min,
+        const Vec3b &target, // rgb
+        const Vec3b &min, // rgb
         const Vec3b &max
 )
 {
-    if (target[0] >= min[2] && target[0] <= max[2] && target[1] >= min[1] && target[1] <= max[1] &&
-        target[2] >= min[0] && target[2] <= max[0])
+    if (target[0] >= min[0] &&
+        target[0] <= max[0] &&
+        target[1] >= min[1] &&
+        target[1] <= max[1] &&
+        target[2] >= min[2] &&
+        target[2] <= max[2])
         return true;
     return false;
 }
@@ -250,8 +254,12 @@ bool BAASImageUtil::judge_rgb_range(
         const Vec3b &max
 )
 {
-    Vec3b pixel = target.at<Vec3b>(position.y, position.x);     // bgr
-    if (pixel[0] >= min[2] && pixel[0] <= max[2] && pixel[1] >= min[1] && pixel[1] <= max[1] && pixel[2] >= min[0] &&
+    const Vec3b& pixel = target.at<Vec3b>(position.y, position.x); // bgr
+    if (pixel[0] >= min[2] &&
+        pixel[0] <= max[2] &&
+        pixel[1] >= min[1] &&
+        pixel[1] <= max[1] &&
+        pixel[2] >= min[0] &&
         pixel[2] <= max[0])
         return true;
     return false;
@@ -291,6 +299,20 @@ bool BAASImageUtil::judge_rgb_range(
 }
 
 bool BAASImageUtil::judge_rgb_range(
+        const Mat& target,
+        const BAASPoint& position,
+        const Vec3b& min,
+        const Vec3b& max,
+        double ratio,
+        bool checkAround,
+        int aroundRange
+)
+{
+    BAASPoint temp = {int(position.x * ratio), int(position.y * ratio)};
+    return judge_rgb_range(target, temp, min, max, checkAround, aroundRange);
+}
+
+bool BAASImageUtil::judge_rgb_range(
         const Mat &target,
         int x,
         int y,
@@ -314,14 +336,7 @@ Vec3b BAASImageUtil::get_region_mean_rgb(
         const BAASRectangle &region
 )
 {
-    return get_region_mean_rgb(
-            target,
-            Rect(
-                    region.ul.x,
-                    region.ul.y,
-                    region.lr.x - region.ul.x,
-                    region.lr.y - region.ul.y
-            ));
+    return get_region_mean_rgb(target,Rect(region.ul.x, region.ul.y,region.lr.x - region.ul.x,region.lr.y - region.ul.y));
 }
 
 Vec3b BAASImageUtil::get_region_mean_rgb(
@@ -471,8 +486,6 @@ void BAASImageUtil::pixel2string(
 {
     str = "[ " + to_string(pixel[2]) + ", " + to_string(pixel[1]) + ", " + to_string(pixel[0]) + " ]";
 }
-
-
 
 BAASPoint::BAASPoint(
         int xx,

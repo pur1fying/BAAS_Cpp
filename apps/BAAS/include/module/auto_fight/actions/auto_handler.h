@@ -19,14 +19,13 @@ public:
         OPPOSITE
     };
 
-
     auto_handler(
             BAAS* baas,
             auto_fight_d* data,
             const BAASConfig& config
     );
 
-    bool execute() noexcept override;
+    bool execute() override;
 
     void display() noexcept override;
 

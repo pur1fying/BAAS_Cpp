@@ -7,6 +7,7 @@
     "ocr_model_name": "en-us"
   },
   "video_link": "https://www.bilibili.com/video/BV1CxLCzEE8e?spm_id_from=333.788.videopod.episodes&p=29",
+  "battle_type": "normal",
   "yolo_setting": {
     "model": "best.onnx",
     "update_interval": 100

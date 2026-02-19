@@ -73,6 +73,7 @@ struct state_info {
     state_info() = default;
 };
 
+// Be careful with this struct because it will be modified / read by several threads
 struct auto_fight_d {
 
     std::vector<int> last_rel_skill_slot_idx;
@@ -81,6 +82,7 @@ struct auto_fight_d {
 
     // data updaters
     uint64_t d_updater_mask = 0;
+    uint64_t default_d_updater_mask;
 
     // boss health
     std::optional<long long> boss_current_health;
@@ -112,10 +114,10 @@ struct auto_fight_d {
     int slot_count;
 
     // fight auto over time
-    std::optional<double>    fight_left_time;
+    std::optional<int>    fight_left_time_ms;
 
     // room close time
-    std::optional<int>       room_left_time;
+    std::optional<int>       room_left_time_second;
 
     // YOLO Detected position
     std::vector<std::string> all_possible_obj_names;
@@ -126,17 +128,21 @@ struct auto_fight_d {
 
     BAASConfig d_fight;
 
+    std::string battle_type;
+
     yolo_d yolo_pra;
 
     void reset_all() noexcept {
         cost.reset();
         auto_state.reset();
-        room_left_time.reset();
+        room_left_time_second.reset();
         boss_max_health.reset();
-        fight_left_time.reset();
+        fight_left_time_ms.reset();
         acceleration_state.reset();
         boss_current_health.reset();
         for (auto& skill : skills)       skill.reset();
+        for (auto& skill : skill_last_detect) skill.reset();
+        for (auto& [_, pos] : obj_last_appeared_pos) pos.reset();
     }
 };
 

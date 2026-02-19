@@ -24,37 +24,10 @@ BAASConfig::BAASConfig(
     config = j;
 }
 
-
-BAASConfig::BAASConfig(
-        const string& path,
-        BAASLogger* logger
-)
-{
-    assert(logger != nullptr);
-    this->logger = logger;
-    this->path = path;
-    if (filesystem::exists(path)) {
-        try {
-            std::ifstream file(path);
-            config = json::parse(file);
-            BAASGlobalLogger->sub_title("Config Load");
-            BAASGlobalLogger->Path(path);
-        }
-        catch (json::parse_error &e) {
-            logger->BAASError("Config");
-            logger->Path(path, 3);
-            logger->BAASError("parse error : " + string(e.what()));
-        }
-    } else {
-        logger->sub_title("Config Not Exist");
-        logger->Path(path);
-        throw PathError("Config file not exist.");
-    }
-}
-
 BAASConfig::BAASConfig(
         const filesystem::path& path,
-        BAASLogger* logger
+        BAASLogger* logger,
+        bool create
 )
 {
     assert(logger != nullptr);
@@ -75,6 +48,13 @@ BAASConfig::BAASConfig(
     } else {
         logger->sub_title("Config Not Exist");
         logger->Path(path);
+        if(create) {
+            logger->BAASInfo("Creating new config file.");
+            std::ofstream ofs(path);
+            ofs << "{}";
+            ofs.close();
+            return;
+        }
         throw PathError("Config file not exist.");
     }
 }

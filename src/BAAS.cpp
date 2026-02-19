@@ -27,7 +27,6 @@ bool BAAS::feature_appear(
 )
 {
     if (!flag_run) throw HumanTakeOverError("Flag Run turned to false manually");
-
     return BAASFeature::feature_appear(this, feature_name, output, show_log);
 }
 
@@ -332,7 +331,6 @@ void BAAS::solve_procedure(
         BAASGlobalLogger->BAASError("Procedure [ " + procedure_name + " ] not found");
         return;
     }
-
     it->second->implement(output, skip_first_screenshot);
 }
 

@@ -27,10 +27,22 @@ ObjectPositionUpdater::ObjectPositionUpdater(
 void ObjectPositionUpdater::update()
 {
     long long _t = BAASChronoUtil::getCurrentTimeMS();
+
+    if (_t - _last_show_frames_t > 1000) {
+        if (_last_log_frames > 0)
+            logger->BAASInfo(std::format("[ YoloObj ] L_F : {} ({} ms)", _last_log_frames, _t - _last_show_frames_t));
+        _last_log_frames = 0;
+        _last_show_frames_t = _t;
+    }
+
     if (_t - _yolo_last_update_t > _yolo_update_itv) {
         baas->get_latest_screenshot(origin_screenshot);
         _yolo->run_session(origin_screenshot, result, nms_op);
         _yolo_last_update_t = _t;
+        auto t2 = BAASChronoUtil::getCurrentTimeMS();
+        logger->BAASInfo(std::format("[ YoloObj ] Time Cost : {} ms", t2 - _t));
+        ++_total_yolo_frames;
+        ++_last_log_frames;
         // draw all rect
 //        for (const auto& res : result.results) {
 //            cv::rectangle(
@@ -61,6 +73,7 @@ void ObjectPositionUpdater::update()
             if (res != std::nullopt) data->obj_last_appeared_pos[_p.first] = res;
         }
     }
+
 }
 
 double ObjectPositionUpdater::estimated_time_cost() {

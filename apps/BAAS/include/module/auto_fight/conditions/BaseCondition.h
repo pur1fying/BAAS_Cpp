@@ -26,7 +26,8 @@ public:
         SKILL_COST,
         ACC_PHASE,
         AUTO_STATE,
-        BOSS_HEALTH
+        BOSS_HEALTH,
+        BATTLE_TIME
     };
 
     BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config);

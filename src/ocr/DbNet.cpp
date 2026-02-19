@@ -21,13 +21,13 @@ void DbNet::set_gpu_id(int gpu_id)
         sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
         BAASGlobalLogger->BAASInfo("Det try to use GPU " + std::to_string(gpu_id));
     } else {
-        BAASGlobalLogger->BAASInfo("Det use CPU");
+        BAASGlobalLogger->BAASInfo("Det use CPU.");
     }
 #else
     if (gpu_id >= 0) {
-        BAASGlobalLogger->BAASWarn("Det not support GPU");
+        BAASGlobalLogger->BAASWarn("Det not support GPU.");
     }
-    BAASGlobalLogger->BAASInfo("Det use CPU");
+    BAASGlobalLogger->BAASInfo("Det use CPU.");
 #endif
 }
 

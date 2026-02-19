@@ -29,6 +29,7 @@ BAAS_NAMESPACE_BEGIN
 class AutoFight{
 
 public:
+    const static std::vector<std::string> valid_battle_types;
 
     explicit AutoFight(BAAS* baas);
 
@@ -69,6 +70,7 @@ public:
     inline void set_data_updater_mask(uint64_t mask) {
         d_auto_f.d_updater_mask = mask;
     }
+
     inline void reset_data() {
         d_auto_f.reset_all();
     }

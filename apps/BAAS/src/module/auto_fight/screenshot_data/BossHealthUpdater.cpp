@@ -11,8 +11,8 @@
 BAAS_NAMESPACE_BEGIN
 
 BossHealthUpdater::BossHealthUpdater(
-        BAAS *baas,
-        auto_fight_d *data
+        BAAS* baas,
+        auto_fight_d* data
 ) : BaseDataUpdater(baas, data)
 {
     if (data->d_fight.contains("/BossHealth/current_ocr_region"))
