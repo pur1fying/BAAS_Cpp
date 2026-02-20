@@ -100,10 +100,12 @@ private:
 
     std::condition_variable d_update_thread_finish_notifier;
 
-    static void submit_data_updater_task(AutoFight* self, unsigned char idx);
+    static void submit_data_updater_task(AutoFight* self, unsigned char idx, uint64_t round);
 
-    inline void notify_d_update_thread_end() {
+    inline void notify_d_update_thread_end(unsigned char idx, uint64_t  round) {
         std::lock_guard<std::mutex> lock(d_update_thread_mutex);
+        d_auto_f.last_updated_data_idx = idx;
+        d_auto_f.last_updated_data_round = round;
         --d_updater_running_thread_count;
         d_update_thread_finish_notifier.notify_all();
     }

@@ -40,4 +40,9 @@ bool BaseDataUpdater::at_fight_page()
     return true;
 }
 
+void BaseDataUpdater::write_result_into_data()
+{
+    throw RuntimeError("BaseDataUpdater class write_result_into_data should not be called.");
+}
+
 BAAS_NAMESPACE_END

@@ -91,7 +91,7 @@ void BossHealthUpdater::_update_current_health()
             logger,
             "0123456789"
     );
-    data->boss_current_health = std::stoll(ocr_result.text);
+    result_current_health = std::stoll(ocr_result.text);
 }
 
 void BossHealthUpdater::_update_max_health()
@@ -105,7 +105,7 @@ void BossHealthUpdater::_update_max_health()
             nullptr,
             "0123456789"
     );
-    data->boss_max_health = std::stoll(ocr_result.text);
+    result_max_health = std::stoll(ocr_result.text);
 }
 
 void BossHealthUpdater::_update_all()
@@ -122,12 +122,18 @@ void BossHealthUpdater::_update_all()
     std::string text = ocr_result.text;
     auto p = text.find('/');
     if (p == std::string::npos) {
-        data->boss_current_health = std::nullopt;
-        data->boss_max_health = std::nullopt;
+        result_current_health = std::nullopt;
+        result_max_health = std::nullopt;
     } else {
-        data->boss_current_health = std::stoll(text.substr(0, p));
-        data->boss_max_health = std::stoll(text.substr(p + 1));
+        result_current_health = std::stoll(text.substr(0, p));
+        result_max_health = std::stoll(text.substr(p + 1));
     }
+}
+
+void BossHealthUpdater::write_result_into_data()
+{
+    data->boss_current_health = result_current_health;
+    data->boss_max_health = result_max_health;
 }
 
 BAAS_NAMESPACE_END

@@ -56,6 +56,8 @@ private:
     std::optional<int> _last_recorded_time;
 
     int _time_increment;
+
+    bool is_first_frame;
 };
 
 BAAS_NAMESPACE_END

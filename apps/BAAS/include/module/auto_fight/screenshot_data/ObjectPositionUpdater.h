@@ -28,9 +28,9 @@ public:
 
     void display_data() override;
 
-private:
+    virtual void write_result_into_data() override;
 
-    void _log_fps();
+private:
 
     void _init_time_cost();
 
@@ -55,11 +55,14 @@ private:
     cv::Mat origin_screenshot;
 
     NMS_option nms_op;
-    yolo_res result;
+
+    yolo_res y_result;
 
     std::unique_ptr<BAAS_Yolo_v8> _yolo;
 
     static constexpr auto _display_format = "| {:>15}| {:>12}| {:>5}";
+
+    std::map<int, std::optional<yolo_single_res>> result;
 
 };
 

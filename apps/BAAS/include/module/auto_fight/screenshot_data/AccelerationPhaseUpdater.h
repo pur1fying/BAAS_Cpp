@@ -25,6 +25,8 @@ public:
 
     void display_data() override;
 
+    void write_result_into_data() override;
+
 private:
 
     BAASConfig feature_appear_output;
@@ -34,6 +36,9 @@ private:
     std::vector<BaseFeature*> acc_feature_ptrs;
 
     cv::Mat origin_screenshot;
+
+    std::optional<uint8_t>   result;
+
 };
 
 BAAS_NAMESPACE_END

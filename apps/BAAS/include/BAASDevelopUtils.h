@@ -9,17 +9,17 @@
 
 #include <opencv2/opencv.hpp>
 
-#define SKILL1_FULL BAASRectangle(845, 601, 923, 662)
-#define SKILL1_LEFT BAASRectangle(845, 601, 886, 662)
-#define SKILL1_RIGHT BAASRectangle(886, 601, 923, 662)
+#define SKILL1_FULL BAASRectangle(857, 601, 935, 652)
+#define SKILL1_LEFT BAASRectangle(857, 601, 898, 652)
+#define SKILL1_RIGHT BAASRectangle(899, 601, 935, 652)
 
-#define SKILL2_FULL BAASRectangle(947, 601, 1025, 662)
-#define SKILL2_LEFT BAASRectangle(947, 601, 987, 662)
-#define SKILL2_RIGHT BAASRectangle(987, 601, 1025, 662)
+#define SKILL2_FULL BAASRectangle(957, 601, 1037, 662)
+#define SKILL2_LEFT BAASRectangle(957, 601, 999, 662)
+#define SKILL2_RIGHT BAASRectangle(1000, 601, 1037, 662)
 
-#define SKILL3_FULL BAASRectangle(1049, 601, 1127, 662)
-#define SKILL3_LEFT BAASRectangle(1049, 601, 1089, 662)
-#define SKILL3_RIGHT BAASRectangle(1089, 601, 1127, 662)
+#define SKILL3_FULL BAASRectangle(1060, 601, 1139, 662)
+#define SKILL3_LEFT BAASRectangle(1060, 601, 1101, 662)
+#define SKILL3_RIGHT BAASRectangle(1102, 601, 1139, 662)
 
 BAAS_NAMESPACE_BEGIN
 

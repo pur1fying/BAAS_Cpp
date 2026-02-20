@@ -50,6 +50,7 @@ double SkillCostUpdater::estimated_time_cost()
 
 void SkillCostUpdater::update()
 {
+    result.clear();
     baas->get_latest_screenshot(origin_screenshot);
     for (int i = 0; i < skill_cost_ocr_region.size(); ++i) {
         if (!(data->skill_cost_update_flag & (1 << i))) continue;
@@ -71,11 +72,19 @@ void SkillCostUpdater::update()
             filtered_text.push_back(ocr_result.text[j]);
         }
 
-        if (filtered_text.empty()) data->skills[i].cost = std::nullopt;
-        else {
-            data->skills[i].cost = std::stoi(filtered_text);
-            data->skill_last_detect[i].cost = data->skills[i].cost.value();
+        if (filtered_text.empty()) result.push_back({i, std::nullopt});
+        else result.push_back({i, std::stoi(filtered_text)});
+    }
+}
+
+void SkillCostUpdater::write_result_into_data()
+{
+    for (const auto& [slot_idx, cost] : result) {
+        if (cost.has_value()) {
+            data->skills[slot_idx].cost = cost.value();
+            data->skill_last_detect[slot_idx].cost = cost.value();
         }
+        else data->skills[slot_idx].cost = std::nullopt;
     }
 }
 

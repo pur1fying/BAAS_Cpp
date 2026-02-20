@@ -51,11 +51,12 @@ public:
 
     double detect_max_cost(cv::Mat& image, bool is_positive);
 
+    virtual void write_result_into_data() override;
+
 private:
 
     inline void _set_cost(double cost) {
         current_cost = cost;
-        data->cost = cost;
     }
 
     double _calc_cost_from_block(int x, int block_idx);

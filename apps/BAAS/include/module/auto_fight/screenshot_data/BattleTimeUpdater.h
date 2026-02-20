@@ -23,6 +23,8 @@ public:
 
     void display_data() override;
 
+    virtual void write_result_into_data();
+
 private:
 
     std::optional<int> ocr_result_to_int(int start, int end);
@@ -41,6 +43,7 @@ private:
 
     cv::Mat origin_screenshot, cropped_image;
 
+    std::optional<int>    result;
 };
 
 BAAS_NAMESPACE_END

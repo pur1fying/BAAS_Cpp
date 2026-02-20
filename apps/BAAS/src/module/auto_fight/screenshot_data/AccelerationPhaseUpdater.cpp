@@ -32,11 +32,11 @@ void AccelerationPhaseUpdater::update()
     for (uint8_t i = 1; i <= 3; ++i) {
         feature_appear_output.clear();
         if (acc_feature_ptrs[i]->appear(baas, feature_appear_output)) {
-            data->acceleration_state = i;
+            result = i;
             return;
         }
     }
-    data->acceleration_state = std::nullopt;
+    result = std::nullopt;
 }
 
 double AccelerationPhaseUpdater::estimated_time_cost()
@@ -55,6 +55,10 @@ void AccelerationPhaseUpdater::display_data()
     else  logger->BAASInfo("Acc_State : [    " + std::string(1, '0' + data->acceleration_state.value()) + "     ]");
 }
 
+void AccelerationPhaseUpdater::write_result_into_data()
+{
+    data->acceleration_state = result;
+}
 
 
 BAAS_NAMESPACE_END

@@ -59,42 +59,42 @@ AutoFight::AutoFight(BAAS *baas)
 // Add data updaters here
 void AutoFight::_init_data_updaters()
 {
-    // BIT [ 1 ]
+    // BIT [ 0 ]
     // cost
     d_auto_f.d_updaters.push_back(std::make_unique<CostUpdater>(baas, &d_auto_f));
     d_updater_map["cost"] = 1LL << 0;
 
-    // BIT [ 2 ]
+    // BIT [ 1 ]
     // boss health
     d_auto_f.d_updaters.push_back(std::make_unique<BossHealthUpdater>(baas, &d_auto_f));
     d_updater_map["boss_health"] = 1LL << 1;
 
-    // BIT [ 3 ]
+    // BIT [ 2 ]
     // skill name
     d_auto_f.d_updaters.push_back(std::make_unique<SkillNameUpdater>(baas, &d_auto_f));
     d_updater_map["skill_name"] = 1LL << 2;
 
-    // BIT [ 4 ]
+    // BIT [ 3 ]
     // skill cost
     d_auto_f.d_updaters.push_back(std::make_unique<SkillCostUpdater>(baas, &d_auto_f));
     d_updater_map["skill_cost"] = 1LL << 3;
 
-    // BIT [ 5 ]
+    // BIT [ 4 ]
     // acc phase
     d_auto_f.d_updaters.push_back(std::make_unique<AccelerationPhaseUpdater>(baas, &d_auto_f));
     d_updater_map["acc_phase"] = 1LL << 4;
 
-    // BIT [ 6 ]
+    // BIT [ 5 ]
     // auto state
     d_auto_f.d_updaters.push_back(std::make_unique<AutoStateUpdater>(baas, &d_auto_f));
     d_updater_map["auto_state"] = 1LL << 5;
 
-    // BIT [ 7 ]
+    // BIT [ 6 ]
     // object position
     d_auto_f.d_updaters.push_back(std::make_unique<ObjectPositionUpdater>(baas, &d_auto_f));
     d_updater_map["object_position"] = 1LL << 6;
 
-    // BIT [ 8 ]
+    // BIT [ 7 ]
     // battle left time
     d_auto_f.d_updaters.push_back(std::make_unique<BattleTimeUpdater>(baas, &d_auto_f));
     d_updater_map["battle_time"] = 1LL << 7;
@@ -133,13 +133,14 @@ void AutoFight::update_data()
             d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
                 return d_updater_running_thread_count < d_update_max_thread;
             });
+            d_auto_f.d_updaters[d_auto_f.last_updated_data_idx]->write_result_into_data();
             // condition judgement
         }
         ++d_updater_running_thread_count;
         unsigned char idx = d_updater_queue.front();
         d_updater_queue.pop();
         d_update_thread_pool->submit([this, idx]() {
-            submit_data_updater_task(this, idx);
+            submit_data_updater_task(this, idx, d_auto_f.round_cnt);
         });
     }
 
@@ -152,13 +153,14 @@ void AutoFight::update_data()
         d_update_thread_finish_notifier.wait(d_update_thread_lock, [&]() {
             return d_updater_running_thread_count < start_running_t;
         });
+        d_auto_f.d_updaters[d_auto_f.last_updated_data_idx]->write_result_into_data();
         // condition judgement
     }
 
     assert(d_updater_running_thread_count == 0);
 }
 
-void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
+void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx, uint64_t round)
 {
 //    auto start_t = std::chrono::high_resolution_clock::now();
     try{
@@ -172,7 +174,7 @@ void AutoFight::submit_data_updater_task(AutoFight* self, unsigned char idx)
 //    self->logger->BAASInfo("In [ " + self->d_auto_f.d_updaters[idx]->data_name() + " ] update | Time: " + std::to_string(
 //            std::chrono::duration_cast<std::chrono::microseconds>(end_t - start_t).count()) + "us");
 
-    self->notify_d_update_thread_end();
+    self->notify_d_update_thread_end(idx, round);
 }
 
 void AutoFight::display_screenshot_extracted_data()
@@ -795,8 +797,8 @@ bool AutoFight::_state_start_trans_cond_j_loop()
         }
 
         // screenshot update
-        update_screenshot();
-//        baas->i_update_screenshot_array();
+//        update_screenshot();
+        baas->i_update_screenshot_array();
         baas->reset_all_feature();
 
         // check at fighting page
@@ -822,10 +824,8 @@ bool AutoFight::_state_start_trans_cond_j_loop()
         }
 
         // wait d_updater_thread_count = 0
-        if(d_updater_running_thread_count > 0) _wait_d_update_running_thread_end();
-
-        assert(d_updater_running_thread_count == 0);
-
+//        if(d_updater_running_thread_count > 0) _wait_d_update_running_thread_end();
+//        assert(d_updater_running_thread_count == 0);
         // submit updaters into thread pool
         for (int i = 0; i < d_wait_to_update_idx.size(); ++i) {
             if (d_updater_running_thread_count >= d_update_max_thread) {
@@ -834,8 +834,12 @@ bool AutoFight::_state_start_trans_cond_j_loop()
                     return d_updater_running_thread_count < d_update_max_thread;
                 });
 
-                // condition judgement
+                // last round data, no need to judge
+                if(d_auto_f.last_updated_data_round != d_auto_f.round_cnt) continue;
+                // write data && condition judgement
+                d_auto_f.d_updaters[d_auto_f.last_updated_data_idx]->write_result_into_data();
                 _state_cond_j();
+
                 if(_state_trans_next_state_idx.has_value()) return true;
                 if(_state_flg_all_trans_cond_dissatisfied)  return _try_default_trans();
             }
@@ -843,11 +847,11 @@ bool AutoFight::_state_start_trans_cond_j_loop()
             unsigned char idx = d_updater_queue.front();
             d_updater_queue.pop();
             d_update_thread_pool->submit([this, idx]() {
-                submit_data_updater_task(this, idx);
+                submit_data_updater_task(this, idx, d_auto_f.round_cnt);
             });
         }
 
-        // when ever a updater finished, do condition judgement
+        // whenever a this round updater finished, do condition judgement
         int start_running_t, initial_t_count = d_updater_running_thread_count;
         for (int i = 1; i <= initial_t_count; ++i) {
             std::unique_lock<std::mutex> d_update_thread_lock(d_update_thread_mutex);
@@ -857,8 +861,12 @@ bool AutoFight::_state_start_trans_cond_j_loop()
                 return d_updater_running_thread_count < start_running_t;
             });
 
-            // condition judgement
+            // last round data, no need to judge
+            if(d_auto_f.last_updated_data_round != d_auto_f.round_cnt) continue;
+            // write data && condition judgement
+            d_auto_f.d_updaters[d_auto_f.last_updated_data_idx]->write_result_into_data();
             _state_cond_j();
+
             if(_state_trans_next_state_idx.has_value())   return true;
             if(_state_flg_all_trans_cond_dissatisfied)    return _try_default_trans();
         }
@@ -1088,8 +1096,10 @@ void AutoFight::_state_set_d_update_flags()
 {
     std::fill(_cond_checked.begin(), _cond_checked.end(), false);
     d_auto_f.d_updater_mask = d_auto_f.default_d_updater_mask;
+    d_auto_f.stop_when_skill_is_activate.clear();
     d_auto_f.boss_health_update_flag = 0b000;
     d_auto_f.skill_cost_update_flag = 0b000;
+    d_auto_f.round_cnt ++;
 
     for (auto& s : d_auto_f.each_slot_possible_templates) s.clear();
     for (auto& s : d_auto_f.skills) s.reset();

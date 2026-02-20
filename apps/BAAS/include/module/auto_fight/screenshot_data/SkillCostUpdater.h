@@ -26,6 +26,8 @@ public:
 
     void display_data() override;
 
+    virtual void write_result_into_data() override;
+
 private:
 
     std::string ocr_model_name, filtered_text;
@@ -33,6 +35,8 @@ private:
     cv::Mat origin_screenshot, cropped_image;
 
     std::vector<BAASRectangle> skill_cost_ocr_region;
+
+    std::vector<std::pair<int, std::optional<int>>> result;
 
     TextLine ocr_result;
 };

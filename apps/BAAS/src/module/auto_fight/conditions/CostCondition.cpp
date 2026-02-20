@@ -50,28 +50,33 @@ CostCondition::CostCondition(
 std::optional<bool> CostCondition::try_match()
 {
     if (!data->cost.has_value()) return std::nullopt;
+    if (is_first_frame) {
+        _last_recorded_cost = data->cost;
+        is_first_frame = false;
+        return std::nullopt;
+    }
 
     std::optional<bool> ret;
     switch (_op) {
         case OVER:
-            if(data->cost > _value) ret = true;
+            if(data->cost >= _value) ret = true;
             break;
         case BELOW:
-            if(data->cost < _value) ret = true;
+            if(data->cost <= _value) ret = true;
             break;
         case IN_RANGE:
-            if(data->cost > _range_min && data->cost < _range_max) ret = true;
+            if(data->cost >= _range_min && data->cost <= _range_max) ret = true;
             break;
         case INCREASE:
             if (_last_recorded_cost.has_value() && (data->cost.value() > _last_recorded_cost.value())) {
                 _cost_increment = _cost_increment + (data->cost.value() - _last_recorded_cost.value());
-                if (_cost_increment > _value) ret = true;
+                if (_cost_increment >= _value) ret = true;
             }
             break;
         case DECREASE:
             if (_last_recorded_cost.has_value() && (data->cost.value() < _last_recorded_cost.value())) {
                 _cost_increment = _cost_increment + (_last_recorded_cost.value() - data->cost.value());
-                if (_cost_increment > _value) ret = true;
+                if (_cost_increment >= _value) ret = true;
             }
             break;
     }
@@ -83,6 +88,7 @@ std::optional<bool> CostCondition::try_match()
 void CostCondition::reset_state()
 {
     _cost_increment = 0;
+    is_first_frame = true;
 }
 
 void CostCondition::_parse_op()

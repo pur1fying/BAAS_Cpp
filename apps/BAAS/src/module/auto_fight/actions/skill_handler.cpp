@@ -23,7 +23,6 @@ skill_handler::skill_handler(
 bool skill_handler::execute() noexcept
 {
     _execute_prepare();
-
     switch (_r_op) {
         case AUTO : {
             baas->solve_procedure("fight_set_auto_on", true);
@@ -241,6 +240,7 @@ bool skill_handler::_C_decrease_check_loop()
         }
         baas->i_update_screenshot_array();
         data->d_updaters[0]->update();
+        data->d_updaters[0]->write_result_into_data();
         if (_cost_cond->try_match()) {
             logger->sub_title("Skill Action C_decrease Check Passed.");
             logger->BAASInfo("C After Skill Rel : [ " + std::to_string(data->cost.value()) + " ]");

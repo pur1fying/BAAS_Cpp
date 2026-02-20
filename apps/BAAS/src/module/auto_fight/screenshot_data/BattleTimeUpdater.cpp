@@ -75,18 +75,18 @@ void BattleTimeUpdater::update()
             auto p_1 = ocr_result.text.find(':');
             auto p_2 = ocr_result.text.find('.', p_1);
             if (p_1 == std::string::npos || p_2 == std::string::npos) {
-                data->fight_left_time_ms = std::nullopt;
+                result = std::nullopt;
                 return;
             }
             auto minute = ocr_result_to_int(0, p_1);
             auto second = ocr_result_to_int(p_1 + 1, p_2);
             auto millisecond = ocr_result_to_int(p_2 + 1, ocr_result.text.size());
             if (!minute.has_value() || !second.has_value() || !millisecond.has_value()) {
-                data->fight_left_time_ms = std::nullopt;
+                result = std::nullopt;
                 return;
             }
 
-            data->fight_left_time_ms = minute.value() * 60 * 1000 + second.value() * 1000 + millisecond.value();
+            result = minute.value() * 60 * 1000 + second.value() * 1000 + millisecond.value();
             break;
         }
 
@@ -94,18 +94,18 @@ void BattleTimeUpdater::update()
         case 1: {
             auto p = ocr_result.text.find(':');
             if (p == std::string::npos) {
-                data->fight_left_time_ms = std::nullopt;
+                result = std::nullopt;
                 return;
             }
 
             auto minute = ocr_result_to_int(0, p);
             auto second = ocr_result_to_int(p + 1, ocr_result.text.size());
             if (!minute.has_value() || !second.has_value()) {
-                data->fight_left_time_ms = std::nullopt;
+                result = std::nullopt;
                 return;
             }
 
-            data->fight_left_time_ms = minute.value() * 60 * 1000 + second.value() * 1000;
+            result = minute.value() * 60 * 1000 + second.value() * 1000;
             break;
         }
     }
@@ -137,6 +137,11 @@ void BattleTimeUpdater::display_data()
 constexpr std::string BattleTimeUpdater::data_name()
 {
     return "BattleTime";
+}
+
+void BattleTimeUpdater::write_result_into_data()
+{
+    data->fight_left_time_ms = result;
 }
 
 BAAS_NAMESPACE_END

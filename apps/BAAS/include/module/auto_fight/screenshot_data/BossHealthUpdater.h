@@ -23,6 +23,8 @@ public:
 
     void display_data() override;
 
+    virtual void write_result_into_data() override;
+
 private:
 
     void _update_all();
@@ -38,6 +40,9 @@ private:
     cv::Mat origin_screenshot, cropped_image;
 
     TextLine ocr_result;
+
+    std::optional<long long> result_current_health;
+    std::optional<long long> result_max_health;
 };
 
 BAAS_NAMESPACE_END

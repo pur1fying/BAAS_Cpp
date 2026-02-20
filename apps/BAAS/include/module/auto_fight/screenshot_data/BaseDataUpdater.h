@@ -26,6 +26,8 @@ public:
 
     virtual void display_data();
 
+    virtual void write_result_into_data();
+
 protected:
 
     BAASLogger* logger;

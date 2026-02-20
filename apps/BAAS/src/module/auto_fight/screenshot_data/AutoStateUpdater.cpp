@@ -35,11 +35,11 @@ void AutoStateUpdater::update()
     for (int i = 0; i < auto_feature_ptrs.size(); ++i) {
         if (auto_feature_ptrs[i]->appear(baas, feature_appear_output)) {
             logger->BAASInfo(auto_feature_ptrs[i]->get_name() + "  matched");
-            data->auto_state = bool(i);
+            result = bool(i);
             return;
         }
     }
-    data->auto_state = std::nullopt;
+    result = std::nullopt;
 }
 
 double AutoStateUpdater::estimated_time_cost()
@@ -59,5 +59,9 @@ void AutoStateUpdater::display_data()
     else                               logger->BAASInfo("Auto      : [    OFF   ]");
 }
 
+void AutoStateUpdater::write_result_into_data()
+{
+    data->auto_state = result;
+}
 
 BAAS_NAMESPACE_END

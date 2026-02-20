@@ -365,9 +365,6 @@ int CostUpdater::cost_is_positive()
     if(baas->feature_appear("fight_" + data->battle_type + "_cost_positive")) return 0;
     if(baas->feature_appear("fight_" + data->battle_type + "_cost_negative")) return 1;
 
-    // zero cost
-    if(baas->feature_appear("fight_" + data->battle_type + "_cost_positive_0")) return 0;
-    if(baas->feature_appear("fight_" + data->battle_type + "_cost_negative_0")) return 1;
     return 2;
 }
 
@@ -394,12 +391,15 @@ void CostUpdater::_detect_positive_cost()
     int last_cost_pixel_block=-1, last_cost_pixel_x=-1;
     int last_end_pixel_block=-1, last_end_pixel_x=-1;
 
+    int fail_cnt = 0, tolerance = 3;
+    bool need_check_interval = false;
     for(int i = 0; i <= detect_info.block_count-1; ++i) {
         for (int j = detect_info.blocks[roi_y_idx][i].first; j <= detect_info.blocks[roi_y_idx][i].second; ++j) {
             // blue cost pixel
             if(BAASImageUtil::judge_rgb_range(img, {j, roi_y}, c_c_min, c_c_max)) {
                 last_cost_pixel_block = i;
                 last_cost_pixel_x = j;
+                fail_cnt = 0;
                 continue;
             }
 
@@ -407,6 +407,7 @@ void CostUpdater::_detect_positive_cost()
             if (BAASImageUtil::judge_rgb_range(img,{j, roi_y},c_e_min,c_e_max)) {
                 last_end_pixel_block = i;
                 last_end_pixel_x = j;
+                fail_cnt = 0;
                 continue;
             }
 
@@ -417,25 +418,29 @@ void CostUpdater::_detect_positive_cost()
                 return;
             }
 
-            // 0 cost pixel
-            if(last_cost_pixel_block == -1) {
-                _set_cost(0.0);
-                return;
-            }
-
             // check if bright pixel is between blocks
-            if (i > 0) {
+            if (need_check_interval) {
                 for (int k = detect_info.blocks[roi_y_idx][i - 1].second + 1;k < detect_info.blocks[roi_y_idx][i].first; ++k) {
                     if (BAASImageUtil::judge_rgb_range(img, {k, roi_y}, c_e_min, c_e_max)) {
                         _set_cost(double(i));
                         return;
                     }
                 }
+                need_check_interval = false;
+            }
+
+            if (++fail_cnt <= tolerance) continue;
+
+            // 0 cost pixel
+            if(last_cost_pixel_block == -1) {
+                _set_cost(0.0);
+                return;
             }
 
             _set_cost(_calc_cost_from_block(last_cost_pixel_x, last_cost_pixel_block));
             return;
         }
+        need_check_interval = true;
     }
 
     _set_cost(max_cost);
@@ -467,6 +472,10 @@ double CostUpdater::_calc_cost_from_block(int x, int block_idx)
     return double(block_idx) + decimal;
 }
 
+void CostUpdater::write_result_into_data()
+{
+    data->cost = current_cost;
+}
 
 
 BAAS_NAMESPACE_END

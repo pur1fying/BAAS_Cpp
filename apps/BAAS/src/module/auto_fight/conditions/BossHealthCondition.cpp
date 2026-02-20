@@ -38,28 +38,26 @@ std::optional<bool> BossHealthCondition::try_match()
     std::optional<bool> ret = std::nullopt;
     switch (_op) {
         case C_OVER:
-            if(data->boss_current_health > _value) ret = true;
+            if(data->boss_current_health >= _value) ret = true;
             break;
         case C_BELOW:
-            if(data->boss_current_health < _value) ret = true;
+            if(data->boss_current_health <= _value) ret = true;
             break;
         case C_IN_RANGE:
-            if(data->boss_current_health > _range_min && data->boss_current_health < _range_max) ret = true;
+            if(data->boss_current_health >= _range_min && data->boss_current_health <= _range_max) ret = true;
             break;
         case C_INCREASE:
             if (_last_recorded_health.has_value() &&
                (data->boss_current_health.value() > _last_recorded_health.value())) {
-                _health_increment =
-                        _health_increment + (data->boss_current_health.value() - _last_recorded_health.value());
-                if (_health_increment > _value) ret = true;
+                _health_increment =_health_increment + (data->boss_current_health.value() - _last_recorded_health.value());
+                if (_health_increment >= _value) ret = true;
             }
             break;
         case C_DECREASE:
             if (_last_recorded_health.has_value() &&
                (data->boss_current_health.value() < _last_recorded_health.value())) {
-                _health_increment =
-                        _health_increment + (_last_recorded_health.value() - data->boss_current_health.value());
-                if (_health_increment > _value) ret = true;
+                _health_increment =_health_increment + (_last_recorded_health.value() - data->boss_current_health.value());
+                if (_health_increment >= _value) ret = true;
             }
             break;
         case M_EQUAL:

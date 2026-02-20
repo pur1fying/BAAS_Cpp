@@ -28,63 +28,61 @@ SkillNameUpdater::SkillNameUpdater(
 
 void SkillNameUpdater::update()
 {
+    result.clear();
     appeared_skill_idx.clear();
     for (const auto& skill: data->skills)
         if (skill.index.has_value())
             appeared_skill_idx.insert(skill.index.value()); // insert existing skill into appeared
 
     baas->get_latest_screenshot(origin_screenshot);
+
+    // search each slot
     for (int i = 0; i < data->each_slot_possible_templates.size(); i++) {
-        if (data->skills[i].index.has_value()) continue;    // skip slot with skill
+        auto& skill = data->skills[i];
+        // skill already detected
+        if (skill.index.has_value()) {
+            assert(skill.is_active.has_value());
+            if (skill.is_active.value()) continue;
+            if (!data->stop_when_skill_is_activate.contains(skill.index.value())) continue;
+
+            // search activate template only
+            screenshot_crop_img = BAASImageUtil::crop(origin_screenshot, each_skill_match_template_region[i]);
+            for (const auto& _active_template : data->all_possible_skills[skill.index.value()].skill_active_templates) {
+                if(_template_appear(_active_template)) {
+                    appeared_skill_idx.insert(skill.index.value());
+                    skill.is_active = true;
+                    break;
+                }
+            }
+            continue;
+        }
         screenshot_crop_img = BAASImageUtil::crop(origin_screenshot, each_skill_match_template_region[i]);
         _find = false;
-        for (auto& _tmp_idx : data->each_slot_possible_templates[i]) {
+        for (const auto& _tmp_idx : data->each_slot_possible_templates[i]) {
             if (appeared_skill_idx.contains(_tmp_idx)) continue;
 
-            for (auto& _active_template : data->all_possible_skills[_tmp_idx].skill_active_templates) {
+            // match activate
+            for (const auto& _active_template : data->all_possible_skills[_tmp_idx].skill_active_templates) {
                 if(_template_appear(_active_template)) {
                     appeared_skill_idx.insert(_tmp_idx);
-                    data->skills[i].index = _tmp_idx;
-                    data->skills[i].is_active = true;
+                    result.push_back({i, _tmp_idx, true});
                     _find = true;
                     break;
                 }
             }
-            if (_find) {
-                for (int j = 0 ; j < data->slot_count; ++j) {
-                    if (data->skill_last_detect[j].index.has_value()
-                     && data->skill_last_detect[j].index.value() == _tmp_idx) {
-                        data->skill_last_detect[j].reset();
-                        break;
-                    }
-                }
-                data->skill_last_detect[i].index = _tmp_idx;
-                data->skill_last_detect[i].is_active = true;
-                break;
-            }
+            if (_find) break;
 
-            for (auto& _inactive_template : data->all_possible_skills[_tmp_idx].skill_inactive_templates) {
+            // match inactivate
+            for (const auto& _inactive_template : data->all_possible_skills[_tmp_idx].skill_inactive_templates) {
                 if(_template_appear(_inactive_template)) {
                     appeared_skill_idx.insert(_tmp_idx);
-                    data->skills[i].index = _tmp_idx;
-                    data->skills[i].is_active = false;
+                    result.push_back({i, _tmp_idx, false});
                     _find = true;
                     break;
                 }
             }
 
-            if (_find) {
-                for (int j = 0 ; j < data->slot_count; ++j) {
-                    if (data->skill_last_detect[j].index.has_value()
-                     && data->skill_last_detect[j].index.value() == _tmp_idx) {
-                        data->skill_last_detect[j].reset();
-                        break;
-                    }
-                }
-                data->skill_last_detect[i].index = _tmp_idx;
-                data->skill_last_detect[i].is_active = false;
-                break;
-            }
+            if (_find) break;
         }
     }
 }
@@ -181,6 +179,23 @@ bool SkillNameUpdater::_template_appear(const template_info& _tmp)
        abs(matched_region_mean_rgb[2] - _tmp.mean_rgb[2]) > _rgb_diff  )  return false;
 
     return true;
+}
+
+void SkillNameUpdater::write_result_into_data()
+{
+    for (const auto& [slot_idx, skill_idx, is_active] : result) {
+        data->skills[slot_idx].index = skill_idx;
+        data->skills[slot_idx].is_active = is_active;
+        for (int j = 0 ; j < data->slot_count; ++j) {
+            if (data->skill_last_detect[j].index.has_value()
+             && data->skill_last_detect[j].index.value() == skill_idx) {
+                data->skill_last_detect[j].reset();
+                break;
+            }
+        }
+        data->skill_last_detect[slot_idx].index = skill_idx;
+        data->skill_last_detect[slot_idx].is_active = is_active;
+    }
 }
 
 BAAS_NAMESPACE_END

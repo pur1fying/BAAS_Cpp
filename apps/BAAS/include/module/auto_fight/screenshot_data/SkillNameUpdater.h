@@ -23,6 +23,8 @@ public:
 
     void display_data() override;
 
+    virtual void write_result_into_data() override;
+
 private:
 
     bool _template_appear(const template_info& _tmp);
@@ -52,6 +54,14 @@ private:
     cv::Mat origin_screenshot, screenshot_crop_img;
 
     cv::Mat match_result;
+
+    struct skill_detected {
+        int slot_idx;
+        int skill_idx;
+        bool is_active;
+    };
+
+    std::vector<skill_detected> result;
 };
 
 BAAS_NAMESPACE_END

@@ -64,6 +64,8 @@ private:
     std::optional<double> _last_recorded_cost;
 
     double _cost_increment;
+
+    bool is_first_frame;
 };
 
 BAAS_NAMESPACE_END

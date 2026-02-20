@@ -42,39 +42,45 @@ BattleTimeCondition::BattleTimeCondition(
 std::optional<bool> BattleTimeCondition::try_match()
 {
     if (!data->fight_left_time_ms.has_value()) return std::nullopt;
+    if (is_first_frame) {
+        _last_recorded_time = data->fight_left_time_ms;
+        is_first_frame = false;
+        return std::nullopt;
+    }
 
     std::optional<bool> ret;
     switch (_op) {
         case OVER:
-            if(data->fight_left_time_ms > _value) ret = true;
+            if(data->fight_left_time_ms >= _value) ret = true;
             break;
         case BELOW:
-            if(data->fight_left_time_ms < _value) ret = true;
+            if(data->fight_left_time_ms <= _value) ret = true;
             break;
         case IN_RANGE:
-            if(data->fight_left_time_ms > _range_min && data->fight_left_time_ms < _range_max) ret = true;
+            if(data->fight_left_time_ms >= _range_min && data->fight_left_time_ms <= _range_max) ret = true;
             break;
         case INCREASE:
             if (_last_recorded_time.has_value() && (data->fight_left_time_ms.value() > data->fight_left_time_ms.value())) {
                 _time_increment = _time_increment + (data->fight_left_time_ms.value() - data->fight_left_time_ms.value());
-                if (_time_increment > _value) ret = true;
+                if (_time_increment >= _value) ret = true;
             }
             break;
         case DECREASE:
             if (_last_recorded_time.has_value() && (data->cost.value() < _last_recorded_time.value())) {
                 _time_increment = _time_increment + (_last_recorded_time.value() - data->cost.value());
-                if (_time_increment > _value) ret = true;
+                if (_time_increment >= _value) ret = true;
             }
             break;
     }
 
-    _last_recorded_time = data->cost;
+    _last_recorded_time = data->fight_left_time_ms;
     return ret;
 }
 
 void BattleTimeCondition::reset_state()
 {
     _time_increment = 0;
+    is_first_frame = true;
 }
 
 void BattleTimeCondition::_parse_op()

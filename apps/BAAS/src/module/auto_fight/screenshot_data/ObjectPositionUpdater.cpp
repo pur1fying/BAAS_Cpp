@@ -37,7 +37,7 @@ void ObjectPositionUpdater::update()
 
     if (_t - _yolo_last_update_t > _yolo_update_itv) {
         baas->get_latest_screenshot(origin_screenshot);
-        _yolo->run_session(origin_screenshot, result, nms_op);
+        _yolo->run_session(origin_screenshot, y_result, nms_op);
         _yolo_last_update_t = _t;
         auto t2 = BAASChronoUtil::getCurrentTimeMS();
         logger->BAASInfo(std::format("[ YoloObj ] Time Cost : {} ms", t2 - _t));
@@ -65,15 +65,15 @@ void ObjectPositionUpdater::update()
 //            cv::imshow("Object Detection", origin_screenshot);
 //            cv::waitKey(1);
 //        }
+        result.clear();
         for (const auto& _p : data->obj_last_appeared_pos) {
             std::optional<yolo_single_res> res = std::nullopt;
-            for (const auto& r : result.results)
+            for (const auto& r : y_result.results)
                 if (r.class_id == _p.first && (res == std::nullopt || r.confidence > res->confidence))
                     res = r;
-            if (res != std::nullopt) data->obj_last_appeared_pos[_p.first] = res;
+            if (res != std::nullopt) result[_p.first] = res;
         }
     }
-
 }
 
 double ObjectPositionUpdater::estimated_time_cost() {
@@ -85,14 +85,14 @@ constexpr std::string ObjectPositionUpdater::data_name() {
 }
 
 void ObjectPositionUpdater::display_data() {
-    if(result.results.empty()) {
+    if(y_result.results.empty()) {
         logger->BAASInfo("Obj  : No Object Detected.");
         return;
     }
 
     logger->BAASInfo(std::format(_display_format, "Object Name", "Center", "Score"));
 
-    for (const auto& res : result.results) {
+    for (const auto& res : y_result.results) {
         std::string name = _yolo->get_classes()[res.class_id];
         int center_x = res.box.x + res.box.width / 2;
         int center_y = res.box.y + res.box.height / 2;
@@ -209,6 +209,12 @@ void ObjectPositionUpdater::_warm_up_session()
     _yolo->warm_up();
     auto e_t = BAASChronoUtil::getCurrentTimeMS();
     logger->BAASInfo("WarmUp T    : " + std::to_string(e_t - s_t) + "ms");
+}
+
+void ObjectPositionUpdater::write_result_into_data()
+{
+    for (const auto& _p : result)
+        data->obj_last_appeared_pos[_p.first] = _p.second;
 }
 
 BAAS_NAMESPACE_END

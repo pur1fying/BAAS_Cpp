@@ -21,7 +21,10 @@ public:
 
     enum Op {
         APPEAR,
-        AT
+        AT,
+        // Skill must be ready
+        APPEAR_READY,
+        AT_READY
     };
 
     void reset_state() override;

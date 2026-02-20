@@ -161,12 +161,16 @@ const std::vector<std::string> BaseCondition::cond_type_st_list = {
 
 const std::map<std::string, SkillNameCondition::Op> SkillNameCondition::op_map = {
         {"appear", APPEAR},
-        {"at", AT}
+        {"at", AT},
+        {"appear_ready", APPEAR_READY},
+        {"at_ready", AT_READY}
 };
 
 const std::vector<std::string> SkillNameCondition::op_st_list = {
         "appear",
-        "at"
+        "at",
+        "appear_ready",
+        "at_ready"
 };
 
 

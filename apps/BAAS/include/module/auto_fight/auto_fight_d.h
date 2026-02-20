@@ -76,6 +76,14 @@ struct state_info {
 // Be careful with this struct because it will be modified / read by several threads
 struct auto_fight_d {
 
+    std::mutex data_mutex;
+
+    uint64_t round_cnt = 0;
+
+    uint8_t last_updated_data_idx;
+
+    uint64_t last_updated_data_round;
+
     std::vector<int> last_rel_skill_slot_idx;
 
     std::vector<std::unique_ptr<BaseDataUpdater>> d_updaters;
@@ -106,6 +114,8 @@ struct auto_fight_d {
     std::vector<slot_skill>  skills;
     // record last detected skill in each slot, will not be reset before condition judgement
     std::vector<slot_skill>  skill_last_detect;
+    // search skill template until skill activate is detected
+    std::map<int, bool>      stop_when_skill_is_activate;
 
     std::vector<std::vector<int>> each_slot_possible_templates; 
     std::vector<skill_template> all_possible_skills;
