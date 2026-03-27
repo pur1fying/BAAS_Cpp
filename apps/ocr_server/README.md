@@ -18,11 +18,14 @@
               python -m unittest discover -s apps/ocr_server/test -p "*.py"
            ```
     If test passed:
-3. Push binaries to corresponding repository
-    - Windows: https://github.com/pur1fying/WindowsCompiled_baas_ocr_server.git
-    - Linux: https://github.com/pur1fying/LinuxCompiled_baas_ocr_server.git
-    - MacOS: https://github.com/pur1fying/MacOSCompiled_baas_ocr_server.git
-    **note**: Only update_reference changed files so that the ocr_server updater will not copy all the files every time.
+3. Push binaries to corresponding repository branch
+    - [windows-x64](https://github.com/pur1fying/BAAS_Cpp_prebuild/tree/windows-x64)             
+    - [linux-x64](https://github.com/pur1fying/BAAS_Cpp_prebuild/tree/linux-x64)                 
+    - [macos-arm64](https://github.com/pur1fying/BAAS_Cpp_prebuild/tree/macos-arm64)             
+    - [android-arm64-v8a](https://github.com/pur1fying/BAAS_Cpp_prebuild/tree/android-arm64-v8a) 
+    - [android-x86_64](https://github.com/pur1fying/BAAS_Cpp_prebuild/tree/android-x86_64)     
+
+   **note**: Only update_reference changed files so that the ocr_server updater will not copy all the files every time.
 
 
 ### Known Issues
