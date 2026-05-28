@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "lock_type": "baas-cpp-dependencies",
+  "local_layout_defaults": {
+    "local_root": "${BAAS_LOCAL_ROOT}",
+    "deps_root": "${BAAS_DEPS_ROOT}",
+    "downloads_root": "${BAAS_DOWNLOADS_ROOT}",
+    "build_root": "${BAAS_DEPS_BUILD_ROOT}"
+  },
+  "variant_model": {
+    "examples": [
+      "Windows-x64-MSVC-Release",
+      "Windows-x64-MSVC-Debug",
+      "Linux-x64-GNU-Release",
+      "MacOS-arm64-AppleClang-Release",
+      "Android-arm64-v8a-Clang-Release"
+    ],
+    "fingerprint_inputs": [
+      "name",
+      "version",
+      "provider",
+      "provider.sha256",
+      "platform",
+      "arch",
+      "compiler.id",
+      "compiler.version",
+      "config",
+      "toolchain_file",
+      "cmake_options"
+    ],
+    "marker_file": ".baas-complete.json"
+  },
+  "dependencies": {
+    "opencv": {
+      "version": "4.9.0",
+      "license": "Apache-2.0",
+      "providers": {
+        "source": {
+          "type": "archive",
+          "url": "https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz",
+          "sha256": "TODO_LOCK_SHA256",
+          "archive_type": "tar.gz",
+          "strip_prefix": "opencv-4.9.0"
+        },
+        "android_sdk": {
+          "type": "archive",
+          "url": "TODO_LOCK_OPENCV_ANDROID_SDK_URL",
+          "sha256": "TODO_LOCK_SHA256",
+          "archive_type": "zip"
+        }
+      },
+      "provider_by_platform": {
+        "Windows": "source",
+        "Linux": "source",
+        "MacOS": "source",
+        "Android": "android_sdk"
+      },
+      "local_layout": {
+        "downloads_dir": "${BAAS_DOWNLOADS_ROOT}",
+        "source_dir": "${BAAS_DEPS_BUILD_ROOT}/opencv/4.9.0/${variant}/src",
+        "build_dir": "${BAAS_DEPS_BUILD_ROOT}/opencv/4.9.0/${variant}/build",
+        "package_dir": "${BAAS_DEPS_ROOT}/opencv/4.9.0/${variant}",
+        "marker": "${BAAS_DEPS_ROOT}/opencv/4.9.0/${variant}/.baas-complete.json"
+      },
+      "build": {
+        "system": "cmake",
+        "package": true,
+        "cmake_options": {
+          "CMAKE_BUILD_TYPE": "${config}",
+          "CMAKE_INSTALL_PREFIX": "${package_dir}",
+          "BUILD_SHARED_LIBS": "ON",
+          "BUILD_opencv_world": "ON",
+          "BUILD_LIST": "core,imgproc,imgcodecs,dnn",
+          "BUILD_TESTS": "OFF",
+          "BUILD_PERF_TESTS": "OFF",
+          "BUILD_EXAMPLES": "OFF",
+          "BUILD_opencv_apps": "OFF",
+          "BUILD_JAVA": "OFF",
+          "WITH_FFMPEG": "OFF",
+          "WITH_GSTREAMER": "OFF",
+          "WITH_OPENCL": "OFF"
+        },
+        "environment": {
+          "OPENCV_DOWNLOAD_PATH": "${BAAS_DOWNLOADS_ROOT}/opencv-download-cache"
+        }
+      },
+      "outputs": {
+        "Windows": {
+          "Release": {
+            "include": [
+              "include/opencv2/core.hpp"
+            ],
+            "runtime": [
+              "bin/opencv_world490.dll"
+            ],
+            "link": [
+              "lib/opencv_world490.lib"
+            ]
+          },
+          "Debug": {
+            "include": [
+              "include/opencv2/core.hpp"
+            ],
+            "runtime": [
+              "bin/opencv_world490d.dll"
+            ],
+            "link": [
+              "lib/opencv_world490d.lib"
+            ]
+          }
+        },
+        "Linux": {
+          "include": [
+            "include/opencv2/core.hpp"
+          ],
+          "runtime": [
+            "lib/libopencv_world.so*"
+          ],
+          "link": [
+            "lib/libopencv_world.so"
+          ]
+        },
+        "MacOS": {
+          "include": [
+            "include/opencv2/core.hpp"
+          ],
+          "runtime": [
+            "lib/libopencv_world*.dylib"
+          ],
+          "link": [
+            "lib/libopencv_world.dylib"
+          ]
+        },
+        "Android": {
+          "include": [
+            "sdk/native/jni/include/opencv2/core.hpp"
+          ],
+          "runtime": [
+            "sdk/native/libs/${android_abi}/libopencv_java4.so"
+          ],
+          "link": [
+            "sdk/native/libs/${android_abi}/libopencv_java4.so"
+          ]
+        }
+      },
+      "validation": {
+        "required_headers": [
+          "opencv2/core.hpp",
+          "opencv2/imgproc.hpp",
+          "opencv2/imgcodecs.hpp",
+          "opencv2/dnn.hpp"
+        ],
+        "required_outputs": [
+          "include",
+          "runtime",
+          "link"
+        ]
+      }
+    },
+    "onnxruntime": {
+      "version": "1.22.0",
+      "provider_by_platform": {
+        "Windows": "release",
+        "Linux": "release",
+        "MacOS": "release",
+        "Android": "release"
+      },
+      "providers": {
+        "release": {
+          "type": "archive",
+          "url": "TODO_LOCK_ONNXRUNTIME_URL_BY_VARIANT",
+          "sha256": "TODO_LOCK_SHA256"
+        }
+      }
+    },
+    "ffmpeg": {
+      "abi": {
+        "avcodec": 60,
+        "avutil": 58,
+        "swscale": 7,
+        "swresample": 4
+      },
+      "provider_by_platform": {
+        "Windows": "prebuilt",
+        "Linux": "system",
+        "MacOS": "prebuilt"
+      }
+    },
+    "lz4": {
+      "version": "1.10.0",
+      "provider_by_platform": {
+        "Windows": "source",
+        "Linux": "source",
+        "MacOS": "source"
+      }
+    },
+    "nlohmann_json": {
+      "version": "3.11.3",
+      "provider_by_platform": {
+        "default": "source"
+      }
+    },
+    "spdlog": {
+      "version": "1.15.3",
+      "provider_by_platform": {
+        "default": "source"
+      }
+    },
+    "cpp_httplib": {
+      "version": "TODO_CONFIRM",
+      "provider_by_platform": {
+        "default": "single_header"
+      }
+    },
+    "simdutf": {
+      "version": "TODO_CONFIRM",
+      "provider_by_platform": {
+        "default": "source"
+      }
+    },
+    "cuda": {
+      "provider_by_platform": {
+        "Windows": "system",
+        "Linux": "system"
+      },
+      "minimum_version": "12.2"
+    },
+    "benchmark": {
+      "status": "candidate_for_removal",
+      "reason": "No Google Benchmark API usage was found in source files."
+    }
+  }
+}

@@ -24,6 +24,7 @@ endif()
 BAAS_sub_title_LOG("Target OS : ${TARGET_OS_NAME}")
 set(BAAS_DEFAULT_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${TARGET_OS_NAME}")
 set(BAAS_DEFAULT_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${TARGET_OS_NAME}")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/dependencies.cmake")
 
 if(TARGET_OS_NAME STREQUAL "Android")
     Android_NDK_check()

@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "lock_type": "baas-cpp-resources",
+  "local_layout_defaults": {
+    "assets_root": "${BAAS_ASSETS_ROOT}",
+    "downloads_root": "${BAAS_DOWNLOADS_ROOT}"
+  },
+  "resources": {
+    "scrcpy_server": {
+      "version": "TODO_CONFIRM",
+      "provider": "release",
+      "url": "TODO_LOCK_RELEASE_ASSET_URL",
+      "sha256": "TODO_LOCK_SHA256",
+      "package_dir": "${BAAS_ASSETS_ROOT}/scrcpy/${version}",
+      "outputs": {
+        "runtime": [
+          "scrcpy-server.jar"
+        ]
+      }
+    },
+    "platform_tools_windows": {
+      "version": "TODO_CONFIRM",
+      "provider": "android_sdk",
+      "url": "TODO_LOCK_PLATFORM_TOOLS_WINDOWS_URL",
+      "sha256": "TODO_LOCK_SHA256",
+      "package_dir": "${BAAS_ASSETS_ROOT}/platform_tools/Windows",
+      "outputs": {
+        "runtime": [
+          "platform-tools/adb.exe",
+          "platform-tools/AdbWinApi.dll",
+          "platform-tools/AdbWinUsbApi.dll"
+        ]
+      }
+    },
+    "platform_tools_macos": {
+      "version": "TODO_CONFIRM",
+      "provider": "android_sdk",
+      "url": "TODO_LOCK_PLATFORM_TOOLS_MACOS_URL",
+      "sha256": "TODO_LOCK_SHA256",
+      "package_dir": "${BAAS_ASSETS_ROOT}/platform_tools/MacOS",
+      "outputs": {
+        "runtime": [
+          "platform-tools/adb"
+        ]
+      }
+    },
+    "ascreencap": {
+      "version": "TODO_CONFIRM",
+      "provider": "external_asset",
+      "url": "TODO_CONFIRM_UPSTREAM_OR_ASSET_URL",
+      "sha256": "TODO_LOCK_SHA256",
+      "package_dir": "${BAAS_ASSETS_ROOT}/ascreencap/${version}",
+      "outputs": {
+        "runtime": [
+          "Android_5.x-7.x/${android_abi}/ascreencap",
+          "Android_8.x/${android_abi}/ascreencap",
+          "Android_9.x/${android_abi}/ascreencap"
+        ]
+      }
+    },
+    "ocr_models": {
+      "version": "TODO_CONFIRM",
+      "provider": "download",
+      "package_dir": "${BAAS_ASSETS_ROOT}/ocr_models",
+      "outputs": {
+        "runtime": []
+      }
+    },
+    "yolo_models": {
+      "version": "TODO_CONFIRM",
+      "provider": "download",
+      "package_dir": "${BAAS_ASSETS_ROOT}/yolo_models",
+      "outputs": {
+        "runtime": []
+      }
+    }
+  }
+}
