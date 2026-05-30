@@ -6,6 +6,7 @@ import http.client
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -674,6 +675,112 @@ class BootstrapDepsTests(unittest.TestCase):
             self.assertEqual(code, 0)
             self.assertTrue(index_path.exists())
             self.assertIn("BAAS_DEP_DEMO_READY TRUE", index_path.read_text(encoding="utf-8"))
+
+    def test_cmake_dependency_helper_bootstraps_missing_index(self) -> None:
+        cmake = shutil.which("cmake")
+        if not cmake:
+            self.skipTest("cmake executable not found")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fake_package = root / "package"
+            fake_package.mkdir()
+            package_value = fake_package.as_posix()
+            deploy_dir = root / "deploy" / "bootstrap_dependency"
+            deploy_dir.mkdir(parents=True)
+            (root / "deploy" / "__init__.py").write_text("", encoding="utf-8")
+            (deploy_dir / "__init__.py").write_text("", encoding="utf-8")
+            (deploy_dir / "__main__.py").write_text(
+                "\n".join(
+                    [
+                        "from __future__ import annotations",
+                        "import sys",
+                        "from pathlib import Path",
+                        "root = Path.cwd()",
+                        "(root / 'bootstrap_args.txt').write_text(' '.join(sys.argv[1:]), encoding='utf-8')",
+                        "index = root / '.baas' / 'cmake' / 'BAASDependencyIndex.cmake'",
+                        "index.parent.mkdir(parents=True, exist_ok=True)",
+                        "index.write_text('\\n'.join([",
+                        "    'set(BAAS_DEP_DEMO_READY TRUE)',",
+                        f"    'set(BAAS_DEP_DEMO_PACKAGE_DIR \"{package_value}\")',",
+                        "    ''",
+                        "]), encoding='utf-8')",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            helper = (Path(__file__).resolve().parents[1] / "cmake" / "deps" / "DependencyIndex.cmake").as_posix()
+            script = root / "check.cmake"
+            script.write_text(
+                "\n".join(
+                    [
+                        f'set(BAAS_DEPENDENCY_INDEX "{(root / ".baas" / "cmake" / "BAASDependencyIndex.cmake").as_posix()}" CACHE FILEPATH "")',
+                        f'set(BAAS_PYTHON_EXECUTABLE "{Path(sys.executable).as_posix()}" CACHE FILEPATH "")',
+                        'set(CMAKE_BUILD_TYPE "Release")',
+                        f'include("{helper}")',
+                        "baas_get_dependency_package_dir(demo package_dir)",
+                        f'if(NOT package_dir STREQUAL "{package_value}")',
+                        '    message(FATAL_ERROR "unexpected package dir: ${package_dir}")',
+                        "endif()",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run([cmake, "-P", str(script)], cwd=root, text=True, capture_output=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            args_text = (root / "bootstrap_args.txt").read_text(encoding="utf-8")
+            self.assertIn("--dependency demo", args_text)
+
+    def test_cmake_dependency_helper_reuses_ready_index(self) -> None:
+        cmake = shutil.which("cmake")
+        if not cmake:
+            self.skipTest("cmake executable not found")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fake_package = root / "package"
+            fake_package.mkdir()
+            index = root / ".baas" / "cmake" / "BAASDependencyIndex.cmake"
+            index.parent.mkdir(parents=True)
+            package_value = fake_package.as_posix()
+            index.write_text(
+                "\n".join(
+                    [
+                        "set(BAAS_DEP_DEMO_READY TRUE)",
+                        f'set(BAAS_DEP_DEMO_PACKAGE_DIR "{package_value}")',
+                        "",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            fake_python = root / "fake_python.cmd"
+            fake_python.write_text(
+                "@echo off\r\necho should-not-run > \"%~dp0bootstrap_ran.txt\"\r\nexit /b 7\r\n",
+                encoding="utf-8",
+            )
+
+            helper = (Path(__file__).resolve().parents[1] / "cmake" / "deps" / "DependencyIndex.cmake").as_posix()
+            script = root / "check.cmake"
+            script.write_text(
+                "\n".join(
+                    [
+                        f'set(BAAS_DEPENDENCY_INDEX "{index.as_posix()}" CACHE FILEPATH "")',
+                        f'set(BAAS_PYTHON_EXECUTABLE "{fake_python.as_posix()}" CACHE FILEPATH "")',
+                        f'include("{helper}")',
+                        "baas_get_dependency_package_dir(demo package_dir)",
+                        f'if(NOT package_dir STREQUAL "{package_value}")',
+                        '    message(FATAL_ERROR "unexpected package dir: ${package_dir}")',
+                        "endif()",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            result = subprocess.run([cmake, "-P", str(script)], cwd=root, text=True, capture_output=True, check=False)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertFalse((root / "bootstrap_ran.txt").exists())
 
     def test_reporter_prints_bootstrap_summary_table(self) -> None:
         entry = PlanEntry(
