@@ -5,7 +5,15 @@
 
 #include "yolo/BAAS_yolo.h"
 
+#include <exception>
+#include <filesystem>
 #include <fstream>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <type_traits>
+#include <vector>
 
 #ifdef __CUDA__
 #include <cuda_fp16.h>
@@ -16,12 +24,12 @@ namespace Ort
 }
 #endif // __CUDA__
 
-#include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "BAASExceptions.h"
 #include "BAASLogger.h"
 #include "ocr/OcrUtils.h"
-#include "BAASExceptions.h"
+#include "utils/BAASImageUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -383,13 +391,7 @@ void BAAS_Yolo_v8::_get_group_num_Out(
 
     std::vector<int> nmsResult;
     for (auto& it : m_boxes) {
-        cv::dnn::NMSBoxes(
-                m_boxes[it.first],
-                m_confidences[it.first],
-                rect_confidence_threshold,
-                iou_threshold,
-                nmsResult
-        );
+        BAASImageUtil::nms_boxes(m_boxes[it.first], m_confidences[it.first], rect_confidence_threshold, iou_threshold, nmsResult);
         yolo_single_res res;
         for (int i = 0; i < nmsResult.size(); ++i) {
             int idx = nmsResult[i];
@@ -437,13 +439,7 @@ void BAAS_Yolo_v8::_get_whole_nms_Out(
 
     std::vector<int> nmsResult;
 
-    cv::dnn::NMSBoxes(
-            boxes,
-            confidences,
-            rect_confidence_threshold,
-            iou_threshold,
-            nmsResult
-    );
+    BAASImageUtil::nms_boxes(boxes, confidences, rect_confidence_threshold, iou_threshold, nmsResult);
 
     yolo_single_res res;
     for (int i = 0; i < nmsResult.size(); ++i) {

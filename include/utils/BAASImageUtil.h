@@ -2,18 +2,19 @@
 #ifndef BAAS_UTILS_BAASIMAGEUTIL_H_
 #define BAAS_UTILS_BAASIMAGEUTIL_H_
 
-#include <map>
+#include <cstdint>
 #include <string>
-#include <filesystem>
+#include <utility>
+#include <vector>
 
-#include <opencv2/opencv.hpp>
-#include <nlohmann/detail/string_concat.hpp>
+#include <opencv2/core.hpp>
 
-#include "BAASTypes.h"
-#include "BAASLogger.h"
-#include "BAASExceptions.h"
+#include "core_defines.h"
 
 BAAS_NAMESPACE_BEGIN
+
+struct BAASPoint;
+struct BAASRectangle;
 
 class BAASImageUtil {
 
@@ -105,8 +106,13 @@ public:
 
     static void imagePaste(
             cv::Mat &src,
+            const cv::Mat &dst
+    );
+
+    static void imagePaste(
+            cv::Mat &src,
             const cv::Mat &dst,
-            const BAASPoint &point = BAASPoint(0, 0)
+            const BAASPoint &point
     );
 
     static void gen_not_black_region_mask(
@@ -136,6 +142,15 @@ public:
             const BAASPoint &p2
     );
 
+    static void nms_boxes(
+            const std::vector<cv::Rect> &boxes,
+            const std::vector<float> &scores,
+            float score_threshold,
+            float nms_threshold,
+            std::vector<int> &indices,
+            float eta = 1.0f,
+            int top_k = 0
+    );
 
     static bool judge_rgb_range(
             const cv::Vec3b &target,

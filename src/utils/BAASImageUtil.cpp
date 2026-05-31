@@ -2,6 +2,13 @@
 
 #include <numbers>
 
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
+
+#include "BAASExceptions.h"
+#include "BAASLogger.h"
+#include "BAASTypes.h"
+
 using namespace std;
 using namespace cv;
 
@@ -212,6 +219,14 @@ bool BAASImageUtil::save(
         BAASGlobalLogger->BAASInfo("SUCCESS Save image : [ " + savePath + " ]");
         return true;
     } else return true;
+}
+
+void BAASImageUtil::imagePaste(
+        Mat &src,
+        const Mat &dst
+)
+{
+    imagePaste(src, dst, BAASPoint(0, 0));
 }
 
 void BAASImageUtil::imagePaste(
