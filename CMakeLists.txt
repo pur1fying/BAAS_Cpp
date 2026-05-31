@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
+set(CMAKE_CXX_STANDARD 20)
+
 get_filename_component(BAAS_PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake")
@@ -8,11 +10,15 @@ include("${CMAKE_CURRENT_LIST_DIR}/cmake/platform.cmake")
 BAAS_hr_LOG("PROJECT BAAS")
 
 # Build type
-if (NOT CMAKE_BUILD_TYPE OR NOT (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Debug"))
+if (CMAKE_BUILD_TYPE AND NOT (CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "Debug"))
     message(FATAL_ERROR "Invalid build type: ${CMAKE_BUILD_TYPE}. Allowed : Debug, Release")
 endif()
 
-BAAS_sub_title_LOG("BUILD TYPE: ${CMAKE_BUILD_TYPE}")
+if(CMAKE_BUILD_TYPE)
+    BAAS_sub_title_LOG("BUILD TYPE: ${CMAKE_BUILD_TYPE}")
+else()
+    BAAS_sub_title_LOG("BUILD TYPE: not set; dependency config defaults to Release")
+endif()
 
 # Target Platform
 detect_target_platform(TARGET_OS_NAME)
@@ -24,7 +30,7 @@ endif()
 BAAS_sub_title_LOG("Target OS : ${TARGET_OS_NAME}")
 set(BAAS_DEFAULT_SEARCH_LIB_PATH "${CMAKE_CURRENT_LIST_DIR}/lib/${TARGET_OS_NAME}")
 set(BAAS_DEFAULT_SEARCH_DLL_PATH "${CMAKE_CURRENT_LIST_DIR}/dll/${TARGET_OS_NAME}")
-include("${CMAKE_CURRENT_LIST_DIR}/cmake/dependencies.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/BAASDependency.cmake")
 
 if(TARGET_OS_NAME STREQUAL "Android")
     Android_NDK_check()
@@ -65,8 +71,6 @@ message(STATUS "Date        : ${GIT_COMMIT_DATE}")
 message(STATUS "Build time  : ${BUILD_TIME}")
 
 
-set(CMAKE_CXX_STANDARD 20)
-
 # app options
 option(BUILD_APP_BAAS               "Build BAAS app          "  OFF)
 option(BUILD_APP_ISA                "Build ISA  app          "  OFF)
@@ -74,6 +78,7 @@ option(BUILD_APP_ISA                "Build ISA  app          "  OFF)
 # other
 option(BUILD_BAAS_OCR           "build the ocr server app"               OFF)
 option(BUILD_BAAS_AW_CHECKER    "build BAAS Auto Fight Workflow Checker" OFF)
+option(BUILD_BAAS_NMS_BENCHMARK "Build BAAS vs OpenCV dnn NMS Google Benchmark executable" OFF)
 
 check_app_options(
         BUILD_APP_BAAS
@@ -92,13 +97,51 @@ set(BAAS_FEATURE_RESOURCE_REQUIRED OFF)
 set(BAAS_PROCEDURE_RESOURCE_REQUIRED OFF)
 set(BAAS_IMAGE_RESOURCE_REQUIRED OFF)
 
+if(BUILD_BAAS_NMS_BENCHMARK)
+    baas_request_dependencies(benchmark opencv_dnn)
+endif()
+
+if(BUILD_APP_BAAS)
+    option(BAAS_APP_USE_CUDA "BAAS_APP Use CUDA" OFF)
+    baas_request_dependencies(opencv ffmpeg lz4 nlohmann_json cpp_httplib spdlog simdutf benchmark)
+    if(BAAS_APP_USE_CUDA)
+        baas_request_dependencies(
+                onnxruntime PROVIDER cuda
+                cuda
+        )
+    else()
+        baas_request_dependencies(onnxruntime)
+    endif()
+endif()
+
+if(BUILD_APP_ISA)
+    baas_request_dependencies(opencv ffmpeg lz4 nlohmann_json cpp_httplib spdlog simdutf benchmark)
+    baas_request_dependencies(
+            onnxruntime PROVIDER cuda
+            cuda
+    )
+endif()
+
+if(BUILD_BAAS_OCR)
+    option(BAAS_OCR_SERVER_USE_CUDA "Ocr Server Use CUDA" OFF)
+    baas_request_dependencies(opencv nlohmann_json cpp_httplib spdlog simdutf)
+    if(BAAS_OCR_SERVER_USE_CUDA)
+        baas_request_dependencies(
+                onnxruntime PROVIDER cuda
+                cuda
+        )
+    else()
+        baas_request_dependencies(onnxruntime)
+    endif()
+endif()
+
+baas_bootstrap_requested_dependencies()
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include_directories(
-        ${BAAS_PROJECT_PATH}/external
         ${BAAS_PROJECT_PATH}/include
-        ${BAAS_PROJECT_PATH}/external/cuda
 )
 
 file(
@@ -113,6 +156,9 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
+list(REMOVE_ITEM BAAS_CORE_SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/simdutf.cpp")
+
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/NmsBenchmark.cmake")
 
 file(
         GLOB

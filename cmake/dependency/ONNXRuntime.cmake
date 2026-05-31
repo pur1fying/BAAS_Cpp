@@ -1,0 +1,67 @@
+include_guard(GLOBAL)
+
+function(baas_try_enable_onnxruntime out_var)
+    if(TARGET BAAS::ONNXRuntime)
+        set(${out_var} TRUE PARENT_SCOPE)
+        return()
+    endif()
+
+    get_property(_ready GLOBAL PROPERTY BAAS_DEPENDENCY_onnxruntime_READY)
+    if(NOT _ready)
+        set(${out_var} FALSE PARENT_SCOPE)
+        return()
+    endif()
+
+    get_property(_package_dir GLOBAL PROPERTY BAAS_DEPENDENCY_onnxruntime_PACKAGE_DIR)
+    set(_include_dir "${_package_dir}/include")
+    set(_onnx_lib "${_package_dir}/lib/onnxruntime.lib")
+    set(_onnx_runtime "${_package_dir}/bin/onnxruntime.dll")
+    if(NOT EXISTS "${_include_dir}/onnxruntime/onnxruntime_cxx_api.h" OR NOT EXISTS "${_onnx_lib}")
+        set(${out_var} FALSE PARENT_SCOPE)
+        return()
+    endif()
+
+    add_library(BAAS::ONNXRuntime UNKNOWN IMPORTED GLOBAL)
+    set_target_properties(
+            BAAS::ONNXRuntime
+            PROPERTIES
+            IMPORTED_LOCATION "${_onnx_lib}"
+            INTERFACE_INCLUDE_DIRECTORIES "${_include_dir}"
+    )
+    if(EXISTS "${_onnx_runtime}")
+        baas_register_runtime_file("onnxruntime" "${_onnx_runtime}")
+    endif()
+
+    get_property(_onnxruntime_provider GLOBAL PROPERTY BAAS_DEPENDENCY_onnxruntime_PROVIDER)
+    if(_onnxruntime_provider STREQUAL "cuda")
+        set(_cuda_provider_lib "${_package_dir}/lib/onnxruntime_providers_cuda.lib")
+        set(_shared_provider_lib "${_package_dir}/lib/onnxruntime_providers_shared.lib")
+        add_library(BAAS::ONNXRuntimeCUDAProvider INTERFACE IMPORTED GLOBAL)
+        set(_provider_libs "")
+        if(EXISTS "${_cuda_provider_lib}")
+            list(APPEND _provider_libs "${_cuda_provider_lib}")
+        endif()
+        if(EXISTS "${_shared_provider_lib}")
+            list(APPEND _provider_libs "${_shared_provider_lib}")
+        endif()
+        set_target_properties(BAAS::ONNXRuntimeCUDAProvider PROPERTIES INTERFACE_LINK_LIBRARIES "${_provider_libs}")
+        file(GLOB _onnx_provider_dlls CONFIGURE_DEPENDS "${_package_dir}/bin/*.dll")
+        foreach(_provider_dll IN LISTS _onnx_provider_dlls)
+            baas_register_runtime_file("onnxruntime-provider" "${_provider_dll}")
+        endforeach()
+    endif()
+
+    set(${out_var} TRUE PARENT_SCOPE)
+endfunction()
+
+function(baas_require_onnxruntime_target)
+    get_property(_ready GLOBAL PROPERTY BAAS_DEPENDENCY_onnxruntime_READY)
+    if(NOT _ready)
+        message(FATAL_ERROR "Dependency 'onnxruntime' is not ready in BAAS dependency manifest: ${BAAS_DEPENDENCY_INDEX}")
+    endif()
+    baas_try_enable_onnxruntime(_onnxruntime_available)
+    if(NOT _onnxruntime_available)
+        get_property(_package_dir GLOBAL PROPERTY BAAS_DEPENDENCY_onnxruntime_PACKAGE_DIR)
+        message(FATAL_ERROR "BAAS::ONNXRuntime package is ready but required files are missing under ${_package_dir}. Run python -m deploy.bootstrap_dependency --dependency onnxruntime --build-type ${BAAS_DEPENDENCY_BUILD_TYPE}")
+    endif()
+endfunction()

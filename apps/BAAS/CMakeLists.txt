@@ -87,8 +87,7 @@ target_include_directories(
         BAAS_APP
         PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include
-        ${BAAS_PROJECT_PATH}/external
-        ${BAAS_PROJECT_PATH}include
+        ${BAAS_PROJECT_PATH}/include
         ${CMAKE_BINARY_DIR}
 )
 

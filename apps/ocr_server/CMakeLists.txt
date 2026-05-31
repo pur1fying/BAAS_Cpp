@@ -41,7 +41,6 @@ file(
         ${BAAS_PROJECT_PATH}/src/BAASGlobals.cpp
         ${BAAS_PROJECT_PATH}/src/BAASLogger.cpp
         ${BAAS_PROJECT_PATH}/src/utils/*.cpp
-        ${BAAS_PROJECT_PATH}/src/simdutf.cpp
 )
 
 # Generate lib in Android, build executable in [Windows, Linux, MacOS]

@@ -9,7 +9,7 @@ project(ISA VERSION 1.0.0)
 
 configure_file(
         ${CMAKE_CURRENT_LIST_DIR}/version.h.in
-        ${CMAKE_BINARY_DIR}/BAAS_Version.h
+        ${CMAKE_BINARY_DIR}/ISA_version.h
 )
 
 set(BIN_RESOURCE_REQUIRED               ON PARENT_SCOPE)
@@ -68,18 +68,11 @@ add_executable(
         ${BAAS_MODULE_RESOURCE}
 )
 
-target_link_directories(
-        ISA
-        PRIVATE
-        ${BAAS_PROJECT_PATH}/lib/${TARGET_OS_NAME}
-)
-
 target_include_directories(
         ISA
         PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}/include
-        ${BAAS_PROJECT_PATH}/external
-        ${BAAS_PROJECT_PATH}include
+        ${BAAS_PROJECT_PATH}/include
         ${CMAKE_BINARY_DIR}
 )
 
@@ -90,100 +83,56 @@ target_compile_definitions(
         BENCHMARK_STATIC_DEFINE
 )
 
+baas_require_opencv_target()
+baas_require_onnxruntime_target()
+baas_require_ffmpeg_target()
+baas_require_lz4_target()
+baas_require_cuda_target()
+baas_require_nlohmann_json_target()
+baas_require_httplib_target()
+baas_require_spdlog_target()
+baas_require_simdutf_target()
+baas_try_enable_benchmark(BAAS_BENCHMARK_AVAILABLE)
 
-SET(
-        LIB_COMMON
-        avcodec
-#        avdevice
-#        avfilter
-#        avformat
-        avutil
-        liblz4
-        onnxruntime
-        onnxruntime_providers_cuda
-        onnxruntime_providers_shared
-#        postproc
-#        swresample
-        swscale
+get_property(_onnxruntime_provider GLOBAL PROPERTY BAAS_DEPENDENCY_onnxruntime_PROVIDER)
+if(NOT _onnxruntime_provider STREQUAL "cuda")
+    message(FATAL_ERROR "ISA requires ONNXRuntime provider 'cuda' in BAAS dependency index. Run: python -m deploy.bootstrap_dependency --dependency onnxruntime --provider cuda --build-type ${BAAS_DEPENDENCY_BUILD_TYPE}")
+endif()
+
+set(
+        LIB_RAW
+        BAAS_ipc
+        BAAS::OpenCV
+        BAAS::ONNXRuntime
+        BAAS::FFmpeg
+        BAAS::LZ4
+        BAAS::nlohmann_json
+        BAAS::httplib
+        BAAS::spdlog
+        BAAS::simdutf
+        BAAS::CUDA
         ws2_32
         shlwapi
 )
 
-SET(
-        DLL_COMMON
-        avcodec-60
-#        avdevice-60
-#        avfilter-9
-#        avformat-60
-        avutil-58
-        liblz4
-        onnxruntime
-        onnxruntime_providers_cuda
-#        postproc-57
-#        swresample-4
-        swscale-7
-)
+if(TARGET BAAS::ONNXRuntimeCUDAProvider)
+    list(APPEND LIB_RAW BAAS::ONNXRuntimeCUDAProvider)
+endif()
 
-if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    SET(
-            LIB_DEBUG
-            opencv_world490d
-            benchmark_d
-            benchmark_main_d
-    )
-    SET(
-            DLL_DEBUG
-            opencv_world490d
-    )
-elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-    SET(
-            LIB_RELEASE
-            opencv_world490
-            benchmark
-            benchmark_main
-    )
-    SET(
-            DLL_RELEASE
-            opencv_world490
-    )
-endif ()
+if(BAAS_BENCHMARK_AVAILABLE)
+    list(APPEND LIB_RAW BAAS::benchmark BAAS::benchmark_main)
+else()
+    message(FATAL_ERROR "BAAS::benchmark package was not found. Run: python -m deploy.bootstrap_dependency --dependency benchmark --build-type ${BAAS_DEPENDENCY_BUILD_TYPE}")
+endif()
 
-
-set(
-        LIB_RAW
-        ${LIB_COMMON}
-        ${LIB_DEBUG}
-        ${LIB_RELEASE}
-)
-
-set(
-        DLL_RAW
-        ${DLL_COMMON}
-        ${DLL_DEBUG}
-        ${DLL_RELEASE}
-)
-
-
-# log found dll name
 message(STATUS "LIB RAW :")
 foreach (LIB ${LIB_RAW})
     message(STATUS "${LIB}")
 endforeach ()
-message(STATUS "---------------------------------")
-message(STATUS "DLL RAW :")
-foreach (DLL ${DLL_RAW})
-    message(STATUS "${DLL}")
-endforeach ()
-
-# get dll full path and copy to binary dir
-foreach (dll ${DLL_RAW})
-    set(FULL_PATH ${BAAS_PROJECT_PATH}/dll/${TARGET_OS_NAME}/${dll}.dll)
-    file(COPY ${FULL_PATH} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-endforeach ()
 
 target_link_libraries(
         ISA
-        BAAS_ipc
         ${LIB_RAW}
 )
 
+baas_copy_runtime_dependencies(ISA)

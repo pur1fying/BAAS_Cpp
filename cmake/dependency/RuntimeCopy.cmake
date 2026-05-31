@@ -1,7 +1,5 @@
 include_guard(GLOBAL)
 
-define_property(GLOBAL PROPERTY BAAS_RUNTIME_FILES BRIEF_DOCS "BAAS runtime files" FULL_DOCS "Registered runtime files copied after target build")
-
 function(baas_register_runtime_file name path)
     get_property(_files GLOBAL PROPERTY BAAS_RUNTIME_FILES)
     list(APPEND _files "${name}|${path}")
