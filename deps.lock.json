@@ -1,19 +1,23 @@
 {
   "schema": 1,
   "lock_type": "baas-cpp-dependencies",
-  "local_layout_defaults": {
-    "local_root": "${BAAS_LOCAL_ROOT}",
-    "deps_root": "${BAAS_DEPS_ROOT}",
-    "downloads_root": "${BAAS_DOWNLOADS_ROOT}",
-    "build_root": "${BAAS_DEPS_BUILD_ROOT}"
+  "paths": {
+    "downloads": "${BAAS_DOWNLOADS_ROOT}",
+    "source": "${BAAS_DEPS_BUILD_ROOT}/${name}/${version}/${variant}/${provider}/src",
+    "build": "${BAAS_DEPS_BUILD_ROOT}/${name}/${version}/${variant}/${provider}/build",
+    "package": "${BAAS_DEPENDENCY_ROOT}/${name}/${version}/${variant}/${provider}"
+  },
+  "state": {
+    "file": "${BAAS_WORKSPACE_ROOT}/state.json"
   },
   "variant_model": {
+    "format": "${platform}-${arch}-${compiler.id}-${config}",
     "examples": [
-      "Windows-x64-MSVC-Release",
-      "Windows-x64-MSVC-Debug",
-      "Linux-x64-GNU-Release",
-      "MacOS-arm64-AppleClang-Release",
-      "Android-arm64-v8a-Clang-Release"
+      "windows-x64-msvc-release",
+      "windows-x64-msvc-debug",
+      "linux-x64-gnu-release",
+      "macos-arm64-appleclang-release",
+      "android-arm64-v8a-clang-release"
     ],
     "fingerprint_inputs": [
       "name",
@@ -27,8 +31,7 @@
       "config",
       "toolchain_file",
       "cmake_options"
-    ],
-    "marker_file": ".baas-complete.json"
+    ]
   },
   "dependencies": {
     "opencv": {
