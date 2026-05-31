@@ -1,65 +1,96 @@
 # BAAS C++ dependency bootstrap
 
-本文档描述依赖去仓库化第一阶段的本地目录和锁文件约定。本阶段只建立框架，不迁移任何依赖，不删除仓库内旧文件。
+本文档记录 BAAS_Cpp 依赖去仓库化的本地目录、lock 文件、bootstrap 脚本和当前 Windows x64 迁移状态。
 
 ## 本地目录
 
-默认本地工作目录为 `${CMAKE_SOURCE_DIR}/.baas`，可通过 CMake 或环境变量覆盖。
+默认本地工作目录为 `${CMAKE_SOURCE_DIR}/.baas`，可以通过 CMake 变量或环境变量覆盖。
 
-- `.baas/deps`: 已整理好的第三方依赖 package，供 BAAS 链接和运行时复制使用。
-- `.baas/assets`: 运行资源和工具，例如 OCR 模型、YOLO 模型、platform-tools、scrcpy-server、ascreencap。
-- `.baas/downloads`: 下载缓存。
+- `.baas/dependency`: 已整理好的第三方 dependency package，供 BAAS 编译、链接、运行时复制和最终打包使用。
+- `.baas/assets`: 运行资源和工具，例如 OCR 模型、YOLO 模型、platform-tools、scrcpy-server、ascreencap。当前阶段尚未迁移资源。
+- `.baas/downloads`: 下载缓存。删除 build 目录后仍可复用下载包。
 - `.baas/build`: 第三方依赖源码解压和构建目录。
-- `.baas/logs`: bootstrap 和第三方构建日志。
+- `.baas/state.json`: 集中依赖状态文件，记录 fingerprint、package、outputs 等信息。
+- `output/log/dependency/<yyyy-mm-dd_hh.mm.ss>`: bootstrap 和第三方构建日志。
 
-用户侧文档使用 `package_dir` 描述依赖产物目录，不使用 `install_dir`。如果第三方 CMake 项目内部需要 `cmake --install` 来整理产物，只作为实现细节处理。
+用户侧目录字段统一使用 `package` 或 package directory，不使用 `install` / `install_dir`。第三方 CMake 项目内部仍可能执行 `cmake --install`，这只是整理第三方产物的实现细节。
 
-## CMake 变量
+## 固定版本策略
 
-- `BAAS_LOCAL_ROOT`: 默认 `${CMAKE_SOURCE_DIR}/.baas`
-- `BAAS_DEPS_ROOT`: 默认 `${BAAS_LOCAL_ROOT}/deps`
-- `BAAS_ASSETS_ROOT`: 默认 `${BAAS_LOCAL_ROOT}/assets`
-- `BAAS_DOWNLOADS_ROOT`: 默认 `${BAAS_LOCAL_ROOT}/downloads`
-- `BAAS_DEPS_BUILD_ROOT`: 默认 `${BAAS_LOCAL_ROOT}/build`
-- `BAAS_DEPS_MODE`: `auto`, `download`, `system`, `source`
-- `BAAS_ALLOW_DOWNLOADS`: 默认 `ON`
-- `BAAS_USE_SYSTEM_ADB`: 默认 `ON`
-- `BAAS_OPENCV_PROVIDER`: 默认 `source`
-- `BAAS_FFMPEG_PROVIDER`: 默认 `prebuilt`
-- `BAAS_ONNXRUNTIME_PROVIDER`: 默认 `cpu`
-- `BAAS_RESOURCE_PROVIDER`: 默认 `download`
+当前阶段只验证固定版本链路，不引入 `range/recommended/resolved` 版本范围结构。每个依赖的 `version` 必须是非空字符串。
 
-## Lock 文件
+多版本兼容会在固定版本的下载、构建、state、fingerprint 和 CMake target 全部稳定后，再按依赖单独验证。
 
-`deps.lock.json` 记录编译和链接依赖。`resources.lock.json` 记录运行时资源。正式启用下载或源码构建前，所有 release archive 和二进制资产必须填入真实 SHA256，不能使用 `TODO_LOCK_SHA256`。
+## 已启用的 Windows x64 编译依赖
 
-每个依赖后续迁移时必须写入 marker 文件：
+以下依赖已经可以通过 `python -m deploy.bootstrap_dependency` 生成到 `.baas/dependency`：
 
-```json
-{
-  "schema": 1,
-  "name": "opencv",
-  "version": "4.9.0",
-  "variant": "Windows-x64-MSVC-Release",
-  "provider": "source",
-  "fingerprint": "sha256:...",
-  "source_sha256": "...",
-  "cmake_options_hash": "...",
-  "compiler_id": "MSVC",
-  "compiler_version": "...",
-  "config": "Release",
-  "created_at": "...",
-  "package_dir": "...",
-  "outputs": {
-    "include": [],
-    "link": [],
-    "runtime": []
-  }
-}
+- OpenCV `4.9.0`: source build，生成 `BAAS::OpenCV`。
+- ONNX Runtime `1.22.0`: Microsoft release package，CPU provider 生成 `BAAS::ONNXRuntime`，CUDA provider 额外生成 `BAAS::ONNXRuntimeCUDAProvider`。
+- FFmpeg `6.1-abi60`: BtbN n6.1 LGPL shared package，生成 `BAAS::FFmpeg`。
+- LZ4 `1.10.0`: source build，生成 `BAAS::LZ4`。
+- nlohmann/json `3.11.3`: header archive，生成 `BAAS::nlohmann_json`。
+- spdlog `1.15.3`: source build，生成 `BAAS::spdlog`。
+- cpp-httplib `0.18.0`: single header，生成 `BAAS::httplib`。
+- simdutf `6.2.0`: source build，生成 `BAAS::simdutf`。
+- Google Benchmark `1.9.1`: source build，生成 `BAAS::benchmark` 和 `BAAS::benchmark_main`。
+- CUDA Toolkit `12.2`: system provider，通过 `find_package(CUDAToolkit 12.2)` 使用本机环境，不下载到仓库。
+
+资源类条目仍在 `resources.lock.json` 中保留 TODO，占位不会触发下载或构建。
+
+## Bootstrap 命令
+
+打印计划：
+
+```powershell
+python -m deploy.bootstrap_dependency --print-plan --build-type Release
 ```
 
-bootstrap 逻辑必须先检查 marker、fingerprint 和 required outputs。全部命中时输出 cache hit，并跳过下载和构建。
+生成所有 Windows x64 编译依赖：
 
-## 当前阶段边界
+```powershell
+python -m deploy.bootstrap_dependency --dependency all --build-type Release --platform windows --arch x64
+```
 
-当前框架不会接管现有 `dll/`、`lib/Windows/`、`external/`、`resource/bin/`。后续每个依赖都必须单独提出待审核修改，验证通过后再逐步移除旧路径 fallback。
+生成 CUDA provider 的 ONNX Runtime：
+
+```powershell
+python -m deploy.bootstrap_dependency --dependency onnxruntime --provider cuda --build-type Release --platform windows --arch x64
+```
+
+只验证 lock 文件：
+
+```powershell
+python scripts/verify_dependency.py --locks-only
+```
+
+清理单个依赖 package：
+
+```powershell
+python -m deploy.bootstrap_dependency --clean cpp_httplib
+```
+
+如果 state 中 fingerprint 命中且 package 内 required outputs 存在，二次运行会显示 `cache_hit` 并跳过下载/构建。缺少 required output 时会显示 `cache_miss_required_outputs_missing` 并重新生成。
+
+## CMake 使用方式
+
+Windows BAAS app、OCR server 和 ISA 的 CMake 入口通过 `cmake/BAASDependency.cmake` 加载 dependency helpers。依赖模块会先检查 `.baas/state.json` 和 package outputs，再创建 `BAAS::*` target。
+
+示例：
+
+```cmake
+baas_require_opencv_target()
+baas_require_onnxruntime_target()
+baas_require_ffmpeg_target()
+baas_require_lz4_target()
+target_link_libraries(BAAS_APP BAAS::OpenCV BAAS::ONNXRuntime BAAS::FFmpeg BAAS::LZ4)
+baas_copy_runtime_dependencies(BAAS_APP)
+```
+
+`baas_copy_runtime_dependencies(target)` 会复制已注册的 DLL 到目标输出目录。ADB、scrcpy-server、ascreencap、OCR/YOLO 模型仍按旧资源路径处理，等待后续资源迁移。
+
+## 当前边界
+
+本阶段不删除仓库内 `dll/`、`lib/Windows/`、`external/`、`resource/bin/` 或模型目录，也不清理 Git 历史。
+
+Windows BAAS app 和 OCR server 已经可以通过 `.baas/dependency` 生成的 dependency 完成编译。ISA 当前可以完成依赖解析和大部分编译，但仍有 ISA 业务代码层面的 `BAAS::solve_procedure` 调用签名不匹配，未在本次依赖迁移中修改。
