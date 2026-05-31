@@ -1,9 +1,23 @@
 {
   "schema": 1,
   "lock_type": "baas-cpp-resources",
-  "local_layout_defaults": {
-    "assets_root": "${BAAS_ASSETS_ROOT}",
-    "downloads_root": "${BAAS_DOWNLOADS_ROOT}"
+  "paths": {
+    "downloads": "${BAAS_DOWNLOADS_ROOT}",
+    "package": "${BAAS_ASSETS_ROOT}/${name}/${version}/${provider}"
+  },
+  "state": {
+    "file": "${BAAS_WORKSPACE_ROOT}/state.json"
+  },
+  "variant_model": {
+    "fingerprint_inputs": [
+      "name",
+      "version",
+      "provider",
+      "sha256",
+      "platform",
+      "arch",
+      "android_abi"
+    ]
   },
   "resources": {
     "scrcpy_server": {
@@ -11,10 +25,21 @@
       "provider": "release",
       "url": "TODO_LOCK_RELEASE_ASSET_URL",
       "sha256": "TODO_LOCK_SHA256",
-      "package_dir": "${BAAS_ASSETS_ROOT}/scrcpy/${version}",
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "sha256",
+        "platform",
+        "arch"
+      ],
       "outputs": {
         "runtime": [
           "scrcpy-server.jar"
+        ]
+      },
+      "validation": {
+        "required_outputs": [
+          "runtime"
         ]
       }
     },
@@ -23,12 +48,23 @@
       "provider": "android_sdk",
       "url": "TODO_LOCK_PLATFORM_TOOLS_WINDOWS_URL",
       "sha256": "TODO_LOCK_SHA256",
-      "package_dir": "${BAAS_ASSETS_ROOT}/platform_tools/Windows",
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "sha256",
+        "platform",
+        "arch"
+      ],
       "outputs": {
         "runtime": [
           "platform-tools/adb.exe",
           "platform-tools/AdbWinApi.dll",
           "platform-tools/AdbWinUsbApi.dll"
+        ]
+      },
+      "validation": {
+        "required_outputs": [
+          "runtime"
         ]
       }
     },
@@ -37,10 +73,44 @@
       "provider": "android_sdk",
       "url": "TODO_LOCK_PLATFORM_TOOLS_MACOS_URL",
       "sha256": "TODO_LOCK_SHA256",
-      "package_dir": "${BAAS_ASSETS_ROOT}/platform_tools/MacOS",
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "sha256",
+        "platform",
+        "arch"
+      ],
       "outputs": {
         "runtime": [
           "platform-tools/adb"
+        ]
+      },
+      "validation": {
+        "required_outputs": [
+          "runtime"
+        ]
+      }
+    },
+    "platform_tools_linux": {
+      "version": "TODO_CONFIRM",
+      "provider": "android_sdk",
+      "url": "TODO_LOCK_PLATFORM_TOOLS_LINUX_URL",
+      "sha256": "TODO_LOCK_SHA256",
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "sha256",
+        "platform",
+        "arch"
+      ],
+      "outputs": {
+        "runtime": [
+          "platform-tools/adb"
+        ]
+      },
+      "validation": {
+        "required_outputs": [
+          "runtime"
         ]
       }
     },
@@ -49,29 +119,63 @@
       "provider": "external_asset",
       "url": "TODO_CONFIRM_UPSTREAM_OR_ASSET_URL",
       "sha256": "TODO_LOCK_SHA256",
-      "package_dir": "${BAAS_ASSETS_ROOT}/ascreencap/${version}",
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "sha256",
+        "platform",
+        "arch",
+        "android_abi"
+      ],
       "outputs": {
         "runtime": [
           "Android_5.x-7.x/${android_abi}/ascreencap",
           "Android_8.x/${android_abi}/ascreencap",
           "Android_9.x/${android_abi}/ascreencap"
         ]
+      },
+      "validation": {
+        "required_outputs": [
+          "runtime"
+        ]
       }
     },
     "ocr_models": {
       "version": "TODO_CONFIRM",
       "provider": "download",
-      "package_dir": "${BAAS_ASSETS_ROOT}/ocr_models",
+      "url": "TODO_LOCK_OCR_MODELS_ASSET_URL",
+      "sha256": "TODO_LOCK_SHA256",
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "sha256"
+      ],
       "outputs": {
         "runtime": []
+      },
+      "validation": {
+        "required_outputs": [
+          "runtime"
+        ]
       }
     },
     "yolo_models": {
       "version": "TODO_CONFIRM",
       "provider": "download",
-      "package_dir": "${BAAS_ASSETS_ROOT}/yolo_models",
+      "url": "TODO_LOCK_YOLO_MODELS_ASSET_URL",
+      "sha256": "TODO_LOCK_SHA256",
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "sha256"
+      ],
       "outputs": {
         "runtime": []
+      },
+      "validation": {
+        "required_outputs": [
+          "runtime"
+        ]
       }
     }
   }
