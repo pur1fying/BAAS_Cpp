@@ -10,6 +10,20 @@ from .outputs import OutputResolver, OutputValidator
 from .repository import PathResolver, StateStore, is_placeholder, provider_for_dependency, provider_path, provider_payload
 
 
+def provider_override_for(args: argparse.Namespace, dependency_name: str) -> str | None:
+    overrides = getattr(args, "provider_overrides", None)
+    if overrides:
+        for item in str(overrides).split(","):
+            if not item.strip():
+                continue
+            if "=" not in item:
+                raise ValueError(f"invalid provider override '{item}', expected dependency=provider")
+            name, provider = (part.strip() for part in item.split("=", 1))
+            if name == dependency_name:
+                return provider
+    return getattr(args, "provider", None)
+
+
 @dataclass(frozen=True)
 class PlanEntry:
     kind: str
@@ -246,7 +260,7 @@ class PlanBuilder:
         if include_all_dependencies:
             dependencies = self.lock_repo.select_dependencies(dependency_selector, args.all or not dependency_selector)
             for name, dep in dependencies.items():
-                entries.append(self.dependency_planner.plan(deps_lock, state, name, dep, ctx, args.provider))
+                entries.append(self.dependency_planner.plan(deps_lock, state, name, dep, ctx, provider_override_for(args, name)))
 
         if include_all_resources:
             resources = self.lock_repo.select_resources(args.resources, args.all or not args.resources)

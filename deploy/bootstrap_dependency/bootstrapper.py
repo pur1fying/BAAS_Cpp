@@ -200,6 +200,27 @@ class BootstrapService:
         self.reporter.phase(entry, "Install", "success")
         self.reporter.finish_entry(entry, "stage")
 
+    def bootstrap_system_dependency(
+        self,
+        name: str,
+        dep: dict[str, Any],
+        entry: PlanEntry,
+        ctx: Any,
+    ) -> None:
+        provider_data = provider_payload(dep, entry.provider)
+        package_dir = Path(entry.package)
+        package_dir.mkdir(parents=True, exist_ok=True)
+
+        outputs_ok, missing_outputs = self.output_validator.check(package_dir, entry.outputs, entry.required_outputs)
+        if not outputs_ok:
+            raise RuntimeError(f"dependency {name} system provider is missing required outputs: {', '.join(missing_outputs)}")
+
+        self.commit_state(entry, ctx, provider_data, {})
+        for phase in ("Download", "Configure", "Build", "Install"):
+            self.reporter.phase(entry, phase, "skip")
+        self.reporter.finish_entry(entry, "system")
+        self.logger.info(f"    system dependency {name} recorded; target resolution is delegated to CMake.")
+
     def is_actionable(self, entry: PlanEntry) -> bool:
         return entry.kind == "dependency" and entry.name in BOOTSTRAP_DEPENDENCIES and entry.status != "cache_hit" and entry.sha_locked
 
@@ -259,8 +280,9 @@ class BootstrapService:
                     continue
                 dep = deps_lock.get("dependencies", {}).get(entry.name, {})
                 self.reporter.set_action(entry, "pending")
-                self.reporter.set_log(entry, self.source_resolver.download_log_path(entry.name, entry.version))
-                download_scheduler.submit(entry, dep)
+                if download_scheduler.requires_artifact(entry):
+                    self.reporter.set_log(entry, self.source_resolver.download_log_path(entry.name, entry.version))
+                    download_scheduler.submit(entry, dep)
 
             with ThreadPoolExecutor(max_workers=stage_workers, thread_name_prefix="baas-stage") as stage_executor:
                 for entry in entries:
@@ -272,8 +294,12 @@ class BootstrapService:
                     if entry.provider_type in {"archive", "prebuilt_archive", "header_archive", "file", "single_header", "local_archive"}:
                         stage_futures[entry.name] = stage_executor.submit(self.stage_task, entry, dep, ctx, download_scheduler)
                     elif entry.provider_type == "system":
-                        self.reporter.mark_skipped(entry, "system dependency is resolved by CMake")
-                        self.logger.info(f"    skip: system dependency {entry.name} is resolved by CMake.")
+                        try:
+                            self.bootstrap_system_dependency(entry.name, dep, entry, ctx)
+                        except (OSError, ValueError, RuntimeError) as exc:
+                            self.reporter.mark_failed(entry, str(exc))
+                            self.logger.error(f"    error: {entry.name}: {exc}")
+                            errors += 1
                     else:
                         self.reporter.mark_skipped(entry, f"unsupported provider type {entry.provider_type}")
                         self.logger.info(f"    skip: unsupported provider type {entry.provider_type} for {entry.name}.")
@@ -318,12 +344,12 @@ def clean(args: argparse.Namespace, ctx: Any, filesystem: SafeFilesystem, logger
     for target in targets:
         for base in bases:
             for path in base.glob(target):
-                filesystem.ensure_inside(path, ctx.local_root)
+                filesystem.ensure_inside(path, ctx.workspace_root)
                 if path.exists():
                     logger.info(f"remove {path}")
                     shutil.rmtree(path)
             direct = base / target
-            filesystem.ensure_inside(direct, ctx.local_root)
+            filesystem.ensure_inside(direct, ctx.workspace_root)
             if direct.exists():
                 logger.info(f"remove {direct}")
                 shutil.rmtree(direct)

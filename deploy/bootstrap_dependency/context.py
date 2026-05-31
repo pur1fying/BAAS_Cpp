@@ -50,12 +50,13 @@ class BootstrapContext:
     toolchain_file: str
     android_abi: str
     variant: str
-    local_root: Path
+    workspace_root: Path
     deps_root: Path
     assets_root: Path
     downloads_root: Path
     build_root: Path
     state_file: Path
+    cmake_manifest: str
 
     @classmethod
     def from_args(cls, args: argparse.Namespace, repo_paths: RepoPaths) -> "BootstrapContext":
@@ -70,18 +71,20 @@ class BootstrapContext:
             default_compiler_id(platform_key),
         )
         compiler_version = getattr(args, "compiler_version", None) or os.environ.get("BAAS_COMPILER_VERSION", "unknown")
-        config = normalize_token(getattr(args, "config", "Release"), "release")
+        config = normalize_token(getattr(args, "build_type", "Release"), "release")
         toolchain_value = getattr(args, "toolchain_file", None)
         toolchain_file = str(Path(toolchain_value).resolve()) if toolchain_value else ""
         variant = f"{platform_key}-{arch_key}-{compiler_id}-{config}"
 
-        local_root = Path(os.environ.get("BAAS_LOCAL_ROOT", repo_paths.root / ".baas")).resolve()
+        workspace_root = Path(os.environ.get("BAAS_WORKSPACE_ROOT", repo_paths.root / ".baas")).resolve()
         dependency_root = os.environ.get("BAAS_DEPENDENCY_ROOT")
-        deps_root = Path(dependency_root or (local_root / "dependency")).resolve()
-        assets_root = Path(os.environ.get("BAAS_ASSETS_ROOT", local_root / "assets")).resolve()
-        downloads_root = Path(os.environ.get("BAAS_DOWNLOADS_ROOT", local_root / "downloads")).resolve()
-        build_root = Path(os.environ.get("BAAS_DEPS_BUILD_ROOT", local_root / "build")).resolve()
-        state_file = Path(os.environ.get("BAAS_STATE_FILE", local_root / "state.json")).resolve()
+        deps_root = Path(dependency_root or (workspace_root / "dependency")).resolve()
+        assets_root = Path(os.environ.get("BAAS_ASSETS_ROOT", workspace_root / "assets")).resolve()
+        downloads_root = Path(os.environ.get("BAAS_DOWNLOADS_ROOT", workspace_root / "downloads")).resolve()
+        build_root = Path(os.environ.get("BAAS_DEPS_BUILD_ROOT", workspace_root / "build")).resolve()
+        state_file = Path(os.environ.get("BAAS_STATE_FILE", workspace_root / "state.json")).resolve()
+        cmake_manifest_value = getattr(args, "cmake_manifest", None) or ""
+        cmake_manifest = str(Path(cmake_manifest_value).resolve()) if cmake_manifest_value else ""
 
         return cls(
             platform_key=platform_key,
@@ -92,10 +95,11 @@ class BootstrapContext:
             toolchain_file=toolchain_file,
             android_abi=android_abi,
             variant=variant,
-            local_root=local_root,
+            workspace_root=workspace_root,
             deps_root=deps_root,
             assets_root=assets_root,
             downloads_root=downloads_root,
             build_root=build_root,
             state_file=state_file,
+            cmake_manifest=cmake_manifest,
         )

@@ -20,7 +20,7 @@ def locked_version(entry_kind: str, name: str, entry: dict[str, Any]) -> str:
 def select_entries(all_entries: dict[str, Any], selector: str | None, include_all: bool) -> dict[str, Any]:
     if include_all or not selector or selector == "all":
         return dict(all_entries)
-    requested = [item.strip() for item in selector.split(",") if item.strip()]
+    requested = list(dict.fromkeys(item.strip() for item in selector.split(",") if item.strip()))
     missing = [name for name in requested if name not in all_entries]
     if missing:
         raise KeyError("unknown entries: " + ", ".join(missing))

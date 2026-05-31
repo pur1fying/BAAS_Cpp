@@ -24,11 +24,14 @@ from .utils import CommandRunner, SafeFilesystem
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Plan, verify, or bootstrap BAAS dependencies.")
     parser.add_argument("--all", action="store_true", help="Plan all dependencies and resources.")
-    parser.add_argument("--dependency", "--dependencies", dest="dependency", help="Comma-separated dependency names, or all.")
+    parser.add_argument("--dependency", dest="dependency", help="One dependency name, or a comma-separated dependency list.")
+    parser.add_argument("--dependencies", dest="dependencies", help="Comma-separated dependency names, or all.")
     parser.add_argument("--deps", dest="dependency", help=argparse.SUPPRESS)
     parser.add_argument("--resources", help="Comma-separated resource names, or all.")
     parser.add_argument("--provider", help="Override provider for selected dependencies.")
-    parser.add_argument("--config", default="Release", choices=("Debug", "Release", "debug", "release"))
+    parser.add_argument("--provider-overrides", help="Comma-separated dependency=provider overrides.")
+    parser.add_argument("--cmake-manifest", help="Write the CMake dependency manifest to this path.")
+    parser.add_argument("--build-type", dest="build_type", default="Release", choices=("Debug", "Release", "debug", "release"))
     parser.add_argument("--platform", choices=("windows", "linux", "macos", "android", "Windows", "Linux", "MacOS", "Android"))
     parser.add_argument("--arch", help="Target architecture, for example x64 or arm64.")
     parser.add_argument("--android-abi", help="Android ABI, for example arm64-v8a.")
@@ -37,7 +40,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--toolchain-file", help="Toolchain file path used in the fingerprint.")
     parser.add_argument("--print-plan", action="store_true", help="Print dependency/resource plan.")
     parser.add_argument("--verify-only", action="store_true", help="Check state and required outputs only.")
-    parser.add_argument("--clean", help="Clean one or more dependency/resource package roots under BAAS_LOCAL_ROOT.")
+    parser.add_argument("--clean", help="Clean one or more dependency/resource package roots under BAAS_WORKSPACE_ROOT.")
     parser.add_argument("--verbose", action="store_true", help="Print required output groups.")
     parser.add_argument(
         "--jobs",
@@ -55,7 +58,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Global archive download attempts per URL. Overrides BAAS_DEPENDENCY_ARCHIVE_DOWNLOAD_RETRY_CNT.",
     )
     parser.add_argument("--retry-cnt", dest="archive_download_retry_cnt", type=int, help=argparse.SUPPRESS)
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.dependencies:
+        args.dependency = ",".join(item for item in (args.dependency, args.dependencies) if item)
+    return args
 
 
 class BootstrapApp:

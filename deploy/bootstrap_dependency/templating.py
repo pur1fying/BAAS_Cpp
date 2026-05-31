@@ -9,7 +9,7 @@ class TemplateExpander:
 
     def template_vars(self, ctx: Any, name: str, version: str, provider: str) -> dict[str, str]:
         return {
-            "BAAS_LOCAL_ROOT": str(ctx.local_root),
+            "BAAS_WORKSPACE_ROOT": str(ctx.workspace_root),
             "BAAS_DEPENDENCY_ROOT": str(ctx.deps_root),
             "BAAS_ASSETS_ROOT": str(ctx.assets_root),
             "BAAS_DOWNLOADS_ROOT": str(ctx.downloads_root),

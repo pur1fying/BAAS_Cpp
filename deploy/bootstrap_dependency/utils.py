@@ -17,7 +17,7 @@ class SafeFilesystem:
         try:
             child_resolved.relative_to(parent_resolved)
         except ValueError as exc:
-            raise ValueError(f"refusing to operate outside BAAS_LOCAL_ROOT: {child_resolved}") from exc
+            raise ValueError(f"refusing to operate outside BAAS_WORKSPACE_ROOT: {child_resolved}") from exc
 
     def safe_rmtree(self, path: Path, allowed_root: Path) -> None:
         self.ensure_inside(path, allowed_root)
