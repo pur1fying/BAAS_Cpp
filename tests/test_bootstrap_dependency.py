@@ -146,8 +146,8 @@ def make_services(repo_paths: RepoPaths):
     return expander, None, output_resolver, output_validator, path_resolver, state_store, lock_repo, PlanBuilder(lock_repo, state_store, dep_planner, res_planner)
 
 
-class BootstrapDepsTests(unittest.TestCase):
-    def test_platform_arch_config_normalization(self) -> None:
+class BootstrapDependencyTests(unittest.TestCase):
+    def test_platform_arch_build_type_normalization(self) -> None:
         self.assertEqual(normalized_platform("Windows"), "windows")
         self.assertEqual(normalized_platform("Darwin"), "macos")
         self.assertEqual(normalized_arch("AMD64"), "x64")
@@ -162,10 +162,10 @@ class BootstrapDepsTests(unittest.TestCase):
             root = Path(tmp)
             repo_paths = write_minimal_locks(root)
             local = root / "custom-local"
-            with patch.dict(os.environ, {"BAAS_LOCAL_ROOT": str(local), "BAAS_COMPILER_VERSION": "19.43"}, clear=False):
-                ctx = BootstrapContext.from_args(args_for("--platform", "Windows", "--arch", "AMD64", "--config", "Debug"), repo_paths)
+            with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(local), "BAAS_COMPILER_VERSION": "19.43"}, clear=False):
+                ctx = BootstrapContext.from_args(args_for("--platform", "Windows", "--arch", "AMD64", "--build-type", "Debug"), repo_paths)
             self.assertEqual(ctx.variant, "windows-x64-msvc-debug")
-            self.assertEqual(ctx.local_root, local.resolve())
+            self.assertEqual(ctx.workspace_root, local.resolve())
             self.assertEqual(ctx.deps_root, (local / "dependency").resolve())
             self.assertEqual(ctx.compiler_version, "19.43")
 
@@ -220,7 +220,7 @@ class BootstrapDepsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             repo_paths = write_minimal_locks(root)
-            with patch.dict(os.environ, {"BAAS_LOCAL_ROOT": str(root / ".baas")}, clear=False):
+            with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
                 ctx = BootstrapContext.from_args(args_for("--platform", "windows", "--arch", "AMD64"), repo_paths)
                 *_, state_store, _, builder = make_services(repo_paths)
                 entry = builder.build(args_for("--dependency", "demo"), ctx)[0]
@@ -240,14 +240,15 @@ class BootstrapDepsTests(unittest.TestCase):
                 path = CMakeDependencyIndex().write(ctx, [cache_hit])
                 text = path.read_text(encoding="utf-8")
 
-            self.assertIn('set(BAAS_DEPENDENCY_ROOT "', text)
-            self.assertIn('set(BAAS_PLATFORM_KEY "windows")', text)
-            self.assertIn('set(BAAS_ARCH_KEY "x64")', text)
-            self.assertIn('set(BAAS_VARIANT "windows-x64-msvc-release")', text)
-            self.assertIn('set(BAAS_DEP_DEMO_VERSION "1.0.0")', text)
-            self.assertIn('set(BAAS_DEP_DEMO_PROVIDER "source_archive")', text)
-            self.assertIn("set(BAAS_DEP_DEMO_READY TRUE)", text)
-            self.assertIn("BAAS_DEP_DEMO_PACKAGE_DIR", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_ROOT [[", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_PLATFORM_KEY [[windows]])", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_ARCH_KEY [[x64]])", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_VARIANT [[windows-x64-msvc-release]])", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_BOOTSTRAPPED_DEPENDENCIES [[demo]])", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_demo_VERSION [[1.0.0]])", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_demo_PROVIDER [[source_archive]])", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_demo_READY TRUE)", text)
+            self.assertIn("BAAS_DEPENDENCY_demo_PACKAGE_DIR", text)
             self.assertIn("/", text)
             self.assertNotIn("\\", text)
             self.assertFalse(path.with_suffix(path.suffix + ".tmp").exists())
@@ -261,8 +262,8 @@ class BootstrapDepsTests(unittest.TestCase):
             entry = builder.build(args_for("--dependency", "demo"), ctx)[0]
             text = CMakeDependencyIndex().render(ctx, [entry])
 
-            self.assertIn("set(BAAS_DEP_DEMO_READY FALSE)", text)
-            self.assertNotIn("BAAS_DEP_DEMO_PACKAGE_DIR", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_demo_READY FALSE)", text)
+            self.assertNotIn("BAAS_DEPENDENCY_demo_PACKAGE_DIR", text)
 
     def test_state_store_read_write_and_schema(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -281,7 +282,7 @@ class BootstrapDepsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             repo_paths = write_minimal_locks(root)
-            with patch.dict(os.environ, {"BAAS_LOCAL_ROOT": str(root / ".baas")}, clear=False):
+            with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
                 ctx = BootstrapContext.from_args(args_for("--platform", "windows", "--arch", "x64"), repo_paths)
                 *_, state_store, lock_repo, builder = make_services(repo_paths)
                 entries = builder.build(args_for("--dependency", "demo"), ctx)
@@ -311,6 +312,98 @@ class BootstrapDepsTests(unittest.TestCase):
                 JsonStore().write_atomic(ctx.state_file, state)
                 (package / "lib" / "demo.lib").unlink()
                 self.assertEqual(builder.build(args_for("--dependency", "demo"), ctx)[0].status, "cache_miss_required_outputs_missing")
+
+    def test_system_dependency_bootstrap_records_state_for_cmake_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            write_minimal_locks(root)
+            deps_lock_path = root / "deps.lock.json"
+            deps_lock = json.loads(deps_lock_path.read_text(encoding="utf-8"))
+            deps_lock["dependencies"]["cuda"] = {
+                "version": "12.2",
+                "providers": {
+                    "system": {
+                        "type": "system",
+                        "minimum_version": "12.2",
+                    }
+                },
+                "provider_by_platform": {
+                    "windows": "system",
+                },
+                "outputs": {
+                    "default": {
+                        "include": [],
+                        "runtime": [],
+                        "link": [],
+                    }
+                },
+                "validation": {
+                    "required_outputs": [],
+                },
+            }
+            deps_lock_path.write_text(json.dumps(deps_lock), encoding="utf-8")
+
+            old_cwd = Path.cwd()
+            os.chdir(root)
+            try:
+                with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
+                    code = main(["--dependency", "cuda", "--platform", "windows", "--arch", "x64"])
+            finally:
+                os.chdir(old_cwd)
+
+            index_path = root / ".baas" / "cmake" / "BAASDependencyIndex.cmake"
+            state = JsonStore().load(root / ".baas" / "state.json")
+            self.assertEqual(code, 0)
+            self.assertTrue(index_path.exists())
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_cuda_READY TRUE)", index_path.read_text(encoding="utf-8"))
+            self.assertIn("cuda", state["dependencies"])
+
+    def test_real_lock_opencv_dnn_exposes_ready_manifest_properties(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        repo_paths = RepoPaths(repo_root, repo_root / "deps.lock.json", repo_root / "resources.lock.json")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
+                ctx = BootstrapContext.from_args(args_for("--dependency", "opencv_dnn", "--platform", "windows", "--arch", "x64", "--build-type", "Release"), repo_paths)
+                *_, state_store, _, builder = make_services(repo_paths)
+                entry = builder.build(args_for("--dependency", "opencv_dnn", "--platform", "windows", "--arch", "x64", "--build-type", "Release"), ctx)[0]
+                self.assertEqual(entry.name, "opencv_dnn")
+                self.assertEqual(entry.provider, "source")
+                self.assertIn("include/opencv2/dnn.hpp", entry.outputs["include"])
+                self.assertIn("bin/opencv_world490.dll", entry.outputs["runtime"])
+
+                package = Path(entry.package)
+                (package / "include" / "opencv2").mkdir(parents=True)
+                (package / "bin").mkdir(parents=True)
+                (package / "lib").mkdir(parents=True)
+                (package / "include" / "opencv2" / "core.hpp").write_text("", encoding="utf-8")
+                (package / "include" / "opencv2" / "dnn.hpp").write_text("", encoding="utf-8")
+                (package / "bin" / "opencv_world490.dll").write_text("", encoding="utf-8")
+                (package / "lib" / "opencv_world490.lib").write_text("", encoding="utf-8")
+
+                state = state_store.empty()
+                state.setdefault("dependencies", {}).setdefault("opencv_dnn", {}).setdefault("4.9.0", {}).setdefault("source", {})[ctx.variant] = {
+                    "fingerprint": entry.fingerprint
+                }
+                JsonStore().write_atomic(ctx.state_file, state)
+
+                cache_hit = builder.build(args_for("--dependency", "opencv_dnn", "--platform", "windows", "--arch", "x64", "--build-type", "Release"), ctx)[0]
+                text = CMakeDependencyIndex().render(ctx, [cache_hit])
+
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_opencv_dnn_VERSION [[4.9.0]])", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_opencv_dnn_PROVIDER [[source]])", text)
+            self.assertIn("set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_opencv_dnn_READY TRUE)", text)
+            self.assertIn("BAAS_DEPENDENCY_opencv_dnn_PACKAGE_DIR", text)
+
+    def test_nms_benchmark_cmake_has_no_external_opencv_options(self) -> None:
+        repo_root = Path(__file__).resolve().parents[1]
+        cmake_files = [repo_root / "CMakeLists.txt", *repo_root.joinpath("cmake").rglob("*.cmake")]
+        offenders = [
+            path
+            for path in cmake_files
+            if "BAAS_NMS_BENCHMARK_OPENCV_" in path.read_text(encoding="utf-8")
+        ]
+        self.assertEqual(offenders, [])
 
     def test_safe_filesystem_rejects_outside_and_root_delete(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -632,7 +725,7 @@ class BootstrapDepsTests(unittest.TestCase):
             old_cwd = Path.cwd()
             os.chdir(root)
             try:
-                with patch.dict(os.environ, {"BAAS_LOCAL_ROOT": str(root / ".baas")}, clear=False):
+                with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
                     output = io.StringIO()
                     with redirect_stdout(output):
                         code = main([])
@@ -646,7 +739,7 @@ class BootstrapDepsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             repo_paths = write_minimal_locks(root)
-            with patch.dict(os.environ, {"BAAS_LOCAL_ROOT": str(root / ".baas")}, clear=False):
+            with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
                 ctx = BootstrapContext.from_args(args_for("--platform", "windows", "--arch", "x64"), repo_paths)
                 *_, state_store, _, builder = make_services(repo_paths)
                 entry = builder.build(args_for("--dependency", "demo"), ctx)[0]
@@ -674,9 +767,9 @@ class BootstrapDepsTests(unittest.TestCase):
             index_path = root / ".baas" / "cmake" / "BAASDependencyIndex.cmake"
             self.assertEqual(code, 0)
             self.assertTrue(index_path.exists())
-            self.assertIn("BAAS_DEP_DEMO_READY TRUE", index_path.read_text(encoding="utf-8"))
+            self.assertIn("BAAS_DEPENDENCY_demo_READY TRUE", index_path.read_text(encoding="utf-8"))
 
-    def test_cmake_dependency_helper_bootstraps_missing_index(self) -> None:
+    def test_cmake_dependency_manager_bootstraps_requested_dependencies_once(self) -> None:
         cmake = shutil.which("cmake")
         if not cmake:
             self.skipTest("cmake executable not found")
@@ -698,11 +791,12 @@ class BootstrapDepsTests(unittest.TestCase):
                         "from pathlib import Path",
                         "root = Path.cwd()",
                         "(root / 'bootstrap_args.txt').write_text(' '.join(sys.argv[1:]), encoding='utf-8')",
-                        "index = root / '.baas' / 'cmake' / 'BAASDependencyIndex.cmake'",
+                        "manifest = Path(sys.argv[sys.argv.index('--cmake-manifest') + 1])",
+                        "index = manifest",
                         "index.parent.mkdir(parents=True, exist_ok=True)",
                         "index.write_text('\\n'.join([",
-                        "    'set(BAAS_DEP_DEMO_READY TRUE)',",
-                        f"    'set(BAAS_DEP_DEMO_PACKAGE_DIR \"{package_value}\")',",
+                        "    'set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_demo_READY TRUE)',",
+                        f"    'set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_demo_PACKAGE_DIR [[{package_value}]])',",
                         "    ''",
                         "]), encoding='utf-8')",
                     ]
@@ -710,16 +804,17 @@ class BootstrapDepsTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            helper = (Path(__file__).resolve().parents[1] / "cmake" / "deps" / "DependencyIndex.cmake").as_posix()
+            helper = (Path(__file__).resolve().parents[1] / "cmake" / "BAASDependency.cmake").as_posix()
             script = root / "check.cmake"
             script.write_text(
                 "\n".join(
                     [
-                        f'set(BAAS_DEPENDENCY_INDEX "{(root / ".baas" / "cmake" / "BAASDependencyIndex.cmake").as_posix()}" CACHE FILEPATH "")',
                         f'set(BAAS_PYTHON_EXECUTABLE "{Path(sys.executable).as_posix()}" CACHE FILEPATH "")',
-                        'set(CMAKE_BUILD_TYPE "Release")',
+                        'set(BAAS_DEPENDENCY_BUILD_TYPE "Release" CACHE STRING "")',
                         f'include("{helper}")',
-                        "baas_get_dependency_package_dir(demo package_dir)",
+                        "baas_request_dependencies(demo PROVIDER cuda demo)",
+                        "baas_bootstrap_requested_dependencies()",
+                        "get_property(package_dir GLOBAL PROPERTY BAAS_DEPENDENCY_demo_PACKAGE_DIR)",
                         f'if(NOT package_dir STREQUAL "{package_value}")',
                         '    message(FATAL_ERROR "unexpected package dir: ${package_dir}")',
                         "endif()",
@@ -731,9 +826,12 @@ class BootstrapDepsTests(unittest.TestCase):
             result = subprocess.run([cmake, "-P", str(script)], cwd=root, text=True, capture_output=True, check=False)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             args_text = (root / "bootstrap_args.txt").read_text(encoding="utf-8")
-            self.assertIn("--dependency demo", args_text)
+            self.assertIn("--dependencies demo", args_text)
+            self.assertIn("--build-type Release", args_text)
+            self.assertIn("--provider-overrides demo=cuda", args_text)
+            self.assertIn("--cmake-manifest", args_text)
 
-    def test_cmake_dependency_helper_reuses_ready_index(self) -> None:
+    def test_cmake_dependency_manager_always_delegates_ready_check_to_python(self) -> None:
         cmake = shutil.which("cmake")
         if not cmake:
             self.skipTest("cmake executable not found")
@@ -742,34 +840,40 @@ class BootstrapDepsTests(unittest.TestCase):
             root = Path(tmp)
             fake_package = root / "package"
             fake_package.mkdir()
-            index = root / ".baas" / "cmake" / "BAASDependencyIndex.cmake"
-            index.parent.mkdir(parents=True)
             package_value = fake_package.as_posix()
-            index.write_text(
-                "\n".join(
+            fake_python = root / "fake_python.cmd"
+            fake_python.write_text(
+                "\r\n".join(
                     [
-                        "set(BAAS_DEP_DEMO_READY TRUE)",
-                        f'set(BAAS_DEP_DEMO_PACKAGE_DIR "{package_value}")',
+                        "@echo off",
+                        "echo %* > \"%~dp0bootstrap_args.txt\"",
+                        "set manifest=",
+                        ":parse",
+                        "if \"%~1\"==\"\" goto write",
+                        "if \"%~1\"==\"--cmake-manifest\" set manifest=%~2",
+                        "shift",
+                        "goto parse",
+                        ":write",
+                        "for %%I in (\"%manifest%\") do if not exist \"%%~dpI\" mkdir \"%%~dpI\"",
+                        "echo set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_demo_READY TRUE)> \"%manifest%\"",
+                        f"echo set_property(GLOBAL PROPERTY BAAS_DEPENDENCY_demo_PACKAGE_DIR [[{package_value}]])>> \"%manifest%\"",
+                        "exit /b 0",
                         "",
                     ]
                 ),
                 encoding="utf-8",
             )
-            fake_python = root / "fake_python.cmd"
-            fake_python.write_text(
-                "@echo off\r\necho should-not-run > \"%~dp0bootstrap_ran.txt\"\r\nexit /b 7\r\n",
-                encoding="utf-8",
-            )
 
-            helper = (Path(__file__).resolve().parents[1] / "cmake" / "deps" / "DependencyIndex.cmake").as_posix()
+            helper = (Path(__file__).resolve().parents[1] / "cmake" / "BAASDependency.cmake").as_posix()
             script = root / "check.cmake"
             script.write_text(
                 "\n".join(
                     [
-                        f'set(BAAS_DEPENDENCY_INDEX "{index.as_posix()}" CACHE FILEPATH "")',
                         f'set(BAAS_PYTHON_EXECUTABLE "{fake_python.as_posix()}" CACHE FILEPATH "")',
                         f'include("{helper}")',
-                        "baas_get_dependency_package_dir(demo package_dir)",
+                        "baas_request_dependencies(demo)",
+                        "baas_bootstrap_requested_dependencies()",
+                        "get_property(package_dir GLOBAL PROPERTY BAAS_DEPENDENCY_demo_PACKAGE_DIR)",
                         f'if(NOT package_dir STREQUAL "{package_value}")',
                         '    message(FATAL_ERROR "unexpected package dir: ${package_dir}")',
                         "endif()",
@@ -780,7 +884,9 @@ class BootstrapDepsTests(unittest.TestCase):
 
             result = subprocess.run([cmake, "-P", str(script)], cwd=root, text=True, capture_output=True, check=False)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertFalse((root / "bootstrap_ran.txt").exists())
+            args_text = (root / "bootstrap_args.txt").read_text(encoding="utf-8")
+            self.assertIn("--dependencies demo", args_text)
+            self.assertIn("--build-type Release", args_text)
 
     def test_reporter_prints_bootstrap_summary_table(self) -> None:
         entry = PlanEntry(
