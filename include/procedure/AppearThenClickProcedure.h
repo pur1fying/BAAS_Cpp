@@ -5,10 +5,15 @@
 #ifndef BAAS_PROCEDURE_APPEARTHENCLICKPROCEDURE_H_
 #define BAAS_PROCEDURE_APPEARTHENCLICKPROCEDURE_H_
 
-
-#define BAAS_PROCEDURE_TYPE_APPEAR_THEN_CLICK 0
+#include <map>
+#include <queue>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "procedure/BaseProcedure.h"
+
+#define BAAS_PROCEDURE_TYPE_APPEAR_THEN_CLICK 0
 
 BAAS_NAMESPACE_BEGIN
 

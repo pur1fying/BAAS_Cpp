@@ -5,6 +5,9 @@
 #ifndef BAAS_DEVICE_SCREENSHOT_BAASSCREENSHOT_H_
 #define BAAS_DEVICE_SCREENSHOT_BAASSCREENSHOT_H_
 
+#include <set>
+#include <string>
+
 #include "device/screenshot/BaseScreenshot.h"
 
 BAAS_NAMESPACE_BEGIN

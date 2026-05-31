@@ -1,9 +1,15 @@
-#include "BAAS.h"
-#include "utils.h"
-
 #include "ISA.h"
 
+#include <cstdlib>
+#include <exception>
+#include <string>
+#include <vector>
+
+#include "BAAS.h"
+#include "config/BAASGlobalSetting.h"
 #include "feature/BAASFeature.h"
+#include "ocr/BAASOCR.h"
+#include "utils.h"
 
 #pragma comment(lib, "ws2_32.lib")
 using namespace cv;

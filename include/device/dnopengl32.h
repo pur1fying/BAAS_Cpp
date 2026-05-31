@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Windows.h>
+
 #ifdef LDOPENGL_EXPORTS
 #define LDOPENGLAPI __declspec(dllexport)
 #else

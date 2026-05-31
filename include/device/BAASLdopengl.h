@@ -5,6 +5,11 @@
 #ifndef BAAS_DEVICE_BAASLDOPENGL_H_
 #define BAAS_DEVICE_BAASLDOPENGL_H_
 
+#include <exception>
+#include <map>
+#include <string>
+#include <utility>
+
 #include "BAASConnection.h"
 
 // Must include after BAASConnection.h

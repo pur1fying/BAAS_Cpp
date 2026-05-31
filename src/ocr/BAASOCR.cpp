@@ -3,6 +3,9 @@
 //
 
 #include "ocr/BAASOCR.h"
+
+#include <set>
+
 #include "ocr/OcrUtils.h"
 #include "BAASGlobals.h"
 #include "config/BAASStaticConfig.h"

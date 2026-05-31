@@ -5,6 +5,10 @@
 #ifndef BAAS_DEVICE_CONTROL_BAASCONTROL_H_
 #define BAAS_DEVICE_CONTROL_BAASCONTROL_H_
 
+#include <cstdint>
+#include <set>
+#include <string>
+
 #include "BaseControl.h"
 
 #define OFFSET_TYPE_NOCHANGE 0

@@ -2,11 +2,16 @@
 #define BAAS_OCR_DBNET_H_
 
 #include <filesystem>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
 #include <onnxruntime/onnxruntime_cxx_api.h>
 #include <opencv2/opencv.hpp>
 
 #include "OcrStruct.h"
+
 BAAS_NAMESPACE_BEGIN
 
 class DbNet {

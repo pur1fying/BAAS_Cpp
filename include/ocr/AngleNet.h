@@ -2,9 +2,15 @@
 #define BAAS_OCR_ANGLENET_H_
 
 #include <filesystem>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include <onnxruntime/onnxruntime_cxx_api.h>
+#include <opencv2/opencv.hpp>
+
 #include "OcrStruct.h"
-#include "onnxruntime/onnxruntime_cxx_api.h"
-#include "opencv2/opencv.hpp"
 
 BAAS_NAMESPACE_BEGIN
 
