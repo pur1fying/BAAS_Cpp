@@ -502,26 +502,218 @@
     },
     "nlohmann_json": {
       "version": "3.11.3",
+      "license": "MIT",
+      "providers": {
+        "source": {
+          "type": "header_archive",
+          "url": "https://github.com/nlohmann/json/archive/refs/tags/v3.11.3.tar.gz",
+          "sha256": "0d8ef5af7f9794e3263480193c491549b2ba6cc74bb018906202ada498a79406",
+          "archive_type": "tar.gz",
+          "strip_prefix": "json-3.11.3"
+        }
+      },
       "provider_by_platform": {
         "default": "source"
+      },
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "provider.sha256",
+        "platform",
+        "arch",
+        "compiler.id",
+        "compiler.version",
+        "config"
+      ],
+      "staging": {
+        "copy": [
+          {
+            "from": "include/nlohmann",
+            "to": "include/nlohmann"
+          }
+        ]
+      },
+      "outputs": {
+        "default": {
+          "include": [
+            "include/nlohmann/json.hpp"
+          ],
+          "runtime": [],
+          "link": []
+        }
+      },
+      "validation": {
+        "required_outputs": [
+          "include"
+        ]
       }
     },
     "spdlog": {
       "version": "1.15.3",
+      "license": "MIT",
+      "providers": {
+        "source": {
+          "type": "archive",
+          "url": "https://github.com/gabime/spdlog/archive/refs/tags/v1.15.3.tar.gz",
+          "sha256": "15a04e69c222eb6c01094b5c7ff8a249b36bb22788d72519646fb85feb267e67",
+          "archive_type": "tar.gz",
+          "strip_prefix": "spdlog-1.15.3"
+        }
+      },
       "provider_by_platform": {
         "default": "source"
+      },
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "provider.sha256",
+        "platform",
+        "arch",
+        "compiler.id",
+        "compiler.version",
+        "config"
+      ],
+      "build": {
+        "system": "cmake",
+        "package": true,
+        "cmake_options": {
+          "CMAKE_BUILD_TYPE": "${cmake_config}",
+          "CMAKE_INSTALL_PREFIX": "${package}",
+          "BUILD_SHARED_LIBS": "ON",
+          "SPDLOG_BUILD_TESTS": "OFF",
+          "SPDLOG_BUILD_EXAMPLE": "OFF",
+          "SPDLOG_BUILD_EXAMPLES": "OFF",
+          "SPDLOG_BUILD_BENCH": "OFF",
+          "SPDLOG_INSTALL": "ON",
+          "CMAKE_DEBUG_POSTFIX": "_d",
+          "SPDLOG_BUILD_SHARED": "ON"
+        }
+      },
+      "outputs": {
+        "default": {
+          "include": [
+            "include/spdlog/spdlog.h"
+          ],
+          "runtime": [
+            "bin/*.dll"
+          ],
+          "link": [
+            "lib/*.lib"
+          ],
+          "cmake": [
+            "lib/cmake/spdlog/spdlogConfig.cmake"
+          ]
+        }
+      },
+      "validation": {
+        "required_outputs": [
+          "include",
+          "runtime",
+          "link",
+          "cmake"
+        ]
       }
     },
     "cpp_httplib": {
-      "version": "TODO_CONFIRM",
+      "version": "0.18.0",
+      "license": "MIT",
+      "providers": {
+        "single_header": {
+          "type": "single_header",
+          "url": "https://raw.githubusercontent.com/yhirose/cpp-httplib/v0.18.0/httplib.h",
+          "sha256": "fbf97ddfa0e36412d37b85b01bd794dfc6711a9d5367d70776b6b5905a1b32e0",
+          "target_path": "include/httplib.h"
+        }
+      },
       "provider_by_platform": {
         "default": "single_header"
+      },
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "provider.sha256",
+        "platform",
+        "arch",
+        "compiler.id",
+        "compiler.version",
+        "config"
+      ],
+      "outputs": {
+        "default": {
+          "include": [
+            "include/httplib.h"
+          ],
+          "runtime": [],
+          "link": []
+        }
+      },
+      "validation": {
+        "required_outputs": [
+          "include"
+        ]
       }
     },
     "simdutf": {
-      "version": "TODO_CONFIRM",
+      "version": "6.2.0",
+      "license": "Apache-2.0",
+      "providers": {
+        "source": {
+          "type": "archive",
+          "url": "https://github.com/simdutf/simdutf/archive/refs/tags/v6.2.0.tar.gz",
+          "sha256": "f3ef16cb86d866d2271a9a2a539b6ed9ef9083d524963919ce6792a0e3750fe3",
+          "archive_type": "tar.gz",
+          "strip_prefix": "simdutf-6.2.0"
+        }
+      },
       "provider_by_platform": {
         "default": "source"
+      },
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "provider.sha256",
+        "platform",
+        "arch",
+        "compiler.id",
+        "compiler.version",
+        "config"
+      ],
+      "build": {
+        "system": "cmake",
+        "package": true,
+        "cmake_options": {
+          "CMAKE_BUILD_TYPE": "${cmake_config}",
+          "CMAKE_INSTALL_PREFIX": "${package}",
+          "BUILD_SHARED_LIBS": "ON",
+          "SIMDUTF_TESTS": "OFF",
+          "SIMDUTF_TOOLS": "OFF",
+          "SIMDUTF_BENCHMARKS": "OFF",
+          "CMAKE_DEBUG_POSTFIX": "_d"
+        }
+      },
+      "outputs": {
+        "default": {
+          "include": [
+            "include/simdutf.h"
+          ],
+          "runtime": [
+            "bin/*.dll"
+          ],
+          "link": [
+            "lib/*.lib"
+          ],
+          "cmake": [
+            "lib/cmake/simdutf/simdutf-config.cmake"
+          ]
+        }
+      },
+      "validation": {
+        "required_outputs": [
+          "include",
+          "runtime",
+          "link",
+          "cmake"
+        ]
       }
     },
     "cuda": {
@@ -558,8 +750,120 @@
       }
     },
     "benchmark": {
-      "status": "candidate_for_removal",
-      "reason": "No Google Benchmark API usage was found in source files."
+      "version": "1.9.1",
+      "license": "Apache-2.0",
+      "providers": {
+        "source_archive": {
+          "type": "archive",
+          "url": "https://github.com/google/benchmark/archive/refs/tags/v1.9.1.tar.gz",
+          "sha256": "32131c08ee31eeff2c8968d7e874f3cb648034377dfc32a4c377fa8796d84981",
+          "archive_type": "tar.gz",
+          "strip_prefix": "benchmark-1.9.1"
+        },
+        "local_archive": {
+          "type": "local_archive",
+          "path_env": "BAAS_BENCHMARK_ARCHIVE",
+          "sha256": "32131c08ee31eeff2c8968d7e874f3cb648034377dfc32a4c377fa8796d84981",
+          "archive_type": "tar.gz",
+          "strip_prefix": "benchmark-1.9.1"
+        },
+        "local_source": {
+          "type": "local_source",
+          "path_env": "BAAS_BENCHMARK_SOURCE_DIR"
+        }
+      },
+      "provider_by_platform": {
+        "default": "source_archive"
+      },
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "provider.sha256",
+        "build.system",
+        "build.cmake_options",
+        "platform",
+        "arch",
+        "compiler.id",
+        "compiler.version",
+        "config",
+        "toolchain_file"
+      ],
+      "build": {
+        "system": "cmake",
+        "package": true,
+        "cmake_options": {
+          "CMAKE_BUILD_TYPE": "${cmake_config}",
+          "CMAKE_INSTALL_PREFIX": "${package}",
+          "BUILD_SHARED_LIBS": "OFF",
+          "BENCHMARK_ENABLE_TESTING": "OFF",
+          "BENCHMARK_ENABLE_GTEST_TESTS": "OFF",
+          "BENCHMARK_ENABLE_INSTALL": "ON",
+          "CMAKE_DEBUG_POSTFIX": "_d"
+        }
+      },
+      "outputs": {
+        "windows": {
+          "release": {
+            "include": [
+              "include/benchmark/benchmark.h"
+            ],
+            "runtime": [],
+            "link": [
+              "lib/benchmark.lib",
+              "lib/benchmark_main.lib"
+            ],
+            "cmake": [
+              "lib/cmake/benchmark/benchmarkConfig.cmake"
+            ]
+          },
+          "debug": {
+            "include": [
+              "include/benchmark/benchmark.h"
+            ],
+            "runtime": [],
+            "link": [
+              "lib/benchmark_d.lib",
+              "lib/benchmark_main_d.lib"
+            ],
+            "cmake": [
+              "lib/cmake/benchmark/benchmarkConfig.cmake"
+            ]
+          }
+        },
+        "linux": {
+          "include": [
+            "include/benchmark/benchmark.h"
+          ],
+          "runtime": [],
+          "link": [
+            "lib/libbenchmark.a",
+            "lib/libbenchmark_main.a"
+          ],
+          "cmake": [
+            "lib/cmake/benchmark/benchmarkConfig.cmake"
+          ]
+        },
+        "macos": {
+          "include": [
+            "include/benchmark/benchmark.h"
+          ],
+          "runtime": [],
+          "link": [
+            "lib/libbenchmark.a",
+            "lib/libbenchmark_main.a"
+          ],
+          "cmake": [
+            "lib/cmake/benchmark/benchmarkConfig.cmake"
+          ]
+        }
+      },
+      "validation": {
+        "required_outputs": [
+          "include",
+          "link",
+          "cmake"
+        ]
+      }
     }
   }
 }
