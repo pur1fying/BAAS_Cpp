@@ -209,6 +209,114 @@
         ]
       }
     },
+    "opencv_dnn": {
+      "version": "4.9.0",
+      "license": "Apache-2.0",
+      "providers": {
+        "source": {
+          "type": "archive",
+          "url": "https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz",
+          "sha256": "ddf76f9dffd322c7c3cb1f721d0887f62d747b82059342213138dc190f28bc6c",
+          "archive_type": "tar.gz",
+          "strip_prefix": "opencv-4.9.0"
+        }
+      },
+      "provider_by_platform": {
+        "windows": "source"
+      },
+      "fingerprint_inputs": [
+        "version",
+        "provider",
+        "provider.sha256",
+        "build.system",
+        "build.cmake_options",
+        "platform",
+        "arch",
+        "compiler.id",
+        "compiler.version",
+        "config",
+        "toolchain_file"
+      ],
+      "build": {
+        "system": "cmake",
+        "package": true,
+        "cmake_options": {
+          "CMAKE_BUILD_TYPE": "Release",
+          "CMAKE_INSTALL_PREFIX": "${package}",
+          "CMAKE_SYSTEM_PROCESSOR": "AMD64",
+          "BUILD_SHARED_LIBS": "ON",
+          "BUILD_opencv_world": "ON",
+          "BUILD_LIST": "core,imgproc,imgcodecs,dnn",
+          "BUILD_opencv_dnn": "ON",
+          "BUILD_opencv_highgui": "OFF",
+          "BUILD_opencv_videoio": "OFF",
+          "BUILD_TESTS": "OFF",
+          "BUILD_PERF_TESTS": "OFF",
+          "BUILD_EXAMPLES": "OFF",
+          "BUILD_opencv_apps": "OFF",
+          "BUILD_JAVA": "OFF",
+          "BUILD_WITH_DEBUG_INFO": "OFF",
+          "WITH_FFMPEG": "OFF",
+          "WITH_GSTREAMER": "OFF",
+          "WITH_OPENCL": "OFF",
+          "WITH_OPENCLAMDBLAS": "OFF",
+          "WITH_OPENCLAMDFFT": "OFF",
+          "WITH_OPENCL_D3D11_NV": "OFF",
+          "WITH_CUDA": "OFF",
+          "WITH_IPP": "OFF",
+          "WITH_JPEG": "OFF",
+          "WITH_TIFF": "OFF",
+          "WITH_WEBP": "OFF",
+          "WITH_OPENEXR": "OFF",
+          "WITH_OPENJPEG": "OFF",
+          "WITH_JASPER": "OFF",
+          "WITH_PNG": "ON",
+          "BUILD_PNG": "ON",
+          "OPENCV_DNN_CUDA": "OFF",
+          "OPENCV_DNN_OPENCL": "OFF",
+          "OPENCV_DNN_TFLITE": "OFF",
+          "OPENCV_ENABLE_ALLOCATOR_STATS": "OFF",
+          "OPENCV_TRACE": "OFF",
+          "ENABLE_LTO": "ON",
+          "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "ON",
+          "CMAKE_C_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG /Gy /Gw",
+          "CMAKE_CXX_FLAGS_RELEASE": "/O2 /Ob2 /DNDEBUG /Gy /Gw /Zc:inline",
+          "CMAKE_SHARED_LINKER_FLAGS_RELEASE": "/INCREMENTAL:NO /OPT:REF /OPT:ICF",
+          "OPENCV_BIN_INSTALL_PATH": "bin",
+          "OPENCV_LIB_INSTALL_PATH": "lib",
+          "OPENCV_INCLUDE_INSTALL_PATH": "include",
+          "OPENCV_CONFIG_INSTALL_PATH": "lib/cmake/opencv4"
+        },
+        "environment": {
+          "OPENCV_DOWNLOAD_PATH": "${BAAS_DOWNLOADS_ROOT}/opencv-download-cache"
+        }
+      },
+      "outputs": {
+        "windows": {
+          "include": [
+            "include/opencv2/core.hpp",
+            "include/opencv2/dnn.hpp"
+          ],
+          "runtime": [
+            "bin/opencv_world490.dll"
+          ],
+          "link": [
+            "lib/opencv_world490.lib"
+          ]
+        }
+      },
+      "validation": {
+        "required_headers": [
+          "opencv2/core.hpp",
+          "opencv2/dnn.hpp"
+        ],
+        "required_outputs": [
+          "include",
+          "runtime",
+          "link"
+        ]
+      }
+    },
     "onnxruntime": {
       "version": "1.22.0",
       "license": "MIT",
