@@ -2,6 +2,10 @@
 // Created by pc on 2025/6/8.
 //
 
+#ifdef _WIN32
+#include <WinSock2.h>
+#endif
+
 #include "utils/BAASSystemUtil.h"
 
 #include "BAASLogger.h"

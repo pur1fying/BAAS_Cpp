@@ -7,11 +7,9 @@
 
 #include "core_defines.h"
 
+#include <cstdio>
 #include <string>
 #include <vector>
-#ifdef _WIN32
-#include <WinSock2.h>
-#endif
 
 BAAS_NAMESPACE_BEGIN
 
@@ -24,7 +22,7 @@ public:
      */
     static bool initWinsock();
 
-    static std::string getStreamOutput(FILE *stream);
+    static std::string getStreamOutput(std::FILE *stream);
 
     static void executeCommandWithoutOutPut(const std::string &command);
 
@@ -40,7 +38,7 @@ public:
             int n
     );
 
-    static FILE* executeCommand(const std::string &command);
+    static std::FILE* executeCommand(const std::string &command);
 
 
 };
