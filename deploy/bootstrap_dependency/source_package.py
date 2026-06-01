@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import http.client
+import json
 import os
 import shutil
 import tarfile
@@ -16,11 +17,6 @@ from typing import Any
 from .logger import DependencyLogger
 from .repository import is_placeholder, provider_path
 from .utils import SafeFilesystem
-
-try:
-    from tqdm import tqdm
-except ImportError:  # pragma: no cover - exercised only when the host Python misses tqdm
-    tqdm = None  # type: ignore[assignment]
 
 
 def entry_error_prefix(name: str) -> str:
@@ -77,6 +73,27 @@ class SourcePackageResolver:
         except (TypeError, ValueError):
             return 120
 
+    def archive_lock_stale_seconds(self) -> int:
+        value = os.environ.get("BAAS_DEPENDENCY_ARCHIVE_LOCK_STALE_SECONDS", "1800")
+        try:
+            return max(1, int(value))
+        except (TypeError, ValueError):
+            return 1800
+
+    def archive_lock_timeout_seconds(self) -> int:
+        value = os.environ.get("BAAS_DEPENDENCY_ARCHIVE_LOCK_TIMEOUT_SECONDS", "3600")
+        try:
+            return max(1, int(value))
+        except (TypeError, ValueError):
+            return 3600
+
+    def archive_lock_poll_seconds(self) -> float:
+        value = os.environ.get("BAAS_DEPENDENCY_ARCHIVE_LOCK_POLL_SECONDS", "1.0")
+        try:
+            return max(0.01, float(value))
+        except (TypeError, ValueError):
+            return 1.0
+
     def format_size(self, size: int) -> str:
         value = float(size)
         for unit in ("B", "KiB", "MiB", "GiB"):
@@ -85,6 +102,117 @@ class SourcePackageResolver:
             value /= 1024.0
         return f"{value:.1f} GiB"
 
+    def format_download_size(self, size: int) -> str:
+        return f"{size / (1024 * 1024):.1f}MB"
+
+    def dependency_download_label(self, name: str, version: str) -> str:
+        return name
+
+    def download_progress_text(self, label: str, downloaded: int, total: int) -> str:
+        total_text = self.format_download_size(total) if total > 0 else "unknown"
+        return f"{self.format_download_size(downloaded)} / {total_text} （ {label} ）"
+
+    def report_download_progress(self, progress_log: Path | None, label: str, downloaded: int, total: int) -> None:
+        message = "    " + self.download_progress_text(label, downloaded, total)
+        self.logger.info(message)
+        self.logger.detail(progress_log, message)
+
+    def archive_lock_dir(self, archive_path: Path) -> Path:
+        return archive_path.with_name(archive_path.name + ".lock")
+
+    def archive_tmp_path(self, archive_path: Path) -> Path:
+        return archive_path.with_suffix(archive_path.suffix + ".tmp")
+
+    def process_exists(self, pid: int) -> bool:
+        if pid <= 0:
+            return False
+        if os.name == "nt":
+            import ctypes
+
+            kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+            process_query_limited_information = 0x1000
+            handle = kernel32.OpenProcess(process_query_limited_information, False, pid)
+            if handle:
+                kernel32.CloseHandle(handle)
+                return True
+            return ctypes.get_last_error() == 5
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return False
+        except PermissionError:
+            return True
+        except OSError:
+            return False
+        return True
+
+    def write_archive_lock_owner(self, lock_dir: Path, archive_name: str) -> None:
+        owner = {
+            "pid": os.getpid(),
+            "created_at": time.time(),
+            "archive": archive_name,
+        }
+        (lock_dir / "owner.json").write_text(json.dumps(owner, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    def read_archive_lock_owner(self, lock_dir: Path) -> dict[str, Any]:
+        try:
+            owner = json.loads((lock_dir / "owner.json").read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return {}
+        return owner if isinstance(owner, dict) else {}
+
+    def archive_lock_is_stale(self, lock_dir: Path) -> bool:
+        stale_seconds = self.archive_lock_stale_seconds()
+        owner = self.read_archive_lock_owner(lock_dir)
+        try:
+            created_at = float(owner.get("created_at", lock_dir.stat().st_mtime))
+        except (OSError, TypeError, ValueError):
+            created_at = time.time()
+        if time.time() - created_at < stale_seconds:
+            return False
+        try:
+            pid = int(owner.get("pid", 0))
+        except (TypeError, ValueError):
+            pid = 0
+        return not self.process_exists(pid)
+
+    def log_download_wait(self, download_log: Path | None, archive_name: str) -> None:
+        message = f"download wait: {archive_name} is being downloaded by another bootstrap process"
+        self.logger.info(message)
+        self.logger.detail(download_log, message)
+
+    def acquire_archive_lock(self, archive_path: Path, download_log: Path | None) -> Path:
+        lock_dir = self.archive_lock_dir(archive_path)
+        started_at = time.monotonic()
+        last_wait_log = 0.0
+        while True:
+            try:
+                lock_dir.mkdir()
+                try:
+                    self.write_archive_lock_owner(lock_dir, archive_path.name)
+                except OSError:
+                    shutil.rmtree(lock_dir, ignore_errors=True)
+                    raise
+                return lock_dir
+            except FileExistsError:
+                if self.archive_lock_is_stale(lock_dir):
+                    message = f"download stale lock removed: {lock_dir}"
+                    self.logger.info(message)
+                    self.logger.detail(download_log, message)
+                    shutil.rmtree(lock_dir, ignore_errors=True)
+                    continue
+
+                now = time.monotonic()
+                if now - started_at >= self.archive_lock_timeout_seconds():
+                    raise TimeoutError(f"timed out waiting for download lock: {lock_dir}")
+                if last_wait_log == 0.0 or now - last_wait_log >= 10.0:
+                    self.log_download_wait(download_log, archive_path.name)
+                    last_wait_log = now
+                time.sleep(self.archive_lock_poll_seconds())
+
+    def release_archive_lock(self, lock_dir: Path) -> None:
+        shutil.rmtree(lock_dir, ignore_errors=True)
+
     def response_content_length(self, headers: Any) -> int:
         total_value = headers.get("Content-Length", "")
         try:
@@ -92,19 +220,10 @@ class SourcePackageResolver:
         except ValueError:
             return 0
 
-    def update_unknown_total_progress(self, progress: Any, chunk_size: int, spinner_index: int) -> int:
-        spinner = "|/-\\"[spinner_index % 4]
-        progress.set_description_str(f"{spinner} archive", refresh=False)
-        progress.update(chunk_size)
-        return spinner_index + 1
-
     def download_to_temp(self, url: str, tmp_path: Path, provider_data: dict[str, Any]) -> None:
         self.download_to_temp_with_log(url, tmp_path, provider_data, None)
 
-    def download_to_temp_with_log(self, url: str, tmp_path: Path, provider_data: dict[str, Any], progress_log: Path | None) -> None:
-        if tqdm is None:
-            raise RuntimeError("tqdm is required for archive download progress; install it with: python -m pip install tqdm")
-
+    def download_to_temp_with_log(self, url: str, tmp_path: Path, provider_data: dict[str, Any], progress_log: Path | None, label: str = "archive") -> None:
         request = urllib.request.Request(url, headers={"User-Agent": "BAAS_Cpp dependency bootstrap"})
         timeout = self.download_timeout(provider_data)
         chunk_size = 256 * 1024
@@ -112,52 +231,33 @@ class SourcePackageResolver:
         downloaded = 0
         completed = False
 
-        progress_stream = progress_log.open("a", encoding="utf-8") if progress_log is not None else self.logger.out
-        try:
-            self.logger.detail(progress_log, f"$ download {url}")
-            with urllib.request.urlopen(request, timeout=timeout) as response, tmp_path.open("wb") as out:
-                total = self.response_content_length(response.headers)
-                known_total = total > 0
-                bar_format = (
-                    "{desc}: {percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]"
-                    if known_total
-                    else "{desc}: {n_fmt} downloaded [{elapsed}, {rate_fmt}]"
-                )
+        self.logger.detail(progress_log, f"$ download {url}")
+        with urllib.request.urlopen(request, timeout=timeout) as response, tmp_path.open("wb") as out:
+            total = self.response_content_length(response.headers)
+            progress_step = max(1024 * 1024, total // 100 if total > 0 else 1024 * 1024)
+            last_progress_bytes = 0
+            last_progress_at = started_at
 
-                with tqdm(
-                    total=total if known_total else None,
-                    unit="B",
-                    unit_scale=True,
-                    unit_divisor=1024,
-                    desc="archive" if known_total else "| archive",
-                    file=progress_stream,
-                    ncols=100,
-                    ascii=" #",
-                    disable=False,
-                    leave=True,
-                    mininterval=0.1 if known_total else 0.0,
-                    miniters=1,
-                    bar_format=bar_format,
-                ) as progress:
-                    spinner_index = 0
-                    while True:
-                        chunk = response.read(chunk_size)
-                        if not chunk:
-                            break
-                        out.write(chunk)
-                        downloaded += len(chunk)
-                        if known_total:
-                            progress.update(len(chunk))
-                        else:
-                            spinner_index = self.update_unknown_total_progress(progress, len(chunk), spinner_index)
-                    completed = True
-        finally:
-            if progress_log is not None:
-                progress_stream.close()
+            while True:
+                chunk = response.read(chunk_size)
+                if not chunk:
+                    break
+                out.write(chunk)
+                downloaded += len(chunk)
+
+                now = time.monotonic()
+                if downloaded - last_progress_bytes >= progress_step or now - last_progress_at >= 1.0:
+                    self.report_download_progress(progress_log, label, downloaded, total)
+                    last_progress_bytes = downloaded
+                    last_progress_at = now
+
+            if downloaded != last_progress_bytes or downloaded == 0:
+                self.report_download_progress(progress_log, label, downloaded, total)
+            completed = True
 
         if completed:
             elapsed = max(0.001, time.monotonic() - started_at)
-            message = f"    download complete: {self.format_size(downloaded)} in {elapsed:.1f}s"
+            message = f"    download complete: {self.format_size(downloaded)} in {elapsed:.1f}s （ {label} ）"
             self.logger.info(message)
             self.logger.detail(progress_log, message)
 
@@ -170,61 +270,76 @@ class SourcePackageResolver:
             raise ValueError(f"dependency {name} provider is missing locked sha256")
 
         download_log = self.download_log_path(name, version)
+        download_label = self.dependency_download_label(name, version)
         downloads_dir.mkdir(parents=True, exist_ok=True)
         archive_path = downloads_dir / self.archive_file_name(name, version, provider_data)
         if archive_path.exists() and self.verify_sha256(archive_path, expected_sha):
-            message = f"download cache hit: {archive_path}"
+            message = f"download cache hit: {archive_path} （ {download_label} ）"
             self.logger.info(message)
             self.logger.detail(download_log, message)
             return archive_path
-        if archive_path.exists():
-            message = f"download cache sha256 mismatch, redownloading: {archive_path}"
-            self.logger.info(message)
-            self.logger.detail(download_log, message)
-            archive_path.unlink()
 
         urls = self.archive_urls(provider_data)
         if not urls:
             raise ValueError(f"failed to download archive for {name}: no URL configured")
 
-        errors: list[str] = []
-        attempts = self.download_attempts()
-        for url in urls:
-            message = f"download {url}"
-            self.logger.info(message)
-            self.logger.detail(download_log, message)
-            for attempt in range(1, attempts + 1):
-                tmp_path = archive_path.with_suffix(archive_path.suffix + ".tmp")
-                tmp_path.unlink(missing_ok=True)
-                try:
-                    self.download_to_temp_with_log(url, tmp_path, provider_data, download_log)
-                    actual_sha = self.sha256_file(tmp_path)
-                    if actual_sha.lower() != expected_sha.lower():
+        lock_dir = self.acquire_archive_lock(archive_path, download_log)
+        tmp_path = self.archive_tmp_path(archive_path)
+        try:
+            if archive_path.exists() and self.verify_sha256(archive_path, expected_sha):
+                message = f"download cache hit: {archive_path} （ {download_label} ）"
+                self.logger.info(message)
+                self.logger.detail(download_log, message)
+                return archive_path
+            if archive_path.exists():
+                message = f"download cache sha256 mismatch: {archive_path}; redownloading （ {download_label} ）"
+                self.logger.info(message)
+                self.logger.detail(download_log, message)
+                archive_path.unlink()
+
+            errors: list[str] = []
+            attempts = self.download_attempts()
+            for url in urls:
+                message = f"download start: {url} （ {download_label} ）"
+                self.logger.info(message)
+                self.logger.detail(download_log, message)
+                for attempt in range(1, attempts + 1):
+                    tmp_path.unlink(missing_ok=True)
+                    try:
+                        self.download_to_temp_with_log(url, tmp_path, provider_data, download_log, download_label)
+                        actual_sha = self.sha256_file(tmp_path)
+                        if actual_sha.lower() != expected_sha.lower():
+                            tmp_path.unlink(missing_ok=True)
+                            message = f"{entry_error_prefix(name)} source: {url}; expected sha256: {expected_sha}; actual sha256: {actual_sha}"
+                            errors.append(message)
+                            self.logger.info(f"    {message}")
+                            self.logger.detail(download_log, f"    {message}")
+                            if attempt < attempts:
+                                retry = f"Retry: {attempt}/{attempts - 1}"
+                                self.logger.info(retry)
+                                self.logger.detail(download_log, retry)
+                            continue
+                        tmp_path.replace(archive_path)
+                        return archive_path
+                    except (OSError, TimeoutError, http.client.IncompleteRead, urllib.error.URLError) as exc:
                         tmp_path.unlink(missing_ok=True)
-                        message = f"{entry_error_prefix(name)} source: {url}; expected sha256: {expected_sha}; actual sha256: {actual_sha}"
+                        message = f"{url} attempt {attempt}/{attempts}: {type(exc).__name__}: {exc}"
                         errors.append(message)
-                        self.logger.info(f"    {message}")
-                        self.logger.detail(download_log, f"    {message}")
                         if attempt < attempts:
-                            retry = f"Retry: {attempt}/{attempts - 1}"
+                            retry = f"Retry: {attempt}/{attempts - 1} after {type(exc).__name__}: {exc}"
                             self.logger.info(retry)
                             self.logger.detail(download_log, retry)
-                        continue
-                    tmp_path.replace(archive_path)
-                    return archive_path
-                except (OSError, TimeoutError, http.client.IncompleteRead, urllib.error.URLError) as exc:
-                    tmp_path.unlink(missing_ok=True)
-                    message = f"{url} attempt {attempt}/{attempts}: {type(exc).__name__}: {exc}"
-                    errors.append(message)
-                    if attempt < attempts:
-                        retry = f"Retry: {attempt}/{attempts - 1} after {type(exc).__name__}: {exc}"
-                        self.logger.info(retry)
-                        self.logger.detail(download_log, retry)
-                    else:
-                        failure = f"    download failed: {type(exc).__name__}: {exc}"
-                        self.logger.info(failure)
-                        self.logger.detail(download_log, failure)
-        raise ValueError(f"failed to download archive for {name}: " + "; ".join(errors))
+                        else:
+                            failure = f"    download failed: {type(exc).__name__}: {exc}"
+                            self.logger.info(failure)
+                            self.logger.detail(download_log, failure)
+            raise ValueError(f"failed to download archive for {name}: " + "; ".join(errors))
+        finally:
+            try:
+                tmp_path.unlink(missing_ok=True)
+            except OSError as exc:
+                self.logger.detail(download_log, f"    warning: failed to remove temporary download file {tmp_path}: {exc}")
+            self.release_archive_lock(lock_dir)
 
     def source_archive(self, name: str, version: str, provider_data: dict[str, Any], downloads_dir: Path) -> Path:
         return self.downloaded_file(name, version, provider_data, downloads_dir)

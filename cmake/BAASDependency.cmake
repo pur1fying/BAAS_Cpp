@@ -106,6 +106,8 @@ function(baas_bootstrap_requested_dependencies)
             RESULT_VARIABLE _bootstrap_result
             OUTPUT_VARIABLE _bootstrap_stdout
             ERROR_VARIABLE _bootstrap_stderr
+            ECHO_OUTPUT_VARIABLE
+            ECHO_ERROR_VARIABLE
     )
     if(NOT _bootstrap_result EQUAL 0)
         string(REPLACE ";" " " _bootstrap_command "${_python_executable};${_bootstrap_args}")

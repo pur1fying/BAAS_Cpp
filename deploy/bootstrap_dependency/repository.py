@@ -8,6 +8,7 @@ from typing import Any
 
 from .constants import PLACEHOLDER_PREFIXES, STATE_SCHEMA
 from .json_store import JsonStore, sha256_json
+from .process_lock import ProcessDirectoryLock
 
 
 def is_placeholder(value: Any) -> bool:
@@ -168,3 +169,26 @@ class StateStore:
 
     def save(self, ctx: Any, state: dict[str, Any]) -> None:
         self.json_store.write_atomic(ctx.state_file, state)
+
+    def update_record_locked(
+        self,
+        ctx: Any,
+        entry: Any,
+        provider_data: dict[str, Any],
+        cmake_options: dict[str, Any],
+        cmake_config: str,
+        logger: Any = None,
+    ) -> None:
+        lock = ProcessDirectoryLock(
+            ctx.state_file.with_name(ctx.state_file.name + ".lock"),
+            owner={"path": str(ctx.state_file), "phase": "state"},
+            env_prefix="BAAS_DEPENDENCY_STATE_LOCK",
+            wait_message=f"state wait: {ctx.state_file} is being written by another bootstrap process",
+            stale_message="state stale lock removed",
+            timeout_message="timed out waiting for state lock",
+            logger=logger,
+        )
+        with lock:
+            state = self.load(ctx)
+            self.set_record(state, entry, ctx, provider_data, cmake_options, cmake_config)
+            self.save(ctx, state)

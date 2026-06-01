@@ -129,6 +129,16 @@ class Reporter:
                     row.install = "failed"
                 row.finish("failed", error)
 
+    def mark_reused(self, entry: PlanEntry) -> None:
+        with self._lock:
+            row = self._rows.get(entry.name)
+            if row:
+                row.action = "reuse"
+                row.error = ""
+                for phase in PHASES:
+                    row.set_phase(phase, "skip")
+                row.finish("reuse")
+
     def mark_skipped(self, entry: PlanEntry, reason: str) -> None:
         with self._lock:
             row = self._rows.get(entry.name)

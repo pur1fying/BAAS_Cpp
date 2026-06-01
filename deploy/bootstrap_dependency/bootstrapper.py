@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import shutil
 import subprocess
-import threading
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -15,6 +14,7 @@ from .logger import DependencyLogger
 from .locks import LockRepository
 from .outputs import OutputValidator
 from .planner import PlanBuilder, PlanEntry
+from .process_lock import ProcessDirectoryLock
 from .repository import StateStore, provider_payload
 from .reporter import Reporter
 from .source_package import SourcePackageResolver
@@ -63,14 +63,44 @@ class BootstrapService:
         self.logger = logger
         self.resource_plan = resource_plan
         self.cpu_semaphore = WeightedSemaphore(resource_plan.cpu_budget)
-        self.state_lock = threading.Lock()
 
     def commit_state(self, entry: PlanEntry, ctx: Any, provider_data: dict[str, Any], cmake_options: dict[str, Any]) -> None:
-        with self.state_lock:
-            state = self.state_store.load(ctx)
-            self.state_store.set_record(state, entry, ctx, provider_data, cmake_options, self.expander.cmake_config_name(ctx))
-        self.state_store.save(ctx, state)
+        self.state_store.update_record_locked(
+            ctx,
+            entry,
+            provider_data,
+            cmake_options,
+            self.expander.cmake_config_name(ctx),
+            self.logger,
+        )
         self.logger.info(f"wrote state: {ctx.state_file}")
+
+    def materialize_lock(self, ctx: Any) -> ProcessDirectoryLock:
+        return ProcessDirectoryLock(
+            ctx.workspace_root / "bootstrap-materialize.lock",
+            owner={"path": str(ctx.workspace_root), "phase": "download/extract"},
+            env_prefix="BAAS_DEPENDENCY_MATERIALIZE_LOCK",
+            wait_message="bootstrap wait: dependency download/extract is running in another bootstrap process",
+            stale_message="bootstrap stale materialize lock removed",
+            timeout_message="timed out waiting for bootstrap materialize lock",
+            logger=self.logger,
+        )
+
+    def validate_entries(self, entries: list[PlanEntry], args: argparse.Namespace) -> int:
+        errors = 0
+        for entry in entries:
+            if entry.status == "cache_hit":
+                continue
+            if entry.kind != "dependency" or entry.name not in BOOTSTRAP_DEPENDENCIES:
+                self.reporter.mark_skipped(entry, "bootstrap implementation is not enabled")
+                self.logger.info(f"    skip: bootstrap implementation is not enabled for {entry.kind} {entry.name} yet.")
+                continue
+            if not entry.sha_locked:
+                self.reporter.mark_failed(entry, "locked SHA256 is required before bootstrapping")
+                self.logger.info(f"    error: locked SHA256 is required before bootstrapping {entry.name}.")
+                errors += 1
+                continue
+        return errors
 
     def report_cmake_phase(self, entry: PlanEntry, phase: str, status: str, log_file: Path) -> None:
         self.reporter.set_log(entry, log_file)
@@ -87,7 +117,6 @@ class BootstrapService:
         entry: PlanEntry,
         ctx: Any,
         args: argparse.Namespace,
-        artifact: DownloadedArtifact | None = None,
     ) -> None:
         provider = entry.provider
         provider_data = provider_payload(dep, provider)
@@ -99,28 +128,15 @@ class BootstrapService:
         if not isinstance(build, dict):
             build = {}
         source_subdir = str(build.get("source_subdir", "")).strip()
-        if entry.status == "cache_miss_fingerprint_changed":
-            self.logger.info(f"    fingerprint changed; resetting source/build/package directories for {name}.")
-            if entry.provider_type != "local_source":
-                self.filesystem.safe_rmtree(source_dir, ctx.build_root)
-            self.filesystem.safe_rmtree(build_dir, ctx.build_root)
-            self.filesystem.safe_rmtree(package_dir, ctx.deps_root)
-
         if entry.provider_type == "local_source":
-            configure_source_dir = self.source_resolver.prepare_source(name, entry, provider_data)
+            configure_source_dir = self.source_resolver.local_source_dir(name, provider_data)
         else:
-            source_ready_dir = source_dir / source_subdir if source_subdir else source_dir
-            if (source_ready_dir / "CMakeLists.txt").exists():
-                self.logger.info(f"    reuse source: {source_dir}")
-            else:
-                archive_path = artifact.path if artifact is not None else self.source_resolver.prepare_source(name, entry, provider_data)
-                self.source_resolver.extract_archive(archive_path, provider_data, source_dir, ctx.build_root)
             configure_source_dir = source_dir
 
         if source_subdir:
             configure_source_dir = configure_source_dir / source_subdir
-            if not (configure_source_dir / "CMakeLists.txt").exists():
-                raise RuntimeError(f"dependency {name} CMake source_subdir does not contain CMakeLists.txt: {configure_source_dir}")
+        if not (configure_source_dir / "CMakeLists.txt").exists():
+            raise RuntimeError(f"dependency {name} CMake source directory does not contain CMakeLists.txt: {configure_source_dir}")
 
         build_dir.mkdir(parents=True, exist_ok=True)
         package_dir.mkdir(parents=True, exist_ok=True)
@@ -151,6 +167,42 @@ class BootstrapService:
 
         self.commit_state(entry, ctx, provider_data, cmake_options)
         self.reporter.finish_entry(entry, "build")
+
+    def prepare_source_dependency(
+        self,
+        name: str,
+        dep: dict[str, Any],
+        entry: PlanEntry,
+        ctx: Any,
+        artifact: DownloadedArtifact | None = None,
+    ) -> None:
+        provider_data = provider_payload(dep, entry.provider)
+        source_dir = Path(entry.source)
+        build_dir = Path(entry.build)
+        package_dir = Path(entry.package)
+
+        build = dep.get("build", {})
+        if not isinstance(build, dict):
+            build = {}
+        source_subdir = str(build.get("source_subdir", "")).strip()
+        if entry.status == "cache_miss_fingerprint_changed":
+            self.logger.info(f"    fingerprint changed; resetting source/build/package directories for {name}.")
+            if entry.provider_type != "local_source":
+                self.filesystem.safe_rmtree(source_dir, ctx.build_root)
+            self.filesystem.safe_rmtree(build_dir, ctx.build_root)
+            self.filesystem.safe_rmtree(package_dir, ctx.deps_root)
+
+        if entry.provider_type == "local_source":
+            self.source_resolver.local_source_dir(name, provider_data)
+            return
+
+        source_ready_dir = source_dir / source_subdir if source_subdir else source_dir
+        if (source_ready_dir / "CMakeLists.txt").exists():
+            self.logger.info(f"    reuse source: {source_dir}")
+            return
+
+        archive_path = artifact.path if artifact is not None else self.source_resolver.prepare_source(name, entry, provider_data)
+        self.source_resolver.extract_archive(archive_path, provider_data, source_dir, ctx.build_root)
 
     def bootstrap_staged_dependency(
         self,
@@ -247,6 +299,85 @@ class BootstrapService:
             self.reporter.mark_failed(entry, str(exc))
             raise
 
+    def materialize_dependencies(self, args: argparse.Namespace, ctx: Any) -> tuple[list[PlanEntry], int]:
+        errors = 0
+        with self.materialize_lock(ctx):
+            deps_lock = self.lock_repo.deps_lock
+            entries = self.plan_builder.build(args, ctx)
+            errors += self.validate_entries(entries, args)
+            if errors:
+                return entries, errors
+
+            download_scheduler = DownloadScheduler(self.source_resolver, self.resource_plan.download_jobs)
+            stage_workers = max(1, self.resource_plan.stage_jobs)
+            stage_futures: dict[str, Future[None]] = {}
+            try:
+                for entry in entries:
+                    if entry.status == "cache_hit":
+                        self.reporter.mark_reused(entry)
+                        continue
+                    if not self.is_actionable(entry):
+                        continue
+                    dep = deps_lock.get("dependencies", {}).get(entry.name, {})
+                    self.reporter.set_action(entry, "pending")
+                    if download_scheduler.requires_artifact(entry):
+                        self.reporter.set_log(entry, self.source_resolver.download_log_path(entry.name, entry.version))
+                        download_scheduler.submit(entry, dep)
+
+                with ThreadPoolExecutor(max_workers=stage_workers, thread_name_prefix="baas-stage") as stage_executor:
+                    for entry in entries:
+                        if not self.is_actionable(entry):
+                            continue
+                        dep = deps_lock.get("dependencies", {}).get(entry.name, {})
+                        if self.is_cmake_source_entry(dep):
+                            continue
+                        if entry.provider_type in {"archive", "prebuilt_archive", "header_archive", "file", "single_header", "local_archive"}:
+                            stage_futures[entry.name] = stage_executor.submit(self.stage_task, entry, dep, ctx, download_scheduler)
+                        elif entry.provider_type == "system":
+                            try:
+                                self.bootstrap_system_dependency(entry.name, dep, entry, ctx)
+                            except (OSError, ValueError, RuntimeError) as exc:
+                                self.reporter.mark_failed(entry, str(exc))
+                                self.logger.error(f"    error: {entry.name}: {exc}")
+                                errors += 1
+                        else:
+                            self.reporter.mark_skipped(entry, f"unsupported provider type {entry.provider_type}")
+                            self.logger.info(f"    skip: unsupported provider type {entry.provider_type} for {entry.name}.")
+
+                    for entry in entries:
+                        if not self.is_actionable(entry):
+                            continue
+                        dep = deps_lock.get("dependencies", {}).get(entry.name, {})
+                        if not self.is_cmake_source_entry(dep):
+                            continue
+                        try:
+                            if download_scheduler.requires_artifact(entry):
+                                self.reporter.phase(entry, "Download", "running")
+                                artifact = download_scheduler.artifact_for(entry)
+                                self.reporter.phase(entry, "Download", "success")
+                            else:
+                                artifact = None
+                                self.reporter.phase(entry, "Download", "skip")
+                            self.prepare_source_dependency(entry.name, dep, entry, ctx, artifact)
+                        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
+                            self.reporter.mark_failed(entry, str(exc))
+                            self.logger.error(f"    error: {entry.name}: {exc}")
+                            errors += 1
+
+                    for entry in entries:
+                        future = stage_futures.get(entry.name)
+                        if future is None:
+                            continue
+                        try:
+                            future.result()
+                        except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
+                            self.reporter.mark_failed(entry, str(exc))
+                            self.logger.error(f"    error: {entry.name}: {exc}")
+                            errors += 1
+            finally:
+                download_scheduler.shutdown(cancel=errors > 0)
+        return entries, errors
+
     def run(self, args: argparse.Namespace, ctx: Any) -> int:
         deps_lock = self.lock_repo.deps_lock
         entries = self.plan_builder.build(args, ctx)
@@ -256,82 +387,31 @@ class BootstrapService:
         self.print_concurrency_plan()
         for entry in entries:
             self.reporter.print_entry(entry, args.verbose)
-            if entry.status == "cache_hit":
-                continue
-            if entry.kind != "dependency" or entry.name not in BOOTSTRAP_DEPENDENCIES:
-                self.reporter.mark_skipped(entry, "bootstrap implementation is not enabled")
-                self.logger.info(f"    skip: bootstrap implementation is not enabled for {entry.kind} {entry.name} yet.")
-                continue
-            if not entry.sha_locked:
-                self.reporter.mark_failed(entry, "locked SHA256 is required before bootstrapping")
-                self.logger.info(f"    error: locked SHA256 is required before bootstrapping {entry.name}.")
-                errors += 1
-                continue
+        errors += self.validate_entries(entries, args)
         if errors:
             self.reporter.print_summary()
             return 1
 
-        download_scheduler = DownloadScheduler(self.source_resolver, self.resource_plan.download_jobs)
-        stage_workers = max(1, self.resource_plan.stage_jobs)
-        stage_futures: dict[str, Future[None]] = {}
+        entries, materialize_errors = self.materialize_dependencies(args, ctx)
+        errors += materialize_errors
+        if errors:
+            self.reporter.print_summary()
+            return 1
+
         try:
             for entry in entries:
                 if not self.is_actionable(entry):
                     continue
                 dep = deps_lock.get("dependencies", {}).get(entry.name, {})
-                self.reporter.set_action(entry, "pending")
-                if download_scheduler.requires_artifact(entry):
-                    self.reporter.set_log(entry, self.source_resolver.download_log_path(entry.name, entry.version))
-                    download_scheduler.submit(entry, dep)
-
-            with ThreadPoolExecutor(max_workers=stage_workers, thread_name_prefix="baas-stage") as stage_executor:
-                for entry in entries:
-                    if not self.is_actionable(entry):
-                        continue
-                    dep = deps_lock.get("dependencies", {}).get(entry.name, {})
-                    if self.is_cmake_source_entry(dep):
-                        continue
-                    if entry.provider_type in {"archive", "prebuilt_archive", "header_archive", "file", "single_header", "local_archive"}:
-                        stage_futures[entry.name] = stage_executor.submit(self.stage_task, entry, dep, ctx, download_scheduler)
-                    elif entry.provider_type == "system":
-                        try:
-                            self.bootstrap_system_dependency(entry.name, dep, entry, ctx)
-                        except (OSError, ValueError, RuntimeError) as exc:
-                            self.reporter.mark_failed(entry, str(exc))
-                            self.logger.error(f"    error: {entry.name}: {exc}")
-                            errors += 1
-                    else:
-                        self.reporter.mark_skipped(entry, f"unsupported provider type {entry.provider_type}")
-                        self.logger.info(f"    skip: unsupported provider type {entry.provider_type} for {entry.name}.")
-
-                for entry in entries:
-                    if not self.is_actionable(entry):
-                        continue
-                    dep = deps_lock.get("dependencies", {}).get(entry.name, {})
-                    if not self.is_cmake_source_entry(dep):
-                        continue
-                    try:
-                        self.reporter.phase(entry, "Download", "running")
-                        artifact = download_scheduler.artifact_for(entry)
-                        self.reporter.phase(entry, "Download", "success")
-                        self.bootstrap_source_dependency(entry.name, dep, entry, ctx, args, artifact)
-                    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
-                        self.reporter.mark_failed(entry, str(exc))
-                        self.logger.error(f"    error: {entry.name}: {exc}")
-                        errors += 1
-
-                for entry in entries:
-                    future = stage_futures.get(entry.name)
-                    if future is None:
-                        continue
-                    try:
-                        future.result()
-                    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
-                        self.reporter.mark_failed(entry, str(exc))
-                        self.logger.error(f"    error: {entry.name}: {exc}")
-                        errors += 1
+                if not self.is_cmake_source_entry(dep):
+                    continue
+                try:
+                    self.bootstrap_source_dependency(entry.name, dep, entry, ctx, args)
+                except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
+                    self.reporter.mark_failed(entry, str(exc))
+                    self.logger.error(f"    error: {entry.name}: {exc}")
+                    errors += 1
         finally:
-            download_scheduler.shutdown(cancel=errors > 0)
             self.reporter.print_summary()
         return 1 if errors else 0
 

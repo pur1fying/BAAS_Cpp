@@ -19,6 +19,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from deploy.bootstrap_dependency import main, parse_args
+from deploy.bootstrap_dependency.bootstrapper import BootstrapService
 from deploy.bootstrap_dependency.cmake import CMakeBuilder
 from deploy.bootstrap_dependency.cmake_index import CMakeDependencyIndex
 from deploy.bootstrap_dependency.concurrency import (
@@ -33,6 +34,7 @@ from deploy.bootstrap_dependency.logger import DependencyLogger
 from deploy.bootstrap_dependency.locks import LockRepository
 from deploy.bootstrap_dependency.outputs import OutputResolver, OutputValidator
 from deploy.bootstrap_dependency.planner import DependencyPlanner, PlanBuilder, PlanEntry, ResourcePlanner
+from deploy.bootstrap_dependency.process_lock import ProcessDirectoryLock
 from deploy.bootstrap_dependency.repository import (
     PathResolver,
     RepoPaths,
@@ -134,6 +136,61 @@ def write_minimal_locks(root: Path) -> RepoPaths:
     return RepoPaths(root, root / "deps.lock.json", root / "resources.lock.json")
 
 
+def write_staged_ffmpeg_locks(root: Path) -> RepoPaths:
+    deps_lock = {
+        "schema": 1,
+        "lock_type": "baas-cpp-dependencies",
+        "paths": {
+            "downloads": "${BAAS_DOWNLOADS_ROOT}",
+            "source": "${BAAS_DEPS_BUILD_ROOT}/${name}/${version}/${variant}/${provider}/src",
+            "build": "${BAAS_DEPS_BUILD_ROOT}/${name}/${version}/${variant}/${provider}/build",
+            "package": "${BAAS_DEPENDENCY_ROOT}/${name}/${version}/${variant}/${provider}",
+        },
+        "dependencies": {
+            "ffmpeg": {
+                "version": "1.0.0",
+                "providers": {
+                    "prebuilt": {
+                        "type": "prebuilt_archive",
+                        "url": "https://example.invalid/ffmpeg.zip",
+                        "sha256": "1" * 64,
+                        "archive_type": "zip",
+                    }
+                },
+                "provider_by_platform": {"default": "prebuilt"},
+                "staging": {
+                    "copy": [
+                        {"from": "include/demo.h", "to": "include/demo.h"},
+                        {"from": "lib/demo.lib", "to": "lib/demo.lib"},
+                    ]
+                },
+                "outputs": {
+                    "windows": {
+                        "release": {
+                            "include": ["include/demo.h"],
+                            "runtime": [],
+                            "link": ["lib/demo.lib"],
+                        }
+                    }
+                },
+                "validation": {"required_outputs": ["include", "link"]},
+            }
+        },
+    }
+    resources_lock = {
+        "schema": 1,
+        "lock_type": "baas-cpp-resources",
+        "paths": {
+            "downloads": "${BAAS_DOWNLOADS_ROOT}",
+            "package": "${BAAS_ASSETS_ROOT}/${name}/${version}/${provider}",
+        },
+        "resources": {},
+    }
+    (root / "deps.lock.json").write_text(json.dumps(deps_lock), encoding="utf-8")
+    (root / "resources.lock.json").write_text(json.dumps(resources_lock), encoding="utf-8")
+    return RepoPaths(root, root / "deps.lock.json", root / "resources.lock.json")
+
+
 def make_services(repo_paths: RepoPaths):
     expander = TemplateExpander()
     output_resolver = OutputResolver(expander)
@@ -144,6 +201,34 @@ def make_services(repo_paths: RepoPaths):
     dep_planner = DependencyPlanner(output_resolver, output_validator, path_resolver, state_store)
     res_planner = ResourcePlanner(output_resolver, output_validator, path_resolver, state_store)
     return expander, None, output_resolver, output_validator, path_resolver, state_store, lock_repo, PlanBuilder(lock_repo, state_store, dep_planner, res_planner)
+
+
+def make_bootstrap_service(repo_paths: RepoPaths, source_resolver: SourcePackageResolver, logger: DependencyLogger, args: argparse.Namespace) -> BootstrapService:
+    class UnusedCMakeBuilder:
+        def build_source_package(self, *items, **kwargs):  # noqa: ANN002, ANN003, ANN202
+            raise AssertionError("unexpected CMake build")
+
+    expander = TemplateExpander()
+    output_resolver = OutputResolver(expander)
+    output_validator = OutputValidator()
+    path_resolver = PathResolver(expander)
+    state_store = StateStore(JsonStore())
+    lock_repo = LockRepository(repo_paths, JsonStore())
+    dep_planner = DependencyPlanner(output_resolver, output_validator, path_resolver, state_store)
+    res_planner = ResourcePlanner(output_resolver, output_validator, path_resolver, state_store)
+    return BootstrapService(
+        PlanBuilder(lock_repo, state_store, dep_planner, res_planner),
+        lock_repo,
+        source_resolver,
+        UnusedCMakeBuilder(),  # type: ignore[arg-type]
+        state_store,
+        output_validator,
+        SafeFilesystem(),
+        Reporter(logger),
+        expander,
+        logger,
+        BootstrapResourcePlanner().compute(args),
+    )
 
 
 class BootstrapDependencyTests(unittest.TestCase):
@@ -277,6 +362,81 @@ class BootstrapDependencyTests(unittest.TestCase):
             ctx.state_file.write_text('{"schema": 99}', encoding="utf-8")
             with self.assertRaises(ValueError):
                 store.load(ctx)
+
+    def test_state_store_locked_updates_preserve_concurrent_records(self) -> None:
+        class SlowStateStore(StateStore):
+            def set_record(self, state, entry, ctx, provider_data, cmake_options, cmake_config):  # noqa: ANN001, ANN202
+                super().set_record(state, entry, ctx, provider_data, cmake_options, cmake_config)
+                with calls_lock:
+                    calls["count"] += 1
+                    is_first = calls["count"] == 1
+                if is_first:
+                    first_update_started.set()
+                    if not allow_first_update_to_finish.wait(3):
+                        raise AssertionError("timed out waiting to finish state update")
+
+        def entry_for(variant: str) -> PlanEntry:
+            return PlanEntry(
+                kind="dependency",
+                name="ffmpeg",
+                version="1.0.0",
+                provider="prebuilt",
+                sha_locked=True,
+                variant=variant,
+                state_file=str(ctx.state_file),
+                downloads=str(ctx.downloads_root),
+                package=str(ctx.deps_root / "ffmpeg" / "1.0.0" / variant / "prebuilt"),
+                fingerprint=f"sha256:{variant}",
+                fingerprint_payload={},
+                required_outputs=[],
+                outputs={},
+                missing_outputs=[],
+                status="cache_miss_state_missing",
+                provider_type="prebuilt_archive",
+            )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo_paths = write_minimal_locks(root)
+            with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
+                ctx = BootstrapContext.from_args(args_for("--platform", "windows", "--arch", "x64"), repo_paths)
+
+            store = SlowStateStore(JsonStore())
+            calls = {"count": 0}
+            calls_lock = threading.Lock()
+            first_update_started = threading.Event()
+            allow_first_update_to_finish = threading.Event()
+            second_finished = threading.Event()
+            errors: list[BaseException] = []
+
+            def update(entry: PlanEntry, done: threading.Event | None = None) -> None:
+                try:
+                    store.update_record_locked(ctx, entry, {"sha256": "1" * 64}, {}, "Release")
+                    if done is not None:
+                        done.set()
+                except BaseException as exc:  # pragma: no cover - surfaced by assertions below
+                    errors.append(exc)
+
+            with patch.dict(os.environ, {"BAAS_DEPENDENCY_STATE_LOCK_POLL_SECONDS": "0.01"}, clear=False):
+                first = threading.Thread(target=update, args=(entry_for("release"),))
+                second = threading.Thread(target=update, args=(entry_for("debug"), second_finished))
+                first.start()
+                self.assertTrue(first_update_started.wait(2))
+                second.start()
+                self.assertFalse(second_finished.wait(0.05))
+                allow_first_update_to_finish.set()
+                first.join(3)
+                second.join(3)
+
+            self.assertFalse(first.is_alive())
+            self.assertFalse(second.is_alive())
+            self.assertEqual(errors, [])
+            state = JsonStore().load(ctx.state_file)
+            records = state["dependencies"]["ffmpeg"]["1.0.0"]["prebuilt"]
+            self.assertIn("release", records)
+            self.assertIn("debug", records)
+            self.assertFalse(ctx.state_file.with_name(ctx.state_file.name + ".lock").exists())
+            self.assertFalse(ctx.state_file.with_suffix(ctx.state_file.suffix + ".tmp").exists())
 
     def test_plan_statuses(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -580,6 +740,120 @@ class BootstrapDependencyTests(unittest.TestCase):
         finally:
             scheduler.shutdown()
 
+    def test_materialize_lock_serializes_bootstrap_prepare_phase(self) -> None:
+        class BlockingResolver(SourcePackageResolver):
+            def prepare_download(self, name, entry, provider_data):  # noqa: ANN001, ANN202
+                with calls_lock:
+                    calls["download"] += 1
+                return archive
+
+            def extract_archive(self, archive_path, provider_data, source_dir, build_root):  # noqa: ANN001, ANN202
+                with calls_lock:
+                    calls["extract"] += 1
+                first_extract_started.set()
+                if not allow_extract_to_finish.wait(3):
+                    raise AssertionError("timed out waiting to finish extract")
+                (source_dir / "include").mkdir(parents=True, exist_ok=True)
+                (source_dir / "lib").mkdir(parents=True, exist_ok=True)
+                (source_dir / "include" / "demo.h").write_text("", encoding="utf-8")
+                (source_dir / "lib" / "demo.lib").write_text("", encoding="utf-8")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo_paths = write_staged_ffmpeg_locks(root)
+            archive = root / "ffmpeg.zip"
+            archive.write_bytes(b"archive")
+            output = io.StringIO()
+            logger = DependencyLogger(None, out=output)
+            resolver = BlockingResolver(SafeFilesystem(), logger)
+            args = args_for("--dependency", "ffmpeg", "--download-jobs", "1", "--stage-jobs", "1", "--jobs", "1")
+            with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
+                ctx = BootstrapContext.from_args(args_for("--platform", "windows", "--arch", "x64"), repo_paths)
+
+            calls = {"download": 0, "extract": 0}
+            calls_lock = threading.Lock()
+            first_extract_started = threading.Event()
+            allow_extract_to_finish = threading.Event()
+            results: list[int] = []
+            errors: list[BaseException] = []
+
+            def run_service() -> None:
+                try:
+                    service = make_bootstrap_service(repo_paths, resolver, logger, args)
+                    results.append(service.run(args, ctx))
+                except BaseException as exc:  # pragma: no cover - surfaced by assertions below
+                    errors.append(exc)
+
+            with patch.dict(os.environ, {"BAAS_DEPENDENCY_MATERIALIZE_LOCK_POLL_SECONDS": "0.01"}, clear=False):
+                first = threading.Thread(target=run_service)
+                second = threading.Thread(target=run_service)
+                first.start()
+                self.assertTrue(first_extract_started.wait(2))
+                second.start()
+                deadline = time.monotonic() + 2
+                while "bootstrap wait:" not in output.getvalue() and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertIn("bootstrap wait:", output.getvalue())
+                allow_extract_to_finish.set()
+                first.join(3)
+                second.join(3)
+
+            self.assertFalse(first.is_alive())
+            self.assertFalse(second.is_alive())
+            self.assertEqual(errors, [])
+            self.assertEqual(sorted(results), [0, 0])
+            self.assertEqual(calls["download"], 1)
+            self.assertEqual(calls["extract"], 1)
+            self.assertFalse((ctx.workspace_root / "bootstrap-materialize.lock").exists())
+
+    def test_materialize_lock_is_released_when_prepare_fails(self) -> None:
+        class FailingResolver(SourcePackageResolver):
+            def prepare_download(self, name, entry, provider_data):  # noqa: ANN001, ANN202
+                return root / "ffmpeg.zip"
+
+            def extract_archive(self, archive_path, provider_data, source_dir, build_root):  # noqa: ANN001, ANN202
+                raise RuntimeError("extract failed")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo_paths = write_staged_ffmpeg_locks(root)
+            output = io.StringIO()
+            logger = DependencyLogger(None, out=output)
+            args = args_for("--dependency", "ffmpeg", "--download-jobs", "1", "--stage-jobs", "1", "--jobs", "1")
+            with patch.dict(os.environ, {"BAAS_WORKSPACE_ROOT": str(root / ".baas")}, clear=False):
+                ctx = BootstrapContext.from_args(args_for("--platform", "windows", "--arch", "x64"), repo_paths)
+
+            service = make_bootstrap_service(repo_paths, FailingResolver(SafeFilesystem(), logger), logger, args)
+            self.assertEqual(service.run(args, ctx), 1)
+            self.assertFalse((ctx.workspace_root / "bootstrap-materialize.lock").exists())
+
+    def test_stale_materialize_lock_is_removed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            lock_dir = root / ".baas" / "bootstrap-materialize.lock"
+            lock_dir.mkdir(parents=True)
+            (lock_dir / "owner.json").write_text(
+                json.dumps({"pid": 999999999, "created_at": time.time() - 100, "phase": "download/extract"}),
+                encoding="utf-8",
+            )
+            lock = ProcessDirectoryLock(
+                lock_dir,
+                owner={"phase": "download/extract"},
+                env_prefix="BAAS_DEPENDENCY_MATERIALIZE_LOCK",
+                wait_message="bootstrap wait: dependency download/extract is running in another bootstrap process",
+                stale_message="bootstrap stale materialize lock removed",
+                timeout_message="timed out waiting for bootstrap materialize lock",
+            )
+
+            with patch.dict(os.environ, {"BAAS_DEPENDENCY_MATERIALIZE_LOCK_STALE_SECONDS": "1"}, clear=False):
+                with patch.object(lock, "process_exists", return_value=False):
+                    lock.acquire()
+
+            owner = json.loads((lock_dir / "owner.json").read_text(encoding="utf-8"))
+            self.assertEqual(owner["pid"], os.getpid())
+            lock.release()
+            self.assertFalse(lock_dir.exists())
+
     def test_archive_helpers_and_local_archive(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -593,6 +867,150 @@ class BootstrapDependencyTests(unittest.TestCase):
             self.assertTrue(resolver.verify_sha256(archive, sha))
             with patch.dict(os.environ, {"BAAS_DEMO_ARCHIVE": str(archive)}, clear=False):
                 self.assertEqual(resolver.local_archive("demo", {"path_env": "BAAS_DEMO_ARCHIVE", "sha256": sha}), archive.resolve())
+
+    def test_archive_download_lock_allows_only_one_downloader(self) -> None:
+        class SlowResolver(SourcePackageResolver):
+            def download_to_temp_with_log(self, url, tmp_path, provider_data, progress_log, label="archive"):  # noqa: ANN001, ANN202
+                with calls_lock:
+                    calls["count"] += 1
+                first_download_started.set()
+                if not allow_first_download_to_finish.wait(3):
+                    raise AssertionError("timed out waiting to finish fake download")
+                tmp_path.write_bytes(payload)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            payload = b"locked archive"
+            sha = hashlib.sha256(payload).hexdigest()
+            output = io.StringIO()
+            logger = DependencyLogger(None, out=output)
+            provider = {"url": "https://example.invalid/demo.tar.gz", "sha256": sha}
+            calls = {"count": 0}
+            calls_lock = threading.Lock()
+            first_download_started = threading.Event()
+            allow_first_download_to_finish = threading.Event()
+            results: dict[str, Path] = {}
+            errors: list[BaseException] = []
+
+            def run_download(key: str) -> None:
+                try:
+                    resolver = SlowResolver(SafeFilesystem(), logger, archive_download_retry_cnt=1)
+                    results[key] = resolver.downloaded_file("demo", "1.0.0", provider, root / "downloads")
+                except BaseException as exc:  # pragma: no cover - surfaced by assertions below
+                    errors.append(exc)
+
+            with patch.dict(os.environ, {"BAAS_DEPENDENCY_ARCHIVE_LOCK_POLL_SECONDS": "0.01"}, clear=False):
+                first = threading.Thread(target=run_download, args=("first",))
+                second = threading.Thread(target=run_download, args=("second",))
+                first.start()
+                self.assertTrue(first_download_started.wait(2))
+                second.start()
+                deadline = time.monotonic() + 2
+                while "download wait:" not in output.getvalue() and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertIn("download wait:", output.getvalue())
+                allow_first_download_to_finish.set()
+                first.join(3)
+                second.join(3)
+
+            self.assertFalse(first.is_alive())
+            self.assertFalse(second.is_alive())
+            self.assertEqual(errors, [])
+            self.assertEqual(calls["count"], 1)
+            self.assertEqual(results["first"], results["second"])
+            self.assertEqual(results["first"].read_bytes(), payload)
+            self.assertFalse((root / "downloads" / "demo.tar.gz.tmp").exists())
+            self.assertFalse((root / "downloads" / "demo.tar.gz.lock").exists())
+            self.assertEqual(output.getvalue().count("download start:"), 1)
+            self.assertIn("download cache hit:", output.getvalue())
+
+    def test_download_cache_hit_does_not_take_archive_lock(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            downloads = root / "downloads"
+            downloads.mkdir()
+            payload = b"cached archive"
+            sha = hashlib.sha256(payload).hexdigest()
+            archive = downloads / "demo.tar.gz"
+            archive.write_bytes(payload)
+            resolver = SourcePackageResolver(SafeFilesystem(), DependencyLogger.stderr_only())
+            provider = {"url": "https://example.invalid/demo.tar.gz", "sha256": sha}
+
+            with patch.object(resolver, "download_to_temp_with_log", side_effect=AssertionError("unexpected download")):
+                result = resolver.downloaded_file("demo", "1.0.0", provider, downloads)
+
+            self.assertEqual(result, archive)
+            self.assertFalse((downloads / "demo.tar.gz.lock").exists())
+
+    def test_download_bad_cache_is_replaced_under_archive_lock(self) -> None:
+        class ReplacingResolver(SourcePackageResolver):
+            def download_to_temp_with_log(self, url, tmp_path, provider_data, progress_log, label="archive"):  # noqa: ANN001, ANN202
+                calls["count"] += 1
+                tmp_path.write_bytes(payload)
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            downloads = root / "downloads"
+            downloads.mkdir()
+            payload = b"correct archive"
+            sha = hashlib.sha256(payload).hexdigest()
+            archive = downloads / "demo.tar.gz"
+            archive.write_bytes(b"wrong archive")
+            output = io.StringIO()
+            resolver = ReplacingResolver(SafeFilesystem(), DependencyLogger(None, out=output), archive_download_retry_cnt=1)
+            provider = {"url": "https://example.invalid/demo.tar.gz", "sha256": sha}
+            calls = {"count": 0}
+
+            result = resolver.downloaded_file("demo", "1.0.0", provider, downloads)
+
+            self.assertEqual(result.read_bytes(), payload)
+            self.assertEqual(calls["count"], 1)
+            self.assertIn("download cache sha256 mismatch:", output.getvalue())
+            self.assertFalse((downloads / "demo.tar.gz.tmp").exists())
+            self.assertFalse((downloads / "demo.tar.gz.lock").exists())
+
+    def test_download_failure_cleans_temp_file_and_archive_lock(self) -> None:
+        class FailingResolver(SourcePackageResolver):
+            def download_to_temp_with_log(self, url, tmp_path, provider_data, progress_log, label="archive"):  # noqa: ANN001, ANN202
+                tmp_path.write_bytes(b"partial")
+                raise OSError("boom")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            downloads = root / "downloads"
+            payload = b"correct archive"
+            sha = hashlib.sha256(payload).hexdigest()
+            resolver = FailingResolver(SafeFilesystem(), DependencyLogger.stderr_only(), archive_download_retry_cnt=1)
+            provider = {"url": "https://example.invalid/demo.tar.gz", "sha256": sha}
+
+            with self.assertRaises(ValueError):
+                resolver.downloaded_file("demo", "1.0.0", provider, downloads)
+
+            self.assertFalse((downloads / "demo.tar.gz.tmp").exists())
+            self.assertFalse((downloads / "demo.tar.gz.lock").exists())
+
+    def test_stale_archive_lock_is_removed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            downloads = root / "downloads"
+            downloads.mkdir()
+            archive = downloads / "demo.tar.gz"
+            lock_dir = downloads / "demo.tar.gz.lock"
+            lock_dir.mkdir()
+            (lock_dir / "owner.json").write_text(
+                json.dumps({"pid": 999999999, "created_at": time.time() - 100, "archive": archive.name}),
+                encoding="utf-8",
+            )
+            resolver = SourcePackageResolver(SafeFilesystem(), DependencyLogger.stderr_only())
+
+            with patch.dict(os.environ, {"BAAS_DEPENDENCY_ARCHIVE_LOCK_STALE_SECONDS": "1"}, clear=False):
+                with patch.object(resolver, "process_exists", return_value=False):
+                    acquired = resolver.acquire_archive_lock(archive, None)
+
+            owner = json.loads((acquired / "owner.json").read_text(encoding="utf-8"))
+            self.assertEqual(owner["pid"], os.getpid())
+            resolver.release_archive_lock(acquired)
+            self.assertFalse(lock_dir.exists())
 
     def test_download_retries_incomplete_read(self) -> None:
         class FakeResponse:
@@ -633,12 +1051,14 @@ class BootstrapDependencyTests(unittest.TestCase):
             self.assertEqual(calls["count"], 2)
             self.assertEqual(result.read_bytes(), payload)
             self.assertFalse(result.with_suffix(result.suffix + ".tmp").exists())
-            self.assertIn("archive", output.getvalue())
+            self.assertIn("download start:", output.getvalue())
+            self.assertIn("（ demo ）", output.getvalue())
+            self.assertIn("MB /", output.getvalue())
             self.assertIn("download complete:", output.getvalue())
             self.assertIn("Retry: 1/1", output.getvalue())
             self.assertNotIn("(attempt 1/2)", output.getvalue())
 
-    def test_download_spinner_when_content_length_is_unknown(self) -> None:
+    def test_download_progress_when_content_length_is_unknown(self) -> None:
         class FakeResponse:
             def __init__(self, payload: bytes) -> None:
                 self.payload = io.BytesIO(payload)
@@ -668,8 +1088,8 @@ class BootstrapDependencyTests(unittest.TestCase):
                 resolver.downloaded_file("demo", "1.0.0", provider, root / "downloads")
 
             text = output.getvalue()
-            self.assertIn("archive", text)
-            self.assertIn("downloaded", text)
+            self.assertIn("（ demo ）", text)
+            self.assertIn("2.0MB / unknown （ demo ）", text)
             self.assertNotIn("unknown total", text)
 
     def test_download_retry_count_is_global_only(self) -> None:
@@ -790,6 +1210,7 @@ class BootstrapDependencyTests(unittest.TestCase):
                         "import sys",
                         "from pathlib import Path",
                         "root = Path.cwd()",
+                        "print('bootstrap console line', flush=True)",
                         "(root / 'bootstrap_args.txt').write_text(' '.join(sys.argv[1:]), encoding='utf-8')",
                         "manifest = Path(sys.argv[sys.argv.index('--cmake-manifest') + 1])",
                         "index = manifest",
@@ -825,6 +1246,7 @@ class BootstrapDependencyTests(unittest.TestCase):
 
             result = subprocess.run([cmake, "-P", str(script)], cwd=root, text=True, capture_output=True, check=False)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("bootstrap console line", result.stdout + result.stderr)
             args_text = (root / "bootstrap_args.txt").read_text(encoding="utf-8")
             self.assertIn("--dependencies demo", args_text)
             self.assertIn("--build-type Release", args_text)
