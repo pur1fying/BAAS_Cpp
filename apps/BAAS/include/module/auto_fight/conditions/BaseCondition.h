@@ -5,34 +5,35 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_CONDITIONS_BASECONDITION_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_CONDITIONS_BASECONDITION_H_
 
-#define BAAS_AUTO_FIGHT_CONDITION_DEFAULT_TIMEOUT 5000
 
-#include <config/BAASConfig.h>
-#include <BAAS.h>
+#include <cstdint>
+#include <map>
+#include <optional>
+#include <string>
+#include <vector>
 
+#include "BAAS.h"
+#include "module/auto_fight/workflow/ConditionConfig.h"
+#include "module/auto_fight/workflow/WorkflowNames.h"
 #include "module/auto_fight/auto_fight_d.h"
 
 BAAS_NAMESPACE_BEGIN
+
+using ConditionIndex = std::map<std::string, std::uint64_t>;
 
 class BaseCondition {
 
 public:
 
-    enum ConditionType {
-        A_COMBINED,
-        O_COMBINED,
-        COST,
-        SKILL_NAME,
-        SKILL_COST,
-        ACC_PHASE,
-        AUTO_STATE,
-        BOSS_HEALTH,
-        BATTLE_TIME
-    };
+    static constexpr auto A_COMBINED = ConditionType::AND_COMBINED;
+    static constexpr auto O_COMBINED = ConditionType::OR_COMBINED;
+    static constexpr auto COST = ConditionType::COST;
+    static constexpr auto SKILL_NAME = ConditionType::SKILL_NAME;
+    static constexpr auto BOSS_HEALTH = ConditionType::BOSS_HEALTH;
+    static constexpr auto BATTLE_TIME = ConditionType::BATTLE_TIME;
 
-    BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config);
-
-    BaseCondition(BAAS* baas, auto_fight_d* data, long long _timeout = BAAS_AUTO_FIGHT_CONDITION_DEFAULT_TIMEOUT);
+    BaseCondition(BAAS* baas, auto_fight_d* data, const ConditionConfig& config,
+            const ConditionIndex& indices = {});
 
     virtual std::optional<bool> try_match();
 
@@ -44,45 +45,41 @@ public:
 
     virtual void display() const noexcept;
 
-    void set_and_cond(const std::vector<uint64_t>& and_cond) {
+    void set_and_cond(const std::vector<uint64_t>& and_cond)
+    {
         and_conditions = and_cond;
     }
 
-    void set_or_cond(const std::vector<uint64_t>& or_cond) {
+    void set_or_cond(const std::vector<uint64_t>& or_cond)
+    {
         or_conditions = or_cond;
     }
 
-    inline const std::vector<uint64_t>& get_and_cond() const noexcept {
+    inline const std::vector<uint64_t>& get_and_cond() const noexcept
+    {
         return and_conditions;
     }
 
-    inline const std::vector<uint64_t>& get_or_cond() const noexcept {
+    inline const std::vector<uint64_t>& get_or_cond() const noexcept
+    {
         return or_conditions;
     }
 
-    inline const std::vector<std::string> get_or_cond_st() const noexcept {
-        return config.get<std::vector<std::string>>("or", {});
-    }
-
-    inline const std::vector<std::string> get_and_cond_st() const noexcept {
-        return config.get<std::vector<std::string>>("and", {});
-    }
-
-    inline bool has_or_cond() const noexcept {
+    inline bool has_or_cond() const noexcept
+    {
         return !or_conditions.empty();
     }
 
-    inline bool has_and_cond() const noexcept {
+    inline bool has_and_cond() const noexcept
+    {
         return !and_conditions.empty();
     }
 
-    inline long long get_timeout() {
+    inline long long get_timeout()
+    {
         return timeout;
     }
 
-    static const std::map<std::string, BaseCondition::ConditionType> cond_type_map;
-
-    static const std::vector<std::string> cond_type_st_list;
 
 protected:
 
@@ -91,8 +88,6 @@ protected:
     BAAS* baas;
     BAASLogger* logger;
     auto_fight_d* data;
-    BAASConfig config;
-
     std::vector<uint64_t> or_conditions;
     std::vector<uint64_t> and_conditions;
 

@@ -4,25 +4,33 @@
 
 #include "module/auto_fight/conditions/BaseCondition.h"
 
+#include <optional>
+#include <string>
+
+#include "module/auto_fight/workflow/ConditionConfig.h"
+#include "module/auto_fight/workflow/WorkflowNames.h"
+
 BAAS_NAMESPACE_BEGIN
 
-BaseCondition::BaseCondition(BAAS* baas, auto_fight_d* data, const BAASConfig& config)
-{
-    this->config = BAASConfig(config.get_config(), baas->get_logger());
-    this->data = data;
-    this->timeout = config.getLLong("timeout", BAAS_AUTO_FIGHT_CONDITION_DEFAULT_TIMEOUT);
-    this->baas = baas;
-    this->logger = baas->get_logger();
-    this->desc = config.getString("desc", "");
-}
-
-BaseCondition::BaseCondition(BAAS* baas, auto_fight_d* data, long long _timeout)
+BaseCondition::BaseCondition(
+        BAAS* baas,
+        auto_fight_d* data,
+        const ConditionConfig& config,
+        const ConditionIndex& indices
+)
 {
     this->data = data;
-    this->timeout = _timeout;
+    this->timeout = config.timeout;
     this->baas = baas;
     this->logger = baas->get_logger();
-    this->desc = "";
+    this->desc = config.desc;
+    this->type = config.type;
+    for (const auto& name : config.and_conditions) {
+        and_conditions.push_back(indices.at(name));
+    }
+    for (const auto& name : config.or_conditions) {
+        or_conditions.push_back(indices.at(name));
+    }
 }
 
 BaseCondition::~BaseCondition()
@@ -53,7 +61,7 @@ void BaseCondition::set_d_update_flag()
 
 void BaseCondition::_display_basic_info() const noexcept
 {
-    logger->BAASInfo("Type    : " + cond_type_st_list[type]);
+    logger->BAASInfo("Type    : " + std::string(wire_name(type)));
     logger->BAASInfo("Timeout : " + std::to_string(timeout));
     if (has_and_cond())logger->BAASInfo("A C Cnt : " + std::to_string(and_conditions.size()));
     if (has_or_cond()) logger->BAASInfo("O C Cnt : " + std::to_string(or_conditions.size()));

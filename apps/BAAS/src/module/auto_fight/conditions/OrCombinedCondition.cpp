@@ -4,13 +4,18 @@
 
 #include "module/auto_fight/conditions/OrCombinedCondition.h"
 
+#include <optional>
+
+#include "module/auto_fight/workflow/ConditionConfig.h"
+
 BAAS_NAMESPACE_BEGIN
 
 OrCombinedCondition::OrCombinedCondition(
-        BAAS* baas, 
+        BAAS* baas,
         auto_fight_d* data,
-const BAASConfig& config
-) : BaseCondition(baas, data, config)
+        const ConditionConfig& config,
+        const ConditionIndex& indices
+) : BaseCondition(baas, data, config, indices)
 {
     type = O_COMBINED;
 }

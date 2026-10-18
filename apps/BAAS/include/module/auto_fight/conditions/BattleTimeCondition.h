@@ -5,7 +5,11 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_CONDITIONS_BATTLETIMECONDITION_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_CONDITIONS_BATTLETIMECONDITION_H_
 
+#include <optional>
+#include <string>
+
 #include "BaseCondition.h"
+#include "module/auto_fight/workflow/ConditionConfig.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -13,18 +17,18 @@ class BattleTimeCondition : public BaseCondition {
 
 public:
 
-    enum Op {
-        OVER,
-        BELOW,
-        IN_RANGE,
-        INCREASE,
-        DECREASE
-    };
+    using Op = NumericConditionOp;
+    static constexpr auto OVER = Op::OVER;
+    static constexpr auto BELOW = Op::BELOW;
+    static constexpr auto IN_RANGE = Op::IN_RANGE;
+    static constexpr auto INCREASE = Op::INCREASE;
+    static constexpr auto DECREASE = Op::DECREASE;
 
     BattleTimeCondition(
             BAAS* baas,
             auto_fight_d* data,
-            const BAASConfig& config
+            const ConditionConfig& config,
+            const ConditionIndex& indices = {}
     );
 
     void reset_state() override;
@@ -33,19 +37,10 @@ public:
 
     void set_d_update_flag() override;
 
-    const static std::map<std::string, Op> op_map;
-
-    const static std::vector<std::string> op_st_list;
 
     std::optional<bool> try_match() override;
 
 private:
-
-    void _parse_config_value();
-
-    void _parse_config_range();
-
-    void _parse_op();
 
     Op _op;
 

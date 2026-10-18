@@ -2,22 +2,27 @@
 // Created by Administrator on 2025/5/15.
 //
 
-#include <memory>
-#include "module/auto_fight/conditions/BossHealthCondition.h"
+#include <optional>
+#include <string>
 
-#include "module/auto_fight/constants.h"
+#include "module/auto_fight/workflow/ConditionConfig.h"
+#include "module/auto_fight/workflow/WorkflowNames.h"
+#include "module/auto_fight/conditions/BossHealthCondition.h"
 
 BAAS_NAMESPACE_BEGIN
 
 BossHealthCondition::BossHealthCondition(
         BAAS* baas,
         auto_fight_d* data,
-        const BAASConfig& config
-) : BaseCondition(baas, data, config)
+        const ConditionConfig& config,
+        const ConditionIndex& indices
+) : BaseCondition(baas, data, config, indices)
 {
-    
-    type = BaseCondition::ConditionType::BOSS_HEALTH;
-    _parse_op();
+    type = ConditionType::BOSS_HEALTH;
+    _op = config.health_op;
+    _value = config.value;
+    _range_min = config.range_min;
+    _range_max = config.range_max;
 }
 
 std::optional<bool> BossHealthCondition::try_match()
@@ -48,14 +53,16 @@ std::optional<bool> BossHealthCondition::try_match()
             break;
         case C_INCREASE:
             if (_last_recorded_health.has_value() &&
-               (data->boss_current_health.value() > _last_recorded_health.value())) {
+               (data->boss_current_health.value() > _last_recorded_health.value()))
+               {
                 _health_increment =_health_increment + (data->boss_current_health.value() - _last_recorded_health.value());
                 if (_health_increment >= _value) ret = true;
             }
             break;
         case C_DECREASE:
             if (_last_recorded_health.has_value() &&
-               (data->boss_current_health.value() < _last_recorded_health.value())) {
+               (data->boss_current_health.value() < _last_recorded_health.value()))
+               {
                 _health_increment =_health_increment + (_last_recorded_health.value() - data->boss_current_health.value());
                 if (_health_increment >= _value) ret = true;
             }
@@ -74,7 +81,7 @@ std::optional<bool> BossHealthCondition::try_match()
 void BossHealthCondition::display() const noexcept
 {
     _display_basic_info();
-    logger->BAASInfo("Op      : " + op_st_list[_op]);
+    logger->BAASInfo("Op      : " + std::string(wire_name(_op)));
     switch (_op) {
         case C_IN_RANGE:
             logger->BAASInfo("Range   : [ " + std::to_string(_range_min) + ", " + std::to_string(_range_max) + " ]");
@@ -85,84 +92,6 @@ void BossHealthCondition::display() const noexcept
         case C_DECREASE:
         case M_EQUAL:
             logger->BAASInfo("Value   : " + std::to_string(_value));
-            break;
-    }
-}
-
-void BossHealthCondition::_parse_config_value()
-{
-    auto  _it = this->config.find("value");
-    if (_it == this->config.end()) {
-        logger->BAASError("[ BossHealthCondition ] [ op ] : \"" + op_st_list[_op] + "\" requires [ value ].");
-        throw ValueError("[ BossHealthCondition ] [ value ] not found.");
-    }
-    if (!_it->is_number()) {
-        logger->BAASError("[ BossHealthCondition ] [ value ] must be a number.");
-        throw TypeError("[ BossHealthCondition ] [ value ] TypeError");
-    }
-
-    _value = _it->get<double>();
-}
-
-void BossHealthCondition::_parse_config_range()
-{
-    auto _it = this->config.find("range");
-    if (_it == this->config.end()) {
-        logger->BAASError("[ BossHealthCondition ] [ op ] : \"" + op_st_list[_op] + "\" requires [ range ].");
-        throw ValueError("[ BossHealthCondition ] [ range ] not found.");
-    }
-    if (!_it->is_array()) {
-        logger->BAASError("[ BossHealthCondition ] [ range ] must be an array.");
-        throw TypeError("[ BossHealthCondition ] [ range ] TypeError");
-    }
-    if (_it->size() != 2) {
-        logger->BAASError("[ BossHealthCondition ] [ range ] array size must be 2.");
-        throw ValueError("[ BossHealthCondition ] [ range ] Size Error");
-    }
-
-    if(!(*_it)[0].is_number() || !(*_it)[1].is_number()) {
-        logger->BAASError("[ BossHealthCondition ] [ range ] element must be number.");
-        throw TypeError("[ BossHealthCondition ] [ range ] Element Type Error");
-    }
-    _range_min =  (*_it)[0].get<double>();
-    _range_max =  (*_it)[1].get<double>();
-}
-
-void BossHealthCondition::_parse_op()
-{
-    auto it = config.find("op");
-    if (it == config.end()) {
-        logger->BAASError("[ BossHealthCondition ] config must contain [ op ].");
-        _log_valid_op("[ BossHealthCondition ] [ op ]", logger, op_st_list);
-        throw ValueError("[ BossHealthCondition ] [ op ] not found.");
-    }
-    if (!it->is_string()) {
-        logger->BAASError("[ BossHealthCondition ] [ op ] must be a string.");
-        _log_valid_op("[ BossHealthCondition ] [ op ]", logger, op_st_list);
-        throw TypeError("[ BossHealthCondition ] [ op ] TypeError");
-    }
-    std::string op_str = *it;
-    auto _it = op_map.find(op_str);
-    if (_it == op_map.end()) {
-        logger->BAASError("Invalid [ BossHealthCondition ] [ op ] : " + op_str);
-        _log_valid_op("[ BossHealthCondition ] [ op ]", logger, op_st_list);
-        throw ValueError("Invalid [ BossHealthCondition ] [ op ].");
-    }
-    _op = _it->second;
-    switch (_op) {
-        case C_OVER:
-
-        case C_BELOW:
-
-        case C_INCREASE:
-
-        case C_DECREASE:
-
-        case M_EQUAL:
-            _parse_config_value();
-            break;
-        case C_IN_RANGE:
-            _parse_config_range();
             break;
     }
 }

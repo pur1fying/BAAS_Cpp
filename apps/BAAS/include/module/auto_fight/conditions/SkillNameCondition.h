@@ -5,7 +5,12 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_CONDITIONS_SKILLNAMECONDITION_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_CONDITIONS_SKILLNAMECONDITION_H_
 
+#include <cstdint>
+#include <optional>
+#include <string>
+
 #include "BaseCondition.h"
+#include "module/auto_fight/workflow/ConditionConfig.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -16,16 +21,15 @@ public:
     SkillNameCondition(
             BAAS* baas,
             auto_fight_d* data,
-            const BAASConfig& config
+            const ConditionConfig& config,
+            const ConditionIndex& indices = {}
     );
 
-    enum Op {
-        APPEAR,
-        AT,
-        // Skill must be ready
-        APPEAR_READY,
-        AT_READY
-    };
+    using Op = SkillNameConditionOp;
+    static constexpr auto APPEAR = Op::APPEAR;
+    static constexpr auto AT = Op::AT;
+    static constexpr auto APPEAR_READY = Op::APPEAR_READY;
+    static constexpr auto AT_READY = Op::AT_READY;
 
     void reset_state() override;
 
@@ -33,19 +37,10 @@ public:
 
     void set_d_update_flag() override;
 
-    const static std::map<std::string, Op> op_map;
-
-    const static std::vector<std::string> op_st_list;
 
     std::optional<bool> try_match() override;
 
 private:
-
-    void _parse_op();
-
-    void _parse_skill_name();
-
-    void _parse_p();
 
     Op _op;
 
@@ -56,7 +51,6 @@ private:
     uint64_t _p;
 
 };
-
 
 
 BAAS_NAMESPACE_END
