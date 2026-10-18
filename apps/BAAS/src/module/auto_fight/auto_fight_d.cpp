@@ -4,4 +4,3 @@
 
 #include "module/auto_fight/auto_fight_d.h"
 
-

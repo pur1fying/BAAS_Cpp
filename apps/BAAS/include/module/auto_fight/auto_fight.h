@@ -17,19 +17,31 @@
 #define BEGIN_AUTO_FIGHT_ACTIONS
 #define END_AUTO_FIGHT_ACTIONS
 
-#include <ThreadPool.h>
-#include <BAAS.h>
+#include <atomic>
+#include <condition_variable>
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <queue>
+#include <string>
+#include <vector>
 
+#include "BAAS.h"
 #include "auto_fight_d.h"
-#include "conditions/BaseCondition.h"
+#include "ThreadPool.h"
 #include "actions/auto_fight_act.h"
+#include "module/auto_fight/workflow/ConditionConfig.h"
+#include "module/auto_fight/workflow/WorkflowModel.h"
+#include "conditions/BaseCondition.h"
+#include "module/auto_fight/WorkflowRoute.h"
 
 BAAS_NAMESPACE_BEGIN
 
 class AutoFight{
 
 public:
-    const static std::vector<std::string> valid_battle_types;
 
     explicit AutoFight(BAAS* baas);
 
@@ -39,15 +51,12 @@ public:
 
 private:
 
-    void _init_d_fight(const std::filesystem::path& name);
+    void _resolve_workflow_path(const std::filesystem::path& name);
 
-    void _init_skills();
+    void _init_skills(const FormationConfig& formation);
 
-    void _init_single_skill_template(std::string& skill_name);
+    void _init_single_skill_template(const std::string& skill_name);
 
-    const static std::vector<std::string> default_active_skill_template, default_inactive_skill_template;
-
-    const static std::string template_j_ptr_prefix;
 
     BAAS* baas;
 
@@ -67,27 +76,31 @@ public:
 
     void display_screenshot_extracted_data();
 
-    inline void set_data_updater_mask(uint64_t mask) {
+    inline void set_data_updater_mask(uint64_t mask)
+    {
         d_auto_f.d_updater_mask = mask;
     }
 
-    inline void reset_data() {
+    inline void reset_data()
+    {
         d_auto_f.reset_all();
     }
 
     void update_screenshot();
 
-    inline void set_boss_health_update_flag(uint8_t flag) {
+    inline void set_boss_health_update_flag(uint8_t flag)
+    {
         d_auto_f.boss_health_update_flag = flag;
     }
 
-    inline void set_skill_cost_update_flag(uint32_t flag) {
+    inline void set_skill_cost_update_flag(uint32_t flag)
+    {
         d_auto_f.skill_cost_update_flag = flag;
     }
 
 private:
 
-    void _init_data_updaters();
+    void _init_data_updaters(const WorkflowModel& workflow);
 
     int d_update_max_thread;
 
@@ -102,7 +115,8 @@ private:
 
     static void submit_data_updater_task(AutoFight* self, unsigned char idx, uint64_t round);
 
-    inline void notify_d_update_thread_end(unsigned char idx, uint64_t  round) {
+    inline void notify_d_update_thread_end(unsigned char idx, uint64_t  round)
+    {
         std::lock_guard<std::mutex> lock(d_update_thread_mutex);
         d_auto_f.last_updated_data_idx = idx;
         d_auto_f.last_updated_data_round = round;
@@ -132,13 +146,8 @@ public:
 
 private:
 
-    void _condition_pre_check();
+    void _init_all_cond(const std::map<std::string, std::optional<ConditionConfig>>& conditions);
 
-    void _init_all_cond();
-
-    void _init_self_cond();
-
-    void _init_single_cond(const BAASConfig& d_cond);
 
     std::vector<std::unique_ptr<BaseCondition>> all_cond;
 
@@ -171,8 +180,6 @@ public:
 
 private:
 
-    void _state_pre_check();
-
     bool _state_start_trans_cond_j_loop();
 
     bool _try_default_trans();
@@ -186,7 +193,8 @@ private:
     void _start_state_transition_loop();
 
     // state transition
-    inline void _execute_state_transition() {
+    inline void _execute_state_transition()
+    {
         logger->sub_title("State Transition");
         logger->BAASInfo("[ " + all_states[_curr_state_idx].name + " ] --> "
                          "[ " + all_states[_state_trans_next_state_idx.value()].name + " ]");
@@ -194,16 +202,19 @@ private:
         _curr_state_idx = _state_trans_next_state_idx.value();
     }
 
-    inline bool _cond_is_pending(uint64_t cond_idx) {
+    inline bool _cond_is_pending(uint64_t cond_idx)
+    {
         return !_cond_is_matched_recorder[cond_idx].has_value();
     }
 
-    inline bool _cond_is_satisfied(uint64_t cond_idx) {
+    inline bool _cond_is_satisfied(uint64_t cond_idx)
+    {
         assert(_cond_is_matched_recorder[cond_idx].has_value());
         return _cond_is_matched_recorder[cond_idx].value();
     }
 
-    inline bool _cond_is_dissatisfied(uint64_t cond_idx) {
+    inline bool _cond_is_dissatisfied(uint64_t cond_idx)
+    {
         assert(_cond_is_matched_recorder[cond_idx].has_value());
         return !_cond_is_matched_recorder[cond_idx].value();
     }
@@ -220,13 +231,7 @@ private:
 
     void _recursive_set_d_update_flags(uint64_t cond_idx);
 
-    void _init_all_state();
-
-    void _init_start_state();
-
-    void _init_self_state();
-
-    void _init_single_state(const BAASConfig& d_state);
+    void _init_all_state(const WorkflowModel& workflow);
 
     std::vector<state_info> all_states;
 
@@ -258,9 +263,7 @@ BEGIN_AUTO_FIGHT_ACTIONS
 public:
 
 private:
-    void _init_actions();
-
-    void _action_pre_check();
+    void _init_actions(const std::map<std::string, std::optional<ActionConfig>>& actions);
 
     std::unique_ptr<auto_fight_act> _actions;
 

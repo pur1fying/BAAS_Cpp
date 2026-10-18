@@ -2,18 +2,21 @@
 // Created by pc on 2025/4/23.
 //
 
-#ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_SCREENSHOT_DATA_RECORDER_H_
-#define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_SCREENSHOT_DATA_RECORDER_H_
+#ifndef BAAS_CPP_MODULE_AUTO_FIGHT_AUTO_FIGHT_D_H_
+#define BAAS_CPP_MODULE_AUTO_FIGHT_AUTO_FIGHT_D_H_
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <vector>
 
 #include <opencv2/opencv.hpp>
-#include <config/BAASConfig.h>
-#include <yolo/yolo_d.h>
 
 #include "core_defines.h"
-
+#include "module/auto_fight/RuntimeState.h"
+#include "yolo/yolo_d.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -24,7 +27,8 @@ struct slot_skill{
     std::optional<int>         cost;      // skill real cost
     std::optional<bool>        is_active; // skill active state
 
-    void reset() noexcept {
+    void reset() noexcept
+    {
         index.reset();
         cost.reset();
         is_active.reset();
@@ -45,32 +49,6 @@ struct skill_template {
     std::vector<template_info> skill_active_templates;
 
     std::vector<template_info> skill_inactive_templates;
-};
-
-struct trans_info {
-
-    uint64_t cond_idx;
-
-    uint64_t next_sta_idx;
-
-};
-
-
-struct state_info {
-
-    std::optional<uint64_t> act_id;
-
-    std::vector<trans_info> transitions;
-
-    std::optional<uint64_t> default_trans;
-
-    std::optional<uint64_t> act_fail_trans;
-
-    std::string desc;
-
-    std::string name;
-
-    state_info() = default;
 };
 
 // Be careful with this struct because it will be modified / read by several threads
@@ -117,7 +95,7 @@ struct auto_fight_d {
     // search skill template until skill activate is detected
     std::map<int, bool>      stop_when_skill_is_activate;
 
-    std::vector<std::vector<int>> each_slot_possible_templates; 
+    std::vector<std::vector<int>> each_slot_possible_templates;
     std::vector<skill_template> all_possible_skills;
     uint32_t skill_cost_update_flag = 0b000000; // max skill is 6
     std::map<std::string, int> skill_name_to_index_map;
@@ -136,13 +114,13 @@ struct auto_fight_d {
     // last appeared position of each object, will not be reset before condition judgement
     std::map<int, std::optional<yolo_single_res>> obj_last_appeared_pos;
 
-    BAASConfig d_fight;
 
     std::string battle_type;
 
     yolo_d yolo_pra;
 
-    void reset_all() noexcept {
+    void reset_all() noexcept
+    {
         cost.reset();
         auto_state.reset();
         room_left_time_second.reset();
@@ -160,4 +138,4 @@ struct auto_fight_d {
 BAAS_NAMESPACE_END
 
 
-#endif //BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_SCREENSHOT_DATA_RECORDER_H_
+#endif //BAAS_CPP_MODULE_AUTO_FIGHT_AUTO_FIGHT_D_H_
