@@ -5,9 +5,14 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_OBJECTPOSITIONUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_OBJECTPOSITIONUPDATER_H_
 
-#include "BaseDataUpdater.h"
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
 
-#include <yolo/BAAS_yolo.h>
+#include "BaseDataUpdater.h"
+#include "module/auto_fight/workflow/WorkflowResources.h"
+#include "yolo/BAAS_yolo.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -17,7 +22,8 @@ public:
 
     explicit ObjectPositionUpdater(
             BAAS* baas,
-            auto_fight_d* data
+            auto_fight_d* data,
+            const YoloConfig& config
     );
 
     void update() override;
@@ -34,9 +40,9 @@ private:
 
     void _init_time_cost();
 
-    void _init_yolo_d();
+    void _init_yolo_d(const YoloConfig& config);
 
-    void _init_yolo_model();
+    void _init_yolo_model(const ModelResource& model);
 
     void _warm_up_session();
 

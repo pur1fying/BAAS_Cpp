@@ -4,9 +4,12 @@
 
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_AUTOSTATEUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_AUTOSTATEUPDATER_H_
-#include <feature/BAASFeature.h>
+#include <optional>
+#include <string>
+#include <vector>
 
 #include "BaseDataUpdater.h"
+#include "feature/BAASFeature.h"
 
 BAAS_NAMESPACE_BEGIN
 

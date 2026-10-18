@@ -5,9 +5,13 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_ACCELERATIONPHASEUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_ACCELERATIONPHASEUPDATER_H_
 
-#include <feature/BAASFeature.h>
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
 
 #include "BaseDataUpdater.h"
+#include "feature/BAASFeature.h"
 
 BAAS_NAMESPACE_BEGIN
 

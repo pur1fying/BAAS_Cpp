@@ -4,6 +4,8 @@
 
 #include "module/auto_fight/screenshot_data/AutoStateUpdater.h"
 
+#include <string>
+#include <vector>
 
 BAAS_NAMESPACE_BEGIN
 

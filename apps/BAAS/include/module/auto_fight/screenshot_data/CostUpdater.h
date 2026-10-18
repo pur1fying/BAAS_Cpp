@@ -5,6 +5,12 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_COSTUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_COSTUPDATER_H_
 
+#include <format>
+#include <map>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "BaseDataUpdater.h"
 
 BAAS_NAMESPACE_BEGIN
@@ -17,7 +23,8 @@ public:
         std::vector<double> possible_cost;
         BAASRectangle roi;
 
-        battle_type_info(const std::vector<double>& possible_cost,const BAASRectangle& roi) {
+        battle_type_info(const std::vector<double>& possible_cost,const BAASRectangle& roi)
+        {
             this->possible_cost = possible_cost;
             this->roi = roi;
         }
@@ -35,11 +42,13 @@ public:
 
     void detect_max_cost();
 
-    inline const std::string& get_detect_max_cost_when() {
+    inline const std::string& get_detect_max_cost_when()
+    {
         return detect_max_cost_when;
     }
 
-    inline std::string cost_value_to_mask_name(double cost) {
+    inline std::string cost_value_to_mask_name(double cost)
+    {
         return baas->get_image_resource_prefix() + "plot_cost_mask." + std::format("{:.1f}", cost);
     }
 
@@ -55,7 +64,8 @@ public:
 
 private:
 
-    inline void _set_cost(double cost) {
+    inline void _set_cost(double cost)
+    {
         current_cost = cost;
     }
 

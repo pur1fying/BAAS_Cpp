@@ -5,7 +5,11 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_BOSSHEALTHUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_BOSSHEALTHUPDATER_H_
 
+#include <optional>
+#include <string>
+
 #include "BaseDataUpdater.h"
+#include "module/auto_fight/workflow/WorkflowModel.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -13,7 +17,8 @@ class BossHealthUpdater : public BaseDataUpdater {
 
 public:
 
-    explicit BossHealthUpdater(BAAS* baas, auto_fight_d* data);
+    explicit BossHealthUpdater(BAAS* baas, auto_fight_d* data,
+            const RecognitionConfig& config);
 
     void update() override;
 

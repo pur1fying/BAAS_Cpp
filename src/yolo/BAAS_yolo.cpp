@@ -107,7 +107,7 @@ void BAAS_Yolo_v8::run_session(const cv::Mat& In, yolo_res& Out, NMS_option nms_
 }
 
 
-void BAAS_Yolo_v8::init_model(const yolo_d& d)
+void BAAS_Yolo_v8::init_model(const yolo_d& d, const std::vector<std::string>* model_classes)
 {
     try{
         if(d.modelType == YOLO_DETECT_V8_HALF && d.gpu_id < 0) {
@@ -127,7 +127,11 @@ void BAAS_Yolo_v8::init_model(const yolo_d& d)
         model_path = d.model_path;
         yaml_path = d.yaml_path;
 
-        _init_yaml();
+        if (model_classes) {
+            classes = *model_classes;
+        } else {
+            _init_yaml();
+        }
 
         env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "Yolo");
 #ifdef __CUDA__

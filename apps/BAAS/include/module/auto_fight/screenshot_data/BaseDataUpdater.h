@@ -5,6 +5,8 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_BASEDATAUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_BASEDATAUPDATER_H_
 
+#include <string>
+
 #include "BAAS.h"
 #include "module/auto_fight/auto_fight_d.h"
 

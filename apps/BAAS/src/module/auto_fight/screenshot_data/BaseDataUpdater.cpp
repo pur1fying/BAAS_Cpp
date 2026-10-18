@@ -3,6 +3,9 @@
 //
 
 #include "module/auto_fight/screenshot_data/BaseDataUpdater.h"
+
+#include <string>
+
 #include "module/auto_fight/BAASAutoFight.h"
 
 BAAS_NAMESPACE_BEGIN

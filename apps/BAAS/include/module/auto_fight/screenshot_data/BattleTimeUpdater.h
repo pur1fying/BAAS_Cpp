@@ -5,7 +5,13 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_BATTLETIMEUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_BATTLETIMEUPDATER_H_
 
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
 #include "BaseDataUpdater.h"
+#include "module/auto_fight/workflow/WorkflowModel.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -13,7 +19,8 @@ class BattleTimeUpdater : public BaseDataUpdater {
 
 public:
 
-    explicit BattleTimeUpdater(BAAS* baas, auto_fight_d* data);
+    explicit BattleTimeUpdater(BAAS* baas, auto_fight_d* data,
+            const RecognitionConfig& config);
 
     void update() override;
 

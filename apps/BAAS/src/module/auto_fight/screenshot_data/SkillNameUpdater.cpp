@@ -4,8 +4,11 @@
 
 #include "module/auto_fight/screenshot_data/SkillNameUpdater.h"
 
-#include <utils/BAASImageUtil.h>
-#include <config/BAASStaticConfig.h>
+#include <string>
+#include <vector>
+
+#include "config/BAASStaticConfig.h"
+#include "utils/BAASImageUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 

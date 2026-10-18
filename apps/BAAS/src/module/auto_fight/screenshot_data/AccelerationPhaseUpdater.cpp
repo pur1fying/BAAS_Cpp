@@ -5,6 +5,9 @@
 
 #include "module/auto_fight/screenshot_data/AccelerationPhaseUpdater.h"
 
+#include <cstdint>
+#include <string>
+
 BAAS_NAMESPACE_BEGIN
 
 AccelerationPhaseUpdater::AccelerationPhaseUpdater(

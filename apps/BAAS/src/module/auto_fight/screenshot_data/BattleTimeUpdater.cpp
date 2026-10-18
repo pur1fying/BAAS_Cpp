@@ -7,9 +7,13 @@
 
 #include "module/auto_fight/screenshot_data/BattleTimeUpdater.h"
 
-#include <ocr/BAASOCR.h>
-#include <utils/BAASImageUtil.h>
-#include <config/BAASStaticConfig.h>
+#include <optional>
+#include <string>
+#include <vector>
+
+#include "config/BAASStaticConfig.h"
+#include "ocr/BAASOCR.h"
+#include "utils/BAASImageUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -21,38 +25,13 @@ const std::vector<std::string> BattleTimeUpdater::supported_time_formats = {
 
 BattleTimeUpdater::BattleTimeUpdater(
         BAAS* baas,
-        auto_fight_d* data
+        auto_fight_d* data,
+        const RecognitionConfig& config
 ) : BaseDataUpdater(baas, data)
 {
-    if (data->d_fight.contains("/BattleTime/time_format"))
-        time_format = data->d_fight.getUInt8("/BossHealth/current_ocr_region");
-    else
-        time_format = static_config->getUInt8("/BAAS/auto_fight/BossHealth/current_ocr_region");
-
-    if (time_format >= supported_time_formats.size()) {
-        logger->BAASError("Invalid Recognize BattleTime Format index : [ " + std::to_string(time_format) + " ]");
-        logger->BAASInfo("Valid BattleTime Format : ");
-        for (size_t i = 0; i < supported_time_formats.size(); ++i)
-            logger->BAASInfo(std::to_string(i) + " : " + supported_time_formats[i]);
-        throw ValueError("Invalid Recognize BattleTime Format index");
-    }
-
-    if (data->d_fight.contains("/BattleTime/ocr_region"))
-        ocr_region = data->d_fight.get<BAASRectangle>("/BattleTime/ocr_region");
-    else
-        ocr_region = static_config->get<BAASRectangle>("/BAAS/auto_fight/BattleTime/ocr_region/" + std::to_string(time_format));
-
-    if (data->d_fight.contains("/BattleTime/ocr_model_name"))
-        ocr_model_name = data->d_fight.get<std::string>("/BattleTime/ocr_model_name");
-    else
-        ocr_model_name = static_config->get<std::string>("/BAAS/auto_fight/BattleTime/ocr_model_name");
-
-    if (!BAASOCR::is_valid_language(ocr_model_name)) {
-        logger->BAASInfo("BossHealth ocr_model_name [ " + ocr_model_name + " ] Invalid.");
-        throw ValueError("Invalid ocr language");
-    }
-
-    logger->BAASInfo("BattleTime Ocr Model Name : [ " + ocr_model_name + " ].");
+    ocr_model_name = config.model;
+    ocr_region = BAASRectangle(config.region[0], config.region[1], config.region[2], config.region[3]);
+    time_format = config.time_format;
     baas_ocr->init({ocr_model_name});
 }
 

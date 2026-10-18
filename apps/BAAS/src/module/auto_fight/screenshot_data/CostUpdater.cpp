@@ -4,9 +4,14 @@
 
 #include "module/auto_fight/screenshot_data/CostUpdater.h"
 
-#include <utils/BAASImageUtil.h>
-#include <config/BAASStaticConfig.h>
-#include <BAASImageResource.h>
+#include <format>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "BAASImageResource.h"
+#include "config/BAASStaticConfig.h"
+#include "utils/BAASImageUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 

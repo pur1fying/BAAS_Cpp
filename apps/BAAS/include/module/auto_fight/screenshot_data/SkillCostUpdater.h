@@ -5,7 +5,13 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_SKILLCOSTUPDATER_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_SKILLCOSTUPDATER_H_
 
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "BaseDataUpdater.h"
+#include "module/auto_fight/workflow/WorkflowModel.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -15,7 +21,9 @@ public:
 
     explicit SkillCostUpdater(
             BAAS* baas,
-            auto_fight_d* data
+            auto_fight_d* data,
+            const std::vector<OcrRegion>& regions,
+            const std::string& model
     );
 
     void update() override;

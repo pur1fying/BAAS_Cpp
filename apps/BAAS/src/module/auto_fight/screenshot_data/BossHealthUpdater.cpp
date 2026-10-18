@@ -4,43 +4,26 @@
 
 #include "module/auto_fight/screenshot_data/BossHealthUpdater.h"
 
-#include <ocr/BAASOCR.h>
-#include <utils/BAASImageUtil.h>
-#include <config/BAASStaticConfig.h>
+#include <string>
+
+#include "config/BAASStaticConfig.h"
+#include "ocr/BAASOCR.h"
+#include "utils/BAASImageUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
 BossHealthUpdater::BossHealthUpdater(
         BAAS* baas,
-        auto_fight_d* data
+        auto_fight_d* data,
+        const RecognitionConfig& config
 ) : BaseDataUpdater(baas, data)
 {
-    if (data->d_fight.contains("/BossHealth/current_ocr_region"))
-        current_ocr_region = data->d_fight.get<BAASRectangle>("/BossHealth/current_ocr_region");
-    else
-        current_ocr_region = static_config->get<BAASRectangle>("/BAAS/auto_fight/BossHealth/current_ocr_region");
-
-    if (data->d_fight.contains("/BossHealth/max_ocr_region"))
-        max_ocr_region = data->d_fight.get<BAASRectangle>("/BossHealth/max_ocr_region");
-    else
-        max_ocr_region = static_config->get<BAASRectangle>("/BAAS/auto_fight/BossHealth/max_ocr_region");
-
-    if (data->d_fight.contains("/BossHealth/ocr_region"))
-        ocr_region = data->d_fight.get<BAASRectangle>("/BossHealth/ocr_region");
-    else
-        ocr_region = static_config->get<BAASRectangle>("/BAAS/auto_fight/BossHealth/ocr_region");
-
-    if (data->d_fight.contains("/BossHealth/ocr_model_name"))
-        ocr_model_name = data->d_fight.get<std::string>("/BossHealth/ocr_model_name");
-    else
-        ocr_model_name = static_config->get<std::string>("/BAAS/auto_fight/BossHealth/ocr_model_name");
-
-    if (!BAASOCR::is_valid_language(ocr_model_name)) {
-        logger->BAASInfo("BossHealth ocr_model_name [ " + ocr_model_name + " ] Invalid.");
-        throw ValueError("Invalid ocr language");
-    }
-
-    logger->BAASInfo("BossHealth Ocr Model Name : [ " + ocr_model_name + " ].");
+    ocr_model_name = config.model;
+    ocr_region = BAASRectangle(config.region[0], config.region[1], config.region[2], config.region[3]);
+    current_ocr_region = BAASRectangle(config.current_region[0], config.current_region[1],
+            config.current_region[2], config.current_region[3]);
+    max_ocr_region = BAASRectangle(config.max_region[0], config.max_region[1],
+            config.max_region[2], config.max_region[3]);
     baas_ocr->init({ocr_model_name});
 }
 

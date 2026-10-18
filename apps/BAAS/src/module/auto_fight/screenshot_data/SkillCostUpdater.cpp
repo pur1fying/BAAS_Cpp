@@ -4,29 +4,25 @@
 
 #include "module/auto_fight/screenshot_data/SkillCostUpdater.h"
 
-#include <ocr/BAASOcr.h>
-#include <utils/BAASImageUtil.h>
-#include <config/BAASStaticConfig.h>
+#include <string>
+#include <vector>
+
+#include "ocr/BAASOcr.h"
+#include "utils/BAASImageUtil.h"
 
 BAAS_NAMESPACE_BEGIN
 
 SkillCostUpdater::SkillCostUpdater(
         BAAS* baas,
-        auto_fight_d* data
+        auto_fight_d* data,
+        const std::vector<OcrRegion>& regions,
+        const std::string& model
 ) : BaseDataUpdater(baas, data)
 {
-    skill_cost_ocr_region = static_config->get<std::vector<BAASRectangle>>("/BAAS/auto_fight/Skill/slot/cost_ocr/regions");
-    if (skill_cost_ocr_region.size() != data->slot_count) {
-        logger->BAASInfo("Skill Cost Ocr Region count : [ " + std::to_string(skill_cost_ocr_region.size())
-                          + " ] do not match slot count [ " + std::to_string(data->slot_count) + " ]." );
-        throw ValueError("Skill Cost Ocr Region count mismatch");
+    for (const auto& region : regions) {
+        skill_cost_ocr_region.emplace_back(region[0], region[1], region[2], region[3]);
     }
-    ocr_model_name = static_config->getString("/BAAS/auto_fight/Skill/slot/cost_ocr/model_name");
-    if (!BAASOCR::is_valid_language(ocr_model_name)) {
-        logger->BAASInfo("Skill Cost ocr_model_name [ " + ocr_model_name + " ] Invalid.");
-        throw ValueError("Invalid ocr language");
-    }
-    logger->BAASInfo("Skill Cost Ocr Model Name : [ " + ocr_model_name + " ].");
+    ocr_model_name = model;
     baas_ocr->init({ocr_model_name});
 }
 

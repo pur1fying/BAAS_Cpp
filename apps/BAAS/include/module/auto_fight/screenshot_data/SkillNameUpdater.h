@@ -2,8 +2,13 @@
 // Created by pc on 2025/4/28.
 //
 
-#ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_SKILLNAMEUPDATER_H_
-#define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_SKILLNAMEUPDATER_H_
+#ifndef BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_SKILLNAMEUPDATER_H_
+#define BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_SKILLNAMEUPDATER_H_
+
+#include <cstdint>
+#include <set>
+#include <string>
+#include <vector>
 
 #include "BaseDataUpdater.h"
 
@@ -31,7 +36,8 @@ private:
 
     void _init_skill_estimated_match_template_cost();
 
-    inline static double _calc_single_match_template_cost(const cv::Mat& _tmp, const BAASRectangle& region) {
+    inline static double _calc_single_match_template_cost(const cv::Mat& _tmp, const BAASRectangle& region)
+    {
         int _rows = region.height(), _cols = region.width();
         return double(_tmp.cols * _tmp.rows * (_cols - _tmp.cols + 1) * (_rows - _tmp.rows + 1));
     }
@@ -66,4 +72,4 @@ private:
 
 BAAS_NAMESPACE_END
 
-#endif //BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_SKILLNAMEUPDATER_H_
+#endif //BAAS_CPP_MODULE_AUTO_FIGHT_SCREENSHOT_DATA_SKILLNAMEUPDATER_H_
