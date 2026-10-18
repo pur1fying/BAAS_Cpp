@@ -56,6 +56,10 @@
             "model_name": "en-us"
           }
         },
+        "default_templates": {
+          "active": ["skill_active"],
+          "inactive": ["skill_l_inactive", "skill_r_inactive"]
+        },
         "templates": {
           "Ui": {
             "active": ["skill_active"],
