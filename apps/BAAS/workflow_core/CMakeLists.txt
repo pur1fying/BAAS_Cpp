@@ -1,0 +1,25 @@
+cmake_minimum_required(VERSION 3.22)
+project(BAASWorkflowCore LANGUAGES CXX)
+
+get_filename_component(BAAS_PROJECT_PATH "${CMAKE_CURRENT_LIST_DIR}/../../.." ABSOLUTE)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+option(BAAS_AUTO_FIGHT_ENABLE_SANITIZERS "Enable ASan and UBSan" OFF)
+
+# A header-only include directory also supports dependency-isolated builds.
+if(BAAS_WORKFLOW_JSON_INCLUDE_DIR)
+    add_library(BAAS_workflow_json INTERFACE)
+    target_include_directories(BAAS_workflow_json INTERFACE "${BAAS_WORKFLOW_JSON_INCLUDE_DIR}")
+    add_library(BAAS::nlohmann_json ALIAS BAAS_workflow_json)
+else()
+    find_package(baas-nlohmann-json CONFIG QUIET)
+    if(NOT TARGET BAAS::nlohmann_json)
+        find_package(nlohmann_json CONFIG REQUIRED)
+        add_library(BAAS::nlohmann_json ALIAS nlohmann_json::nlohmann_json)
+    endif()
+endif()
+
+include("${BAAS_PROJECT_PATH}/cmake/BAASResources.cmake")
+include("${BAAS_PROJECT_PATH}/apps/BAAS/cmake/AutoFightWorkflow.cmake")

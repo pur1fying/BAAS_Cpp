@@ -49,11 +49,21 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
+# Workflow sources belong to the separate Core/native targets; deferred schema
+# sources in the same directory remain outside the application build.
+list(FILTER BAAS_MODULE_RESOURCE EXCLUDE REGEX "/src/module/auto_fight/workflow/.*\\.cpp$")
+
 add_executable(
         BAAS_APP
         main.cpp
         ${BAAS_CORE_SOURCES}
         ${BAAS_MODULE_RESOURCE}
+)
+
+target_link_libraries(
+        BAAS_APP
+        PRIVATE
+        BAAS::AutoFightWorkflowNative
 )
 
 

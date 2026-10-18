@@ -1,0 +1,39 @@
+name: Auto Fight Workflow Core
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+        configuration: [Debug, Release]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: TheMrMilchmann/setup-msvc-dev@v3
+        if: runner.os == 'Windows'
+        with:
+          arch: x64
+      - name: Install header-only build dependencies
+        run: |
+          python -m pip install "conan==2.29.0" ninja
+          conan profile detect --force
+          conan export deploy/conan/recipes/baas-nlohmann-json --version=3.11.3
+          conan install apps/BAAS/workflow_core -of build/core-deps -s build_type=${{ matrix.configuration }} --build=missing --no-remote
+      - name: Configure standalone Core
+        run: cmake -S apps/BAAS/workflow_core -B build/workflow -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.configuration }} -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/build/core-deps/conan_toolchain.cmake
+      - name: Build standalone Core
+        run: cmake --build build/workflow --parallel 4

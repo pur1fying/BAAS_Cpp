@@ -77,14 +77,13 @@ option(BUILD_APP_ISA                "Build ISA  app          "  OFF)
 
 # other
 option(BUILD_BAAS_OCR           "build the ocr server app"               OFF)
-option(BUILD_BAAS_AW_CHECKER    "build BAAS Auto Fight Workflow Checker" OFF)
 option(BUILD_BAAS_NMS_BENCHMARK "Build BAAS vs OpenCV dnn NMS Google Benchmark executable" OFF)
+option(BAAS_AUTO_FIGHT_ENABLE_SANITIZERS "Instrument Auto Fight Workflow Core with ASan and UBSan" OFF)
 
 check_app_options(
         BUILD_APP_BAAS
         BUILD_APP_ISA
         BUILD_BAAS_OCR
-        BUILD_BAAS_AW_CHECKER
 )
 
 if(BUILD_BAAS_NMS_BENCHMARK)
@@ -122,9 +121,7 @@ if(BUILD_BAAS_OCR)
     endif()
 endif()
 
-if(BUILD_BAAS_AW_CHECKER)
-    baas_request_dependencies(opencv nlohmann_json spdlog simdutf)
-endif()
+baas_request_dependencies(nlohmann_json)
 
 baas_load_requested_dependencies()
 
@@ -147,16 +144,22 @@ file(
         ${CMAKE_CURRENT_LIST_DIR}/src/*.cpp
 )
 
+list(FILTER BAAS_CORE_SOURCES EXCLUDE REGEX "/src/auto_fight/authoring/.*\\.cpp$")
+
 if(TARGET_OS_NAME STREQUAL "Windows")
     list(REMOVE_ITEM BAAS_CORE_SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/simdutf.cpp")
 endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/NmsBenchmark.cmake")
 
+if(BUILD_APP_BAAS)
+    include("${CMAKE_CURRENT_LIST_DIR}/apps/BAAS/cmake/AutoFightWorkflow.cmake")
+endif()
+# Authoring/schema remain source-only until migrated to the new parser API.
+
 set(BAAS_APP_BAAS_CPP_DIR  "${CMAKE_CURRENT_LIST_DIR}/apps/BAAS")
 set(BAAS_APP_ISA_DIR       "${CMAKE_CURRENT_LIST_DIR}/apps/ISA")
 set(BAAS_OCR_SERVER_DIR    "${CMAKE_CURRENT_LIST_DIR}/apps/ocr_server")
-set(BAAS_AW_CHECKER_DIR    "${CMAKE_CURRENT_LIST_DIR}/apps/BAAS_auto_fight_workflow_checker")
 
 # --------------  BAAS APP  ------------------
 if (BUILD_APP_BAAS)
@@ -171,11 +174,6 @@ endif()
 # --------------  OCR SERVER  ----------------
 if (BUILD_BAAS_OCR)
     add_subdirectory(apps/ocr_server)
-endif()
-
-# --------------  BAAS AUTO FIGHT WORKFLOW CHECKER  ----------------
-if (BUILD_BAAS_AW_CHECKER)
-    add_subdirectory(apps/BAAS_auto_fight_workflow_checker)
 endif()
 
 add_library(

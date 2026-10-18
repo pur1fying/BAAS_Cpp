@@ -1,0 +1,6 @@
+[requires]
+baas-nlohmann-json/3.11.3
+
+[generators]
+CMakeDeps
+CMakeToolchain
