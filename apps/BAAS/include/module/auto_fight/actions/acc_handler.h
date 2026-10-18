@@ -6,6 +6,7 @@
 #define BAAS_CPP_MODULE_AUTO_FIGHT_ACTIONS_ACC_HANDLER_H_
 
 #include "base_handler.h"
+#include "module/auto_fight/workflow/ActionConfig.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -13,34 +14,21 @@ class acc_handler : public base_handler {
 
 public:
 
-    enum Op {
-        PHASE_1,
-        PHASE_2,
-        PHASE_3,
-    };
-
     acc_handler(
             BAAS* baas,
             auto_fight_d* data,
-            const BAASConfig& config
+            const ActionStepConfig& config
     );
 
     bool execute() override;
 
     void display() noexcept override;
 
-    const static std::map<std::string, Op> op_map;
-
-    const static std::vector<std::string> op_st_list;
-
 private:
 
-    void _parse_op();
-
-    Op _op;
+    AccOp _op;
 
 };
-
 
 
 BAAS_NAMESPACE_END

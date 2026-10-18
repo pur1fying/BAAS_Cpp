@@ -4,8 +4,16 @@
 #ifndef BAAS_CPP_MODULE_AUTO_FIGHT_ACTIONS_AUTO_FIGHT_ACT_H_
 #define BAAS_CPP_MODULE_AUTO_FIGHT_ACTIONS_AUTO_FIGHT_ACT_H_
 
-#include "module/auto_fight/actions/base_handler.h"
+#include <cstdint>
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
+
+#include "module/auto_fight/workflow/ActionConfig.h"
 #include "module/auto_fight/auto_fight_d.h"
+#include "module/auto_fight/actions/base_handler.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -20,36 +28,35 @@ public:
 
     bool _execute(uint64_t act_id);
 
-    inline auto act_find(const std::string& act_name) {
+    inline auto act_find(const std::string& act_name)
+    {
         return act_name_idx_map.find(act_name);
     }
 
-    inline auto act_end() const noexcept {
+    inline auto act_end() const noexcept
+    {
         return act_name_idx_map.end();
     }
 
-    inline uint64_t size() {
+    inline uint64_t size()
+    {
         return act_name_idx_map.size();
      }
 
-    void _action_pre_check();
+    const WorkflowNameIndex& name_indices() const
+    {
+        return act_name_idx_map;
+    }
 
-    void _init_all_act();
+    void _init_all_act(const std::map<std::string, std::optional<ActionConfig>>& actions);
 
 private:
-
-
-    void _init_single_act(const BAASConfig& config, const std::string& key);
-
-    std::string _type_name;
-
     BAAS* baas;
 
     BAASLogger* logger;
 
     auto_fight_d* data;
 
-    BAASConfig act_config;
 
     std::map<std::string, uint64_t> act_name_idx_map;
 

@@ -4,20 +4,22 @@
 
 #include "module/auto_fight/actions/skip_ani_handler.h"
 
+#include "module/auto_fight/workflow/ActionConfig.h"
+
 BAAS_NAMESPACE_BEGIN
 
 void skip_ani_handler::display() noexcept
 {
-    
+
 }
 
 skip_ani_handler::skip_ani_handler(
         BAAS* baas,
         auto_fight_d* data,
-        const BAASConfig& config
-) : base_handler(baas, data, config)
+        const ActionStepConfig& config
+) : base_handler(baas, data, config.desc)
 {
-    _timeout = config.getDouble("timeout", 3.0);
+    _timeout = config.skip_animation_timeout;
     _patch = BAASConfig(nlohmann::json(), logger);
     _patch.insert("/max_execute_time", _timeout);
     _patch.insert("/tentative_click", nlohmann::json::array({true, 469, 194, 0.3}));

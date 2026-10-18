@@ -6,6 +6,7 @@
 #define BAAS_CPP_MODULE_AUTO_FIGHT_ACTIONS_SKIP_ANI_HANDLER_H_
 
 #include "base_handler.h"
+#include "module/auto_fight/workflow/ActionConfig.h"
 
 BAAS_NAMESPACE_BEGIN
 
@@ -17,7 +18,7 @@ public:
     skip_ani_handler(
             BAAS* baas,
             auto_fight_d* data,
-            const BAASConfig& config
+            const ActionStepConfig& config
     );
 
     bool execute() noexcept override;

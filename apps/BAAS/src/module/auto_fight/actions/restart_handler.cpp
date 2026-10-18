@@ -4,13 +4,15 @@
 
 #include "module/auto_fight/actions/restart_handler.h"
 
+#include "module/auto_fight/workflow/ActionConfig.h"
+
 BAAS_NAMESPACE_BEGIN
 
 restart_handler::restart_handler(
         BAAS* baas,
         auto_fight_d* data,
-        const BAASConfig& config
-) : base_handler(baas, data, config)
+        const ActionStepConfig& config
+) : base_handler(baas, data, config.desc)
 {
 
 }

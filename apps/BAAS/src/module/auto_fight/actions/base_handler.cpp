@@ -4,16 +4,17 @@
 
 #include "module/auto_fight/actions/base_handler.h"
 
+#include <string>
+#include <utility>
 
 BAAS_NAMESPACE_BEGIN
 
-base_handler::base_handler(BAAS* baas, auto_fight_d* data, const BAASConfig& config)
+base_handler::base_handler(BAAS* baas, auto_fight_d* data, std::string desc)
 {
-    this->config = BAASConfig(config.get_config(), baas->get_logger());
     this->data = data;
     this->baas = baas;
     this->logger = baas->get_logger();
-    this->desc = config.getString("desc");
+    this->desc = std::move(desc);
 }
 
 bool base_handler::execute()
